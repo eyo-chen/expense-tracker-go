@@ -1,6 +1,6 @@
 package usecase
 
-import "github.com/OYE0303/expense-tracker-go/internel/domain"
+import "github.com/OYE0303/expense-tracker-go/internal/domain"
 
 type UserModel interface {
 	// Create inserts a new user into the database.

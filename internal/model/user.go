@@ -3,7 +3,7 @@ package model
 import (
 	"database/sql"
 
-	"github.com/OYE0303/expense-tracker-go/internel/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 

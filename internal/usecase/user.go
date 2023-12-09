@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/OYE0303/expense-tracker-go/internel/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/auth"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
