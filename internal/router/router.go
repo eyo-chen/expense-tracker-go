@@ -12,6 +12,7 @@ func New(handler *hd.Handler) http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/v1/user/signup", handler.User.Signup).Methods(http.MethodPost)
+	r.HandleFunc("/v1/user/login", handler.User.Login).Methods(http.MethodPost)
 
 	return r
 }
