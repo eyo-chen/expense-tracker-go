@@ -8,6 +8,13 @@ func (v *Validator) Signup(email, password, name string) bool {
 	return v.Valid()
 }
 
+// Login validates email and password for login
+func (v *Validator) Login(email, password string) bool {
+	v.checkEmail(email)
+	v.checkPassword(password)
+	return v.Valid()
+}
+
 func (v *Validator) checkEmail(email string) {
 	v.Check(Matches(email, EmailRX), "email", "Invalid email address")
 }
