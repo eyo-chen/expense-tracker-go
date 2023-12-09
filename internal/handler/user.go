@@ -7,6 +7,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/jsutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
 type userHandler struct {
@@ -26,6 +27,11 @@ func (u userHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	if err := jsutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsutil.ReadJson failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	if v := validator.New(); !v.Signup(input.Email, input.Password, input.Name) {
+		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
