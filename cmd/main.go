@@ -7,6 +7,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/OYE0303/expense-tracker-go/internal/handler"
+	"github.com/OYE0303/expense-tracker-go/internal/model"
+	"github.com/OYE0303/expense-tracker-go/internal/router"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -25,7 +29,11 @@ func main() {
 	}
 	defer db.Close()
 
-	if err := initServe(); err != nil {
+	// Setup model, usecase, and handler
+	model := model.New(db)
+	usecase := usecase.New(&model.User)
+	handler := handler.New(&usecase.User)
+	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}
 }
@@ -50,9 +58,10 @@ func openDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func initServe() error {
+func initServe(handler *handler.Handler) error {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", 4000),
+		Handler:      router.New(handler),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

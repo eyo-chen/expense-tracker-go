@@ -37,7 +37,7 @@ func (u *userUC) Signup(user *domain.User) error {
 		return err
 	}
 
-	if err := u.User.Create(user.Name, user.Email, passwordHash, user.CountryID); err != nil {
+	if err := u.User.Create(user.Name, user.Email, passwordHash); err != nil {
 		logger.Error("u.User.Insert failed", "package", "usecase", "err", err)
 		return err
 	}

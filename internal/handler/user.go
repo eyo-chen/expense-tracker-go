@@ -19,10 +19,9 @@ func newUserHandler(user UserUC) *userHandler {
 
 func (u userHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name      string `json:"name"`
-		Email     string `json:"email"`
-		CountryID int    `json:"country_id"`
-		Password  string `json:"password"`
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 	if err := jsutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsutil.ReadJson failed", "package", "handler", "err", err)
@@ -31,10 +30,9 @@ func (u userHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := domain.User{
-		Name:      input.Name,
-		Email:     input.Email,
-		CountryID: input.CountryID,
-		Password:  input.Password,
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
 	}
 	if err := u.User.Signup(&user); err != nil {
 		if err == domain.ErrDataAlreadyExists {
