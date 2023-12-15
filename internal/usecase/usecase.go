@@ -1,11 +1,13 @@
 package usecase
 
 type Usecase struct {
-	User userUC
+	User      userUC
+	MainCateg mainCategUC
 }
 
-func New(UserModel UserModel) *Usecase {
+func New(u UserModel, m MainCategModel) *Usecase {
 	return &Usecase{
-		User: *newUserUC(UserModel),
+		User:      *newUserUC(u),
+		MainCateg: *newMainCategUC(m),
 	}
 }

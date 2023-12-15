@@ -1,11 +1,13 @@
 package handler
 
 type Handler struct {
-	User userHandler
+	User      userHandler
+	MainCateg mainCategHandler
 }
 
-func New(userUC UserUC) *Handler {
+func New(u UserUC, m MainCategUC) *Handler {
 	return &Handler{
-		User: *newUserHandler(userUC),
+		User:      *newUserHandler(u),
+		MainCateg: *newMainCategHandler(m),
 	}
 }

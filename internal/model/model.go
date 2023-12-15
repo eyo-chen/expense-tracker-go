@@ -3,11 +3,13 @@ package model
 import "database/sql"
 
 type Model struct {
-	User UserModel
+	User      UserModel
+	MainCateg MainCategModel
 }
 
 func New(db *sql.DB) *Model {
 	return &Model{
-		User: *newUserModel(db),
+		User:      *newUserModel(db),
+		MainCateg: *newMainCategModel(db),
 	}
 }
