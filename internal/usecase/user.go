@@ -14,8 +14,8 @@ type userUC struct {
 	User UserModel
 }
 
-func newUserUC(UserModel UserModel) *userUC {
-	return &userUC{User: UserModel}
+func newUserUC(u UserModel) *userUC {
+	return &userUC{User: u}
 }
 
 type Claims struct {
