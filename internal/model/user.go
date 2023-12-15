@@ -22,7 +22,6 @@ type User struct {
 	Password_hash string `json:"password_hash"`
 }
 
-// Create inserts a new user into the database.
 func (m *UserModel) Create(name, email, passwordHash string) error {
 	stmt := `INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)`
 
@@ -34,7 +33,6 @@ func (m *UserModel) Create(name, email, passwordHash string) error {
 	return nil
 }
 
-// FindByEmail returns a user by email.
 func (m *UserModel) FindByEmail(email string) (*domain.User, error) {
 	stmt := `SELECT id, name, email, password_hash FROM users WHERE email = ?`
 
