@@ -14,7 +14,7 @@ type UserModel interface {
 // MainCategModel is the interface that wraps the basic methods for main category model.
 type MainCategModel interface {
 	// Create inserts a new main category into the database.
-	Create(categ *domain.MainCateg, userID int64, iconID int64) error
+	Create(categ *domain.MainCateg, userID int64) error
 
 	// GetOneByUserID returns a main category by user id and name.
 	GetOneByUserID(userID int64, name string) (*domain.MainCateg, error)

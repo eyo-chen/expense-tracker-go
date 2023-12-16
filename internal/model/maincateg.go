@@ -20,7 +20,7 @@ type MainCateg struct {
 	Type string `json:"type"`
 }
 
-func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64, iconID int64) error {
+func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
 	categType := "1"
@@ -28,7 +28,7 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64, iconID in
 		categType = "2"
 	}
 
-	if _, err := m.DB.Exec(stmt, categ.Name, categType, userID, iconID); err != nil {
+	if _, err := m.DB.Exec(stmt, categ.Name, categType, userID, categ.IconID); err != nil {
 		return err
 	}
 

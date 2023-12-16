@@ -17,7 +17,7 @@ func newMainCategUC(m MainCategModel, i IconModel) *mainCategUC {
 	}
 }
 
-func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64, iconID int64) error {
+func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64) error {
 	categbyUserID, err := m.MainCategModel.GetOneByUserID(userID, categ.Name)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("m.MainCategModel.GetOneByUserID failed", "package", "usecase", "err", err)
@@ -28,7 +28,7 @@ func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64, iconID int64) e
 		return domain.ErrDataAlreadyExists
 	}
 
-	icon, err := m.IconModel.GetByID(iconID)
+	icon, err := m.IconModel.GetByID(categ.IconID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("m.IconModel.GetByID failed", "package", "usecase", "err", err)
 		return err
@@ -38,7 +38,7 @@ func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64, iconID int64) e
 		return domain.ErrDataNotFound
 	}
 
-	if err := m.MainCategModel.Create(categ, userID, iconID); err != nil {
+	if err := m.MainCategModel.Create(categ, userID); err != nil {
 		logger.Error("m.MainCategModel.Create failed", "package", "usecase", "err", err)
 		return err
 	}
