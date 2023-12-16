@@ -5,9 +5,9 @@ type Usecase struct {
 	MainCateg mainCategUC
 }
 
-func New(u UserModel, m MainCategModel) *Usecase {
+func New(u UserModel, m MainCategModel, i IconModel) *Usecase {
 	return &Usecase{
 		User:      *newUserUC(u),
-		MainCateg: *newMainCategUC(m),
+		MainCateg: *newMainCategUC(m, i),
 	}
 }

@@ -19,3 +19,8 @@ type MainCategModel interface {
 	// GetOneByUserID returns a main category by user id and name.
 	GetOneByUserID(userID int64, name string) (*domain.MainCateg, error)
 }
+
+type IconModel interface {
+	// GetByID returns an icon by id.
+	GetByID(id int64) (*domain.Icon, error)
+}
