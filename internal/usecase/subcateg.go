@@ -59,3 +59,12 @@ func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
 
 	return nil
 }
+
+func (s *subCategUC) Delete(id int64) error {
+	if err := s.SubCateg.Delete(id); err != nil {
+		logger.Error("s.SubCateg.Delete failed", "package", "usecase", "err", err)
+		return err
+	}
+
+	return nil
+}

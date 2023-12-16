@@ -96,3 +96,24 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 		return
 	}
 }
+
+func (s *subCategHandler) DeleteSubCateg(w http.ResponseWriter, r *http.Request) {
+	id, err := jsutil.ReadID(r)
+	if err != nil {
+		logger.Error("jsutil.ReadID failed", "package", "handler", "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	if err := s.SubCateg.Delete(id); err != nil {
+		logger.Error("s.SubCateg.Delete failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if err := jsutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
+		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}

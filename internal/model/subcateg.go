@@ -43,6 +43,17 @@ func (m *SubCategModel) Update(categ *domain.SubCateg) error {
 	return nil
 }
 
+func (m *SubCategModel) Delete(id int64) error {
+	stmt := `DELETE FROM sub_categories WHERE id = ?`
+
+	if _, err := m.DB.Exec(stmt, id); err != nil {
+		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		return err
+	}
+
+	return nil
+}
+
 func (m *SubCategModel) GetByID(id int64) (*domain.SubCateg, error) {
 	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ?`
 

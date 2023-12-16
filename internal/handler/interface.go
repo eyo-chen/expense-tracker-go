@@ -30,4 +30,7 @@ type SubCategUC interface {
 
 	// Update is a function that updates a sub category.
 	Update(categ *domain.SubCateg, userID int64) error
+
+	// Delete is a function that deletes a sub category.
+	Delete(id int64) error
 }

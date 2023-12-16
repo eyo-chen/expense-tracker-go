@@ -37,6 +37,9 @@ type SubCategModel interface {
 	// Update updates a sub category.
 	Update(categ *domain.SubCateg) error
 
+	// Delete deletes a sub category.
+	Delete(id int64) error
+
 	// GetByID returns a sub category by id.
 	GetByID(id int64) (*domain.SubCateg, error)
 
