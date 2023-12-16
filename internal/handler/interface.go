@@ -15,4 +15,7 @@ type UserUC interface {
 type MainCategUC interface {
 	// Add is a function that adds a main category.
 	Add(categ *domain.MainCateg, userID int64) error
+
+	// Update is a function that updates a main category.
+	Update(categ *domain.MainCateg, userID int64) error
 }

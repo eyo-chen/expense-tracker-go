@@ -12,13 +12,13 @@ type contextKey string
 
 const contextKeyUser = contextKey("user")
 
-// Set stores the user in the request context
+// SetUser stores the user in the request context
 func SetUser(r *http.Request, user *domain.User) *http.Request {
 	ctx := context.WithValue(r.Context(), contextKeyUser, user)
 	return r.WithContext(ctx)
 }
 
-// Get retrieves the user from the request context
+// GetUser retrieves the user from the request context
 func GetUser(r *http.Request) *domain.User {
 	user, ok := r.Context().Value(contextKeyUser).(*domain.User)
 	if !ok {
