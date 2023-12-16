@@ -20,19 +20,39 @@ type MainCateg struct {
 	Type string `json:"type"`
 }
 
-func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64, iconID int64) error {
+func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
-	categType := "1"
-	if categ.Type == "expense" {
-		categType = "2"
-	}
-
-	if _, err := m.DB.Exec(stmt, categ.Name, categType, userID, iconID); err != nil {
+	if _, err := m.DB.Exec(stmt, categ.Name, genType(categ.Type), userID, categ.IconID); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (m *MainCategModel) Update(categ *domain.MainCateg) error {
+	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ? WHERE id = ?`
+
+	if _, err := m.DB.Exec(stmt, categ.Name, genType(categ.Type), categ.IconID, categ.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *MainCategModel) GetByID(id int64) (*domain.MainCateg, error) {
+	stmt := `SELECT id, name, type FROM main_categories WHERE id = ?`
+
+	var categ MainCateg
+	if err := m.DB.QueryRow(stmt, id).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrDataNotFound
+		}
+
+		return nil, err
+	}
+
+	return cvtToDomainMainCateg(&categ), nil
 }
 
 func (m *MainCategModel) GetOneByUserID(userID int64, name string) (*domain.MainCateg, error) {
@@ -56,4 +76,12 @@ func cvtToDomainMainCateg(c *MainCateg) *domain.MainCateg {
 		Name: c.Name,
 		Type: c.Type,
 	}
+}
+
+func genType(categType string) string {
+	if categType == "expense" {
+		return "2"
+	}
+
+	return "1"
 }

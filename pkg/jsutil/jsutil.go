@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/gorilla/mux"
 )
 
 // WriteJSON writes the provided data to the client in JSON format.
@@ -84,4 +86,17 @@ func ReadJson(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	}
 
 	return nil
+}
+
+// ReadID reads the ID from the URL path.
+func ReadID(r *http.Request) (int64, error) {
+	rawID := mux.Vars(r)["id"]
+
+	id, err := strconv.ParseInt(rawID, 10, 64)
+	if err != nil || id <= 0 {
+		logger.Error("strconv.ParseInt failed", "package", "jsutil", "err", err)
+		return 0, err
+	}
+
+	return id, nil
 }

@@ -16,6 +16,7 @@ func New(handler *hd.Handler) http.Handler {
 	r.HandleFunc("/v1/user/login", handler.User.Login).Methods(http.MethodPost)
 
 	r.HandleFunc("/v1/main-category", handler.MainCateg.AddMainCateg).Methods(http.MethodPost)
+	r.HandleFunc("/v1/main-category/{id}", handler.MainCateg.UpdateMainCateg).Methods(http.MethodPatch)
 
 	return middleware.LogRequest(middleware.Authenticate(r))
 }
