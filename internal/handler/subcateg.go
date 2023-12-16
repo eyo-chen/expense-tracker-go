@@ -11,19 +11,20 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
-type mainCategHandler struct {
-	MainCateg MainCategUC
+type subCategHandler struct {
+	SubCateg SubCategUC
 }
 
-func newMainCategHandler(m MainCategUC) *mainCategHandler {
-	return &mainCategHandler{MainCateg: m}
+func newSubCategHandler(s SubCategUC) *subCategHandler {
+	return &subCategHandler{
+		SubCateg: s,
+	}
 }
 
-func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
+func (s *subCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name   string `json:"name"`
-		Type   string `json:"type"`
-		IconID int64  `json:"icon_id"`
+		Name        string `json:"name"`
+		MainCategID int64  `json:"main_category_id"`
 	}
 	if err := jsutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsutil.ReadJSON failed", "package", "handler", "err", err)
@@ -31,38 +32,31 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	categ := domain.MainCateg{
-		Name:   input.Name,
-		Type:   input.Type,
-		IconID: input.IconID,
+	categ := domain.SubCateg{
+		Name:        input.Name,
+		MainCategID: input.MainCategID,
 	}
 
 	v := validator.New()
-	if !v.CreateMainCateg(&categ) {
+	if !v.CreateSubCateg(&categ) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Create(&categ, user.ID); err != nil {
+	if err := s.SubCateg.Create(&categ, user.ID); err != nil {
 		if err == domain.ErrDataAlreadyExists || err == domain.ErrDataNotFound {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
 
-		logger.Error("m.MainCateg.Add failed", "package", "handler", "err", err)
-		errutil.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	if err := jsutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+		logger.Error("s.SubCateg.Create failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
-func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
+func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsutil.ReadID failed", "package", "handler", "err", err)
@@ -71,8 +65,7 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	var input struct {
-		Name   string `json:"name"`
-		IconID int64  `json:"icon_id"`
+		Name string `json:"name"`
 	}
 	if err := jsutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsutil.ReadJSON failed", "package", "handler", "err", err)
@@ -80,38 +73,31 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	categ := domain.MainCateg{
-		ID:     id,
-		Name:   input.Name,
-		IconID: input.IconID,
+	categ := domain.SubCateg{
+		ID:   id,
+		Name: input.Name,
 	}
 
 	v := validator.New()
-	if !v.UpdateMainCateg(&categ) {
+	if !v.UpdateSubCateg(&categ) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Update(&categ, user.ID); err != nil {
-		if err == domain.ErrDataAlreadyExists || err == domain.ErrDataNotFound {
+	if err := s.SubCateg.Update(&categ, user.ID); err != nil {
+		if err == domain.ErrDataNotFound || err == domain.ErrDataAlreadyExists {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
 
-		logger.Error("m.MainCateg.Update failed", "package", "handler", "err", err)
-		errutil.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	if err := jsutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+		logger.Error("s.SubCateg.Update failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
-func (m *mainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
+func (s *subCategHandler) DeleteSubCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsutil.ReadID failed", "package", "handler", "err", err)
@@ -119,8 +105,8 @@ func (m *mainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := m.MainCateg.Delete(id); err != nil {
-		logger.Error("m.MainCateg.Delete failed", "package", "handler", "err", err)
+	if err := s.SubCateg.Delete(id); err != nil {
+		logger.Error("s.SubCateg.Delete failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}

@@ -31,8 +31,8 @@ func main() {
 
 	// Setup model, usecase, and handler
 	model := model.New(db)
-	usecase := usecase.New(&model.User, &model.MainCateg, &model.Icon)
-	handler := handler.New(&usecase.User, &usecase.MainCateg)
+	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon)
+	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}

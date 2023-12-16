@@ -6,22 +6,22 @@ import (
 )
 
 type mainCategUC struct {
-	MainCategModel MainCategModel
-	IconModel      IconModel
+	MainCateg MainCategModel
+	Icon      IconModel
 }
 
 func newMainCategUC(m MainCategModel, i IconModel) *mainCategUC {
 	return &mainCategUC{
-		MainCategModel: m,
-		IconModel:      i,
+		MainCateg: m,
+		Icon:      i,
 	}
 }
 
-func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64) error {
+func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	// check if the main category name is already taken
-	categbyUserID, err := m.MainCategModel.GetOneByUserID(userID, categ.Name)
+	categbyUserID, err := m.MainCateg.GetOneByUserID(userID, categ.Name)
 	if err != nil && err != domain.ErrDataNotFound {
-		logger.Error("m.MainCategModel.GetOneByUserID failed", "package", "usecase", "err", err)
+		logger.Error("m.MainCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err
 	}
 	if categbyUserID != nil {
@@ -29,17 +29,17 @@ func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64) error {
 	}
 
 	// check if the icon exists
-	icon, err := m.IconModel.GetByID(categ.IconID)
+	icon, err := m.Icon.GetByID(categ.IconID)
 	if err != nil && err != domain.ErrDataNotFound {
-		logger.Error("m.IconModel.GetByID failed", "package", "usecase", "err", err)
+		logger.Error("m.Icon.GetByID failed", "package", "usecase", "err", err)
 		return err
 	}
 	if icon == nil {
 		return domain.ErrDataNotFound
 	}
 
-	if err := m.MainCategModel.Create(categ, userID); err != nil {
-		logger.Error("m.MainCategModel.Create failed", "package", "usecase", "err", err)
+	if err := m.MainCateg.Create(categ, userID); err != nil {
+		logger.Error("m.MainCateg.Create failed", "package", "usecase", "err", err)
 		return err
 	}
 
@@ -47,19 +47,19 @@ func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64) error {
 }
 
 func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
-	categbyID, err := m.MainCategModel.GetByID(categ.ID)
+	categByID, err := m.MainCateg.GetByID(categ.ID)
 	if err != nil && err != domain.ErrDataNotFound {
-		logger.Error("m.MainCategModel.GetByID failed", "package", "usecase", "err", err)
+		logger.Error("m.MainCateg.GetByID failed", "package", "usecase", "err", err)
 		return err
 	}
-	if categbyID == nil {
+	if categByID == nil {
 		return domain.ErrDataNotFound
 	}
 
 	// check if the main category name is already taken
-	categbyUserID, err := m.MainCategModel.GetOneByUserID(userID, categ.Name)
+	categbyUserID, err := m.MainCateg.GetOneByUserID(userID, categ.Name)
 	if err != nil && err != domain.ErrDataNotFound {
-		logger.Error("m.MainCategModel.GetOneByUserID failed", "package", "usecase", "err", err)
+		logger.Error("m.MainCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err
 	}
 	if categbyUserID != nil {
@@ -67,17 +67,17 @@ func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 	}
 
 	// check if the icon exists
-	icon, err := m.IconModel.GetByID(categ.IconID)
+	icon, err := m.Icon.GetByID(categ.IconID)
 	if err != nil && err != domain.ErrDataNotFound {
-		logger.Error("m.IconModel.GetByID failed", "package", "usecase", "err", err)
+		logger.Error("m.Icon.GetByID failed", "package", "usecase", "err", err)
 		return err
 	}
 	if icon == nil {
 		return domain.ErrDataNotFound
 	}
 
-	if err := m.MainCategModel.Update(categ); err != nil {
-		logger.Error("m.MainCategModel.Update failed", "package", "usecase", "err", err)
+	if err := m.MainCateg.Update(categ); err != nil {
+		logger.Error("m.MainCateg.Update failed", "package", "usecase", "err", err)
 		return err
 	}
 
@@ -85,8 +85,8 @@ func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 }
 
 func (m *mainCategUC) Delete(id int64) error {
-	if err := m.MainCategModel.Delete(id); err != nil {
-		logger.Error("m.MainCategModel.Delete failed", "package", "usecase", "err", err)
+	if err := m.MainCateg.Delete(id); err != nil {
+		logger.Error("m.MainCateg.Delete failed", "package", "usecase", "err", err)
 		return err
 	}
 

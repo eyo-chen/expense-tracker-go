@@ -7,3 +7,10 @@ type MainCateg struct {
 	Type   string
 	IconID int64
 }
+
+// SubCateg contains sub category information
+type SubCateg struct {
+	ID          int64
+	Name        string
+	MainCategID int64
+}

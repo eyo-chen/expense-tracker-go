@@ -13,12 +13,24 @@ type UserUC interface {
 
 // MainCategUC is the interface that wraps the basic methods for main category usecase.
 type MainCategUC interface {
-	// Add is a function that adds a main category.
-	Add(categ *domain.MainCateg, userID int64) error
+	// Create is a function that creates a main category.
+	Create(categ *domain.MainCateg, userID int64) error
 
 	// Update is a function that updates a main category.
 	Update(categ *domain.MainCateg, userID int64) error
 
 	// Delete is a function that deletes a main category.
+	Delete(id int64) error
+}
+
+// SubCategUC is the interface that wraps the basic methods for sub category usecase.
+type SubCategUC interface {
+	// Create is a function that creates a sub category.
+	Create(categ *domain.SubCateg, userID int64) error
+
+	// Update is a function that updates a sub category.
+	Update(categ *domain.SubCateg, userID int64) error
+
+	// Delete is a function that deletes a sub category.
 	Delete(id int64) error
 }
