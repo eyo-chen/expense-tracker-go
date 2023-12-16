@@ -13,8 +13,8 @@ type UserUC interface {
 
 // MainCategUC is the interface that wraps the basic methods for main category usecase.
 type MainCategUC interface {
-	// Add is a function that adds a main category.
-	Add(categ *domain.MainCateg, userID int64) error
+	// Create is a function that creates a main category.
+	Create(categ *domain.MainCateg, userID int64) error
 
 	// Update is a function that updates a main category.
 	Update(categ *domain.MainCateg, userID int64) error

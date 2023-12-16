@@ -17,7 +17,7 @@ func newMainCategUC(m MainCategModel, i IconModel) *mainCategUC {
 	}
 }
 
-func (m *mainCategUC) Add(categ *domain.MainCateg, userID int64) error {
+func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	// check if the main category name is already taken
 	categbyUserID, err := m.MainCateg.GetOneByUserID(userID, categ.Name)
 	if err != nil && err != domain.ErrDataNotFound {

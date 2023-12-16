@@ -19,7 +19,7 @@ func newMainCategHandler(m MainCategUC) *mainCategHandler {
 	return &mainCategHandler{MainCateg: m}
 }
 
-func (m *mainCategHandler) AddMainCateg(w http.ResponseWriter, r *http.Request) {
+func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name   string `json:"name"`
 		Type   string `json:"type"`
@@ -38,13 +38,13 @@ func (m *mainCategHandler) AddMainCateg(w http.ResponseWriter, r *http.Request) 
 	}
 
 	v := validator.New()
-	if !v.AddMainCateg(&categ) {
+	if !v.CreateMainCateg(&categ) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Add(&categ, user.ID); err != nil {
+	if err := m.MainCateg.Create(&categ, user.ID); err != nil {
 		if err == domain.ErrDataAlreadyExists || err == domain.ErrDataNotFound {
 			errutil.BadRequestResponse(w, r, err)
 			return
