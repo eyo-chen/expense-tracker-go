@@ -29,6 +29,16 @@ type MainCategModel interface {
 	GetOneByUserID(userID int64, name string) (*domain.MainCateg, error)
 }
 
+// SubCategModel is the interface that wraps the basic methods for sub category model.
+type SubCategModel interface {
+	// Create inserts a new sub category into the database.
+	Create(categ *domain.SubCateg, userID int64) error
+
+	// GetOneByUserID returns a sub category by user id and name.
+	GetOneByUserID(userID int64, name string) (*domain.SubCateg, error)
+}
+
+// IconModel is the interface that wraps the basic methods for icon model.
 type IconModel interface {
 	// GetByID returns an icon by id.
 	GetByID(id int64) (*domain.Icon, error)

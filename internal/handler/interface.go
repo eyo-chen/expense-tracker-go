@@ -22,3 +22,9 @@ type MainCategUC interface {
 	// Delete is a function that deletes a main category.
 	Delete(id int64) error
 }
+
+// SubCategUC is the interface that wraps the basic methods for sub category usecase.
+type SubCategUC interface {
+	// Create is a function that creates a sub category.
+	Create(categ *domain.SubCateg, userID int64) error
+}
