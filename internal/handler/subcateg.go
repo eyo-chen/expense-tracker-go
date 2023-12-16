@@ -45,7 +45,7 @@ func (s *subCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request)
 
 	user := ctxutil.GetUser(r)
 	if err := s.SubCateg.Create(&categ, user.ID); err != nil {
-		if err == domain.ErrDataAlreadyExists {
+		if err == domain.ErrDataAlreadyExists || err == domain.ErrDataNotFound {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}

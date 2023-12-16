@@ -6,11 +6,15 @@ import (
 )
 
 type subCategUC struct {
-	SubCateg SubCategModel
+	SubCateg  SubCategModel
+	MainCateg MainCategModel
 }
 
-func newSubCategUC(subCateg SubCategModel) *subCategUC {
-	return &subCategUC{SubCateg: subCateg}
+func newSubCategUC(s SubCategModel, m MainCategModel) *subCategUC {
+	return &subCategUC{
+		SubCateg:  s,
+		MainCateg: m,
+	}
 }
 
 func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
@@ -22,6 +26,16 @@ func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	}
 	if categByUserID != nil {
 		return domain.ErrDataAlreadyExists
+	}
+
+	// check if the main category exists
+	mainCategByID, err := s.MainCateg.GetByID(categ.MainCategID)
+	if err != nil && err != domain.ErrDataNotFound {
+		logger.Error("s.MainCateg.GetByID failed", "package", "usecase", "err", err)
+		return err
+	}
+	if mainCategByID == nil {
+		return domain.ErrDataNotFound
 	}
 
 	if err := s.SubCateg.Create(categ, userID); err != nil {
