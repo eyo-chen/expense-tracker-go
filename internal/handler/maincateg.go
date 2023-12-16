@@ -45,7 +45,7 @@ func (m *mainCategHandler) AddMainCateg(w http.ResponseWriter, r *http.Request) 
 
 	user := ctxutil.GetUser(r)
 	if err := m.MainCateg.Add(&categ, user.ID, categ.IconID); err != nil {
-		if err == domain.ErrDataAlreadyExists {
+		if err == domain.ErrDataAlreadyExists || err == domain.ErrDataNotFound {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
