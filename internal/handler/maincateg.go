@@ -110,3 +110,24 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 }
+
+func (m *mainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
+	id, err := jsutil.ReadID(r)
+	if err != nil {
+		logger.Error("jsutil.ReadID failed", "package", "handler", "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	if err := m.MainCateg.Delete(id); err != nil {
+		logger.Error("m.MainCateg.Delete failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if err := jsutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
+		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}

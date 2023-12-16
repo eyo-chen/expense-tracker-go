@@ -19,6 +19,9 @@ type MainCategModel interface {
 	// Update updates a main category.
 	Update(categ *domain.MainCateg) error
 
+	// Delete deletes a main category.
+	Delete(id int64) error
+
 	// GetByID returns a main category by id.
 	GetByID(id int64) (*domain.MainCateg, error)
 

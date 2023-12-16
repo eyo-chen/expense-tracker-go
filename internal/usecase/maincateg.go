@@ -83,3 +83,12 @@ func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 
 	return nil
 }
+
+func (m *mainCategUC) Delete(id int64) error {
+	if err := m.MainCategModel.Delete(id); err != nil {
+		logger.Error("m.MainCategModel.Delete failed", "package", "usecase", "err", err)
+		return err
+	}
+
+	return nil
+}

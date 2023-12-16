@@ -18,4 +18,7 @@ type MainCategUC interface {
 
 	// Update is a function that updates a main category.
 	Update(categ *domain.MainCateg, userID int64) error
+
+	// Delete is a function that deletes a main category.
+	Delete(id int64) error
 }
