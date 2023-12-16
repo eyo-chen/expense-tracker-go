@@ -34,6 +34,12 @@ type SubCategModel interface {
 	// Create inserts a new sub category into the database.
 	Create(categ *domain.SubCateg, userID int64) error
 
+	// Update updates a sub category.
+	Update(categ *domain.SubCateg) error
+
+	// GetByID returns a sub category by id.
+	GetByID(id int64) (*domain.SubCateg, error)
+
 	// GetOneByUserID returns a sub category by user id and name.
 	GetOneByUserID(userID int64, name string) (*domain.SubCateg, error)
 }

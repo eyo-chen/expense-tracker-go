@@ -47,12 +47,12 @@ func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 }
 
 func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
-	categbyID, err := m.MainCateg.GetByID(categ.ID)
+	categByID, err := m.MainCateg.GetByID(categ.ID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("m.MainCateg.GetByID failed", "package", "usecase", "err", err)
 		return err
 	}
-	if categbyID == nil {
+	if categByID == nil {
 		return domain.ErrDataNotFound
 	}
 

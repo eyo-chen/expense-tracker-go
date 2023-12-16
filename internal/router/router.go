@@ -23,6 +23,7 @@ func New(handler *hd.Handler) http.Handler {
 
 	// sub category
 	r.HandleFunc("/v1/sub-category", handler.SubCateg.CreateSubCateg).Methods(http.MethodPost)
+	r.HandleFunc("/v1/sub-category/{id}", handler.SubCateg.UpdateSubCateg).Methods(http.MethodPatch)
 
 	return middleware.LogRequest(middleware.Authenticate(r))
 }

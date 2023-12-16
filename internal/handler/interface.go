@@ -27,4 +27,7 @@ type MainCategUC interface {
 type SubCategUC interface {
 	// Create is a function that creates a sub category.
 	Create(categ *domain.SubCateg, userID int64) error
+
+	// Update is a function that updates a sub category.
+	Update(categ *domain.SubCateg, userID int64) error
 }

@@ -32,6 +32,33 @@ func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	return nil
 }
 
+func (m *SubCategModel) Update(categ *domain.SubCateg) error {
+	stmt := `UPDATE sub_categories SET name = ? WHERE id = ?`
+
+	if _, err := m.DB.Exec(stmt, categ.Name, categ.ID); err != nil {
+		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		return err
+	}
+
+	return nil
+}
+
+func (m *SubCategModel) GetByID(id int64) (*domain.SubCateg, error) {
+	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ?`
+
+	var categ SubCateg
+	if err := m.DB.QueryRow(stmt, id).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrDataNotFound
+		}
+
+		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
+		return nil, err
+	}
+
+	return cvtToDomainSubCateg(&categ), nil
+}
+
 func (m *SubCategModel) GetOneByUserID(userID int64, name string) (*domain.SubCateg, error) {
 	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND name = ?`
 

@@ -55,3 +55,44 @@ func (s *subCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request)
 		return
 	}
 }
+
+func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
+	id, err := jsutil.ReadID(r)
+	if err != nil {
+		logger.Error("jsutil.ReadID failed", "package", "handler", "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	var input struct {
+		Name string `json:"name"`
+	}
+	if err := jsutil.ReadJson(w, r, &input); err != nil {
+		logger.Error("jsutil.ReadJSON failed", "package", "handler", "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	categ := domain.SubCateg{
+		ID:   id,
+		Name: input.Name,
+	}
+
+	v := validator.New()
+	if !v.UpdateSubCateg(&categ) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	if err := s.SubCateg.Update(&categ, user.ID); err != nil {
+		if err == domain.ErrDataNotFound || err == domain.ErrDataAlreadyExists {
+			errutil.BadRequestResponse(w, r, err)
+			return
+		}
+
+		logger.Error("s.SubCateg.Update failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}

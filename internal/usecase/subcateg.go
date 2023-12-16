@@ -15,17 +15,45 @@ func newSubCategUC(subCateg SubCategModel) *subCategUC {
 
 func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	// check if the sub category name is already taken
-	categbyUserID, err := s.SubCateg.GetOneByUserID(userID, categ.Name)
+	categByUserID, err := s.SubCateg.GetOneByUserID(userID, categ.Name)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("s.SubCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err
 	}
-	if categbyUserID != nil {
+	if categByUserID != nil {
 		return domain.ErrDataAlreadyExists
 	}
 
 	if err := s.SubCateg.Create(categ, userID); err != nil {
 		logger.Error("s.SubCateg.Create failed", "package", "usecase", "err", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
+	categByID, err := s.SubCateg.GetByID(categ.ID)
+	if err != nil && err != domain.ErrDataNotFound {
+		logger.Error("s.SubCateg.GetByID failed", "package", "usecase", "err", err)
+		return err
+	}
+	if categByID == nil {
+		return domain.ErrDataNotFound
+	}
+
+	// check if the sub category name is already taken
+	categByUserID, err := s.SubCateg.GetOneByUserID(userID, categ.Name)
+	if err != nil && err != domain.ErrDataNotFound {
+		logger.Error("s.SubCateg.GetOneByUserID failed", "package", "usecase", "err", err)
+		return err
+	}
+	if categByUserID != nil {
+		return domain.ErrDataAlreadyExists
+	}
+
+	if err := s.SubCateg.Update(categ); err != nil {
+		logger.Error("s.SubCateg.Update failed", "package", "usecase", "err", err)
 		return err
 	}
 
