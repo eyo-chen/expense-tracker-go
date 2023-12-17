@@ -19,7 +19,7 @@ func newSubCategUC(s SubCategModel, m MainCategModel) *subCategUC {
 
 func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	// check if the sub category name is already taken
-	categByUserID, err := s.SubCateg.GetOneByUserID(userID, categ.Name)
+	categByUserID, err := s.SubCateg.GetOne(categ, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("s.SubCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err
@@ -77,7 +77,7 @@ func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
 	}
 
 	// check if the sub category name is already taken
-	categByUserID, err := s.SubCateg.GetOneByUserID(userID, categ.Name)
+	categByUserID, err := s.SubCateg.GetOne(categByID, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("s.SubCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err

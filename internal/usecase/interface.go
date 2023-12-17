@@ -52,8 +52,8 @@ type SubCategModel interface {
 	// GetByID returns a sub category by id.
 	GetByID(id int64) (*domain.SubCateg, error)
 
-	// GetOneByUserID returns a sub category by user id and name.
-	GetOneByUserID(userID int64, name string) (*domain.SubCateg, error)
+	// GetOne returns a sub category by name, main category id and userID
+	GetOne(inputCateg *domain.SubCateg, userID int64) (*domain.SubCateg, error)
 }
 
 // IconModel is the interface that wraps the basic methods for icon model.
