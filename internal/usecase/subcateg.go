@@ -56,6 +56,16 @@ func (s *subCategUC) GetAll(userID int64) ([]*domain.SubCateg, error) {
 	return categs, nil
 }
 
+func (s *subCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
+	categs, err := s.SubCateg.GetByMainCategID(userID, mainCategID)
+	if err != nil {
+		logger.Error("s.SubCateg.GetByMainCategID failed", "package", "usecase", "err", err)
+		return nil, err
+	}
+
+	return categs, nil
+}
+
 func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
 	categByID, err := s.SubCateg.GetByID(categ.ID)
 	if err != nil && err != domain.ErrDataNotFound {

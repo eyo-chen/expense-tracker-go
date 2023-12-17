@@ -34,6 +34,9 @@ type SubCategUC interface {
 	// GetAll is a function that returns all sub categories by user id.
 	GetAll(userID int64) ([]*domain.SubCateg, error)
 
+	// GetByMainCategID is a function that returns all sub categories by user id and main category id.
+	GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error)
+
 	// Update is a function that updates a sub category.
 	Update(categ *domain.SubCateg, userID int64) error
 

@@ -43,6 +43,9 @@ type SubCategModel interface {
 	// GetAll returns all sub categories by user id.
 	GetAll(userID int64) ([]*domain.SubCateg, error)
 
+	// GetByMainCategID returns all sub categories by user id and main category id.
+	GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error)
+
 	// Delete deletes a sub category.
 	Delete(id int64) error
 
