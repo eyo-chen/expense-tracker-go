@@ -16,6 +16,9 @@ type MainCategModel interface {
 	// Create inserts a new main category into the database.
 	Create(categ *domain.MainCateg, userID int64) error
 
+	// GetAll returns all main categories by user id.
+	GetAll(userID int64) ([]*domain.MainCateg, error)
+
 	// Update updates a main category.
 	Update(categ *domain.MainCateg) error
 

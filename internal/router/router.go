@@ -18,6 +18,7 @@ func New(handler *hd.Handler) http.Handler {
 
 	// main category
 	r.HandleFunc("/v1/main-category", handler.MainCateg.CreateMainCateg).Methods(http.MethodPost)
+	r.HandleFunc("/v1/main-category", handler.MainCateg.GetAllMainCateg).Methods(http.MethodGet)
 	r.HandleFunc("/v1/main-category/{id}", handler.MainCateg.UpdateMainCateg).Methods(http.MethodPatch)
 	r.HandleFunc("/v1/main-category/{id}", handler.MainCateg.DeleteMainCateg).Methods(http.MethodDelete)
 

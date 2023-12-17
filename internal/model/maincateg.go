@@ -16,9 +16,10 @@ func newMainCategModel(db *sql.DB) *MainCategModel {
 }
 
 type MainCateg struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
+	ID     int64  `json:"id"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	IconID int64  `json:"icon_id"`
 }
 
 func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
@@ -30,6 +31,30 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	}
 
 	return nil
+}
+
+func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
+	stmt := `SELECT id, name, type, icon_id FROM main_categories WHERE user_id = ?`
+
+	rows, err := m.DB.Query(stmt, userID)
+	if err != nil {
+		logger.Error("m.DB.Query failed", "package", "model", "err", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categs []*domain.MainCateg
+	for rows.Next() {
+		var categ MainCateg
+		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.IconID); err != nil {
+			logger.Error("rows.Scan failed", "package", "model", "err", err)
+			return nil, err
+		}
+
+		categs = append(categs, cvtToDomainMainCateg(&categ))
+	}
+
+	return categs, nil
 }
 
 func (m *MainCategModel) Update(categ *domain.MainCateg) error {
@@ -87,10 +112,16 @@ func (m *MainCategModel) GetOneByUserID(userID int64, name string) (*domain.Main
 }
 
 func cvtToDomainMainCateg(c *MainCateg) *domain.MainCateg {
+	categType := "income"
+	if c.Type == "2" {
+		categType = "expense"
+	}
+
 	return &domain.MainCateg{
-		ID:   c.ID,
-		Name: c.Name,
-		Type: c.Type,
+		ID:     c.ID,
+		Name:   c.Name,
+		Type:   categType,
+		IconID: c.IconID,
 	}
 }
 
