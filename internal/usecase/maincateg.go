@@ -19,7 +19,7 @@ func newMainCategUC(m MainCategModel, i IconModel) *mainCategUC {
 
 func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	// check if the main category name is already taken
-	categbyUserID, err := m.MainCateg.GetOneByUserID(userID, categ.Name)
+	categbyUserID, err := m.MainCateg.GetOne(categ, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("m.MainCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err
@@ -67,7 +67,7 @@ func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 	}
 
 	// check if the main category name is already taken
-	categbyUserID, err := m.MainCateg.GetOneByUserID(userID, categ.Name)
+	categbyUserID, err := m.MainCateg.GetOne(categ, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("m.MainCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err

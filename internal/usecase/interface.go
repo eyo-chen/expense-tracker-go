@@ -28,8 +28,8 @@ type MainCategModel interface {
 	// GetByID returns a main category by id.
 	GetByID(id int64) (*domain.MainCateg, error)
 
-	// GetOneByUserID returns a main category by user id and name.
-	GetOneByUserID(userID int64, name string) (*domain.MainCateg, error)
+	// GetOne returns a main category by name, type and userID
+	GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error)
 }
 
 // SubCategModel is the interface that wraps the basic methods for sub category model.

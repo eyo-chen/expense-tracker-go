@@ -95,11 +95,11 @@ func (m *MainCategModel) GetByID(id int64) (*domain.MainCateg, error) {
 	return cvtToDomainMainCateg(&categ), nil
 }
 
-func (m *MainCategModel) GetOneByUserID(userID int64, name string) (*domain.MainCateg, error) {
-	stmt := `SELECT id, name, type FROM main_categories WHERE user_id = ? AND name = ?`
+func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error) {
+	stmt := `SELECT id, name, type FROM main_categories WHERE user_id = ? AND name = ? AND type = ?`
 
 	var categ MainCateg
-	if err := m.DB.QueryRow(stmt, userID, name).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
+	if err := m.DB.QueryRow(stmt, userID, inputCateg.Name, genType(inputCateg.Type)).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrDataNotFound
 		}
