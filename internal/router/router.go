@@ -13,16 +13,20 @@ func New(handler *hd.Handler) http.Handler {
 	r := mux.NewRouter()
 
 	// user
-	r.HandleFunc("/v1/user/signup", handler.User.Signup).Methods(http.MethodPost)
-	r.HandleFunc("/v1/user/login", handler.User.Login).Methods(http.MethodPost)
+	userRouter := r.PathPrefix("/v1/user").Subrouter()
+	userRouter.HandleFunc("/signup", handler.User.Signup).Methods(http.MethodPost)
+	userRouter.HandleFunc("/login", handler.User.Login).Methods(http.MethodPost)
 
 	// main category
 	r.HandleFunc("/v1/main-category", handler.MainCateg.CreateMainCateg).Methods(http.MethodPost)
+	r.HandleFunc("/v1/main-category", handler.MainCateg.GetAllMainCateg).Methods(http.MethodGet)
 	r.HandleFunc("/v1/main-category/{id}", handler.MainCateg.UpdateMainCateg).Methods(http.MethodPatch)
 	r.HandleFunc("/v1/main-category/{id}", handler.MainCateg.DeleteMainCateg).Methods(http.MethodDelete)
 
 	// sub category
 	r.HandleFunc("/v1/sub-category", handler.SubCateg.CreateSubCateg).Methods(http.MethodPost)
+	r.HandleFunc("/v1/sub-category", handler.SubCateg.GetAllSubCateg).Methods(http.MethodGet)
+	r.HandleFunc("/v1/main-category/{id}/sub-category", handler.SubCateg.GetByMainCategID).Methods(http.MethodGet)
 	r.HandleFunc("/v1/sub-category/{id}", handler.SubCateg.UpdateSubCateg).Methods(http.MethodPatch)
 	r.HandleFunc("/v1/sub-category/{id}", handler.SubCateg.DeleteSubCateg).Methods(http.MethodDelete)
 

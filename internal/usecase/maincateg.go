@@ -46,6 +46,16 @@ func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
+func (m *mainCategUC) GetAll(userID int64) ([]*domain.MainCateg, error) {
+	categs, err := m.MainCateg.GetAll(userID)
+	if err != nil {
+		logger.Error("m.MainCateg.GetAll failed", "package", "usecase", "err", err)
+		return nil, err
+	}
+
+	return categs, nil
+}
+
 func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 	categByID, err := m.MainCateg.GetByID(categ.ID)
 	if err != nil && err != domain.ErrDataNotFound {

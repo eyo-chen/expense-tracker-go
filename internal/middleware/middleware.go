@@ -24,7 +24,7 @@ func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorizationHeader := r.Header.Get("Authorization")
 		if authorizationHeader == "" {
-			next.ServeHTTP(w, r)
+			errutil.AuthenticationErrorResponse(w, r, domain.ErrAuthentication)
 			return
 		}
 

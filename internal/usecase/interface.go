@@ -16,6 +16,9 @@ type MainCategModel interface {
 	// Create inserts a new main category into the database.
 	Create(categ *domain.MainCateg, userID int64) error
 
+	// GetAll returns all main categories by user id.
+	GetAll(userID int64) ([]*domain.MainCateg, error)
+
 	// Update updates a main category.
 	Update(categ *domain.MainCateg) error
 
@@ -36,6 +39,12 @@ type SubCategModel interface {
 
 	// Update updates a sub category.
 	Update(categ *domain.SubCateg) error
+
+	// GetAll returns all sub categories by user id.
+	GetAll(userID int64) ([]*domain.SubCateg, error)
+
+	// GetByMainCategID returns all sub categories by user id and main category id.
+	GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error)
 
 	// Delete deletes a sub category.
 	Delete(id int64) error

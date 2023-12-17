@@ -62,6 +62,25 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+func (m *mainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
+	user := ctxutil.GetUser(r)
+	categs, err := m.MainCateg.GetAll(user.ID)
+	if err != nil {
+		logger.Error("m.MainCateg.GetAll failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	respData := map[string]interface{}{
+		"categories": categs,
+	}
+	if err := jsutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
+		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
+
 func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsutil.ReadID(r)
 	if err != nil {
