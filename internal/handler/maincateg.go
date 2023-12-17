@@ -74,7 +74,6 @@ func (m *mainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 	respData := map[string]interface{}{
 		"categories": categs,
 	}
-
 	if err := jsutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
 		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)

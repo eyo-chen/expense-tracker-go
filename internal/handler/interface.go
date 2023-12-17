@@ -31,6 +31,9 @@ type SubCategUC interface {
 	// Create is a function that creates a sub category.
 	Create(categ *domain.SubCateg, userID int64) error
 
+	// GetAll is a function that returns all sub categories by user id.
+	GetAll(userID int64) ([]*domain.SubCateg, error)
+
 	// Update is a function that updates a sub category.
 	Update(categ *domain.SubCateg, userID int64) error
 

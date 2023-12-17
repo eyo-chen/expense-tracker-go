@@ -24,6 +24,7 @@ func New(handler *hd.Handler) http.Handler {
 
 	// sub category
 	r.HandleFunc("/v1/sub-category", handler.SubCateg.CreateSubCateg).Methods(http.MethodPost)
+	r.HandleFunc("/v1/sub-category", handler.SubCateg.GetAllSubCateg).Methods(http.MethodGet)
 	r.HandleFunc("/v1/sub-category/{id}", handler.SubCateg.UpdateSubCateg).Methods(http.MethodPatch)
 	r.HandleFunc("/v1/sub-category/{id}", handler.SubCateg.DeleteSubCateg).Methods(http.MethodDelete)
 
