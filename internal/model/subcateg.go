@@ -102,11 +102,11 @@ func (m *SubCategModel) Delete(id int64) error {
 	return nil
 }
 
-func (m *SubCategModel) GetByID(id int64) (*domain.SubCateg, error) {
-	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ?`
+func (m *SubCategModel) GetByID(id, userID int64) (*domain.SubCateg, error) {
+	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ? AND user_id = ?`
 
 	var categ SubCateg
-	if err := m.DB.QueryRow(stmt, id).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
+	if err := m.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrDataNotFound
 		}

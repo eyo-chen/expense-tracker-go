@@ -18,16 +18,6 @@ func newSubCategUC(s SubCategModel, m MainCategModel) *subCategUC {
 }
 
 func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
-	// check if the sub category name is already taken
-	categByUserID, err := s.SubCateg.GetOne(categ, userID)
-	if err != nil && err != domain.ErrDataNotFound {
-		logger.Error("s.SubCateg.GetOneByUserID failed", "package", "usecase", "err", err)
-		return err
-	}
-	if categByUserID != nil {
-		return domain.ErrDataAlreadyExists
-	}
-
 	// check if the main category exists
 	mainCategByID, err := s.MainCateg.GetByID(categ.MainCategID, userID)
 	if err != nil && err != domain.ErrDataNotFound {
@@ -36,6 +26,16 @@ func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	}
 	if mainCategByID == nil {
 		return domain.ErrDataNotFound
+	}
+
+	// check if the sub category name is already taken
+	categByUserID, err := s.SubCateg.GetOne(categ, userID)
+	if err != nil && err != domain.ErrDataNotFound {
+		logger.Error("s.SubCateg.GetOneByUserID failed", "package", "usecase", "err", err)
+		return err
+	}
+	if categByUserID != nil {
+		return domain.ErrDataAlreadyExists
 	}
 
 	if err := s.SubCateg.Create(categ, userID); err != nil {
@@ -67,7 +67,8 @@ func (s *subCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubC
 }
 
 func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
-	categByID, err := s.SubCateg.GetByID(categ.ID)
+	// check if the sub category exists
+	categByID, err := s.SubCateg.GetByID(categ.ID, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("s.SubCateg.GetByID failed", "package", "usecase", "err", err)
 		return err
@@ -76,8 +77,15 @@ func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
 		return domain.ErrDataNotFound
 	}
 
+	/*
+		Have to add mainCategID after getting the sub category by ID because
+		1. We don't expect the front end to pass the main category ID, and to be able to change the main category ID
+		2. GetOne() needs the main category ID to check if the sub category name is already taken
+	*/
+	categ.MainCategID = categByID.MainCategID
+
 	// check if the sub category name is already taken
-	categByUserID, err := s.SubCateg.GetOne(categByID, userID)
+	categByUserID, err := s.SubCateg.GetOne(categ, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("s.SubCateg.GetOneByUserID failed", "package", "usecase", "err", err)
 		return err
