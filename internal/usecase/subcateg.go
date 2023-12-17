@@ -29,7 +29,7 @@ func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	}
 
 	// check if the main category exists
-	mainCategByID, err := s.MainCateg.GetByID(categ.MainCategID)
+	mainCategByID, err := s.MainCateg.GetByID(categ.MainCategID, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("s.MainCateg.GetByID failed", "package", "usecase", "err", err)
 		return err

@@ -57,7 +57,8 @@ func (m *mainCategUC) GetAll(userID int64) ([]*domain.MainCateg, error) {
 }
 
 func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
-	categByID, err := m.MainCateg.GetByID(categ.ID)
+	// check if the main category exists
+	categByID, err := m.MainCateg.GetByID(categ.ID, userID)
 	if err != nil && err != domain.ErrDataNotFound {
 		logger.Error("m.MainCateg.GetByID failed", "package", "usecase", "err", err)
 		return err

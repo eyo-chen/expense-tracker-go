@@ -25,10 +25,10 @@ type MainCategModel interface {
 	// Delete deletes a main category.
 	Delete(id int64) error
 
-	// GetByID returns a main category by id.
-	GetByID(id int64) (*domain.MainCateg, error)
+	// GetByID returns a main category by id, and user id.
+	GetByID(id, userID int64) (*domain.MainCateg, error)
 
-	// GetOne returns a main category by name, type and userID
+	// GetOne returns a main category by name, type and user id.
 	GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error)
 }
 
@@ -52,7 +52,7 @@ type SubCategModel interface {
 	// GetByID returns a sub category by id.
 	GetByID(id int64) (*domain.SubCateg, error)
 
-	// GetOne returns a sub category by name, main category id and userID
+	// GetOne returns a sub category by name, main category id and user id.
 	GetOne(inputCateg *domain.SubCateg, userID int64) (*domain.SubCateg, error)
 }
 
