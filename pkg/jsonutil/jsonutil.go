@@ -1,4 +1,4 @@
-package jsutil
+package jsonutil
 
 import (
 	"encoding/json"

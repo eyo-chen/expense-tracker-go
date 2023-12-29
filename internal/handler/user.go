@@ -5,7 +5,7 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/jsutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
@@ -24,8 +24,8 @@ func (u userHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := jsutil.ReadJson(w, r, &input); err != nil {
-		logger.Error("jsutil.ReadJson failed", "package", "handler", "err", err)
+	if err := jsonutil.ReadJson(w, r, &input); err != nil {
+		logger.Error("jsonutil.ReadJson failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -52,8 +52,8 @@ func (u userHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := jsutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
@@ -64,8 +64,8 @@ func (u userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := jsutil.ReadJson(w, r, &input); err != nil {
-		logger.Error("jsutil.ReadJson failed", "package", "handler", "err", err)
+	if err := jsonutil.ReadJson(w, r, &input); err != nil {
+		logger.Error("jsonutil.ReadJson failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -96,8 +96,8 @@ func (u userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	resp := map[string]interface{}{
 		"token": token,
 	}
-	if err := jsutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}

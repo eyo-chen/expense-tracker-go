@@ -6,7 +6,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/jsutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
@@ -25,8 +25,8 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 		Type   string `json:"type"`
 		IconID int64  `json:"icon_id"`
 	}
-	if err := jsutil.ReadJson(w, r, &input); err != nil {
-		logger.Error("jsutil.ReadJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.ReadJson(w, r, &input); err != nil {
+		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -55,8 +55,8 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := jsutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
@@ -74,17 +74,17 @@ func (m *mainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 	respData := map[string]interface{}{
 		"categories": categs,
 	}
-	if err := jsutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
 func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
-	id, err := jsutil.ReadID(r)
+	id, err := jsonutil.ReadID(r)
 	if err != nil {
-		logger.Error("jsutil.ReadID failed", "package", "handler", "err", err)
+		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -93,8 +93,8 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 		Name   string `json:"name"`
 		IconID int64  `json:"icon_id"`
 	}
-	if err := jsutil.ReadJson(w, r, &input); err != nil {
-		logger.Error("jsutil.ReadJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.ReadJson(w, r, &input); err != nil {
+		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -123,17 +123,17 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := jsutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
 func (m *mainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
-	id, err := jsutil.ReadID(r)
+	id, err := jsonutil.ReadID(r)
 	if err != nil {
-		logger.Error("jsutil.ReadID failed", "package", "handler", "err", err)
+		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -144,8 +144,8 @@ func (m *mainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := jsutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "handler", "err", err)
+	if err := jsonutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}

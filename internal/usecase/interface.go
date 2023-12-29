@@ -25,11 +25,11 @@ type MainCategModel interface {
 	// Delete deletes a main category.
 	Delete(id int64) error
 
-	// GetByID returns a main category by id.
-	GetByID(id int64) (*domain.MainCateg, error)
+	// GetByID returns a main category by id and user id.
+	GetByID(id, userID int64) (*domain.MainCateg, error)
 
-	// GetOneByUserID returns a main category by user id and name.
-	GetOneByUserID(userID int64, name string) (*domain.MainCateg, error)
+	// GetOne returns a main category by name, type and user id.
+	GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error)
 }
 
 // SubCategModel is the interface that wraps the basic methods for sub category model.
@@ -49,11 +49,11 @@ type SubCategModel interface {
 	// Delete deletes a sub category.
 	Delete(id int64) error
 
-	// GetByID returns a sub category by id.
-	GetByID(id int64) (*domain.SubCateg, error)
+	// GetByID returns a sub category by id and user id.
+	GetByID(id, userID int64) (*domain.SubCateg, error)
 
-	// GetOneByUserID returns a sub category by user id and name.
-	GetOneByUserID(userID int64, name string) (*domain.SubCateg, error)
+	// GetOne returns a sub category by name, main category id and user id.
+	GetOne(inputCateg *domain.SubCateg, userID int64) (*domain.SubCateg, error)
 }
 
 // IconModel is the interface that wraps the basic methods for icon model.
