@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -14,6 +15,8 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -23,14 +26,19 @@ func main() {
 	}
 
 	logger.Info("Connecting to database...")
-	db, err := openDB()
+	mysqlDB, err := newMysqlDB()
 	if err != nil {
-		logger.Fatal("Unable to connect to database", "error", err)
+		logger.Fatal("Unable to connect to mysql database", "error", err)
 	}
-	defer db.Close()
+	defer mysqlDB.Close()
+	mongoDB, err := newMongoDB()
+	if err != nil {
+		logger.Fatal("Unable to connect to mongo database", "error", err)
+	}
+	defer mongoDB.Disconnect(context.Background())
 
 	// Setup model, usecase, and handler
-	model := model.New(db)
+	model := model.New(mysqlDB)
 	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon)
 	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg)
 	if err := initServe(handler); err != nil {
@@ -38,7 +46,19 @@ func main() {
 	}
 }
 
-func openDB() (*sql.DB, error) {
+func newMongoDB() (*mongo.Client, error) {
+	uri := os.Getenv("MONGODB_URI")
+	if uri == "" {
+		return nil, fmt.Errorf("MONGODB_URI is not set")
+	}
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func newMysqlDB() (*sql.DB, error) {
 	config := map[string]string{
 		"name":     os.Getenv("DB_NAME"),
 		"user":     os.Getenv("DB_USER"),
