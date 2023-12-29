@@ -9,11 +9,11 @@ type Model struct {
 	Icon      IconModel
 }
 
-func New(db *sql.DB) *Model {
+func New(mysqlDB *sql.DB) *Model {
 	return &Model{
-		User:      *newUserModel(db),
-		MainCateg: *newMainCategModel(db),
-		SubCateg:  *newSubCategModel(db),
-		Icon:      *newIconModel(db),
+		User:      *newUserModel(mysqlDB),
+		MainCateg: *newMainCategModel(mysqlDB),
+		SubCateg:  *newSubCategModel(mysqlDB),
+		Icon:      *newIconModel(mysqlDB),
 	}
 }

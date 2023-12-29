@@ -23,14 +23,14 @@ func main() {
 	}
 
 	logger.Info("Connecting to database...")
-	db, err := openDB()
+	mysqlDB, err := newMysqlDB()
 	if err != nil {
 		logger.Fatal("Unable to connect to database", "error", err)
 	}
-	defer db.Close()
+	defer mysqlDB.Close()
 
 	// Setup model, usecase, and handler
-	model := model.New(db)
+	model := model.New(mysqlDB)
 	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon)
 	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg)
 	if err := initServe(handler); err != nil {
@@ -38,7 +38,7 @@ func main() {
 	}
 }
 
-func openDB() (*sql.DB, error) {
+func newMysqlDB() (*sql.DB, error) {
 	config := map[string]string{
 		"name":     os.Getenv("DB_NAME"),
 		"user":     os.Getenv("DB_USER"),
