@@ -3,7 +3,7 @@ package errutil
 import (
 	"net/http"
 
-	"github.com/OYE0303/expense-tracker-go/pkg/jsutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
@@ -30,8 +30,8 @@ func VildateErrorResponse(w http.ResponseWriter, r *http.Request, err map[string
 		errMap[k] = v
 	}
 
-	if err := jsutil.WriteJSON(w, http.StatusBadRequest, errMap, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "errutil", "err", err)
+	if err := jsonutil.WriteJSON(w, http.StatusBadRequest, errMap, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "errutil", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -39,8 +39,8 @@ func VildateErrorResponse(w http.ResponseWriter, r *http.Request, err map[string
 func errorResponse(w http.ResponseWriter, r *http.Request, status int, message interface{}) {
 	err := map[string]interface{}{"error": message}
 
-	if err := jsutil.WriteJSON(w, status, err, nil); err != nil {
-		logger.Error("jsutil.WriteJSON failed", "package", "errutil", "err", err)
+	if err := jsonutil.WriteJSON(w, status, err, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "errutil", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
