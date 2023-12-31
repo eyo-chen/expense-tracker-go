@@ -72,5 +72,39 @@ func (t *transactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
+}
 
+func (t *transactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	startDate := r.URL.Query().Get("start_date")
+	endDate := r.URL.Query().Get("end_date")
+
+	query := &domain.GetQuery{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	v := validator.New()
+	if !v.GetTransaction(query) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	ctx := r.Context()
+	transactions, err := t.transaction.GetAll(ctx, query, user)
+	if err != nil {
+		logger.Error("t.transaction.GetAll failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	respData := map[string]interface{}{
+		"transactions": transactions,
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
 }
