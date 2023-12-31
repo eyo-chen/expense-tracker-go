@@ -70,4 +70,7 @@ type IconModel interface {
 type TransactionModel interface {
 	// Create inserts a new transaction into the database.
 	Create(ctx context.Context, transaction *domain.Transaction) error
+
+	// GetAll returns all transactions by user id and query.
+	GetAll(ctx context.Context, query *domain.GetQuery, userID int64) (*domain.TransactionResp, error)
 }
