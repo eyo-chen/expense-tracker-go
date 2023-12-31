@@ -32,6 +32,9 @@ func New(handler *hd.Handler) http.Handler {
 	r.Handle("/v1/sub-category/{id}", auth.ThenFunc(handler.SubCateg.UpdateSubCateg)).Methods(http.MethodPatch)
 	r.Handle("/v1/sub-category/{id}", auth.ThenFunc(handler.SubCateg.DeleteSubCateg)).Methods(http.MethodDelete)
 
+	// transaction
+	r.Handle("/v1/transaction", auth.ThenFunc(handler.Transaction.Create)).Methods(http.MethodPost)
+
 	regular := alice.New(middleware.LogRequest)
 
 	return regular.Then(r)

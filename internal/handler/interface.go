@@ -1,6 +1,10 @@
 package handler
 
-import "github.com/OYE0303/expense-tracker-go/internal/domain"
+import (
+	"context"
+
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
+)
 
 // UserUC is the interface that wraps the basic methods for user usecase.
 type UserUC interface {
@@ -42,4 +46,10 @@ type SubCategUC interface {
 
 	// Delete is a function that deletes a sub category.
 	Delete(id int64) error
+}
+
+// TransactionUC is the interface that wraps the basic methods for transaction usecase.
+type TransactionUC interface {
+	// Create is a function that creates a transaction.
+	Create(ctx context.Context, user *domain.User, transaction *domain.Transaction) error
 }

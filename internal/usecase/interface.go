@@ -1,6 +1,10 @@
 package usecase
 
-import "github.com/OYE0303/expense-tracker-go/internal/domain"
+import (
+	"context"
+
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
+)
 
 // UserModel is the interface that wraps the basic methods for user model.
 type UserModel interface {
@@ -60,4 +64,10 @@ type SubCategModel interface {
 type IconModel interface {
 	// GetByID returns an icon by id.
 	GetByID(id int64) (*domain.Icon, error)
+}
+
+// TransactionModel is the interface that wraps the basic methods for transaction model.
+type TransactionModel interface {
+	// Create inserts a new transaction into the database.
+	Create(ctx context.Context, transaction *domain.Transaction) error
 }

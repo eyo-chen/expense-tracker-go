@@ -1,15 +1,17 @@
 package usecase
 
 type Usecase struct {
-	User      userUC
-	MainCateg mainCategUC
-	SubCateg  subCategUC
+	User        userUC
+	MainCateg   mainCategUC
+	SubCateg    subCategUC
+	Transaction transactionUC
 }
 
-func New(u UserModel, m MainCategModel, s SubCategModel, i IconModel) *Usecase {
+func New(u UserModel, m MainCategModel, s SubCategModel, i IconModel, t TransactionModel) *Usecase {
 	return &Usecase{
-		User:      *newUserUC(u),
-		MainCateg: *newMainCategUC(m, i),
-		SubCateg:  *newSubCategUC(s, m),
+		User:        *newUserUC(u),
+		MainCateg:   *newMainCategUC(m, i),
+		SubCateg:    *newSubCategUC(s, m),
+		Transaction: *newTransactionUC(t, m, s),
 	}
 }
