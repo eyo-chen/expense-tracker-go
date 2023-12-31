@@ -20,16 +20,16 @@ type TransactionModel struct {
 }
 
 type Transaction struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	UserID      int64              `bson:"user_id"`
-	Type        string             `bson:"type"`
-	MainCategID int64              `bson:"main_category_id"`
-	SubCategID  int64              `bson:"sub_category_id"`
-	Price       int64              `bson:"price"`
-	Date        *time.Time         `bson:"date"`
-	Note        string             `bson:"note,omitempty"`
-	CreatedAt   time.Time          `bson:"created_at"`
-	UpdatedAt   time.Time          `bson:"updated_at"`
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
+	UserID    int64              `bson:"user_id"`
+	Type      string             `bson:"type"`
+	MainCateg *MainCateg         `bson:"main_category"`
+	SubCateg  *SubCateg          `bson:"sub_category"`
+	Price     int64              `bson:"price"`
+	Date      *time.Time         `bson:"date"`
+	Note      string             `bson:"note,omitempty"`
+	CreatedAt time.Time          `bson:"created_at"`
+	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
 func newTransactionModel(db *mongo.Database) *TransactionModel {

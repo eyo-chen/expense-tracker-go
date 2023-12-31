@@ -4,26 +4,26 @@ import "github.com/OYE0303/expense-tracker-go/internal/domain"
 
 func cvtToDomainTransaction(t *Transaction) *domain.Transaction {
 	return &domain.Transaction{
-		ID:          t.ID.Hex(),
-		UserID:      t.UserID,
-		Type:        cvtToDomainType(t.Type),
-		MainCategID: t.MainCategID,
-		SubCategID:  t.SubCategID,
-		Price:       t.Price,
-		Date:        t.Date,
-		Note:        t.Note,
+		ID:        t.ID.Hex(),
+		UserID:    t.UserID,
+		Type:      cvtToDomainType(t.Type),
+		MainCateg: cvtToDomainMainCateg(t.MainCateg),
+		SubCateg:  cvtToDomainSubCateg(t.SubCateg),
+		Price:     t.Price,
+		Date:      t.Date,
+		Note:      t.Note,
 	}
 }
 
 func cvtToModelTransaction(t *domain.Transaction) *Transaction {
 	return &Transaction{
-		UserID:      t.UserID,
-		Type:        cvtToModelType(t.Type),
-		MainCategID: t.MainCategID,
-		SubCategID:  t.SubCategID,
-		Price:       t.Price,
-		Date:        t.Date,
-		Note:        t.Note,
+		UserID:    t.UserID,
+		Type:      cvtToModelType(t.Type),
+		MainCateg: cvtToModelMainCateg(t.MainCateg),
+		SubCateg:  cvtToModelSubCateg(t.SubCateg),
+		Price:     t.Price,
+		Date:      t.Date,
+		Note:      t.Note,
 	}
 }
 
@@ -42,6 +42,40 @@ func cvtToDomainTransactionResp(transactions []*Transaction) *domain.Transaction
 	}
 
 	return &result
+}
+
+func cvtToModelMainCateg(c *domain.MainCateg) *MainCateg {
+	return &MainCateg{
+		ID:     c.ID,
+		Name:   c.Name,
+		Type:   cvtToModelType(c.Type),
+		IconID: c.IconID,
+	}
+}
+
+func cvtToDomainMainCateg(c *MainCateg) *domain.MainCateg {
+	return &domain.MainCateg{
+		ID:     c.ID,
+		Name:   c.Name,
+		Type:   cvtToDomainType(c.Type),
+		IconID: c.IconID,
+	}
+}
+
+func cvtToModelSubCateg(c *domain.SubCateg) *SubCateg {
+	return &SubCateg{
+		ID:          c.ID,
+		Name:        c.Name,
+		MainCategID: c.MainCategID,
+	}
+}
+
+func cvtToDomainSubCateg(categ *SubCateg) *domain.SubCateg {
+	return &domain.SubCateg{
+		ID:          categ.ID,
+		Name:        categ.Name,
+		MainCategID: categ.MainCategID,
+	}
 }
 
 func cvtToModelType(t string) string {

@@ -24,7 +24,7 @@ func newTransactionUC(t TransactionModel, m MainCategModel, s SubCategModel) *tr
 
 func (t *transactionUC) Create(ctx context.Context, user *domain.User, transaction *domain.Transaction) error {
 	// check if the main category exists
-	mainCateg, err := t.MainCateg.GetByID(transaction.MainCategID, user.ID)
+	mainCateg, err := t.MainCateg.GetByID(transaction.MainCateg.ID, user.ID)
 	if errors.Is(err, domain.ErrDataNotFound) {
 		return domain.ErrDataNotFound
 	}
@@ -39,7 +39,7 @@ func (t *transactionUC) Create(ctx context.Context, user *domain.User, transacti
 	}
 
 	// check if the sub category exists
-	subCateg, err := t.SubCateg.GetByID(transaction.SubCategID, user.ID)
+	subCateg, err := t.SubCateg.GetByID(transaction.SubCateg.ID, user.ID)
 	if errors.Is(err, domain.ErrDataNotFound) {
 		return domain.ErrDataNotFound
 	}
@@ -49,7 +49,7 @@ func (t *transactionUC) Create(ctx context.Context, user *domain.User, transacti
 	}
 
 	// check if the sub category matches the main category
-	if subCateg.MainCategID != transaction.MainCategID {
+	if subCateg.MainCategID != transaction.MainCateg.ID {
 		return domain.ErrDataNotFound
 	}
 

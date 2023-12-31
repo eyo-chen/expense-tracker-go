@@ -40,13 +40,17 @@ func (t *transactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	user := ctxutil.GetUser(r)
 	transaction := domain.Transaction{
-		UserID:      user.ID,
-		Type:        input.Type,
-		MainCategID: input.MainCategID,
-		SubCategID:  input.SubCategID,
-		Price:       input.Price,
-		Date:        input.Date,
-		Note:        input.Note,
+		UserID: user.ID,
+		Type:   input.Type,
+		MainCateg: &domain.MainCateg{
+			ID: input.MainCategID,
+		},
+		SubCateg: &domain.SubCateg{
+			ID: input.SubCategID,
+		},
+		Price: input.Price,
+		Date:  input.Date,
+		Note:  input.Note,
 	}
 
 	v := validator.New()

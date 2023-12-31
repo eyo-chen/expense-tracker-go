@@ -110,17 +110,3 @@ func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*do
 
 	return cvtToDomainMainCateg(&categ), nil
 }
-
-func cvtToDomainMainCateg(c *MainCateg) *domain.MainCateg {
-	categType := "income"
-	if c.Type == "2" {
-		categType = "expense"
-	}
-
-	return &domain.MainCateg{
-		ID:     c.ID,
-		Name:   c.Name,
-		Type:   categType,
-		IconID: c.IconID,
-	}
-}

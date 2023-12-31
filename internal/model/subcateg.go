@@ -133,11 +133,3 @@ func (m *SubCategModel) GetOne(inputCateg *domain.SubCateg, userID int64) (*doma
 
 	return cvtToDomainSubCateg(&categ), nil
 }
-
-func cvtToDomainSubCateg(categ *SubCateg) *domain.SubCateg {
-	return &domain.SubCateg{
-		ID:          categ.ID,
-		Name:        categ.Name,
-		MainCategID: categ.MainCategID,
-	}
-}
