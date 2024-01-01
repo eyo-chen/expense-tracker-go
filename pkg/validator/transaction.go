@@ -18,20 +18,28 @@ func (v *Validator) CreateTransaction(transaction *domain.Transaction) bool {
 
 // GetTransaction is a function that validates the queries for getting transactions.
 func (v *Validator) GetTransaction(query *domain.GetQuery) bool {
-	v.Check(query.StartDate != "", "startDate", "Start date can't be empty")
-	v.Check(query.EndDate != "", "endDate", "End date can't be empty")
 	v.Check(isValidDateFormat(query.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
 	v.Check(isValidDateFormat(query.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
-
-	// Check if start date is before or equal end date
-	startDate, _ := time.Parse(time.DateOnly, query.StartDate)
-	endDate, _ := time.Parse(time.DateOnly, query.EndDate)
-	v.Check(startDate.Before(endDate) || startDate.Equal(endDate), "startDate", "Start date must be before end date")
+	v.Check(checkStartDateBeforeEndDate(query), "startDate", "Start date must be before end date")
 
 	return v.Valid()
 }
 
 func isValidDateFormat(dateString string) bool {
+	if dateString == "" {
+		return true
+	}
+
 	_, err := time.Parse(time.DateOnly, dateString)
 	return err == nil
+}
+
+func checkStartDateBeforeEndDate(query *domain.GetQuery) bool {
+	if query.StartDate == "" || query.EndDate == "" {
+		return true
+	}
+
+	startDate, _ := time.Parse(time.DateOnly, query.StartDate)
+	endDate, _ := time.Parse(time.DateOnly, query.EndDate)
+	return startDate.Before(endDate) || startDate.Equal(endDate)
 }
