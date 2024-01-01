@@ -13,7 +13,7 @@ func cvtToDomainTransactionResp(transactions []*Transaction) *domain.Transaction
 			result.Expense += t.Price
 			result.NetIncome -= t.Price
 		}
-		result.Transactions = append(result.Transactions, cvtToDomainTransaction(t))
+		result.DataList = append(result.DataList, cvtToDomainTransaction(t))
 	}
 
 	return &result

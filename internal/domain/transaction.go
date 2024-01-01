@@ -19,8 +19,8 @@ type GetQuery struct {
 }
 
 type TransactionResp struct {
-	Transactions []*Transaction `json:"transactions"`
-	Income       int64          `json:"income"`
-	Expense      int64          `json:"expense"`
-	NetIncome    int64          `json:"net_income"`
+	DataList  []*Transaction `json:"data_list"`
+	Income    int64          `json:"income"`
+	Expense   int64          `json:"expense"`
+	NetIncome int64          `json:"net_income"`
 }
