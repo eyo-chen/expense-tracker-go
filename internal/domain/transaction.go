@@ -2,6 +2,7 @@ package domain
 
 import "time"
 
+// Transaction contains transaction information with main category and sub category
 type Transaction struct {
 	ID        string     `json:"id"`
 	UserID    int64      `json:"user_id"`
@@ -13,11 +14,13 @@ type Transaction struct {
 	Note      string     `json:"note"`
 }
 
+// GetQuery contains query for getting transactions
 type GetQuery struct {
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
 }
 
+// TransactionResp contains list of transactions and total income, expense, and net income
 type TransactionResp struct {
 	DataList  []*Transaction `json:"data_list"`
 	Income    int64          `json:"income"`
