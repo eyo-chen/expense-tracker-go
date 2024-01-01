@@ -45,26 +45,36 @@ func cvtToDomainTransactionResp(transactions []*Transaction) *domain.Transaction
 }
 
 func cvtToModelMainCateg(c *domain.MainCateg) *MainCateg {
+	var icon *Icon
+	if c.Icon != nil {
+		icon = &Icon{
+			ID:  c.Icon.ID,
+			URL: c.Icon.URL,
+		}
+	}
+
 	return &MainCateg{
 		ID:   c.ID,
 		Name: c.Name,
 		Type: cvtToModelType(c.Type),
-		Icon: &Icon{
-			ID:  c.Icon.ID,
-			URL: c.Icon.URL,
-		},
+		Icon: icon,
 	}
 }
 
 func cvtToDomainMainCateg(c *MainCateg) *domain.MainCateg {
+	var icon *domain.Icon
+	if c.Icon != nil {
+		icon = &domain.Icon{
+			ID:  c.Icon.ID,
+			URL: c.Icon.URL,
+		}
+	}
+
 	return &domain.MainCateg{
 		ID:   c.ID,
 		Name: c.Name,
 		Type: cvtToDomainType(c.Type),
-		Icon: &domain.Icon{
-			ID:  c.Icon.ID,
-			URL: c.Icon.URL,
-		},
+		Icon: icon,
 	}
 }
 
