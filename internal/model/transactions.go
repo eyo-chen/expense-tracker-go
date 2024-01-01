@@ -50,18 +50,11 @@ func (t *TransactionModel) Create(ctx context.Context, transaction *domain.Trans
 }
 
 func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, userID int64) (*domain.TransactionResp, error) {
-	startDate, endDate, err := parseDate(query.StartDate, query.EndDate)
+	filter, err := getFilter(query, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	filter := map[string]interface{}{
-		"user_id": userID,
-		"date": map[string]interface{}{
-			"$gte": primitive.NewDateTimeFromTime(*startDate),
-			"$lte": primitive.NewDateTimeFromTime(*endDate),
-		},
-	}
 	opts := options.Find().SetSort(bson.D{{Key: "updated_at", Value: 1}})
 
 	cursor, err := t.DB.Collection(CollectionTransactions).Find(ctx, filter, opts)
@@ -77,16 +70,47 @@ func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, u
 	return cvtToDomainTransactionResp(transactions), nil
 }
 
-func parseDate(startDate, endDate string) (*time.Time, *time.Time, error) {
-	parsedStartDate, err := time.Parse(time.DateOnly, startDate)
+func getFilter(query *domain.GetQuery, userID int64) (bson.M, error) {
+	dateFilter, err := getDateFilter(query)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	parsedEndDate, err := time.Parse(time.DateOnly, endDate)
-	if err != nil {
-		return nil, nil, err
+	filter := bson.M{
+		"user_id": userID,
+		"date":    dateFilter,
 	}
 
-	return &parsedStartDate, &parsedEndDate, nil
+	return filter, nil
+}
+
+func getDateFilter(query *domain.GetQuery) (bson.M, error) {
+	filter := bson.M{}
+
+	if query.StartDate != "" {
+		startDate, err := parseDateOnly(query.StartDate)
+		if err != nil {
+			return nil, err
+		}
+		filter["$gte"] = primitive.NewDateTimeFromTime(*startDate)
+	}
+
+	if query.EndDate != "" {
+		endDate, err := parseDateOnly(query.EndDate)
+		if err != nil {
+			return nil, err
+		}
+		filter["$lte"] = primitive.NewDateTimeFromTime(*endDate)
+	}
+
+	return filter, nil
+}
+
+func parseDateOnly(date string) (*time.Time, error) {
+	parsedDate, err := time.Parse(time.DateOnly, date)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsedDate, nil
 }
