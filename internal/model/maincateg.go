@@ -16,10 +16,10 @@ func newMainCategModel(db *sql.DB) *MainCategModel {
 }
 
 type MainCateg struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-	Icon *Icon  `json:"icon"`
+	ID   int64  `json:"id" bson:"id"`
+	Name string `json:"name" bson:"name"`
+	Type string `json:"type" bson:"type"`
+	Icon *Icon  `json:"icon" bson:"icon"`
 }
 
 func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
@@ -100,6 +100,28 @@ func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*do
 
 	var categ MainCateg
 	if err := m.DB.QueryRow(stmt, userID, inputCateg.Name, cvtToModelType(inputCateg.Type)).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrDataNotFound
+		}
+
+		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
+		return nil, err
+	}
+
+	return cvtToDomainMainCateg(&categ), nil
+}
+
+func (m *MainCategModel) GetFullInfoByID(id, userID int64) (*domain.MainCateg, error) {
+	stmt := `SELECT mc.id, mc.name, mc.type, i.id, i.url 
+					 FROM main_categories mc 
+					 INNER JOIN icons i 
+					 ON mc.icon_id = i.id 
+					 WHERE mc.id = ? AND mc.user_id = ?`
+
+	categ := MainCateg{
+		Icon: &Icon{},
+	}
+	if err := m.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.Type, &categ.Icon.ID, &categ.Icon.URL); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrDataNotFound
 		}

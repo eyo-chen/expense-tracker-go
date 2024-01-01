@@ -24,12 +24,12 @@ func newTransactionUC(t TransactionModel, m MainCategModel, s SubCategModel) *tr
 
 func (t *transactionUC) Create(ctx context.Context, user *domain.User, transaction *domain.Transaction) error {
 	// check if the main category exists
-	mainCateg, err := t.MainCateg.GetByID(transaction.MainCateg.ID, user.ID)
+	mainCateg, err := t.MainCateg.GetFullInfoByID(transaction.MainCateg.ID, user.ID)
 	if errors.Is(err, domain.ErrDataNotFound) {
 		return domain.ErrDataNotFound
 	}
 	if err != nil {
-		logger.Error("t.MainCateg.GetByID failed", "package", "usecase", "err", err)
+		logger.Error("t.MainCateg.GetFullInfoByID failed", "package", "usecase", "err", err)
 		return err
 	}
 
@@ -53,6 +53,8 @@ func (t *transactionUC) Create(ctx context.Context, user *domain.User, transacti
 		return domain.ErrDataNotFound
 	}
 
+	transaction.MainCateg = mainCateg
+	transaction.SubCateg = subCateg
 	if err := t.Transaction.Create(ctx, transaction); err != nil {
 		logger.Error("t.Transaction.Create failed", "package", "usecase", "err", err)
 		return err

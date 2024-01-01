@@ -2,6 +2,23 @@ package model
 
 import "github.com/OYE0303/expense-tracker-go/internal/domain"
 
+func cvtToDomainTransactionResp(transactions []*Transaction) *domain.TransactionResp {
+	var result domain.TransactionResp
+
+	for _, t := range transactions {
+		if t.Type == "1" {
+			result.Income += t.Price
+			result.NetIncome += t.Price
+		} else {
+			result.Expense += t.Price
+			result.NetIncome -= t.Price
+		}
+		result.Transactions = append(result.Transactions, cvtToDomainTransaction(t))
+	}
+
+	return &result
+}
+
 func cvtToDomainTransaction(t *Transaction) *domain.Transaction {
 	return &domain.Transaction{
 		ID:        t.ID.Hex(),
@@ -25,23 +42,6 @@ func cvtToModelTransaction(t *domain.Transaction) *Transaction {
 		Date:      t.Date,
 		Note:      t.Note,
 	}
-}
-
-func cvtToDomainTransactionResp(transactions []*Transaction) *domain.TransactionResp {
-	var result domain.TransactionResp
-
-	for _, t := range transactions {
-		if t.Type == "1" {
-			result.Income += t.Price
-			result.NetIncome += t.Price
-		} else {
-			result.Expense += t.Price
-			result.NetIncome -= t.Price
-		}
-		result.Transactions = append(result.Transactions, cvtToDomainTransaction(t))
-	}
-
-	return &result
 }
 
 func cvtToModelMainCateg(c *domain.MainCateg) *MainCateg {
