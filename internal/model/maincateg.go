@@ -16,16 +16,16 @@ func newMainCategModel(db *sql.DB) *MainCategModel {
 }
 
 type MainCateg struct {
-	ID     int64  `json:"id"`
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	IconID int64  `json:"icon_id"`
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+	Icon *Icon  `json:"icon"`
 }
 
 func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, cvtToModelType(categ.Type), userID, categ.IconID); err != nil {
+	if _, err := m.DB.Exec(stmt, categ.Name, cvtToModelType(categ.Type), userID, categ.Icon.ID); err != nil {
 		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
 		return err
 	}
@@ -46,7 +46,7 @@ func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
 	var categs []*domain.MainCateg
 	for rows.Next() {
 		var categ MainCateg
-		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.IconID); err != nil {
+		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.Icon.ID); err != nil {
 			logger.Error("rows.Scan failed", "package", "model", "err", err)
 			return nil, err
 		}
@@ -60,7 +60,7 @@ func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
 func (m *MainCategModel) Update(categ *domain.MainCateg) error {
 	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ? WHERE id = ?`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, cvtToModelType(categ.Type), categ.IconID, categ.ID); err != nil {
+	if _, err := m.DB.Exec(stmt, categ.Name, cvtToModelType(categ.Type), categ.Icon.ID, categ.ID); err != nil {
 		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
 		return err
 	}

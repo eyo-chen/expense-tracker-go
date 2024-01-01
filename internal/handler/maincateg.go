@@ -32,9 +32,11 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	categ := domain.MainCateg{
-		Name:   input.Name,
-		Type:   input.Type,
-		IconID: input.IconID,
+		Name: input.Name,
+		Type: input.Type,
+		Icon: &domain.Icon{
+			ID: input.IconID,
+		},
 	}
 
 	v := validator.New()
@@ -100,9 +102,11 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	categ := domain.MainCateg{
-		ID:     id,
-		Name:   input.Name,
-		IconID: input.IconID,
+		ID:   id,
+		Name: input.Name,
+		Icon: &domain.Icon{
+			ID: input.IconID,
+		},
 	}
 
 	v := validator.New()

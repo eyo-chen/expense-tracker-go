@@ -31,7 +31,7 @@ func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	}
 
 	// check if the icon exists
-	icon, err := m.Icon.GetByID(categ.IconID)
+	icon, err := m.Icon.GetByID(categ.Icon.ID)
 	if err != nil && !errors.Is(err, domain.ErrDataNotFound) {
 		logger.Error("m.Icon.GetByID failed", "package", "usecase", "err", err)
 		return err
@@ -80,7 +80,7 @@ func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 	}
 
 	// check if the icon exists
-	icon, err := m.Icon.GetByID(categ.IconID)
+	icon, err := m.Icon.GetByID(categ.Icon.ID)
 	if err != nil && !errors.Is(err, domain.ErrDataNotFound) {
 		logger.Error("m.Icon.GetByID failed", "package", "usecase", "err", err)
 		return err
