@@ -34,6 +34,9 @@ type MainCategModel interface {
 
 	// GetOne returns a main category by name, type and user id.
 	GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error)
+
+	// GetFullInfoByID returns a main category by id and user id with icon info.
+	GetFullInfoByID(id, userID int64) (*domain.MainCateg, error)
 }
 
 // SubCategModel is the interface that wraps the basic methods for sub category model.
@@ -70,4 +73,7 @@ type IconModel interface {
 type TransactionModel interface {
 	// Create inserts a new transaction into the database.
 	Create(ctx context.Context, transaction *domain.Transaction) error
+
+	// GetAll returns all transactions by user id and query.
+	GetAll(ctx context.Context, query *domain.GetQuery, userID int64) (*domain.TransactionResp, error)
 }

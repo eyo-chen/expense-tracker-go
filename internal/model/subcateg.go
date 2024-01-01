@@ -16,9 +16,9 @@ func newSubCategModel(db *sql.DB) *SubCategModel {
 }
 
 type SubCateg struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	MainCategID int64  `json:"main_category_id"`
+	ID          int64  `json:"id" bson:"id"`
+	Name        string `json:"name" bson:"name"`
+	MainCategID int64  `json:"main_category_id" bson:"main_category_id"`
 }
 
 func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
@@ -132,12 +132,4 @@ func (m *SubCategModel) GetOne(inputCateg *domain.SubCateg, userID int64) (*doma
 	}
 
 	return cvtToDomainSubCateg(&categ), nil
-}
-
-func cvtToDomainSubCateg(categ *SubCateg) *domain.SubCateg {
-	return &domain.SubCateg{
-		ID:          categ.ID,
-		Name:        categ.Name,
-		MainCategID: categ.MainCategID,
-	}
 }
