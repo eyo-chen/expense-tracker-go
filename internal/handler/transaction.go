@@ -27,7 +27,7 @@ func (t *transactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		MainCategID int64      `json:"main_category_id"`
 		SubCategID  int64      `json:"sub_category_id"`
-		Price       int64      `json:"price"`
+		Price       float64    `json:"price"`
 		Date        *time.Time `json:"date"`
 		Note        string     `json:"note"`
 	}

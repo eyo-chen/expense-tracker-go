@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -15,8 +14,6 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -39,19 +36,6 @@ func main() {
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}
-}
-
-func newMongoDB() (*mongo.Client, error) {
-	uri := os.Getenv("MONGODB_URI")
-	if uri == "" {
-		return nil, fmt.Errorf("MONGODB_URI is not set")
-	}
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
-	}
-
-	return client, nil
 }
 
 func newMysqlDB() (*sql.DB, error) {

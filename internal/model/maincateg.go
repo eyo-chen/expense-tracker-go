@@ -16,10 +16,10 @@ func newMainCategModel(db *sql.DB) *MainCategModel {
 }
 
 type MainCateg struct {
-	ID   int64  `json:"id" bson:"id"`
-	Name string `json:"name" bson:"name"`
-	Type string `json:"type" bson:"type"`
-	Icon *Icon  `json:"icon" bson:"icon"`
+	ID     int64  `json:"id"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	IconID int64  `json:"icon_id"`
 }
 
 func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
@@ -46,12 +46,12 @@ func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
 	var categs []*domain.MainCateg
 	for rows.Next() {
 		var categ MainCateg
-		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.Icon.ID); err != nil {
+		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.ID); err != nil {
 			logger.Error("rows.Scan failed", "package", "model", "err", err)
 			return nil, err
 		}
 
-		categs = append(categs, cvtToDomainMainCateg(&categ))
+		categs = append(categs, cvtToDomainMainCateg(&categ, nil))
 	}
 
 	return categs, nil
@@ -92,7 +92,7 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 		return nil, err
 	}
 
-	return cvtToDomainMainCateg(&categ), nil
+	return cvtToDomainMainCateg(&categ, nil), nil
 }
 
 func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error) {
@@ -108,27 +108,9 @@ func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*do
 		return nil, err
 	}
 
-	return cvtToDomainMainCateg(&categ), nil
+	return cvtToDomainMainCateg(&categ, nil), nil
 }
 
 func (m *MainCategModel) GetFullInfoByID(id, userID int64) (*domain.MainCateg, error) {
-	stmt := `SELECT mc.id, mc.name, mc.type, i.id, i.url 
-					 FROM main_categories mc 
-					 INNER JOIN icons i 
-					 ON mc.icon_id = i.id 
-					 WHERE mc.id = ? AND mc.user_id = ?`
-
-	categ := MainCateg{
-		Icon: &Icon{},
-	}
-	if err := m.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.Type, &categ.Icon.ID, &categ.Icon.URL); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, domain.ErrDataNotFound
-		}
-
-		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
-		return nil, err
-	}
-
-	return cvtToDomainMainCateg(&categ), nil
+	return nil, nil
 }
