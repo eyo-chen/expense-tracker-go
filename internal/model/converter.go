@@ -25,32 +25,12 @@ func cvtToModelTransaction(t *domain.Transaction) *Transaction {
 	}
 }
 
-func cvtToModelMainCateg(c *domain.MainCateg, i *domain.Icon) *MainCateg {
-	return &MainCateg{
-		ID:     c.ID,
-		Name:   c.Name,
-		Type:   cvtToModelType(c.Type),
-		IconID: i.ID,
-	}
-}
-
 func cvtToDomainMainCateg(c *MainCateg, i *Icon) *domain.MainCateg {
 	return &domain.MainCateg{
 		ID:   c.ID,
 		Name: c.Name,
 		Type: cvtToDomainType(c.Type),
 		Icon: cvtToDomainIcon(i),
-	}
-}
-
-func cvtToModelIcon(i *domain.Icon) *Icon {
-	if i == nil {
-		return nil
-	}
-
-	return &Icon{
-		ID:  i.ID,
-		URL: i.URL,
 	}
 }
 
@@ -62,14 +42,6 @@ func cvtToDomainIcon(i *Icon) *domain.Icon {
 	return &domain.Icon{
 		ID:  i.ID,
 		URL: i.URL,
-	}
-}
-
-func cvtToModelSubCateg(c *domain.SubCateg) *SubCateg {
-	return &SubCateg{
-		ID:          c.ID,
-		Name:        c.Name,
-		MainCategID: c.MainCategID,
 	}
 }
 
