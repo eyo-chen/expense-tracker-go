@@ -2,115 +2,128 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-)
-
-const (
-	CollectionTransactions = "transactions"
+	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
 type TransactionModel struct {
-	DB *mongo.Database
+	DB *sql.DB
 }
 
 type Transaction struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	UserID    int64              `bson:"user_id"`
-	Type      string             `bson:"type"`
-	MainCateg *MainCateg         `bson:"main_category"`
-	SubCateg  *SubCateg          `bson:"sub_category"`
-	Price     int64              `bson:"price"`
-	Date      *time.Time         `bson:"date"`
-	Note      string             `bson:"note,omitempty"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
+	ID          int64      `json:"id"`
+	UserID      int64      `json:"user_id"`
+	MainCategID int64      `json:"main_category_id"`
+	SubCategID  int64      `json:"sub_category_id"`
+	Price       float64    `json:"price"`
+	Note        string     `json:"note"`
+	Date        *time.Time `json:"date"`
 }
 
-func newTransactionModel(db *mongo.Database) *TransactionModel {
+func newTransactionModel(db *sql.DB) *TransactionModel {
 	return &TransactionModel{DB: db}
 }
 
 func (t *TransactionModel) Create(ctx context.Context, transaction *domain.Transaction) error {
-	curTime := time.Now()
 	trans := cvtToModelTransaction(transaction)
-	trans.CreatedAt = curTime
-	trans.UpdatedAt = curTime
+	qStmt := "INSERT INTO transactions (user_id, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?)"
 
-	_, err := t.DB.Collection(CollectionTransactions).InsertOne(ctx, trans)
-	if err != nil {
+	if _, err := t.DB.ExecContext(ctx, qStmt, trans.UserID, trans.MainCategID, trans.SubCategID, trans.Price, trans.Note, trans.Date); err != nil {
+		logger.Error("t.DB.ExecContext failed", "package", "model", "err", err)
 		return err
 	}
+
 	return nil
+
 }
 
 func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, userID int64) (*domain.TransactionResp, error) {
-	filter, err := getFilter(query, userID)
+	qStmt := getQStmt(query, userID)
+	args := getArgs(query, userID)
+
+	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {
+		logger.Error("t.DB.QueryContext failed", "package", "model", "err", err)
 		return nil, err
 	}
+	defer rows.Close()
 
-	opts := options.Find().SetSort(bson.D{{Key: "updated_at", Value: 1}})
+	var transactions []*domain.Transaction
+	var income, expense float64
+	for rows.Next() {
+		var trans Transaction
+		var mainCateg MainCateg
+		var subCateg SubCateg
+		var icon Icon
 
-	cursor, err := t.DB.Collection(CollectionTransactions).Find(ctx, filter, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	var transactions []*Transaction
-	if err := cursor.All(ctx, &transactions); err != nil {
-		return nil, err
-	}
-
-	return cvtToDomainTransactionResp(transactions), nil
-}
-
-func getFilter(query *domain.GetQuery, userID int64) (bson.M, error) {
-	dateFilter, err := getDateFilter(query)
-	if err != nil {
-		return nil, err
-	}
-
-	filter := bson.M{
-		"user_id": userID,
-		"date":    dateFilter,
-	}
-
-	return filter, nil
-}
-
-func getDateFilter(query *domain.GetQuery) (bson.M, error) {
-	filter := bson.M{}
-
-	if query.StartDate != "" {
-		startDate, err := parseDateOnly(query.StartDate)
-		if err != nil {
+		if err := rows.Scan(&trans.ID, &trans.UserID, &trans.Price, &trans.Note, &trans.Date, &mainCateg.ID, &mainCateg.Name, &mainCateg.Type, &subCateg.ID, &subCateg.Name, &icon.ID, &icon.URL); err != nil {
+			logger.Error("rows.Scan failed", "package", "model", "err", err)
 			return nil, err
 		}
-		filter["$gte"] = primitive.NewDateTimeFromTime(*startDate)
+
+		if mainCateg.Type == "1" {
+			income += trans.Price
+		} else {
+			expense += trans.Price
+		}
+
+		transactions = append(transactions, cvtToDomainTransaction(&trans, &mainCateg, &subCateg, &icon))
+	}
+
+	var result domain.TransactionResp
+	result.DataList = transactions
+	result.Income = income
+	result.Expense = expense
+	result.NetIncome = income - expense
+
+	return &result, nil
+}
+
+func getQStmt(query *domain.GetQuery, userID int64) string {
+	qStmt := `SELECT t.id, t.user_id, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
+						FROM transactions AS t
+						INNER JOIN main_categories AS mc 
+						ON t.main_category_id = mc.id
+						INNER JOIN sub_categories AS sc 
+						ON t.sub_category_id = sc.id
+						INNER JOIN icons AS i
+						ON mc.icon_id = i.id
+						WHERE t.user_id = ?`
+
+	if query.StartDate != "" && query.EndDate != "" {
+		qStmt += " AND date BETWEEN ? AND ?"
+	}
+
+	if query.StartDate != "" {
+		qStmt += " AND date >= ?"
 	}
 
 	if query.EndDate != "" {
-		endDate, err := parseDateOnly(query.EndDate)
-		if err != nil {
-			return nil, err
-		}
-		filter["$lte"] = primitive.NewDateTimeFromTime(*endDate)
+		qStmt += " AND date <= ?"
 	}
 
-	return filter, nil
+	return qStmt
 }
 
-func parseDateOnly(date string) (*time.Time, error) {
-	parsedDate, err := time.Parse(time.DateOnly, date)
-	if err != nil {
-		return nil, err
+func getArgs(query *domain.GetQuery, userID int64) []interface{} {
+	var args []interface{}
+
+	args = append(args, userID)
+
+	if query.StartDate != "" && query.EndDate != "" {
+		args = append(args, query.StartDate, query.EndDate)
 	}
 
-	return &parsedDate, nil
+	if query.StartDate != "" {
+		args = append(args, query.StartDate)
+	}
+
+	if query.EndDate != "" {
+		args = append(args, query.EndDate)
+	}
+
+	return args
 }

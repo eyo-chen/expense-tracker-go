@@ -25,10 +25,9 @@ func newTransactionHandler(t TransactionUC) *transactionHandler {
 
 func (t *transactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Type        string     `json:"type"`
 		MainCategID int64      `json:"main_category_id"`
 		SubCategID  int64      `json:"sub_category_id"`
-		Price       int64      `json:"price"`
+		Price       float64    `json:"price"`
 		Date        *time.Time `json:"date"`
 		Note        string     `json:"note"`
 	}
@@ -41,7 +40,6 @@ func (t *transactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	user := ctxutil.GetUser(r)
 	transaction := domain.Transaction{
 		UserID: user.ID,
-		Type:   input.Type,
 		MainCateg: &domain.MainCateg{
 			ID: input.MainCategID,
 		},
