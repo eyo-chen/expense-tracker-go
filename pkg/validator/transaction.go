@@ -8,7 +8,6 @@ import (
 
 // CreateMainCateg is a function that validates the input for creating main category.
 func (v *Validator) CreateTransaction(transaction *domain.Transaction) bool {
-	v.Check(transaction.Type == "income" || transaction.Type == "expense", "type", "Type must be income or expense")
 	v.Check(transaction.MainCateg.ID > 0, "main_category_id", "Main category ID must be greater than 0")
 	v.Check(transaction.SubCateg.ID > 0, "sub_category_id", "Sub category ID must be greater than 0")
 	v.Check(transaction.Price > 0, "price", "Price must be greater than 0")

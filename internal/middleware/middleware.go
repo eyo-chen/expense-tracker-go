@@ -44,7 +44,7 @@ func Authenticate(next http.Handler) http.Handler {
 		})
 		if err != nil {
 			logger.Error("jwt.Parse failed", "package", "middleware", "err", err)
-			errutil.AuthenticationErrorResponse(w, r, domain.ErrServer)
+			errutil.AuthenticationErrorResponse(w, r, err)
 			return
 		}
 

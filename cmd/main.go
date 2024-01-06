@@ -31,15 +31,9 @@ func main() {
 		logger.Fatal("Unable to connect to mysql database", "error", err)
 	}
 	defer mysqlDB.Close()
-	mongoClient, err := newMongoDB()
-	if err != nil {
-		logger.Fatal("Unable to connect to mongo database", "error", err)
-	}
-	defer mongoClient.Disconnect(context.Background())
-	mongoDB := mongoClient.Database(os.Getenv("MONGODB_DATABASE"))
 
 	// Setup model, usecase, and handler
-	model := model.New(mysqlDB, mongoDB)
+	model := model.New(mysqlDB)
 	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon, &model.Transaction)
 	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction)
 	if err := initServe(handler); err != nil {
