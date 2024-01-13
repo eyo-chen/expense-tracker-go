@@ -46,7 +46,7 @@ func (s *UserSuite) TestCreate() {
 		{
 			Desc:         "Create user successfully",
 			Name:         "test",
-			Email:        "TestCreate@gmail.com",
+			Email:        "TestCreate@gmail.co",
 			PasswordHash: "test",
 			CheckFun: func() error {
 				stmt := `SELECT id, name, email, password_hash FROM users WHERE email = ? AND name = ?`
