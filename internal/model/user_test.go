@@ -35,6 +35,16 @@ func (s *UserSuite) TearDownSuite() {
 	dockerutil.PurgeDocker()
 }
 
+func (s *UserSuite) SetupTest() {
+	s.model = newUserModel(s.db)
+}
+
+func (s *UserSuite) TearDownTest() {
+	if _, err := s.db.Exec("DELETE FROM users"); err != nil {
+		s.Require().NoError(err)
+	}
+}
+
 func (s *UserSuite) TestCreate() {
 	tests := []struct {
 		Desc         string
@@ -46,13 +56,13 @@ func (s *UserSuite) TestCreate() {
 		{
 			Desc:         "Create user successfully",
 			Name:         "test",
-			Email:        "TestCreate@gmail.com",
+			Email:        "test@gmail.com",
 			PasswordHash: "test",
 			CheckFun: func() error {
 				stmt := `SELECT id, name, email, password_hash FROM users WHERE email = ? AND name = ?`
 				var user User
 
-				return s.db.QueryRow(stmt, "TestCreate@gmail.com", "test").Scan(&user.ID, &user.Name, &user.Email, &user.Password_hash)
+				return s.db.QueryRow(stmt, "test@gmail.com", "test").Scan(&user.ID, &user.Name, &user.Email, &user.Password_hash)
 			},
 		},
 	}
@@ -60,11 +70,11 @@ func (s *UserSuite) TestCreate() {
 	for _, test := range tests {
 		s.T().Run(test.Desc, func(t *testing.T) {
 			err := s.model.Create(test.Name, test.Email, test.PasswordHash)
-			s.NoError(err, test.Desc)
+			s.Require().NoError(err, test.Desc)
 
 			if test.CheckFun != nil {
 				err = test.CheckFun()
-				s.NoError(err, test.Desc)
+				s.Require().NoError(err, test.Desc)
 			}
 		})
 	}
@@ -79,24 +89,28 @@ func (s *UserSuite) TestFindByEmail() {
 	}{
 		{
 			Desc:  "Find user successfully",
-			Email: "TestFindByEmail@gmail.com",
+			Email: "test@gmail.com",
 			SetupFun: func() error {
 				stmt := `INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)`
-				_, err := s.db.Exec(stmt, "test", "TestFindByEmail@gmail.com", "test")
+				_, err := s.db.Exec(stmt, "test", "test@gmail.com", "test")
 
 				return err
 			},
 			Expected: &domain.User{
-				ID:            1,
 				Name:          "test",
-				Email:         "TestFindByEmail@gmail.com",
+				Email:         "test@gmail.com",
 				Password_hash: "test",
 			},
 		},
 		{
-			Desc:     "User not found",
-			Email:    "",
-			SetupFun: nil,
+			Desc:  "User not found",
+			Email: "test222@",
+			SetupFun: func() error {
+				stmt := `INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)`
+				_, err := s.db.Exec(stmt, "test", "test222@gmail.com", "test")
+
+				return err
+			},
 			Expected: nil,
 		},
 	}
@@ -105,24 +119,24 @@ func (s *UserSuite) TestFindByEmail() {
 		s.T().Run(test.Desc, func(t *testing.T) {
 			if test.SetupFun != nil {
 				err := test.SetupFun()
-				s.NoError(err, test.Desc)
+				s.Require().NoError(err, test.Desc)
 			}
 
 			user, err := s.model.FindByEmail(test.Email)
-			s.NoError(err, test.Desc)
+			s.Require().NoError(err, test.Desc)
 
 			if test.Expected == nil {
-				s.Nil(user, test.Desc)
+				s.Require().Nil(user, test.Desc)
 				return
 			}
 
 			if test.Expected != nil && user == nil {
-				s.FailNow("Expected is not nil but user is nil", test.Desc)
+				s.Require().FailNow("Expected is not nil but user is nil", test.Desc)
 			}
 
-			s.Equal(test.Expected.Name, user.Name, test.Desc)
-			s.Equal(test.Expected.Email, user.Email, test.Desc)
-			s.Equal(test.Expected.Password_hash, user.Password_hash, test.Desc)
+			s.Require().Equal(test.Expected.Name, user.Name, test.Desc)
+			s.Require().Equal(test.Expected.Email, user.Email, test.Desc)
+			s.Require().Equal(test.Expected.Password_hash, user.Password_hash, test.Desc)
 		})
 	}
 }
