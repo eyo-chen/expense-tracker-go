@@ -31,9 +31,10 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	mainCategType := domain.CvtToMainCategType(input.Type)
 	categ := domain.MainCateg{
 		Name: input.Name,
-		Type: input.Type,
+		Type: mainCategType,
 		Icon: &domain.Icon{
 			ID: input.IconID,
 		},

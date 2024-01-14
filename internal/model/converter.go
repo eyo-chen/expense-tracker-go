@@ -29,7 +29,7 @@ func cvtToDomainMainCateg(c *MainCateg, i *Icon) *domain.MainCateg {
 	return &domain.MainCateg{
 		ID:   c.ID,
 		Name: c.Name,
-		Type: cvtToDomainType(c.Type),
+		Type: domain.CvtToMainCategType(c.Type),
 		Icon: cvtToDomainIcon(i),
 	}
 }
@@ -51,18 +51,4 @@ func cvtToDomainSubCateg(categ *SubCateg) *domain.SubCateg {
 		Name:        categ.Name,
 		MainCategID: categ.MainCategID,
 	}
-}
-
-func cvtToModelType(t string) string {
-	if t == "income" {
-		return "1"
-	}
-	return "2"
-}
-
-func cvtToDomainType(t string) string {
-	if t == "1" {
-		return "income"
-	}
-	return "expense"
 }
