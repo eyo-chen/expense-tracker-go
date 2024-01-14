@@ -31,9 +31,10 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	mainCategType := domain.CvtToMainCategType(input.Type)
 	categ := domain.MainCateg{
 		Name: input.Name,
-		Type: input.Type,
+		Type: mainCategType,
 		Icon: &domain.Icon{
 			ID: input.IconID,
 		},
@@ -73,8 +74,29 @@ func (m *mainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// TODO: refactor the following logic
+	type icon struct {
+		ID  int64  `json:"id"`
+		URL string `json:"url"`
+	}
+	type resp struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+		Type string `json:"type"`
+		Icon icon   `json:"icon"`
+	}
+
+	var respCategs []*resp
+	for _, categ := range categs {
+		respCategs = append(respCategs, &resp{
+			ID:   categ.ID,
+			Name: categ.Name,
+			Type: categ.Type.String(),
+		})
+	}
+
 	respData := map[string]interface{}{
-		"categories": categs,
+		"categories": respCategs,
 	}
 	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)

@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
@@ -25,7 +26,7 @@ type MainCateg struct {
 func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, cvtToModelType(categ.Type), userID, categ.Icon.ID); err != nil {
+	if _, err := m.DB.Exec(stmt, categ.Name, categ.Type.ModelValue(), userID, categ.Icon.ID); err != nil {
 		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
 		return err
 	}
@@ -46,10 +47,13 @@ func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
 	var categs []*domain.MainCateg
 	for rows.Next() {
 		var categ MainCateg
-		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.ID); err != nil {
+		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.IconID); err != nil {
 			logger.Error("rows.Scan failed", "package", "model", "err", err)
 			return nil, err
 		}
+
+		fmt.Println("categ: ", categ)
+		fmt.Println("categ.ID: ", categ.ID)
 
 		categs = append(categs, cvtToDomainMainCateg(&categ, nil))
 	}
@@ -60,7 +64,7 @@ func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
 func (m *MainCategModel) Update(categ *domain.MainCateg) error {
 	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ? WHERE id = ?`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, cvtToModelType(categ.Type), categ.Icon.ID, categ.ID); err != nil {
+	if _, err := m.DB.Exec(stmt, categ.Name, categ.Type.ModelValue(), categ.Icon.ID, categ.ID); err != nil {
 		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
 		return err
 	}
@@ -99,7 +103,7 @@ func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*do
 	stmt := `SELECT id, name, type FROM main_categories WHERE user_id = ? AND name = ? AND type = ?`
 
 	var categ MainCateg
-	if err := m.DB.QueryRow(stmt, userID, inputCateg.Name, cvtToModelType(inputCateg.Type)).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
+	if err := m.DB.QueryRow(stmt, userID, inputCateg.Name, inputCateg.Type.ModelValue()).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrDataNotFound
 		}
