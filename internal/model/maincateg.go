@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
@@ -46,10 +47,13 @@ func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
 	var categs []*domain.MainCateg
 	for rows.Next() {
 		var categ MainCateg
-		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.ID); err != nil {
+		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.IconID); err != nil {
 			logger.Error("rows.Scan failed", "package", "model", "err", err)
 			return nil, err
 		}
+
+		fmt.Println("categ: ", categ)
+		fmt.Println("categ.ID: ", categ.ID)
 
 		categs = append(categs, cvtToDomainMainCateg(&categ, nil))
 	}
