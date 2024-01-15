@@ -16,6 +16,7 @@ import (
 type UserSuite struct {
 	suite.Suite
 	db    *sql.DB
+	f     *factory
 	model usecase.UserModel
 }
 
@@ -27,6 +28,7 @@ func (s *UserSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
 	db := testutil.ConnToDB(port)
 	s.model = newUserModel(db)
+	s.f = newFactory(db)
 	s.db = db
 }
 
@@ -37,6 +39,7 @@ func (s *UserSuite) TearDownSuite() {
 
 func (s *UserSuite) SetupTest() {
 	s.model = newUserModel(s.db)
+	s.f = newFactory(s.db)
 }
 
 func (s *UserSuite) TearDownTest() {
@@ -91,9 +94,10 @@ func (s *UserSuite) TestFindByEmail() {
 			Desc:  "Find user successfully",
 			Email: "test@gmail.com",
 			SetupFun: func() error {
-				stmt := `INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)`
-				_, err := s.db.Exec(stmt, "test", "test@gmail.com", "test")
-
+				overwrites := map[string]any{
+					"Email": "test@gmail.com",
+				}
+				_, err := s.f.newUser(overwrites)
 				return err
 			},
 			Expected: &domain.User{
@@ -106,9 +110,10 @@ func (s *UserSuite) TestFindByEmail() {
 			Desc:  "User not found",
 			Email: "test222@",
 			SetupFun: func() error {
-				stmt := `INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)`
-				_, err := s.db.Exec(stmt, "test", "test222@gmail.com", "test")
-
+				overwrites := map[string]any{
+					"Email": "test2222@gmail.com",
+				}
+				_, err := s.f.newUser(overwrites)
 				return err
 			},
 			Expected: nil,
