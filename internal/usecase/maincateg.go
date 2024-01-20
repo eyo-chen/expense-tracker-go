@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"errors"
-
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
@@ -45,33 +43,13 @@ func (m *mainCategUC) GetAll(userID int64) ([]*domain.MainCateg, error) {
 
 func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 	// check if the main category exists
-	_, err := m.MainCateg.GetByID(categ.ID, userID)
-	if errors.Is(err, domain.ErrDataNotFound) {
-		return domain.ErrDataNotFound
-	}
-	if err != nil {
-		logger.Error("m.MainCateg.GetByID failed", "package", "usecase", "err", err)
+	if _, err := m.MainCateg.GetByID(categ.ID, userID); err != nil {
 		return err
-	}
-
-	// check if the main category name is already taken
-	categbyUserID, err := m.MainCateg.GetOne(categ, userID)
-	if err != nil && !errors.Is(err, domain.ErrDataNotFound) {
-		logger.Error("m.MainCateg.GetOne failed", "package", "usecase", "err", err)
-		return err
-	}
-	if categbyUserID != nil {
-		return domain.ErrDataAlreadyExists
 	}
 
 	// check if the icon exists
-	icon, err := m.Icon.GetByID(categ.Icon.ID)
-	if err != nil && !errors.Is(err, domain.ErrDataNotFound) {
-		logger.Error("m.Icon.GetByID failed", "package", "usecase", "err", err)
+	if _, err := m.Icon.GetByID(categ.Icon.ID); err != nil {
 		return err
-	}
-	if icon == nil {
-		return domain.ErrDataNotFound
 	}
 
 	if err := m.MainCateg.Update(categ); err != nil {

@@ -32,10 +32,9 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	mainCategType := domain.CvtToMainCategType(input.Type)
 	categ := domain.MainCateg{
 		Name: input.Name,
-		Type: mainCategType,
+		Type: domain.CvtToMainCategType(input.Type),
 		Icon: &domain.Icon{
 			ID: input.IconID,
 		},
@@ -120,6 +119,7 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 
 	var input struct {
 		Name   string `json:"name"`
+		Type   string `json:"type"`
 		IconID int64  `json:"icon_id"`
 	}
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
@@ -131,6 +131,7 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	categ := domain.MainCateg{
 		ID:   id,
 		Name: input.Name,
+		Type: domain.CvtToMainCategType(input.Type),
 		Icon: &domain.Icon{
 			ID: input.IconID,
 		},
@@ -144,12 +145,17 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 
 	user := ctxutil.GetUser(r)
 	if err := m.MainCateg.Update(&categ, user.ID); err != nil {
-		if err == domain.ErrDataAlreadyExists || err == domain.ErrDataNotFound {
+		errors := []error{
+			domain.ErrUniqueNameUserType,
+			domain.ErrUniqueIconUser,
+			domain.ErrMainCategNotFound,
+			domain.ErrIconNotFound,
+		}
+		if slices.Contains(errors, err) {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
 
-		logger.Error("m.MainCateg.Update failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}

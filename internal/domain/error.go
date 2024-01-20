@@ -11,6 +11,7 @@ var (
 	ErrInvalidMainCategType = errors.New("invalid main category type")
 
 	// main category
+	ErrMainCategNotFound  = errors.New("main category not found")
 	ErrUniqueIconUser     = errors.New("icon already used by another main category")
 	ErrUniqueNameUserType = errors.New("name already used by another main category with the same type")
 
