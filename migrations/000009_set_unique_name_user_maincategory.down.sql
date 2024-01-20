@@ -1,0 +1,2 @@
+ALTER TABLE sub_categories
+DROP INDEX unique_name_user_maincategory;
