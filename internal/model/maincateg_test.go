@@ -122,3 +122,30 @@ func (s *MainCategSuite) TestGetAll() {
 	s.Require().Equal(categ1.Name, categs[0].Name)
 	s.Require().Equal(categ1.Type, categs[0].Type.ModelValue())
 }
+
+func (s *MainCategSuite) TestUpdate() {
+	mainCateg, err := s.f.newMainCateg(nil)
+	s.Require().NoError(err)
+
+	domainMainCateg := &domain.MainCateg{
+		ID:   mainCateg.ID,
+		Name: "test2",
+		Type: domain.Income,
+		Icon: &domain.Icon{
+			ID: mainCateg.IconID,
+		},
+	}
+
+	err = s.mainCategModel.Update(domainMainCateg)
+	s.Require().NoError(err)
+
+	checkStmt := `SELECT id, name, type, icon_id
+							 FROM main_categories
+							 WHERE id = ?
+							 `
+	var result MainCateg
+	err = s.db.QueryRow(checkStmt, mainCateg.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	s.Require().NoError(err)
+	s.Require().Equal(domainMainCateg.Name, result.Name)
+	s.Require().Equal(domainMainCateg.Type.ModelValue(), result.Type)
+}
