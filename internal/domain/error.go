@@ -9,4 +9,11 @@ var (
 	ErrAuthToken            = errors.New("invalid auth token")
 	ErrServer               = errors.New("internal server error")
 	ErrInvalidMainCategType = errors.New("invalid main category type")
+
+	// main category
+	ErrUniqueIconUser     = errors.New("icon already used by another main category")
+	ErrUniqueNameUserType = errors.New("name already used by another main category with the same type")
+
+	// icon
+	ErrIconNotFound = errors.New("icon not found")
 )

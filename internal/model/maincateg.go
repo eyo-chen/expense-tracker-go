@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/pkg/errorutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
@@ -14,6 +15,11 @@ type MainCategModel struct {
 func newMainCategModel(db *sql.DB) *MainCategModel {
 	return &MainCategModel{DB: db}
 }
+
+const (
+	UniqueIconUser     = "main_categories.unique_icon_user"
+	UniqueNameUserType = "main_categories.unique_name_user_type"
+)
 
 type MainCateg struct {
 	ID     int64  `json:"id"`
@@ -26,6 +32,14 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
 	if _, err := m.DB.Exec(stmt, categ.Name, categ.Type.ModelValue(), userID, categ.Icon.ID); err != nil {
+		if errorutil.ParseError(err, UniqueNameUserType) {
+			return domain.ErrUniqueNameUserType
+		}
+
+		if errorutil.ParseError(err, UniqueIconUser) {
+			return domain.ErrUniqueIconUser
+		}
+
 		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
 		return err
 	}
