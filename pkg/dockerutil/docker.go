@@ -16,9 +16,6 @@ var (
 )
 
 func RunDocker() string {
-	mut.Lock()
-	defer mut.Unlock()
-
 	var db *sql.DB
 	var err error
 	pool, err = dockertest.NewPool("")
@@ -29,6 +26,9 @@ func RunDocker() string {
 	if err := pool.Client.Ping(); err != nil {
 		panic(fmt.Sprintf("pool.Client.Ping failed: %s", err))
 	}
+
+	mut.Lock()
+	defer mut.Unlock()
 
 	resource, err = pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "mysql",
