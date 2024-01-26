@@ -59,7 +59,7 @@ func (s *IconSuite) TestGetByID() {
 			Desc:        "Not found",
 			ID:          2,
 			Expected:    nil,
-			ExpectedErr: domain.ErrDataNotFound,
+			ExpectedErr: domain.ErrIconNotFound,
 		},
 	}
 

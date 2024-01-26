@@ -25,7 +25,7 @@ func (m *IconModel) GetByID(id int64) (*domain.Icon, error) {
 	var icon Icon
 	if err := m.DB.QueryRow(stmt, id).Scan(&icon.ID, &icon.URL); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, domain.ErrDataNotFound
+			return nil, domain.ErrIconNotFound
 		}
 
 		return nil, err

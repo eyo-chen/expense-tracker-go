@@ -45,7 +45,7 @@ func (s *subCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request)
 
 	user := ctxutil.GetUser(r)
 	if err := s.SubCateg.Create(&categ, user.ID); err != nil {
-		if err == domain.ErrDataAlreadyExists || err == domain.ErrDataNotFound {
+		if err == domain.ErrUniqueNameUserMainCateg {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
@@ -110,7 +110,8 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 
 	var input struct {
-		Name string `json:"name"`
+		Name        string `json:"name"`
+		MainCategID int64  `json:"main_category_id"`
 	}
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
@@ -119,8 +120,9 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 
 	categ := domain.SubCateg{
-		ID:   id,
-		Name: input.Name,
+		ID:          id,
+		Name:        input.Name,
+		MainCategID: input.MainCategID,
 	}
 
 	v := validator.New()
@@ -131,7 +133,7 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 
 	user := ctxutil.GetUser(r)
 	if err := s.SubCateg.Update(&categ, user.ID); err != nil {
-		if err == domain.ErrDataNotFound || err == domain.ErrDataAlreadyExists {
+		if err == domain.ErrUniqueNameUserMainCateg {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}

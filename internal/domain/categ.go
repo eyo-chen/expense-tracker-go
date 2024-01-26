@@ -19,7 +19,8 @@ type SubCateg struct {
 type MainCategType uint64
 
 const (
-	Income MainCategType = iota
+	UnSpecified MainCategType = iota
+	Income
 	Expense
 )
 
