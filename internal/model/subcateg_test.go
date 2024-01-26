@@ -128,3 +128,113 @@ func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string
 	err = s.subCategModel.Create(inputSubCateg, user.ID)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 }
+
+func (s *SubCategSuite) TestUpdate() {
+	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
+		"when no duplicate data, update successfully":                  updatesub_NoDuplicateData_UpdateSuccessfully,
+		"when there are multiple main categories, update successfully": updatesub_WithMultipleMainCateg_UpdateSuccessfully,
+		"when update to duplicate name, return error":                  updatesub_DuplicateName_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func updatesub_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
+	// prepare data
+	user, err := s.f.newUser()
+	s.Require().NoError(err, desc)
+	mainCateg, err := s.f.newMainCateg(user)
+	s.Require().NoError(err, desc)
+	subCateg, err := s.f.newSubCateg(user, mainCateg)
+	s.Require().NoError(err, desc)
+
+	// prepare input data
+	inputSubCateg := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        "updated test",
+		MainCategID: mainCateg.ID,
+	}
+
+	// action
+	err = s.subCategModel.Update(inputSubCateg)
+	s.Require().NoError(err, desc)
+
+	// check
+	var result domain.SubCateg
+	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
+	err = s.db.QueryRow(checkStmt, user.ID, mainCateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(inputSubCateg.Name, result.Name, desc)
+	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
+}
+
+func updatesub_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc string) {
+	// prepare existing data
+	// user
+	user1, err := s.f.newUser()
+	s.Require().NoError(err, desc)
+
+	// main category1
+	overwrite := map[string]interface{}{"Name": "test1"}
+	mainCateg, err := s.f.newMainCateg(user1, overwrite)
+	s.Require().NoError(err, desc)
+
+	// main category2
+	overwrite = map[string]interface{}{"Name": "test2"}
+	_, err = s.f.newMainCateg(user1, overwrite)
+	s.Require().NoError(err, desc)
+
+	// sub category
+	subCateg, err := s.f.newSubCateg(user1, mainCateg)
+	s.Require().NoError(err, desc)
+
+	// prepare input data
+	inputSubCateg := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        "updated test",
+		MainCategID: mainCateg.ID,
+	}
+
+	// action
+	err = s.subCategModel.Update(inputSubCateg)
+	s.Require().NoError(err, desc)
+
+	// check
+	var result domain.SubCateg
+	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
+	err = s.db.QueryRow(checkStmt, user1.ID, mainCateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(inputSubCateg.Name, result.Name, desc)
+	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
+}
+
+func updatesub_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
+	// prepare existing data
+	user, err := s.f.newUser()
+	s.Require().NoError(err, desc)
+	mainCateg, err := s.f.newMainCateg(user)
+	s.Require().NoError(err, desc)
+
+	overwrite := map[string]interface{}{"Name": "test1"}
+	subCateg1, err := s.f.newSubCateg(user, mainCateg, overwrite)
+	s.Require().NoError(err, desc)
+
+	overwrite = map[string]interface{}{"Name": "test2"}
+	subCateg2, err := s.f.newSubCateg(user, mainCateg, overwrite)
+	s.Require().NoError(err, desc)
+
+	// prepare input data
+	inputSubCateg := &domain.SubCateg{
+		ID:          subCateg1.ID,
+		Name:        subCateg2.Name,
+		MainCategID: mainCateg.ID,
+	}
+
+	// action and check
+	err = s.subCategModel.Update(inputSubCateg)
+	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+}
