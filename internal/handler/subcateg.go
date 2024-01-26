@@ -131,7 +131,7 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 
 	user := ctxutil.GetUser(r)
 	if err := s.SubCateg.Update(&categ, user.ID); err != nil {
-		if err == domain.ErrDataNotFound || err == domain.ErrDataAlreadyExists {
+		if err == domain.ErrUniqueNameUserMainCateg {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
