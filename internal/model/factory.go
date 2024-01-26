@@ -123,7 +123,8 @@ func (f *factory) newSubCateg(user *User, mainCateg *MainCateg, overwrites ...ma
 	}
 
 	categ := &SubCateg{
-		Name: "test",
+		Name:        "test",
+		MainCategID: mainCateg.ID,
 	}
 
 	for _, o := range overwrites {
