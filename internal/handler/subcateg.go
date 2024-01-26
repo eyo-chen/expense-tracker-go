@@ -110,7 +110,8 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 
 	var input struct {
-		Name string `json:"name"`
+		Name        string `json:"name"`
+		MainCategID int64  `json:"main_category_id"`
 	}
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
@@ -119,8 +120,9 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 
 	categ := domain.SubCateg{
-		ID:   id,
-		Name: input.Name,
+		ID:          id,
+		Name:        input.Name,
+		MainCategID: input.MainCategID,
 	}
 
 	v := validator.New()

@@ -24,5 +24,6 @@ func (v *Validator) CreateSubCateg(categ *domain.SubCateg) bool {
 
 func (v *Validator) UpdateSubCateg(categ *domain.SubCateg) bool {
 	v.Check(len(categ.Name) > 0, "name", "Name can't be empty")
+	v.Check(categ.MainCategID > 0, "main_category_id", "Main category ID must be greater than 0")
 	return v.Valid()
 }

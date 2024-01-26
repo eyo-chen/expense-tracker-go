@@ -52,8 +52,14 @@ func (s *subCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubC
 
 func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
 	// check if the sub category exists
-	if _, err := s.SubCateg.GetByID(categ.ID, userID); err != nil {
+	subCategByID, err := s.SubCateg.GetByID(categ.ID, userID)
+	if err != nil {
 		return err
+	}
+
+	// check if the input main category ID and the database main category ID are the same
+	if subCategByID.MainCategID != categ.MainCategID {
+		return domain.ErrMainCategNotFound
 	}
 
 	if err := s.SubCateg.Update(categ); err != nil {
