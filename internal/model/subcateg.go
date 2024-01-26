@@ -4,7 +4,12 @@ import (
 	"database/sql"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/pkg/errorutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+)
+
+const (
+	UniqueNameUserMainCategory = "sub_categories.unique_name_user_maincategory"
 )
 
 type SubCategModel struct {
@@ -25,6 +30,10 @@ func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES (?, ?, ?)`
 
 	if _, err := m.DB.Exec(stmt, categ.Name, userID, categ.MainCategID); err != nil {
+		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
+			return domain.ErrUniqueNameUserMainCateg
+		}
+
 		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
 		return err
 	}

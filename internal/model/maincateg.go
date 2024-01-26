@@ -8,6 +8,11 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
+const (
+	UniqueIconUser     = "main_categories.unique_icon_user"
+	UniqueNameUserType = "main_categories.unique_name_user_type"
+)
+
 type MainCategModel struct {
 	DB *sql.DB
 }
@@ -15,11 +20,6 @@ type MainCategModel struct {
 func newMainCategModel(db *sql.DB) *MainCategModel {
 	return &MainCategModel{DB: db}
 }
-
-const (
-	UniqueIconUser     = "main_categories.unique_icon_user"
-	UniqueNameUserType = "main_categories.unique_name_user_type"
-)
 
 type MainCateg struct {
 	ID     int64  `json:"id"`
