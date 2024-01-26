@@ -15,6 +15,10 @@ var (
 	ErrUniqueIconUser     = errors.New("icon already used by another main category")
 	ErrUniqueNameUserType = errors.New("name already used by another main category with the same type")
 
+	// sub category
+	ErrSubCategNotFound        = errors.New("sub category not found")
+	ErrUniqueNameUserMainCateg = errors.New("name already used by another sub category with the same main category")
+
 	// icon
 	ErrIconNotFound = errors.New("icon not found")
 )

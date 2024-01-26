@@ -67,9 +67,7 @@ func (s *MainCategSuite) TearDownTest() {
 		s.Require().NoError(err)
 	}
 
-	if err := tx.Commit(); err != nil {
-		s.Require().NoError(err)
-	}
+	s.Require().NoError(tx.Commit())
 }
 
 func (s *MainCategSuite) TestCreate() {

@@ -105,6 +105,46 @@ func (f *factory) newMainCateg(user *User, overwrites ...map[string]any) (*MainC
 	return categ, nil
 }
 
+func (f *factory) newSubCateg(user *User, mainCateg *MainCateg, overwrites ...map[string]any) (*SubCateg, error) {
+	if user == nil {
+		var err error
+		user, err = f.newUser()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if mainCateg == nil {
+		var err error
+		mainCateg, err = f.newMainCateg(user)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	categ := &SubCateg{
+		Name: "test",
+	}
+
+	for _, o := range overwrites {
+		merge(categ, o)
+	}
+
+	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES (?, ?, ?)`
+
+	res, err := f.db.Exec(stmt, categ.Name, user.ID, mainCateg.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	categ.ID, err = res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	return categ, nil
+}
+
 func merge(obj any, values map[string]any) {
 	st := reflect.ValueOf(obj).Elem()
 
