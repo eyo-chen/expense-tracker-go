@@ -137,9 +137,9 @@ func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string
 
 func (s *SubCategSuite) TestUpdate() {
 	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
-		"when no duplicate data, update successfully":                  updatesub_NoDuplicateData_UpdateSuccessfully,
-		"when there are multiple main categories, update successfully": updatesub_WithMultipleMainCateg_UpdateSuccessfully,
-		"when update to duplicate name, return error":                  updatesub_DuplicateName_ReturnError,
+		"when no duplicate data, update successfully":                  update_NoDuplicateData_UpdateSuccessfully,
+		"when there are multiple main categories, update successfully": update_WithMultipleMainCateg_UpdateSuccessfully,
+		"when update to duplicate name, return error":                  update_DuplicateName_ReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -149,7 +149,7 @@ func (s *SubCategSuite) TestUpdate() {
 	}
 }
 
-func updatesub_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
+func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare data
 	user, err := s.f.NewUser()
 	s.Require().NoError(err, desc)
@@ -178,7 +178,7 @@ func updatesub_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string)
 	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
 }
 
-func updatesub_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc string) {
+func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
 	// user
 	user1, err := s.f.NewUser()
@@ -218,7 +218,7 @@ func updatesub_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc s
 	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
 }
 
-func updatesub_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
+func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 	// prepare existing data
 	user, err := s.f.NewUser()
 	s.Require().NoError(err, desc)
