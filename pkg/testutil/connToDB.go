@@ -12,7 +12,7 @@ import (
 	_ "github.com/golang-migrate/migrate/source/file"
 )
 
-func ConnToDB(port string) *sql.DB {
+func ConnToDB(port string) (*sql.DB, *migrate.Migrate) {
 	db, err := sql.Open("mysql", fmt.Sprintf("root:root@(localhost:%s)/mysql?parseTime=true", port))
 	if err != nil {
 		log.Fatalf("sql.Open failed: %s", err)
@@ -37,5 +37,5 @@ func ConnToDB(port string) *sql.DB {
 		log.Fatalf("migration.Up failed: %s", err)
 	}
 
-	return db
+	return db, migration
 }

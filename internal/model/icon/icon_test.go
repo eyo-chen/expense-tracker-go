@@ -8,13 +8,15 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/usecase"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
 )
 
 type IconSuite struct {
 	suite.Suite
-	db    *sql.DB
-	model usecase.IconModel
+	db      *sql.DB
+	migrate *migrate.Migrate
+	model   usecase.IconModel
 }
 
 func TestIconSuite(t *testing.T) {
@@ -23,13 +25,15 @@ func TestIconSuite(t *testing.T) {
 
 func (s *IconSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
-	db := testutil.ConnToDB(port)
+	db, migrate := testutil.ConnToDB(port)
 	s.model = NewIconModel(db)
 	s.db = db
+	s.migrate = migrate
 }
 
 func (s *IconSuite) TearDownSuite() {
 	s.db.Close()
+	s.migrate.Close()
 	dockerutil.PurgeDocker()
 }
 

@@ -10,14 +10,16 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/usecase"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
 )
 
 type UserSuite struct {
 	suite.Suite
-	db    *sql.DB
-	f     *model.Factory
-	model usecase.UserModel
+	db      *sql.DB
+	migrate *migrate.Migrate
+	f       *model.Factory
+	model   usecase.UserModel
 }
 
 func TestUserSuite(t *testing.T) {
@@ -26,14 +28,16 @@ func TestUserSuite(t *testing.T) {
 
 func (s *UserSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
-	db := testutil.ConnToDB(port)
+	db, migrate := testutil.ConnToDB(port)
 	s.model = user.NewUserModel(db)
 	s.f = model.NewFactory(db)
 	s.db = db
+	s.migrate = migrate
 }
 
 func (s *UserSuite) TearDownSuite() {
 	s.db.Close()
+	s.migrate.Close()
 	dockerutil.PurgeDocker()
 }
 

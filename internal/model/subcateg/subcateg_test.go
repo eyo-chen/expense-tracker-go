@@ -11,12 +11,14 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
 )
 
 type SubCategSuite struct {
 	suite.Suite
 	db            *sql.DB
+	migrate       *migrate.Migrate
 	f             *model.Factory
 	subCategModel usecase.SubCategModel
 }
@@ -27,15 +29,17 @@ func TestSubCategSuite(t *testing.T) {
 
 func (s *SubCategSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
-	db := testutil.ConnToDB(port)
+	db, migrate := testutil.ConnToDB(port)
 	logger.Register()
 	s.db = db
 	s.subCategModel = subcateg.NewSubCategModel(db)
 	s.f = model.NewFactory(db)
+	s.migrate = migrate
 }
 
 func (s *SubCategSuite) TearDownSuite() {
 	s.db.Close()
+	s.migrate.Close()
 	dockerutil.PurgeDocker()
 }
 
