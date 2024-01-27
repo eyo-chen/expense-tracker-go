@@ -1,4 +1,4 @@
-package model
+package icon
 
 import (
 	"database/sql"
@@ -24,7 +24,7 @@ func TestIconSuite(t *testing.T) {
 func (s *IconSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
 	db := testutil.ConnToDB(port)
-	s.model = newIconModel(db)
+	s.model = NewIconModel(db)
 	s.db = db
 }
 

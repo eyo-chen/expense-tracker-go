@@ -1,4 +1,4 @@
-package model
+package subcateg
 
 import (
 	"database/sql"
@@ -16,7 +16,7 @@ type SubCategModel struct {
 	DB *sql.DB
 }
 
-func newSubCategModel(db *sql.DB) *SubCategModel {
+func NewSubCategModel(db *sql.DB) *SubCategModel {
 	return &SubCategModel{DB: db}
 }
 
