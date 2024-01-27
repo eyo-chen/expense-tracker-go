@@ -1,4 +1,4 @@
-package handler
+package transaction
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/handler/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
@@ -13,17 +14,17 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
-type transactionHandler struct {
-	transaction TransactionUC
+type TransactionHandler struct {
+	transaction interfaces.TransactionUC
 }
 
-func newTransactionHandler(t TransactionUC) *transactionHandler {
-	return &transactionHandler{
+func NewTransactionHandler(t interfaces.TransactionUC) *TransactionHandler {
+	return &TransactionHandler{
 		transaction: t,
 	}
 }
 
-func (t *transactionHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		MainCategID int64      `json:"main_category_id"`
 		SubCategID  int64      `json:"sub_category_id"`
@@ -76,7 +77,7 @@ func (t *transactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *transactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	startDate := r.URL.Query().Get("start_date")
 	endDate := r.URL.Query().Get("end_date")
 
