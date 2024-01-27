@@ -1,4 +1,4 @@
-package model
+package user
 
 import (
 	"database/sql"
@@ -11,7 +11,7 @@ type UserModel struct {
 	DB *sql.DB
 }
 
-func newUserModel(db *sql.DB) *UserModel {
+func NewUserModel(db *sql.DB) *UserModel {
 	return &UserModel{DB: db}
 }
 

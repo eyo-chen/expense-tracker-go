@@ -1,8 +1,13 @@
-package model
+package transaction
 
-import "github.com/OYE0303/expense-tracker-go/internal/domain"
+import (
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
+	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
+	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
+)
 
-func cvtToDomainTransaction(t *Transaction, m *MainCateg, s *SubCateg, i *Icon) *domain.Transaction {
+func cvtToDomainTransaction(t *Transaction, m *maincateg.MainCateg, s *subcateg.SubCateg, i *icon.Icon) *domain.Transaction {
 	return &domain.Transaction{
 		ID:        t.ID,
 		UserID:    t.UserID,
@@ -25,7 +30,7 @@ func cvtToModelTransaction(t *domain.Transaction) *Transaction {
 	}
 }
 
-func cvtToDomainMainCateg(c *MainCateg, i *Icon) *domain.MainCateg {
+func cvtToDomainMainCateg(c *maincateg.MainCateg, i *icon.Icon) *domain.MainCateg {
 	return &domain.MainCateg{
 		ID:   c.ID,
 		Name: c.Name,
@@ -34,7 +39,7 @@ func cvtToDomainMainCateg(c *MainCateg, i *Icon) *domain.MainCateg {
 	}
 }
 
-func cvtToDomainIcon(i *Icon) *domain.Icon {
+func cvtToDomainIcon(i *icon.Icon) *domain.Icon {
 	if i == nil {
 		return nil
 	}
@@ -45,7 +50,7 @@ func cvtToDomainIcon(i *Icon) *domain.Icon {
 	}
 }
 
-func cvtToDomainSubCateg(categ *SubCateg) *domain.SubCateg {
+func cvtToDomainSubCateg(categ *subcateg.SubCateg) *domain.SubCateg {
 	return &domain.SubCateg{
 		ID:          categ.ID,
 		Name:        categ.Name,

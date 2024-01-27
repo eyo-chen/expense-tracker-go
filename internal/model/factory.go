@@ -5,20 +5,24 @@ import (
 	"reflect"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
+	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
+	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
+	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 )
 
-type factory struct {
+type Factory struct {
 	db *sql.DB
 }
 
-func newFactory(db *sql.DB) *factory {
-	return &factory{db: db}
+func NewFactory(db *sql.DB) *Factory {
+	return &Factory{db: db}
 }
 
 // Field: ID, Name, Email, Password_hash
-func (f *factory) newUser(overwrites ...map[string]any) (*User, error) {
+func (f *Factory) NewUser(overwrites ...map[string]any) (*user.User, error) {
 	stmt := `INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)`
-	user := &User{
+	user := &user.User{
 		Name:          "test",
 		Email:         "test@gmail.com",
 		Password_hash: "test",
@@ -42,9 +46,9 @@ func (f *factory) newUser(overwrites ...map[string]any) (*User, error) {
 }
 
 // Field: ID, URL
-func (f *factory) newIcon(overwrites ...map[string]any) (*Icon, error) {
+func (f *Factory) NewIcon(overwrites ...map[string]any) (*icon.Icon, error) {
 	stmt := `INSERT INTO icons (url) VALUES (?)`
-	icon := &Icon{
+	icon := &icon.Icon{
 		URL: "https://test.com",
 	}
 
@@ -66,21 +70,21 @@ func (f *factory) newIcon(overwrites ...map[string]any) (*Icon, error) {
 }
 
 // Field: ID, Name, Type, IconID
-func (f *factory) newMainCateg(user *User, overwrites ...map[string]any) (*MainCateg, error) {
+func (f *Factory) NewMainCateg(user *user.User, overwrites ...map[string]any) (*maincateg.MainCateg, error) {
 	if user == nil {
 		var err error
-		user, err = f.newUser()
+		user, err = f.NewUser()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	icon, err := f.newIcon()
+	icon, err := f.NewIcon()
 	if err != nil {
 		return nil, err
 	}
 
-	categ := &MainCateg{
+	categ := &maincateg.MainCateg{
 		Name:   "test",
 		Type:   domain.Expense.ModelValue(),
 		IconID: icon.ID,
@@ -105,10 +109,10 @@ func (f *factory) newMainCateg(user *User, overwrites ...map[string]any) (*MainC
 	return categ, nil
 }
 
-func (f *factory) newSubCateg(user *User, mainCateg *MainCateg, overwrites ...map[string]any) (*SubCateg, error) {
+func (f *Factory) NewSubCateg(user *user.User, mainCateg *maincateg.MainCateg, overwrites ...map[string]any) (*subcateg.SubCateg, error) {
 	if user == nil {
 		var err error
-		user, err = f.newUser()
+		user, err = f.NewUser()
 		if err != nil {
 			return nil, err
 		}
@@ -116,13 +120,13 @@ func (f *factory) newSubCateg(user *User, mainCateg *MainCateg, overwrites ...ma
 
 	if mainCateg == nil {
 		var err error
-		mainCateg, err = f.newMainCateg(user)
+		mainCateg, err = f.NewMainCateg(user)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	categ := &SubCateg{
+	categ := &subcateg.SubCateg{
 		Name:        "test",
 		MainCategID: mainCateg.ID,
 	}

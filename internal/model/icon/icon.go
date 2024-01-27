@@ -1,4 +1,4 @@
-package model
+package icon
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ type IconModel struct {
 	DB *sql.DB
 }
 
-func newIconModel(db *sql.DB) *IconModel {
+func NewIconModel(db *sql.DB) *IconModel {
 	return &IconModel{DB: db}
 }
 
