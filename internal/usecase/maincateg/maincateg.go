@@ -1,23 +1,24 @@
-package usecase
+package maincateg
 
 import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
-type mainCategUC struct {
-	MainCateg MainCategModel
-	Icon      IconModel
+type MainCategUC struct {
+	MainCateg interfaces.MainCategModel
+	Icon      interfaces.IconModel
 }
 
-func newMainCategUC(m MainCategModel, i IconModel) *mainCategUC {
-	return &mainCategUC{
+func NewMainCategUC(m interfaces.MainCategModel, i interfaces.IconModel) *MainCategUC {
+	return &MainCategUC{
 		MainCateg: m,
 		Icon:      i,
 	}
 }
 
-func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
+func (m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	// check if the icon exists
 	_, err := m.Icon.GetByID(categ.Icon.ID)
 	if err != nil {
@@ -31,7 +32,7 @@ func (m *mainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *mainCategUC) GetAll(userID int64) ([]*domain.MainCateg, error) {
+func (m *MainCategUC) GetAll(userID int64) ([]*domain.MainCateg, error) {
 	categs, err := m.MainCateg.GetAll(userID)
 	if err != nil {
 		logger.Error("m.MainCateg.GetAll failed", "package", "usecase", "err", err)
@@ -41,7 +42,7 @@ func (m *mainCategUC) GetAll(userID int64) ([]*domain.MainCateg, error) {
 	return categs, nil
 }
 
-func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
+func (m *MainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 	// check if the main category exists
 	if _, err := m.MainCateg.GetByID(categ.ID, userID); err != nil {
 		return err
@@ -59,7 +60,7 @@ func (m *mainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *mainCategUC) Delete(id int64) error {
+func (m *MainCategUC) Delete(id int64) error {
 	if err := m.MainCateg.Delete(id); err != nil {
 		logger.Error("m.MainCateg.Delete failed", "package", "usecase", "err", err)
 		return err

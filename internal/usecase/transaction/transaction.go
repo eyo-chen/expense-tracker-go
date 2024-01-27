@@ -1,28 +1,29 @@
-package usecase
+package transaction
 
 import (
 	"context"
 	"errors"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
-type transactionUC struct {
-	Transaction TransactionModel
-	MainCateg   MainCategModel
-	SubCateg    SubCategModel
+type TransactionUC struct {
+	Transaction interfaces.TransactionModel
+	MainCateg   interfaces.MainCategModel
+	SubCateg    interfaces.SubCategModel
 }
 
-func newTransactionUC(t TransactionModel, m MainCategModel, s SubCategModel) *transactionUC {
-	return &transactionUC{
+func NewTransactionUC(t interfaces.TransactionModel, m interfaces.MainCategModel, s interfaces.SubCategModel) *TransactionUC {
+	return &TransactionUC{
 		Transaction: t,
 		MainCateg:   m,
 		SubCateg:    s,
 	}
 }
 
-func (t *transactionUC) Create(ctx context.Context, user *domain.User, transaction *domain.Transaction) error {
+func (t *TransactionUC) Create(ctx context.Context, user *domain.User, transaction *domain.Transaction) error {
 	// check if the main category exists
 	_, err := t.MainCateg.GetByID(transaction.MainCateg.ID, user.ID)
 	if errors.Is(err, domain.ErrDataNotFound) {
@@ -56,7 +57,7 @@ func (t *transactionUC) Create(ctx context.Context, user *domain.User, transacti
 	return nil
 }
 
-func (t *transactionUC) GetAll(ctx context.Context, query *domain.GetQuery, user *domain.User) (*domain.TransactionResp, error) {
+func (t *TransactionUC) GetAll(ctx context.Context, query *domain.GetQuery, user *domain.User) (*domain.TransactionResp, error) {
 	transactions, err := t.Transaction.GetAll(ctx, query, user.ID)
 	if err != nil {
 		logger.Error("t.Transaction.GetAll failed", "package", "usecase", "err", err)

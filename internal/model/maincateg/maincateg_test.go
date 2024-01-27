@@ -9,7 +9,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
 	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
@@ -22,9 +22,9 @@ type MainCategSuite struct {
 	db             *sql.DB
 	migrate        *migrate.Migrate
 	f              *model.Factory
-	mainCategModel usecase.MainCategModel
-	userModel      usecase.UserModel
-	iconModel      usecase.IconModel
+	mainCategModel interfaces.MainCategModel
+	userModel      interfaces.UserModel
+	iconModel      interfaces.IconModel
 }
 
 func TestMainCategSuite(t *testing.T) {

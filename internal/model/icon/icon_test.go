@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/golang-migrate/migrate"
@@ -16,7 +16,7 @@ type IconSuite struct {
 	suite.Suite
 	db      *sql.DB
 	migrate *migrate.Migrate
-	model   usecase.IconModel
+	model   interfaces.IconModel
 }
 
 func TestIconSuite(t *testing.T) {
