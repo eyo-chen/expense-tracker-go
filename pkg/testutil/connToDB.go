@@ -6,8 +6,10 @@ import (
 	"log"
 	"path/filepath"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
+	_ "github.com/golang-migrate/migrate/source/file"
 )
 
 func ConnToDB(port string) *sql.DB {
@@ -21,7 +23,7 @@ func ConnToDB(port string) *sql.DB {
 		log.Fatalf("mysql.WithInstance failed: %s", err)
 	}
 
-	baseDir := filepath.Join("..", "..")
+	baseDir := filepath.Join("..", "..", "..")
 	migrationDir := fmt.Sprintf("file://%s/migrations/", baseDir)
 	migration, err := migrate.NewWithDatabaseInstance(
 		migrationDir,

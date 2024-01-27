@@ -1,22 +1,22 @@
-package model
+package user_test
 
 import (
 	"database/sql"
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/model"
+	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/stretchr/testify/suite"
 )
 
 type UserSuite struct {
 	suite.Suite
 	db    *sql.DB
-	f     *factory
+	f     *model.Factory
 	model usecase.UserModel
 }
 
@@ -27,8 +27,8 @@ func TestUserSuite(t *testing.T) {
 func (s *UserSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
 	db := testutil.ConnToDB(port)
-	s.model = newUserModel(db)
-	s.f = newFactory(db)
+	s.model = user.NewUserModel(db)
+	s.f = model.NewFactory(db)
 	s.db = db
 }
 
@@ -38,8 +38,8 @@ func (s *UserSuite) TearDownSuite() {
 }
 
 func (s *UserSuite) SetupTest() {
-	s.model = newUserModel(s.db)
-	s.f = newFactory(s.db)
+	s.model = user.NewUserModel(s.db)
+	s.f = model.NewFactory(s.db)
 }
 
 func (s *UserSuite) TearDownTest() {
@@ -63,7 +63,7 @@ func (s *UserSuite) TestCreate() {
 			PasswordHash: "test",
 			CheckFun: func() error {
 				stmt := `SELECT id, name, email, password_hash FROM users WHERE email = ? AND name = ?`
-				var user User
+				var user user.User
 
 				return s.db.QueryRow(stmt, "test@gmail.com", "test").Scan(&user.ID, &user.Name, &user.Email, &user.Password_hash)
 			},
@@ -97,7 +97,7 @@ func (s *UserSuite) TestFindByEmail() {
 				overwrites := map[string]any{
 					"Email": "test@gmail.com",
 				}
-				_, err := s.f.newUser(overwrites)
+				_, err := s.f.NewUser(overwrites)
 				return err
 			},
 			Expected: &domain.User{
@@ -113,7 +113,7 @@ func (s *UserSuite) TestFindByEmail() {
 				overwrites := map[string]any{
 					"Email": "test2222@gmail.com",
 				}
-				_, err := s.f.newUser(overwrites)
+				_, err := s.f.NewUser(overwrites)
 				return err
 			},
 			Expected: nil,

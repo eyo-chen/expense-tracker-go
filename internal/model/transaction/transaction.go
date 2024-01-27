@@ -1,4 +1,4 @@
-package model
+package transaction
 
 import (
 	"context"
@@ -6,6 +6,9 @@ import (
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
+	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
+	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
@@ -23,7 +26,7 @@ type Transaction struct {
 	Date        *time.Time `json:"date"`
 }
 
-func newTransactionModel(db *sql.DB) *TransactionModel {
+func NewTransactionModel(db *sql.DB) *TransactionModel {
 	return &TransactionModel{DB: db}
 }
 
@@ -55,9 +58,9 @@ func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, u
 	var income, expense float64
 	for rows.Next() {
 		var trans Transaction
-		var mainCateg MainCateg
-		var subCateg SubCateg
-		var icon Icon
+		var mainCateg maincateg.MainCateg
+		var subCateg subcateg.SubCateg
+		var icon icon.Icon
 
 		if err := rows.Scan(&trans.ID, &trans.UserID, &trans.Price, &trans.Note, &trans.Date, &mainCateg.ID, &mainCateg.Name, &mainCateg.Type, &subCateg.ID, &subCateg.Name, &icon.ID, &icon.URL); err != nil {
 			logger.Error("rows.Scan failed", "package", "model", "err", err)

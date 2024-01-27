@@ -1,4 +1,4 @@
-package model
+package maincateg
 
 import (
 	"database/sql"
@@ -17,7 +17,7 @@ type MainCategModel struct {
 	DB *sql.DB
 }
 
-func newMainCategModel(db *sql.DB) *MainCategModel {
+func NewMainCategModel(db *sql.DB) *MainCategModel {
 	return &MainCategModel{DB: db}
 }
 
