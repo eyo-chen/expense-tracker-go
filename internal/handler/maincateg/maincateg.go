@@ -1,10 +1,11 @@
-package handler
+package maincateg
 
 import (
 	"net/http"
 	"slices"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/handler/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
@@ -12,15 +13,15 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
-type mainCategHandler struct {
-	MainCateg MainCategUC
+type MainCategHandler struct {
+	MainCateg interfaces.MainCategUC
 }
 
-func newMainCategHandler(m MainCategUC) *mainCategHandler {
-	return &mainCategHandler{MainCateg: m}
+func NewMainCategHandler(m interfaces.MainCategUC) *MainCategHandler {
+	return &MainCategHandler{MainCateg: m}
 }
 
-func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
+func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name   string `json:"name"`
 		Type   string `json:"type"`
@@ -69,7 +70,7 @@ func (m *mainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (m *mainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
+func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
 	user := ctxutil.GetUser(r)
 	categs, err := m.MainCateg.GetAll(user.ID)
 	if err != nil {
@@ -109,7 +110,7 @@ func (m *mainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
+func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -167,7 +168,7 @@ func (m *mainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (m *mainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
+func (m *MainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)

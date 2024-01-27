@@ -1,24 +1,25 @@
-package handler
+package user
 
 import (
 	"net/http"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/handler/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
-type userHandler struct {
-	User UserUC
+type UserHandler struct {
+	User interfaces.UserUC
 }
 
-func newUserHandler(user UserUC) *userHandler {
-	return &userHandler{User: user}
+func NewUserHandler(user interfaces.UserUC) *UserHandler {
+	return &UserHandler{User: user}
 }
 
-func (u userHandler) Signup(w http.ResponseWriter, r *http.Request) {
+func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
@@ -59,7 +60,7 @@ func (u userHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u userHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`

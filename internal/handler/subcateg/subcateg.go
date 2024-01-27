@@ -1,9 +1,10 @@
-package handler
+package subcateg
 
 import (
 	"net/http"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/handler/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
@@ -11,17 +12,17 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
-type subCategHandler struct {
-	SubCateg SubCategUC
+type SubCategHandler struct {
+	SubCateg interfaces.SubCategUC
 }
 
-func newSubCategHandler(s SubCategUC) *subCategHandler {
-	return &subCategHandler{
+func NewSubCategHandler(s interfaces.SubCategUC) *SubCategHandler {
+	return &SubCategHandler{
 		SubCateg: s,
 	}
 }
 
-func (s *subCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request) {
+func (s *SubCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name        string `json:"name"`
 		MainCategID int64  `json:"main_category_id"`
@@ -56,7 +57,7 @@ func (s *subCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (s *subCategHandler) GetAllSubCateg(w http.ResponseWriter, r *http.Request) {
+func (s *SubCategHandler) GetAllSubCateg(w http.ResponseWriter, r *http.Request) {
 	user := ctxutil.GetUser(r)
 	categs, err := s.SubCateg.GetAll(user.ID)
 	if err != nil {
@@ -75,7 +76,7 @@ func (s *subCategHandler) GetAllSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (s *subCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Request) {
+func (s *SubCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -101,7 +102,7 @@ func (s *subCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
+func (s *SubCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -144,7 +145,7 @@ func (s *subCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (s *subCategHandler) DeleteSubCateg(w http.ResponseWriter, r *http.Request) {
+func (s *SubCategHandler) DeleteSubCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
