@@ -1,23 +1,24 @@
-package usecase
+package subcateg
 
 import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
-type subCategUC struct {
-	SubCateg  SubCategModel
-	MainCateg MainCategModel
+type SubCategUC struct {
+	SubCateg  interfaces.SubCategModel
+	MainCateg interfaces.MainCategModel
 }
 
-func newSubCategUC(s SubCategModel, m MainCategModel) *subCategUC {
-	return &subCategUC{
+func NewSubCategUC(s interfaces.SubCategModel, m interfaces.MainCategModel) *SubCategUC {
+	return &SubCategUC{
 		SubCateg:  s,
 		MainCateg: m,
 	}
 }
 
-func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
+func (s *SubCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	// check if the main category exists
 	if _, err := s.MainCateg.GetByID(categ.MainCategID, userID); err != nil {
 		return err
@@ -30,7 +31,7 @@ func (s *subCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	return nil
 }
 
-func (s *subCategUC) GetAll(userID int64) ([]*domain.SubCateg, error) {
+func (s *SubCategUC) GetAll(userID int64) ([]*domain.SubCateg, error) {
 	categs, err := s.SubCateg.GetAll(userID)
 	if err != nil {
 		logger.Error("s.SubCateg.GetAll failed", "package", "usecase", "err", err)
@@ -40,7 +41,7 @@ func (s *subCategUC) GetAll(userID int64) ([]*domain.SubCateg, error) {
 	return categs, nil
 }
 
-func (s *subCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
+func (s *SubCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
 	categs, err := s.SubCateg.GetByMainCategID(userID, mainCategID)
 	if err != nil {
 		logger.Error("s.SubCateg.GetByMainCategID failed", "package", "usecase", "err", err)
@@ -50,7 +51,7 @@ func (s *subCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubC
 	return categs, nil
 }
 
-func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
+func (s *SubCategUC) Update(categ *domain.SubCateg, userID int64) error {
 	// check if the sub category exists
 	subCategByID, err := s.SubCateg.GetByID(categ.ID, userID)
 	if err != nil {
@@ -69,7 +70,7 @@ func (s *subCategUC) Update(categ *domain.SubCateg, userID int64) error {
 	return nil
 }
 
-func (s *subCategUC) Delete(id int64) error {
+func (s *SubCategUC) Delete(id int64) error {
 	if err := s.SubCateg.Delete(id); err != nil {
 		logger.Error("s.SubCateg.Delete failed", "package", "usecase", "err", err)
 		return err

@@ -7,7 +7,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model"
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/golang-migrate/migrate"
@@ -19,7 +19,7 @@ type UserSuite struct {
 	db      *sql.DB
 	migrate *migrate.Migrate
 	f       *model.Factory
-	model   usecase.UserModel
+	model   interfaces.UserModel
 }
 
 func TestUserSuite(t *testing.T) {

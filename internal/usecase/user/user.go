@@ -1,21 +1,22 @@
-package usecase
+package user
 
 import (
 	"os"
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/auth"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type userUC struct {
-	User UserModel
+type UserUC struct {
+	User interfaces.UserModel
 }
 
-func newUserUC(u UserModel) *userUC {
-	return &userUC{User: u}
+func NewUserUC(u interfaces.UserModel) *UserUC {
+	return &UserUC{User: u}
 }
 
 type Claims struct {
@@ -25,7 +26,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (u *userUC) Signup(user *domain.User) error {
+func (u *UserUC) Signup(user *domain.User) error {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
 		logger.Error("u.User.FindByEmail failed", "package", "usecase", "err", err)
@@ -50,7 +51,7 @@ func (u *userUC) Signup(user *domain.User) error {
 	return nil
 }
 
-func (u *userUC) Login(user *domain.User) (string, error) {
+func (u *UserUC) Login(user *domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
 		logger.Error("u.User.FindByEmail failed", "package", "usecase", "err", err)
