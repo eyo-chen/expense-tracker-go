@@ -21,15 +21,17 @@ func NewSubCategModel(db *sql.DB) *SubCategModel {
 }
 
 type SubCateg struct {
-	ID          int64  `json:"id" bson:"id"`
-	Name        string `json:"name" bson:"name"`
-	MainCategID int64  `json:"main_category_id" bson:"main_category_id"`
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	UserID      int64  `json:"user_id"`
+	MainCategID int64  `json:"main_category_id"`
 }
 
 func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES (?, ?, ?)`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, userID, categ.MainCategID); err != nil {
+	c := cvtToSubCateg(categ, userID)
+	if _, err := m.DB.Exec(stmt, c.Name, c.UserID, c.MainCategID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
@@ -92,7 +94,8 @@ func (m *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.S
 func (m *SubCategModel) Update(categ *domain.SubCateg) error {
 	stmt := `UPDATE sub_categories SET name = ? WHERE id = ?`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, categ.ID); err != nil {
+	c := cvtToSubCateg(categ, 0)
+	if _, err := m.DB.Exec(stmt, c.Name, c.ID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
