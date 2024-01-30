@@ -21,15 +21,17 @@ func NewSubCategModel(db *sql.DB) *SubCategModel {
 }
 
 type SubCateg struct {
-	ID          int64  `json:"id" bson:"id"`
-	Name        string `json:"name" bson:"name"`
-	MainCategID int64  `json:"main_category_id" bson:"main_category_id"`
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	UserID      int64  `json:"user_id"`
+	MainCategID int64  `json:"main_category_id"`
 }
 
 func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES (?, ?, ?)`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, userID, categ.MainCategID); err != nil {
+	c := cvtToSubCateg(categ, userID)
+	if _, err := m.DB.Exec(stmt, c.Name, c.UserID, c.MainCategID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
@@ -92,7 +94,8 @@ func (m *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.S
 func (m *SubCategModel) Update(categ *domain.SubCateg) error {
 	stmt := `UPDATE sub_categories SET name = ? WHERE id = ?`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, categ.ID); err != nil {
+	c := cvtToSubCateg(categ, 0)
+	if _, err := m.DB.Exec(stmt, c.Name, c.ID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
@@ -122,22 +125,6 @@ func (m *SubCategModel) GetByID(id, userID int64) (*domain.SubCateg, error) {
 	if err := m.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrSubCategNotFound
-		}
-
-		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
-		return nil, err
-	}
-
-	return cvtToDomainSubCateg(&categ), nil
-}
-
-func (m *SubCategModel) GetOne(inputCateg *domain.SubCateg, userID int64) (*domain.SubCateg, error) {
-	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND name = ? AND main_category_id = ?`
-
-	var categ SubCateg
-	if err := m.DB.QueryRow(stmt, userID, inputCateg.Name, inputCateg.MainCategID).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, domain.ErrDataNotFound
 		}
 
 		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)

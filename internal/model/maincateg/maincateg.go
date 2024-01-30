@@ -26,12 +26,14 @@ type MainCateg struct {
 	Name   string `json:"name"`
 	Type   string `json:"type"`
 	IconID int64  `json:"icon_id"`
+	UserID int64  `json:"user_id"`
 }
 
 func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, categ.Type.ModelValue(), userID, categ.Icon.ID); err != nil {
+	c := cvtToMainCateg(categ, userID)
+	if _, err := m.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -74,7 +76,8 @@ func (m *MainCategModel) GetAll(userID int64) ([]*domain.MainCateg, error) {
 func (m *MainCategModel) Update(categ *domain.MainCateg) error {
 	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ? WHERE id = ?`
 
-	if _, err := m.DB.Exec(stmt, categ.Name, categ.Type.ModelValue(), categ.Icon.ID, categ.ID); err != nil {
+	c := cvtToMainCateg(categ, 0)
+	if _, err := m.DB.Exec(stmt, c.Name, c.Type, c.IconID, c.ID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -115,24 +118,4 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 	}
 
 	return cvtToDomainMainCateg(&categ, nil), nil
-}
-
-func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error) {
-	stmt := `SELECT id, name, type FROM main_categories WHERE user_id = ? AND name = ? AND type = ?`
-
-	var categ MainCateg
-	if err := m.DB.QueryRow(stmt, userID, inputCateg.Name, inputCateg.Type.ModelValue()).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, domain.ErrDataNotFound
-		}
-
-		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
-		return nil, err
-	}
-
-	return cvtToDomainMainCateg(&categ, nil), nil
-}
-
-func (m *MainCategModel) GetFullInfoByID(id, userID int64) (*domain.MainCateg, error) {
-	return nil, nil
 }

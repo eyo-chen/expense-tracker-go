@@ -24,3 +24,13 @@ func cvtToDomainIcon(i *icon.Icon) *domain.Icon {
 		URL: i.URL,
 	}
 }
+
+func cvtToMainCateg(c *domain.MainCateg, userID int64) *MainCateg {
+	return &MainCateg{
+		ID:     c.ID,
+		Name:   c.Name,
+		Type:   c.Type.ModelValue(),
+		IconID: c.Icon.ID,
+		UserID: userID,
+	}
+}
