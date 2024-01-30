@@ -119,25 +119,3 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 
 	return cvtToDomainMainCateg(&categ, nil), nil
 }
-
-func (m *MainCategModel) GetOne(inputCateg *domain.MainCateg, userID int64) (*domain.MainCateg, error) {
-	stmt := `SELECT id, name, type FROM main_categories WHERE user_id = ? AND name = ? AND type = ?`
-
-	c := cvtToMainCateg(inputCateg, userID)
-
-	var categ MainCateg
-	if err := m.DB.QueryRow(stmt, c.UserID, c.Name, c.Type).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, domain.ErrDataNotFound
-		}
-
-		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
-		return nil, err
-	}
-
-	return cvtToDomainMainCateg(&categ, nil), nil
-}
-
-func (m *MainCategModel) GetFullInfoByID(id, userID int64) (*domain.MainCateg, error) {
-	return nil, nil
-}
