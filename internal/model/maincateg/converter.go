@@ -25,17 +25,6 @@ func cvtToDomainMainCateg(c *MainCateg, i *icon.Icon) *domain.MainCateg {
 	}
 }
 
-func cvtToDomainIcon(i *icon.Icon) *domain.Icon {
-	if i == nil {
-		return nil
-	}
-
-	return &domain.Icon{
-		ID:  i.ID,
-		URL: i.URL,
-	}
-}
-
 func cvtToMainCateg(c *domain.MainCateg, userID int64) *MainCateg {
 	return &MainCateg{
 		ID:     c.ID,

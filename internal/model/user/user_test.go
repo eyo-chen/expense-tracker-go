@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model"
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
@@ -18,7 +17,7 @@ type UserSuite struct {
 	suite.Suite
 	db      *sql.DB
 	migrate *migrate.Migrate
-	f       *model.Factory
+	f       *testutil.Factory[user.User]
 	model   interfaces.UserModel
 }
 
@@ -30,7 +29,7 @@ func (s *UserSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
 	db, migrate := testutil.ConnToDB(port)
 	s.model = user.NewUserModel(db)
-	s.f = model.NewFactory(db)
+	s.f = testutil.NewFactory(db, user.User{}, user.BluePrintUser, user.InserterUser)
 	s.db = db
 	s.migrate = migrate
 }
@@ -43,13 +42,14 @@ func (s *UserSuite) TearDownSuite() {
 
 func (s *UserSuite) SetupTest() {
 	s.model = user.NewUserModel(s.db)
-	s.f = model.NewFactory(s.db)
 }
 
 func (s *UserSuite) TearDownTest() {
 	if _, err := s.db.Exec("DELETE FROM users"); err != nil {
 		s.Require().NoError(err)
 	}
+
+	s.f.Reset()
 }
 
 func (s *UserSuite) TestCreate() {
@@ -98,10 +98,8 @@ func (s *UserSuite) TestFindByEmail() {
 			Desc:  "Find user successfully",
 			Email: "test@gmail.com",
 			SetupFun: func() error {
-				overwrites := map[string]any{
-					"Email": "test@gmail.com",
-				}
-				_, err := s.f.NewUser(overwrites)
+				ow := &user.User{Name: "test", Email: "test@gmail.com", Password_hash: "test"}
+				_, err := s.f.Build().Overwrite(ow).Insert()
 				return err
 			},
 			Expected: &domain.User{
@@ -114,10 +112,7 @@ func (s *UserSuite) TestFindByEmail() {
 			Desc:  "User not found",
 			Email: "test222@",
 			SetupFun: func() error {
-				overwrites := map[string]any{
-					"Email": "test2222@gmail.com",
-				}
-				_, err := s.f.NewUser(overwrites)
+				_, err := s.f.Build().Insert()
 				return err
 			},
 			Expected: nil,
