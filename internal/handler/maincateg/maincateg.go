@@ -36,7 +36,7 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	categ := domain.MainCateg{
 		Name: input.Name,
 		Type: domain.CvtToMainCategType(input.Type),
-		Icon: &domain.Icon{
+		Icon: domain.Icon{
 			ID: input.IconID,
 		},
 	}
@@ -71,10 +71,12 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 }
 
 func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
+	qType := r.URL.Query().Get("type")
+	categType := domain.CvtToMainCategType(qType)
 	user := ctxutil.GetUser(r)
-	categs, err := m.MainCateg.GetAll(user.ID)
+
+	categs, err := m.MainCateg.GetAll(user.ID, categType)
 	if err != nil {
-		logger.Error("m.MainCateg.GetAll failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
@@ -97,6 +99,10 @@ func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 			ID:   categ.ID,
 			Name: categ.Name,
 			Type: categ.Type.String(),
+			Icon: icon{
+				ID:  categ.Icon.ID,
+				URL: categ.Icon.URL,
+			},
 		})
 	}
 
@@ -133,7 +139,7 @@ func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 		ID:   id,
 		Name: input.Name,
 		Type: domain.CvtToMainCategType(input.Type),
-		Icon: &domain.Icon{
+		Icon: domain.Icon{
 			ID: input.IconID,
 		},
 	}

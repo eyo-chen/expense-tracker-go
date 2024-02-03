@@ -21,7 +21,7 @@ type MainCategUC interface {
 	Create(categ *domain.MainCateg, userID int64) error
 
 	// GetAll is a function that returns all main categories by user id.
-	GetAll(userID int64) ([]*domain.MainCateg, error)
+	GetAll(userID int64, categType domain.MainCategType) ([]domain.MainCateg, error)
 
 	// Update is a function that updates a main category.
 	Update(categ *domain.MainCateg, userID int64) error

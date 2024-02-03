@@ -32,10 +32,9 @@ func (m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *MainCategUC) GetAll(userID int64) ([]*domain.MainCateg, error) {
-	categs, err := m.MainCateg.GetAll(userID)
+func (m *MainCategUC) GetAll(userID int64, categType domain.MainCategType) ([]domain.MainCateg, error) {
+	categs, err := m.MainCateg.GetAll(userID, categType)
 	if err != nil {
-		logger.Error("m.MainCateg.GetAll failed", "package", "usecase", "err", err)
 		return nil, err
 	}
 
