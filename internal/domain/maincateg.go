@@ -5,7 +5,7 @@ type MainCateg struct {
 	ID   int64         `json:"id"`
 	Name string        `json:"name"`
 	Type MainCategType `json:"type"`
-	Icon *Icon         `json:"icon"`
+	Icon Icon          `json:"icon"`
 }
 
 // MainCategType is an enumeration of main category types
