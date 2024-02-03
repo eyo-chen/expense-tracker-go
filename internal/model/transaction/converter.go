@@ -35,7 +35,7 @@ func cvtToDomainMainCateg(c *maincateg.MainCateg, i *icon.Icon) *domain.MainCate
 		ID:   c.ID,
 		Name: c.Name,
 		Type: domain.CvtToMainCategType(c.Type),
-		Icon: cvtToDomainIcon(i),
+		// Icon: cvtToDomainIcon(i),
 	}
 }
 

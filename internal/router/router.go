@@ -36,7 +36,7 @@ func New(handler *hd.Handler) http.Handler {
 	r.Handle("/v1/transaction", auth.ThenFunc(handler.Transaction.Create)).Methods(http.MethodPost)
 	r.Handle("/v1/transaction", auth.ThenFunc(handler.Transaction.GetAll)).Methods(http.MethodGet)
 
-	regular := alice.New(middleware.LogRequest)
+	regular := alice.New(middleware.LogRequest, middleware.EnableCORS)
 
 	return regular.Then(r)
 }
