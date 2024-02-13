@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
 var (
@@ -426,6 +428,8 @@ func (f *Factory[T]) insertAss(name string, v interface{}) error {
 		}
 	}
 	stmt += `)`
+
+	logger.Info("insert association", "stmt", stmt, "fieldValues", fieldValues)
 
 	res, err := f.db.Exec(stmt, fieldValues...)
 	if err != nil {
