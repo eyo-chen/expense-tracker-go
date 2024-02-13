@@ -98,7 +98,7 @@ func (s *UserSuite) TestFindByEmail() {
 			Desc:  "Find user successfully",
 			Email: "test@gmail.com",
 			SetupFun: func() error {
-				ow := &user.User{Name: "test", Email: "test@gmail.com", Password_hash: "test"}
+				ow := user.User{Name: "test", Email: "test@gmail.com", Password_hash: "test"}
 				_, err := s.f.Build().Overwrite(ow).Insert()
 				return err
 			},
