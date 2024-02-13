@@ -123,44 +123,35 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 }
 
 func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(2).InsertUserAndIcon()
+	createdMainCateg, user, _, err := s.f.InsertMainCategWithAss(maincateg.MainCateg{})
 	s.Require().NoError(err, desc)
 
-	ow := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[1].ID,
-	}
-	createdMainCateg, err := s.f.PrepareMainCateg(ow).InsertMainCateg()
+	icons, err := s.f.PrepareIcons(1).InsertIcons()
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
 		Name: createdMainCateg.Name,
-		Type: domain.Expense,
+		Type: domain.Income,
 		Icon: domain.Icon{
-			ID: icons[1].ID,
+			ID: icons[0].ID,
 		},
 	}
-	err = s.mainCategModel.Create(categ, users[0].ID)
+	err = s.mainCategModel.Create(categ, user.ID)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 }
 
 func create_DuplicateIcon_ReturnError(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(1).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow := &maincateg.MainCateg{IconID: icons[0].ID, UserID: users[0].ID}
-	createdMainCateg, err := s.f.PrepareMainCateg(ow).InsertMainCateg()
+	createdMainCateg, user, icon, err := s.f.InsertMainCategWithAss(maincateg.MainCateg{})
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
 		Name: createdMainCateg.Name + "1", // different name
 		Type: domain.Expense,
 		Icon: domain.Icon{
-			ID: icons[0].ID,
+			ID: icon.ID,
 		},
 	}
-	err = s.mainCategModel.Create(categ, users[0].ID)
+	err = s.mainCategModel.Create(categ, user.ID)
 	s.Require().EqualError(err, domain.ErrUniqueIconUser.Error(), desc)
 }
 
@@ -180,26 +171,15 @@ func (s *MainCategSuite) TestGetAll() {
 }
 
 func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(2).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow1 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	ow2 := &maincateg.MainCateg{
-		Type:   domain.Income.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[1].ID,
-	}
-	categories, err := s.f.PrepareMainCateies(2, ow1, ow2).InsertMainCateies()
+	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
+	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   categories[1].ID,
-			Name: categories[1].Name,
+			ID:   mainCategList[1].ID,
+			Name: mainCategList[1].Name,
 			Type: domain.Income,
 			Icon: domain.Icon{
 				ID:  icons[1].ID,
@@ -214,26 +194,15 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 }
 
 func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(2).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow1 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	ow2 := &maincateg.MainCateg{
-		Type:   domain.Income.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[1].ID,
-	}
-	categories, err := s.f.PrepareMainCateies(2, ow1, ow2).InsertMainCateies()
+	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
+	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   categories[0].ID,
-			Name: categories[0].Name,
+			ID:   mainCategList[0].ID,
+			Name: mainCategList[0].Name,
 			Type: domain.Expense,
 			Icon: domain.Icon{
 				ID:  icons[0].ID,
@@ -248,26 +217,15 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 }
 
 func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(2).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow1 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	ow2 := &maincateg.MainCateg{
-		Type:   domain.Income.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[1].ID,
-	}
-	categories, err := s.f.PrepareMainCateies(2, ow1, ow2).InsertMainCateies()
+	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
+	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   categories[0].ID,
-			Name: categories[0].Name,
+			ID:   mainCategList[0].ID,
+			Name: mainCategList[0].Name,
 			Type: domain.Expense,
 			Icon: domain.Icon{
 				ID:  icons[0].ID,
@@ -275,8 +233,8 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 			},
 		},
 		{
-			ID:   categories[1].ID,
-			Name: categories[1].Name,
+			ID:   mainCategList[1].ID,
+			Name: mainCategList[1].Name,
 			Type: domain.Income,
 			Icon: domain.Icon{
 				ID:  icons[1].ID,
@@ -291,50 +249,34 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 }
 
 func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(2).PrepareIcons(3).InsertUserAndIcon()
-	s.Require().NoError(err)
-
-	ow1 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	ow2 := &maincateg.MainCateg{
-		Type:   domain.Income.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[1].ID,
-	}
-	ow3 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[1].ID,
-		IconID: icons[2].ID,
-	}
-
-	categories, err := s.f.PrepareMainCateies(3, ow1, ow2, ow3).InsertMainCateies()
-	s.Require().NoError(err)
+	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
+	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
+	ow3 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(3, 2, 3, ow1, ow2, ow3)
+	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   categories[0].ID,
-			Name: categories[0].Name,
-			Type: domain.Expense,
-			Icon: domain.Icon{
-				ID:  icons[0].ID,
-				URL: icons[0].URL,
-			},
-		},
-		{
-			ID:   categories[1].ID,
-			Name: categories[1].Name,
+			ID:   mainCategList[1].ID,
+			Name: mainCategList[1].Name,
 			Type: domain.Income,
 			Icon: domain.Icon{
 				ID:  icons[1].ID,
 				URL: icons[1].URL,
 			},
 		},
+		{
+			ID:   mainCategList[2].ID,
+			Name: mainCategList[2].Name,
+			Type: domain.Expense,
+			Icon: domain.Icon{
+				ID:  icons[2].ID,
+				URL: icons[2].URL,
+			},
+		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.UnSpecified)
+	categs, err := s.mainCategModel.GetAll(users[1].ID, domain.UnSpecified)
 	s.Require().NoError(err)
 	s.Require().Equal(expResult, categs)
 }
@@ -355,23 +297,15 @@ func (s *MainCategSuite) TestUpdate() {
 }
 
 func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(1).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	categoy, err := s.f.PrepareMainCateg(ow).InsertMainCateg()
+	categ, _, _, err := s.f.InsertMainCategWithAss(maincateg.MainCateg{})
 	s.Require().NoError(err, desc)
 
 	inputCateg := &domain.MainCateg{
-		ID:   categoy.ID,
+		ID:   categ.ID,
 		Name: "test2",
 		Type: domain.Income,
 		Icon: domain.Icon{
-			ID: categoy.IconID,
+			ID: categ.IconID,
 		},
 	}
 	err = s.mainCategModel.Update(inputCateg)
@@ -382,25 +316,14 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 							 WHERE id = ?
 							 `
 	var result maincateg.MainCateg
-	err = s.db.QueryRow(checkStmt, categoy.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
 	s.Require().Equal(inputCateg.Type.ModelValue(), result.Type, desc)
 }
 
 func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(2).PrepareIcons(1).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow1 := &maincateg.MainCateg{
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	ow2 := &maincateg.MainCateg{
-		UserID: users[1].ID,
-		IconID: icons[0].ID,
-	}
-	categs, err := s.f.PrepareMainCateies(2, ow1, ow2).InsertMainCateies()
+	categs, _, _, err := s.f.InsertMainCategListWithAss(2, 2, 1)
 	s.Require().NoError(err, desc)
 
 	inputCateg := &domain.MainCateg{
@@ -425,7 +348,7 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
 	s.Require().Equal(inputCateg.Type.ModelValue(), result.Type, desc)
 
-	// check if the data of other user is not updated
+	// check if the other data is not updated
 	var result2 maincateg.MainCateg
 	err = s.db.QueryRow(checkStmt, categs[1].ID).Scan(&result2.ID, &result2.Name, &result2.Type, &result2.IconID)
 	s.Require().NoError(err, desc)
@@ -434,26 +357,13 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 }
 
 func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(2).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow1 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	ow2 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[1].ID,
-	}
-	categs, err := s.f.PrepareMainCateies(2, ow1, ow2).InsertMainCateies()
+	categs, _, _, err := s.f.InsertMainCategListWithAss(2, 1, 2)
 	s.Require().NoError(err, desc)
 
 	domainMainCateg := &domain.MainCateg{
 		ID:   categs[0].ID,
 		Name: categs[1].Name, // update categ1 with categ2 name
-		Type: domain.Expense,
+		Type: domain.CvtToMainCategType(categs[0].Type),
 		Icon: domain.Icon{
 			ID: categs[0].IconID,
 		},
@@ -463,26 +373,13 @@ func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 }
 
 func update_DuplicateIcon_ReturnError(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(2).InsertUserAndIcon()
-	s.Require().NoError(err, desc)
-
-	ow1 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[0].ID,
-	}
-	ow2 := &maincateg.MainCateg{
-		Type:   domain.Expense.ModelValue(),
-		UserID: users[0].ID,
-		IconID: icons[1].ID,
-	}
-	categs, err := s.f.PrepareMainCateies(2, ow1, ow2).InsertMainCateies()
+	categs, _, _, err := s.f.InsertMainCategListWithAss(2, 1, 2)
 	s.Require().NoError(err, desc)
 
 	domainMainCateg := &domain.MainCateg{
 		ID:   categs[0].ID,
 		Name: categs[0].Name + "2", // make sure the name is different
-		Type: domain.Expense,
+		Type: domain.CvtToMainCategType(categs[0].Type),
 		Icon: domain.Icon{
 			ID: categs[1].IconID, // update categ1 with categ2 icon
 		},
