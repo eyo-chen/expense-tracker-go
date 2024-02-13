@@ -99,7 +99,7 @@ func (f *Factory[T]) BuildList(n int) *Factory[T] {
 
 // Overwrite overwrites the last value with the given value
 func (f *Factory[T]) Overwrite(ow T) *Factory[T] {
-	if err := insertValues(f.last, ow); err != nil {
+	if err := copyValues(f.last, ow); err != nil {
 		f.errors = append(f.errors, err)
 	}
 
@@ -119,7 +119,7 @@ func (f *Factory[T]) Overwrites(ows []T) *Factory[T] {
 			ow = ows[i]
 		}
 
-		if err := insertValues(v, ow); err != nil {
+		if err := copyValues(v, ow); err != nil {
 			f.errors = append(f.errors, err)
 		}
 		f.list[i] = v
@@ -500,8 +500,8 @@ func genNonZeroValue(fieldType reflect.Type, i int) interface{} {
 	}
 }
 
-// insertValues inserts non-zero values from src to dest
-func insertValues[T any](dest *T, src T) error {
+// copyValues copys non-zero values from src to dest
+func copyValues[T any](dest *T, src T) error {
 	destValue := reflect.ValueOf(dest).Elem()
 	srcValue := reflect.ValueOf(src)
 
