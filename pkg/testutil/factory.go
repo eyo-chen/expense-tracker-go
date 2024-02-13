@@ -187,7 +187,7 @@ func (f *Factory[T]) WithOne(value interface{}) *Factory[T] {
 		return f
 	}
 
-	setNonZeroValues(value, f.index)
+	setNonZeroValues(value, f.index+1)
 	f.associations[name] = []interface{}{value}
 	f.index++
 	return f
@@ -244,7 +244,7 @@ func (f *Factory[T]) WithMany(i int, values ...interface{}) *Factory[T] {
 			return f
 		}
 
-		setNonZeroValues(curVal, f.index)
+		setNonZeroValues(curVal, f.index+1)
 		vs = append(vs, curVal)
 		f.index++
 	}
@@ -381,10 +381,10 @@ func (f *Factory[T]) setField(target *T, name string, source interface{}) error 
 		return fmt.Errorf("source field not found: ID at setField")
 	}
 
-	if sourceIDField.Kind() != reflect.Int ||
-		sourceIDField.Kind() != reflect.Int64 ||
-		sourceIDField.Kind() != reflect.Int32 ||
-		sourceIDField.Kind() != reflect.Int16 ||
+	if sourceIDField.Kind() != reflect.Int &&
+		sourceIDField.Kind() != reflect.Int64 &&
+		sourceIDField.Kind() != reflect.Int32 &&
+		sourceIDField.Kind() != reflect.Int16 &&
 		sourceIDField.Kind() != reflect.Int8 {
 		return fmt.Errorf("ID field is not an integer at setField")
 	}
