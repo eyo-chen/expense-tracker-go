@@ -171,9 +171,7 @@ func (s *MainCategSuite) TestGetAll() {
 }
 
 func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) {
-	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
-	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, ow1, ow2)
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
@@ -194,9 +192,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 }
 
 func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string) {
-	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
-	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, ow1, ow2)
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
@@ -217,9 +213,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 }
 
 func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
-	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
-	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, ow1, ow2)
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
@@ -249,10 +243,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 }
 
 func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
-	ow1 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
-	ow2 := maincateg.MainCateg{Type: domain.Income.ModelValue()}
-	ow3 := maincateg.MainCateg{Type: domain.Expense.ModelValue()}
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(3, 2, 3, ow1, ow2, ow3)
+	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(3, 2, 3, "expense", "income", "expense")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
