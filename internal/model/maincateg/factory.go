@@ -3,6 +3,7 @@ package maincateg
 import (
 	"database/sql"
 
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
@@ -14,9 +15,17 @@ type MainCategFactory struct {
 	icon      *testutil.Factory[icon.Icon]
 }
 
+func setIncomeType(maincateg *MainCateg) {
+	maincateg.Type = domain.Income.ModelValue()
+}
+
+func setExpenseType(maincateg *MainCateg) {
+	maincateg.Type = domain.Expense.ModelValue()
+}
+
 func NewMainCategFactory(db *sql.DB) *MainCategFactory {
 	return &MainCategFactory{
-		mainCateg: testutil.NewFactory[MainCateg](db, MainCateg{}, BluePrintMainCategory, InserterMainCategory),
+		mainCateg: testutil.NewFactory[MainCateg](db, MainCateg{}, BluePrintMainCategory, InserterMainCategory).SetTrait("income", setIncomeType).SetTrait("expense", setExpenseType),
 		user:      testutil.NewFactory[user.User](db, user.User{}, BluePrintUser, InserterUser),
 		icon:      testutil.NewFactory[icon.Icon](db, icon.Icon{}, BluePrintIcon, InsertIcon),
 	}
@@ -77,7 +86,7 @@ func (mf *MainCategFactory) InsertMainCategWithAss(ow MainCateg) (MainCateg, use
 	return maincateg, *user, *icon, err
 }
 
-func (mf *MainCategFactory) InsertMainCategListWithAss(i int, userIdx int, iconIdx int, ows ...MainCateg) ([]MainCateg, []user.User, []icon.Icon, error) {
+func (mf *MainCategFactory) InsertMainCategListWithAss(i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, []icon.Icon, error) {
 	iconPtrList := make([]interface{}, 0, iconIdx)
 	for k := 0; k < iconIdx; k++ {
 		iconPtrList = append(iconPtrList, &icon.Icon{})
@@ -88,7 +97,7 @@ func (mf *MainCategFactory) InsertMainCategListWithAss(i int, userIdx int, iconI
 		userPtrList = append(userPtrList, &user.User{})
 	}
 
-	maincategList, _, err := mf.mainCateg.BuildList(i).Overwrites(ows).WithMany(userIdx, userPtrList...).WithMany(iconIdx, iconPtrList...).InsertListWithAss()
+	maincategList, _, err := mf.mainCateg.BuildList(i).WithTraits(traitName).WithMany(userIdx, userPtrList...).WithMany(iconIdx, iconPtrList...).InsertListWithAss()
 	if err != nil {
 		return nil, nil, nil, err
 	}

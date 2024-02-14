@@ -19,6 +19,8 @@ var (
 	ErrDestValueNotStruct                 = errors.New("destination value is not a struct")
 	ErrSourceValueNotStruct               = errors.New("source value is not a struct")
 	ErrDestAndSourceIsDiff                = errors.New("destination and source type is different")
+	ErrWithTraitsOnlyWithBuildList        = errors.New("WithTraits can only be used with BuildList")
+	ErrWithTraitOnlyWithBuild             = errors.New("WithTrait can only be used with Build")
 )
 
 // bluePrintFunc is a client-defined function to create a new value
@@ -26,6 +28,9 @@ type bluePrintFunc[T any] func(i int, last T) T
 
 // inserter is a client-defined function to insert a value into the database
 type inserter[T any] func(db *sql.DB, v T) (T, error)
+
+// SetTrait is a client-defined function to add a trait to mutate the value
+type setTraiter[T any] func(v *T)
 
 type Factory[T any] struct {
 	db        *sql.DB
@@ -37,6 +42,9 @@ type Factory[T any] struct {
 	bluePrint bluePrintFunc[T]
 	inserter  inserter[T]
 	errors    []error
+
+	// map from name to trait function
+	traits map[string]setTraiter[T]
 
 	// map from name to list of associations
 	// e.g. "User" -> []*User
@@ -74,6 +82,16 @@ func NewFactory[T any](db *sql.DB, v T, bluePrint bluePrintFunc[T], inserter ins
 		associations: map[string][]interface{}{},
 		tagToField:   tagToField,
 	}
+}
+
+// SetTrait adds a trait to the factory value
+func (f *Factory[T]) SetTrait(name string, tr setTraiter[T]) *Factory[T] {
+	if f.traits == nil {
+		f.traits = map[string]setTraiter[T]{}
+	}
+
+	f.traits[name] = tr
+	return f
 }
 
 // Build creates a new value using the bluePrint function
@@ -325,6 +343,46 @@ func (f *Factory[T]) genAndInsertAss() ([]interface{}, error) {
 	}
 
 	return result, nil
+}
+
+// WithTrait invokes the traiter based on given name.
+// WithTrait can only be used with Build
+func (f *Factory[T]) WithTrait(name string) *Factory[T] {
+	if f.list != nil {
+		f.errors = append(f.errors, ErrWithTraitOnlyWithBuild)
+		return f
+	}
+
+	tr, ok := f.traits[name]
+	if !ok {
+		f.errors = append(f.errors, fmt.Errorf("undefined name %s at WithTrait", name))
+		return f
+	}
+
+	tr(f.last)
+
+	return f
+}
+
+// WithTraits invokes the traiter based on given names.
+// WithTraits can only be used with BuildList
+func (f *Factory[T]) WithTraits(name []string) *Factory[T] {
+	if f.list == nil {
+		f.errors = append(f.errors, ErrWithTraitsOnlyWithBuildList)
+		return f
+	}
+
+	for k := 0; k < len(name) && k < len(f.list); k++ {
+		tr, ok := f.traits[name[k]]
+		if !ok {
+			f.errors = append(f.errors, fmt.Errorf("undefined name %s at WithTrait", name[k]))
+			return f
+		}
+
+		tr(f.list[k])
+	}
+
+	return f
 }
 
 // setAss sets the assoication connection to one factory value.
