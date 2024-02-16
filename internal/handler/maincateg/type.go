@@ -12,6 +12,6 @@ type mainCateg struct {
 	Icon icon   `json:"icon"`
 }
 
-type GetAllMainCategResp struct {
+type getAllMainCategResp struct {
 	Categories []mainCateg `json:"categories"`
 }

@@ -2,7 +2,7 @@ package maincateg
 
 import "github.com/OYE0303/expense-tracker-go/internal/domain"
 
-func cvtToGetAllMainCategResp(c []domain.MainCateg) GetAllMainCategResp {
+func cvtToGetAllMainCategResp(c []domain.MainCateg) getAllMainCategResp {
 	categs := make([]mainCateg, 0, len(c))
 
 	for _, v := range c {
@@ -17,7 +17,7 @@ func cvtToGetAllMainCategResp(c []domain.MainCateg) GetAllMainCategResp {
 		})
 	}
 
-	return GetAllMainCategResp{
+	return getAllMainCategResp{
 		Categories: categs,
 	}
 }
