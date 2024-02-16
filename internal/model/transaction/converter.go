@@ -7,8 +7,8 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
 )
 
-func cvtToDomainTransaction(t *Transaction, m *maincateg.MainCateg, s *subcateg.SubCateg, i *icon.Icon) *domain.Transaction {
-	return &domain.Transaction{
+func cvtToDomainTransaction(t *Transaction, m *maincateg.MainCateg, s *subcateg.SubCateg, i *icon.Icon) domain.Transaction {
+	return domain.Transaction{
 		ID:        t.ID,
 		UserID:    t.UserID,
 		MainCateg: cvtToDomainMainCateg(m, i),
@@ -35,7 +35,10 @@ func cvtToDomainMainCateg(c *maincateg.MainCateg, i *icon.Icon) *domain.MainCate
 		ID:   c.ID,
 		Name: c.Name,
 		Type: domain.CvtToMainCategType(c.Type),
-		// Icon: cvtToDomainIcon(i),
+		Icon: domain.Icon{
+			ID:  i.ID,
+			URL: i.URL,
+		},
 	}
 }
 

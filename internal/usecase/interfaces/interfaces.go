@@ -66,5 +66,5 @@ type TransactionModel interface {
 	Create(ctx context.Context, transaction *domain.Transaction) error
 
 	// GetAll returns all transactions by user id and query.
-	GetAll(ctx context.Context, query *domain.GetQuery, userID int64) (*domain.TransactionResp, error)
+	GetAll(ctx context.Context, query *domain.GetQuery, userID int64) ([]domain.Transaction, error)
 }

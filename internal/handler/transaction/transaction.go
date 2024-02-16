@@ -101,8 +101,9 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	transResp := cvtToGetTransactionResp(transactions)
 	respData := map[string]interface{}{
-		"transactions": transactions,
+		"transactions": transResp.Transactions,
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {

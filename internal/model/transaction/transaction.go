@@ -43,7 +43,7 @@ func (t *TransactionModel) Create(ctx context.Context, transaction *domain.Trans
 
 }
 
-func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, userID int64) (*domain.TransactionResp, error) {
+func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, userID int64) ([]domain.Transaction, error) {
 	qStmt := getQStmt(query, userID)
 	args := getArgs(query, userID)
 
@@ -54,8 +54,7 @@ func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, u
 	}
 	defer rows.Close()
 
-	var transactions []*domain.Transaction
-	var income, expense float64
+	var transactions []domain.Transaction
 	for rows.Next() {
 		var trans Transaction
 		var mainCateg maincateg.MainCateg
@@ -66,23 +65,10 @@ func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, u
 			logger.Error("rows.Scan failed", "package", "model", "err", err)
 			return nil, err
 		}
-
-		if mainCateg.Type == "1" {
-			income += trans.Price
-		} else {
-			expense += trans.Price
-		}
-
 		transactions = append(transactions, cvtToDomainTransaction(&trans, &mainCateg, &subCateg, &icon))
 	}
 
-	var result domain.TransactionResp
-	result.DataList = transactions
-	result.Income = income
-	result.Expense = expense
-	result.NetIncome = income - expense
-
-	return &result, nil
+	return transactions, nil
 }
 
 func getQStmt(query *domain.GetQuery, userID int64) string {

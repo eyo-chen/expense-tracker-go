@@ -93,7 +93,7 @@ func (s *SubCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Reques
 	}
 
 	respData := map[string]interface{}{
-		"sub_categories": categs,
+		"categories": categs,
 	}
 	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
