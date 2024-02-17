@@ -23,7 +23,7 @@ func cvtToGetTransactionResp(trans []domain.Transaction) getTransactionResp {
 			},
 			Price: t.Price,
 			Note:  t.Note,
-			Date:  *t.Date,
+			Date:  t.Date,
 		})
 	}
 

@@ -17,13 +17,13 @@ type TransactionModel struct {
 }
 
 type Transaction struct {
-	ID          int64      `json:"id"`
-	UserID      int64      `json:"user_id"`
-	MainCategID int64      `json:"main_category_id"`
-	SubCategID  int64      `json:"sub_category_id"`
-	Price       float64    `json:"price"`
-	Note        string     `json:"note"`
-	Date        *time.Time `json:"date"`
+	ID          int64     `json:"id"`
+	UserID      int64     `json:"user_id" factory:"User,users"`
+	MainCategID int64     `json:"main_category_id" factory:"MainCateg,main_categories"`
+	SubCategID  int64     `json:"sub_category_id" factory:"SubCateg,sub_categories"`
+	Price       float64   `json:"price"`
+	Note        string    `json:"note"`
+	Date        time.Time `json:"date"`
 }
 
 func NewTransactionModel(db *sql.DB) *TransactionModel {
@@ -65,7 +65,8 @@ func (t *TransactionModel) GetAll(ctx context.Context, query *domain.GetQuery, u
 			logger.Error("rows.Scan failed", "package", "model", "err", err)
 			return nil, err
 		}
-		transactions = append(transactions, cvtToDomainTransaction(&trans, &mainCateg, &subCateg, &icon))
+
+		transactions = append(transactions, cvtToDomainTransaction(trans, mainCateg, subCateg, icon))
 	}
 
 	return transactions, nil
@@ -81,6 +82,10 @@ func getQStmt(query *domain.GetQuery, userID int64) string {
 						INNER JOIN icons AS i
 						ON mc.icon_id = i.id
 						WHERE t.user_id = ?`
+
+	if query == nil {
+		return qStmt
+	}
 
 	if query.StartDate != "" && query.EndDate != "" {
 		qStmt += " AND date BETWEEN ? AND ?"
@@ -99,8 +104,11 @@ func getQStmt(query *domain.GetQuery, userID int64) string {
 
 func getArgs(query *domain.GetQuery, userID int64) []interface{} {
 	var args []interface{}
-
 	args = append(args, userID)
+
+	if query == nil {
+		return args
+	}
 
 	if query.StartDate != "" && query.EndDate != "" {
 		args = append(args, query.StartDate, query.EndDate)
