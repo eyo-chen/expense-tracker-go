@@ -1,11 +1,13 @@
 package testutil
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
 	"strings"
+	"unicode"
 
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
@@ -21,6 +23,9 @@ var (
 	ErrDestAndSourceIsDiff                = errors.New("destination and source type is different")
 	ErrWithTraitsOnlyWithBuildList        = errors.New("WithTraits can only be used with BuildList")
 	ErrWithTraitOnlyWithBuild             = errors.New("WithTrait can only be used with Build")
+	ErrGetOnlyWithBuild                   = errors.New("Get can only be used with Build")
+	ErrNoValueWithGet                     = errors.New("no value to get")
+	ErrGetListOnlyWithBuildList           = errors.New("GetList can only be used with BuildList")
 )
 
 // bluePrintFunc is a client-defined function to create a new value
@@ -31,6 +36,11 @@ type inserter[T any] func(db *sql.DB, v T) (T, error)
 
 // SetTrait is a client-defined function to add a trait to mutate the value
 type setTraiter[T any] func(v *T)
+
+type tagInfo struct {
+	tableName string
+	fieldName string
+}
 
 type Factory[T any] struct {
 	db        *sql.DB
@@ -49,16 +59,17 @@ type Factory[T any] struct {
 	// map from name to list of associations
 	// e.g. "User" -> []*User
 	associations map[string][]interface{}
-	// map from tag to field name
-	// e.g. "User" -> "UserID"
-	tagToField map[string]string
+
+	// map from tag to metadata
+	// e.g. "User" -> {tableName: "users", fieldName: "UserID"}
+	tagToInfo map[string]tagInfo
 }
 
 // NewFactory creates a new factory instance
 func NewFactory[T any](db *sql.DB, v T, bluePrint bluePrintFunc[T], inserter inserter[T]) *Factory[T] {
 	dataType := reflect.TypeOf(v)
 
-	tagToField := map[string]string{}
+	tagToInfo := map[string]tagInfo{}
 	for i := 0; i < dataType.NumField(); i++ {
 		field := dataType.Field(i)
 		tag := field.Tag.Get("factory")
@@ -66,7 +77,11 @@ func NewFactory[T any](db *sql.DB, v T, bluePrint bluePrintFunc[T], inserter ins
 			continue
 		}
 
-		tagToField[tag] = field.Name
+		parts := strings.Split(tag, ",")
+		structName := parts[0]
+		tableName := parts[1]
+
+		tagToInfo[structName] = tagInfo{tableName: tableName, fieldName: field.Name}
 	}
 
 	last := reflect.New(dataType).Elem().Interface().(T)
@@ -80,7 +95,7 @@ func NewFactory[T any](db *sql.DB, v T, bluePrint bluePrintFunc[T], inserter ins
 		bluePrint:    bluePrint,
 		inserter:     inserter,
 		associations: map[string][]interface{}{},
-		tagToField:   tagToField,
+		tagToInfo:    tagToInfo,
 	}
 }
 
@@ -172,17 +187,46 @@ func (f *Factory[T]) InsertList() ([]T, error) {
 	return list, nil
 }
 
-// Reset resets the factory to its initial state
-func (f *Factory[T]) Reset() {
-	last := reflect.New(f.dataType).Elem().Interface().(T)
-	f.last = &last
-	f.list = nil
-	f.index = 0
+// Get returns the last value
+func (f *Factory[T]) Get() (T, error) {
+	if f.last == nil {
+		return f.empty, ErrNoValueWithGet
+	}
+
+	if f.list != nil {
+		return f.empty, ErrGetOnlyWithBuild
+	}
+
+	if f.errors != nil {
+		return f.empty, genFinalError(f.errors)
+	}
+
+	return *f.last, nil
 }
 
-// Value returns the last value
-func (f *Factory[T]) Value() T {
-	return *f.last
+// GetList returns the list of values
+func (f *Factory[T]) GetList() ([]T, error) {
+	if f.list == nil {
+		return nil, ErrGetListOnlyWithBuildList
+	}
+
+	if f.errors != nil {
+		return nil, genFinalError(f.errors)
+	}
+
+	list := make([]T, len(f.list))
+	for i, v := range f.list {
+		list[i] = *v
+	}
+
+	return list, nil
+}
+
+// Reset resets the factory to its initial state
+func (f *Factory[T]) Reset() {
+	f.last = nil
+	f.list = nil
+	f.index = 0
 }
 
 // WihtOne set one association to the factory value
@@ -202,7 +246,7 @@ func (f *Factory[T]) WithOne(value interface{}) *Factory[T] {
 		return f
 	}
 
-	if _, ok := f.tagToField[name]; !ok {
+	if _, ok := f.tagToInfo[name]; !ok {
 		f.errors = append(f.errors, fmt.Errorf("type %v, value: %v passed to WithOne is not found at tag", name, v))
 		return f
 	}
@@ -259,7 +303,7 @@ func (f *Factory[T]) WithMany(i int, values ...interface{}) *Factory[T] {
 			return f
 		}
 
-		if _, ok := f.tagToField[curName]; !ok {
+		if _, ok := f.tagToInfo[curName]; !ok {
 			f.errors = append(f.errors, fmt.Errorf("type %v, value: %v passed to WithMany is not found at tag", typeOfCurVal.Elem().Name(), valueOfCurVal.Elem().Interface()))
 			return f
 		}
@@ -333,7 +377,8 @@ func (f *Factory[T]) genAndInsertAss() ([]interface{}, error) {
 	result := []interface{}{}
 	for name, vs := range f.associations {
 		for _, v := range vs {
-			if err := f.insertAss(name, v); err != nil {
+			tableName := f.tagToInfo[name].tableName
+			if err := f.insertAss(tableName, v); err != nil {
 				return nil, err
 			}
 
@@ -392,7 +437,8 @@ func (f *Factory[T]) setAss() error {
 		// use vs[0] because we can make sure setAss(InsertWithAss) only invoke with Build function
 		// which means there's only one factory value
 		// so that each associations only allow one value
-		if err := f.setField(f.last, f.tagToField[name], vs[0]); err != nil {
+		fieldName := f.tagToInfo[name].fieldName
+		if err := f.setField(f.last, fieldName, vs[0]); err != nil {
 			return err
 		}
 	}
@@ -415,7 +461,8 @@ func (f *Factory[T]) setAssWithList() error {
 				cachePrev[name] = vs[i]
 			}
 
-			if err := f.setField(l, f.tagToField[name], v); err != nil {
+			fieldName := f.tagToInfo[name].fieldName
+			if err := f.setField(l, fieldName, v); err != nil {
 				return err
 			}
 		}
@@ -456,7 +503,6 @@ func (f *Factory[T]) setField(target *T, name string, source interface{}) error 
 
 // insertAss inserts the association value into the database
 func (f *Factory[T]) insertAss(name string, v interface{}) error {
-	tableName := strings.ToLower(name) + "s"
 	fieldNames := []string{}
 	fieldValues := []interface{}{}
 
@@ -467,11 +513,11 @@ func (f *Factory[T]) insertAss(name string, v interface{}) error {
 			continue
 		}
 
-		fieldNames = append(fieldNames, n)
+		fieldNames = append(fieldNames, camelToSnake(n))
 		fieldValues = append(fieldValues, val.Field(i).Interface())
 	}
 
-	stmt := `INSERT INTO ` + tableName + ` (`
+	stmt := `INSERT INTO ` + name + ` (`
 	for i, v := range fieldNames {
 		stmt += v
 		if i < len(fieldNames)-1 {
@@ -603,6 +649,23 @@ func genFinalError(errs []error) error {
 	}
 
 	return fmt.Errorf("encountered the following errors:\n%s", strings.Join(errorMessages, "\n"))
+}
+
+func camelToSnake(input string) string {
+	var buf bytes.Buffer
+
+	for i, r := range input {
+		if unicode.IsUpper(r) {
+			if i > 0 && unicode.IsLower(rune(input[i-1])) {
+				buf.WriteRune('_')
+			}
+			buf.WriteRune(unicode.ToLower(r))
+		} else {
+			buf.WriteRune(r)
+		}
+	}
+
+	return buf.String()
 }
 
 // type Builder[T any] struct {
