@@ -9,14 +9,14 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 )
 
-func BluePrintMainCategory(i int, last MainCateg) MainCateg {
+func BluePrint(i int, last MainCateg) MainCateg {
 	return MainCateg{
 		Name: "test" + fmt.Sprint(i),
 		Type: domain.Income.ModelValue(),
 	}
 }
 
-func InserterMainCategory(db *sql.DB, c MainCateg) (MainCateg, error) {
+func Inserter(db *sql.DB, c MainCateg) (MainCateg, error) {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
 	res, err := db.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID)

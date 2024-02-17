@@ -7,15 +7,27 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
 )
 
-func cvtToDomainTransaction(t *Transaction, m *maincateg.MainCateg, s *subcateg.SubCateg, i *icon.Icon) domain.Transaction {
+func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.SubCateg, i icon.Icon) domain.Transaction {
 	return domain.Transaction{
-		ID:        t.ID,
-		UserID:    t.UserID,
-		MainCateg: cvtToDomainMainCateg(m, i),
-		SubCateg:  cvtToDomainSubCateg(s),
-		Price:     t.Price,
-		Note:      t.Note,
-		Date:      t.Date,
+		ID:     t.ID,
+		UserID: t.UserID,
+		Price:  t.Price,
+		Note:   t.Note,
+		Date:   t.Date,
+		MainCateg: domain.MainCateg{
+			ID:   m.ID,
+			Name: m.Name,
+			Type: domain.CvtToMainCategType(m.Type),
+			Icon: domain.Icon{
+				ID:  i.ID,
+				URL: i.URL,
+			},
+		},
+		SubCateg: domain.SubCateg{
+			ID:          s.ID,
+			Name:        s.Name,
+			MainCategID: m.ID, // use m.ID because in the get query, we don't reterive the subCateg.MainCategID
+		},
 	}
 }
 
@@ -27,36 +39,5 @@ func cvtToModelTransaction(t *domain.Transaction) *Transaction {
 		Price:       t.Price,
 		Note:        t.Note,
 		Date:        t.Date,
-	}
-}
-
-func cvtToDomainMainCateg(c *maincateg.MainCateg, i *icon.Icon) *domain.MainCateg {
-	return &domain.MainCateg{
-		ID:   c.ID,
-		Name: c.Name,
-		Type: domain.CvtToMainCategType(c.Type),
-		Icon: domain.Icon{
-			ID:  i.ID,
-			URL: i.URL,
-		},
-	}
-}
-
-func cvtToDomainIcon(i *icon.Icon) *domain.Icon {
-	if i == nil {
-		return nil
-	}
-
-	return &domain.Icon{
-		ID:  i.ID,
-		URL: i.URL,
-	}
-}
-
-func cvtToDomainSubCateg(categ *subcateg.SubCateg) *domain.SubCateg {
-	return &domain.SubCateg{
-		ID:          categ.ID,
-		Name:        categ.Name,
-		MainCategID: categ.MainCategID,
 	}
 }

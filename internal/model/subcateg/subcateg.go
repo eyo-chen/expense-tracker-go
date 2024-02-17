@@ -23,8 +23,8 @@ func NewSubCategModel(db *sql.DB) *SubCategModel {
 type SubCateg struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
-	UserID      int64  `json:"user_id"`
-	MainCategID int64  `json:"main_category_id"`
+	UserID      int64  `json:"user_id" factory:"User,users"`
+	MainCategID int64  `json:"main_category_id" factory:"MainCateg,main_categories"`
 }
 
 func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
