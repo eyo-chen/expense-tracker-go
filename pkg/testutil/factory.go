@@ -224,7 +224,8 @@ func (f *Factory[T]) GetList() ([]T, error) {
 
 // Reset resets the factory to its initial state
 func (f *Factory[T]) Reset() {
-	f.last = nil
+	last := reflect.New(f.dataType).Elem().Interface().(T)
+	f.last = &last
 	f.list = nil
 	f.index = 0
 }
