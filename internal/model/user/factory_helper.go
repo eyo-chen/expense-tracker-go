@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func BluePrintUser(i int, last User) User {
+func Blueprint(i int, last User) User {
 	return User{
 		Name:          "test" + fmt.Sprint(i),
 		Email:         "test" + fmt.Sprint(i) + "@gmail.com",
@@ -13,7 +13,7 @@ func BluePrintUser(i int, last User) User {
 	}
 }
 
-func InserterUser(db *sql.DB, u User) (User, error) {
+func Inserter(db *sql.DB, u User) (User, error) {
 	stmt := `INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)`
 	res, err := db.Exec(stmt, u.Name, u.Email, u.Password_hash)
 	if err != nil {

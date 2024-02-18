@@ -26,11 +26,11 @@ func NewTransactionHandler(t interfaces.TransactionUC) *TransactionHandler {
 
 func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		MainCategID int64      `json:"main_category_id"`
-		SubCategID  int64      `json:"sub_category_id"`
-		Price       float64    `json:"price"`
-		Date        *time.Time `json:"date"`
-		Note        string     `json:"note"`
+		MainCategID int64     `json:"main_category_id"`
+		SubCategID  int64     `json:"sub_category_id"`
+		Price       float64   `json:"price"`
+		Date        time.Time `json:"date"`
+		Note        string    `json:"note"`
 	}
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
@@ -41,10 +41,10 @@ func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	user := ctxutil.GetUser(r)
 	transaction := domain.Transaction{
 		UserID: user.ID,
-		MainCateg: &domain.MainCateg{
+		MainCateg: domain.MainCateg{
 			ID: input.MainCategID,
 		},
-		SubCateg: &domain.SubCateg{
+		SubCateg: domain.SubCateg{
 			ID: input.SubCategID,
 		},
 		Price: input.Price,
@@ -101,8 +101,9 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	transResp := cvtToGetTransactionResp(transactions)
 	respData := map[string]interface{}{
-		"transactions": transactions,
+		"transactions": transResp.Transactions,
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {

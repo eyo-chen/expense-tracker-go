@@ -29,7 +29,7 @@ func (s *UserSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
 	db, migrate := testutil.ConnToDB(port)
 	s.model = user.NewUserModel(db)
-	s.f = testutil.NewFactory(db, user.User{}, user.BluePrintUser, user.InserterUser)
+	s.f = testutil.NewFactory(db, user.User{}, user.Blueprint, user.Inserter)
 	s.db = db
 	s.migrate = migrate
 }

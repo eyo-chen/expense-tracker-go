@@ -25,7 +25,7 @@ func setExpenseType(maincateg *MainCateg) {
 
 func NewMainCategFactory(db *sql.DB) *MainCategFactory {
 	return &MainCategFactory{
-		mainCateg: testutil.NewFactory[MainCateg](db, MainCateg{}, BluePrintMainCategory, InserterMainCategory).SetTrait("income", setIncomeType).SetTrait("expense", setExpenseType),
+		mainCateg: testutil.NewFactory[MainCateg](db, MainCateg{}, BluePrint, Inserter).SetTrait("income", setIncomeType).SetTrait("expense", setExpenseType),
 		user:      testutil.NewFactory[user.User](db, user.User{}, BluePrintUser, InserterUser),
 		icon:      testutil.NewFactory[icon.Icon](db, icon.Icon{}, BluePrintIcon, InsertIcon),
 	}

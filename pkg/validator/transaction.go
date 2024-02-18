@@ -11,7 +11,7 @@ func (v *Validator) CreateTransaction(transaction *domain.Transaction) bool {
 	v.Check(transaction.MainCateg.ID > 0, "main_category_id", "Main category ID must be greater than 0")
 	v.Check(transaction.SubCateg.ID > 0, "sub_category_id", "Sub category ID must be greater than 0")
 	v.Check(transaction.Price > 0, "price", "Price must be greater than 0")
-	v.Check(transaction.Date != nil, "date", "Date can't be empty")
+	v.Check(!transaction.Date.IsZero(), "date", "Date can't be empty")
 	return v.Valid()
 }
 
