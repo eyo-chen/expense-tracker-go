@@ -9,7 +9,7 @@ func getAllCvtToDomainMainCateg(categ MainCateg, i icon.Icon) domain.MainCateg {
 	return domain.MainCateg{
 		ID:   categ.ID,
 		Name: categ.Name,
-		Type: domain.CvtToMainCategType(categ.Type),
+		Type: domain.CvtToTransactionType(categ.Type),
 		Icon: domain.Icon{
 			ID:  i.ID,
 			URL: i.URL,
@@ -21,7 +21,7 @@ func cvtToDomainMainCateg(c *MainCateg, i *icon.Icon) *domain.MainCateg {
 	return &domain.MainCateg{
 		ID:   c.ID,
 		Name: c.Name,
-		Type: domain.CvtToMainCategType(c.Type),
+		Type: domain.CvtToTransactionType(c.Type),
 	}
 }
 
@@ -29,7 +29,7 @@ func cvtToMainCateg(c *domain.MainCateg, userID int64) *MainCateg {
 	return &MainCateg{
 		ID:     c.ID,
 		Name:   c.Name,
-		Type:   c.Type.ModelValue(),
+		Type:   c.Type.ToModelValue(),
 		IconID: c.Icon.ID,
 		UserID: userID,
 	}

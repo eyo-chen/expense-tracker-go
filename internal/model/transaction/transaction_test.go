@@ -95,7 +95,7 @@ func (s *TransactionSuite) TestCreate() {
 		MainCateg: domain.MainCateg{
 			ID:   main.ID,
 			Name: main.Name,
-			Type: domain.CvtToMainCategType(main.Type),
+			Type: domain.CvtToTransactionType(main.Type),
 			Icon: domain.Icon{
 				ID:  icon.ID,
 				URL: icon.URL,

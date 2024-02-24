@@ -21,7 +21,7 @@ type MainCategModel interface {
 	Create(categ *domain.MainCateg, userID int64) error
 
 	// GetAll returns all main categories by user id.
-	GetAll(userID int64, categType domain.MainCategType) ([]domain.MainCateg, error)
+	GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)
 
 	// Update updates a main category.
 	Update(categ *domain.MainCateg) error

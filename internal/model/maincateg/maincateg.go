@@ -50,15 +50,15 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *MainCategModel) GetAll(userID int64, categType domain.MainCategType) ([]domain.MainCateg, error) {
+func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
 	stmt := `SELECT mc.id, mc.name, mc.type, i.id, i.url
 					 FROM main_categories AS mc
 					 LEFT JOIN icons AS i 
 					 ON mc.icon_id = i.id
 					 WHERE user_id = ?`
 
-	if categType != domain.UnSpecified {
-		stmt += ` AND type = ` + categType.ModelValue()
+	if transType != domain.UnSpecified {
+		stmt += ` AND type = ` + transType.ToModelValue()
 	}
 
 	rows, err := m.DB.Query(stmt, userID)

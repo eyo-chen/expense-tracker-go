@@ -12,7 +12,7 @@ import (
 func BluePrint(i int, last MainCateg) MainCateg {
 	return MainCateg{
 		Name: "test" + fmt.Sprint(i),
-		Type: domain.Income.ModelValue(),
+		Type: domain.Income.ToModelValue(),
 	}
 }
 

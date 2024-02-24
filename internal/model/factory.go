@@ -86,7 +86,7 @@ func (f *Factory) NewMainCateg(user *user.User, overwrites ...map[string]any) (*
 
 	categ := &maincateg.MainCateg{
 		Name:   "test",
-		Type:   domain.Expense.ModelValue(),
+		Type:   domain.Expense.ToModelValue(),
 		IconID: icon.ID,
 	}
 
