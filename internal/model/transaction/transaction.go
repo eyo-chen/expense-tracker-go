@@ -18,6 +18,7 @@ type TransactionModel struct {
 
 type Transaction struct {
 	ID          int64     `json:"id"`
+	Type        string    `json:"type"`
 	UserID      int64     `json:"user_id" factory:"User,users"`
 	MainCategID int64     `json:"main_category_id" factory:"MainCateg,main_categories"`
 	SubCategID  int64     `json:"sub_category_id" factory:"SubCateg,sub_categories"`
@@ -30,11 +31,11 @@ func NewTransactionModel(db *sql.DB) *TransactionModel {
 	return &TransactionModel{DB: db}
 }
 
-func (t *TransactionModel) Create(ctx context.Context, transaction *domain.Transaction) error {
-	trans := cvtToModelTransaction(transaction)
-	qStmt := "INSERT INTO transactions (user_id, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?)"
+func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
+	tr := cvtToModelTransaction(trans)
+	qStmt := "INSERT INTO transactions (user_id, type, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?, ?)"
 
-	if _, err := t.DB.ExecContext(ctx, qStmt, trans.UserID, trans.MainCategID, trans.SubCategID, trans.Price, trans.Note, trans.Date); err != nil {
+	if _, err := t.DB.ExecContext(ctx, qStmt, tr.UserID, tr.Type, tr.MainCategID, tr.SubCategID, tr.Price, tr.Note, tr.Date); err != nil {
 		logger.Error("t.DB.ExecContext failed", "package", "model", "err", err)
 		return err
 	}

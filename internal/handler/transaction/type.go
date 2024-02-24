@@ -2,6 +2,19 @@ package transaction
 
 import "time"
 
+type createTransactionReq struct {
+	Type        string    `json:"type"`
+	MainCategID int64     `json:"main_category_id"`
+	SubCategID  int64     `json:"sub_category_id"`
+	Price       float64   `json:"price"`
+	Date        time.Time `json:"date"`
+	Note        string    `json:"note"`
+}
+
+type getTransactionResp struct {
+	Transactions []transaction `json:"transactions"`
+}
+
 type icon struct {
 	ID  int64  `json:"id"`
 	URL string `json:"url"`
@@ -26,8 +39,4 @@ type transaction struct {
 	Price     float64   `json:"price"`
 	Note      string    `json:"note"`
 	Date      time.Time `json:"date"`
-}
-
-type getTransactionResp struct {
-	Transactions []transaction `json:"transactions"`
 }

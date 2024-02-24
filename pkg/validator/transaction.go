@@ -7,11 +7,12 @@ import (
 )
 
 // CreateMainCateg is a function that validates the input for creating main category.
-func (v *Validator) CreateTransaction(transaction *domain.Transaction) bool {
-	v.Check(transaction.MainCateg.ID > 0, "main_category_id", "Main category ID must be greater than 0")
-	v.Check(transaction.SubCateg.ID > 0, "sub_category_id", "Sub category ID must be greater than 0")
-	v.Check(transaction.Price > 0, "price", "Price must be greater than 0")
-	v.Check(!transaction.Date.IsZero(), "date", "Date can't be empty")
+func (v *Validator) CreateTransaction(t domain.CreateTransactionInput) bool {
+	v.Check(t.MainCategID > 0, "main_category_id", "Main category ID must be greater than 0")
+	v.Check(t.SubCategID > 0, "sub_category_id", "Sub category ID must be greater than 0")
+	v.Check(t.Price > 0, "price", "Price must be greater than 0")
+	v.Check(t.Type.IsValid(), "type", "Type must be income or expense")
+	v.Check(!t.Date.IsZero(), "date", "Date can't be empty")
 	return v.Valid()
 }
 

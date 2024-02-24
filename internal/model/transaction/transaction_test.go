@@ -87,41 +87,30 @@ func (s *TransactionSuite) TearDownTest() {
 }
 
 func (s *TransactionSuite) TestCreate() {
-	user, main, sub, icon, err := s.f.PrepareUserMainAndSubCateg()
+	user, main, sub, _, err := s.f.PrepareUserMainAndSubCateg()
 	s.Require().NoError(err)
 
-	t := domain.Transaction{
-		UserID: user.ID,
-		MainCateg: domain.MainCateg{
-			ID:   main.ID,
-			Name: main.Name,
-			Type: domain.CvtToTransactionType(main.Type),
-			Icon: domain.Icon{
-				ID:  icon.ID,
-				URL: icon.URL,
-			},
-		},
-		SubCateg: domain.SubCateg{
-			ID:          sub.ID,
-			Name:        sub.Name,
-			MainCategID: sub.MainCategID,
-		},
-		Price: 100,
-		Note:  "test",
-		Date:  mockTimeNow,
+	t := domain.CreateTransactionInput{
+		UserID:      user.ID,
+		Type:        domain.CvtToTransactionType(main.Type),
+		MainCategID: main.ID,
+		SubCategID:  sub.ID,
+		Price:       100,
+		Note:        "test",
+		Date:        mockTimeNow,
 	}
 
-	err = s.transactionModel.Create(mockCtx, &t)
+	err = s.transactionModel.Create(mockCtx, t)
 	s.Require().NoError(err)
 
 	var checkT transaction.Transaction
-	stmt := "SELECT user_id, main_category_id, sub_category_id, price, note, date FROM transactions WHERE user_id = ?"
-	err = s.db.QueryRow(stmt, user.ID).Scan(&checkT.UserID, &checkT.MainCategID, &checkT.SubCategID, &checkT.Price, &checkT.Note, &checkT.Date)
+	stmt := "SELECT user_id, type, main_category_id, sub_category_id, price, note, date FROM transactions WHERE user_id = ?"
+	err = s.db.QueryRow(stmt, user.ID).Scan(&checkT.UserID, &checkT.Type, &checkT.MainCategID, &checkT.SubCategID, &checkT.Price, &checkT.Note, &checkT.Date)
 	s.Require().NoError(err)
-
 	s.Equal(t.UserID, checkT.UserID)
-	s.Equal(t.MainCateg.ID, checkT.MainCategID)
-	s.Equal(t.SubCateg.ID, checkT.SubCategID)
+	s.Equal(t.Type.ToModelValue(), checkT.Type)
+	s.Equal(t.MainCategID, checkT.MainCategID)
+	s.Equal(t.SubCategID, checkT.SubCategID)
 	s.Equal(t.Price, checkT.Price)
 	s.Equal(t.Note, checkT.Note)
 }
