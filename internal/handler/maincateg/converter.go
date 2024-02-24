@@ -9,7 +9,7 @@ func cvtToGetAllMainCategResp(c []domain.MainCateg) getAllMainCategResp {
 		categs = append(categs, mainCateg{
 			ID:   v.ID,
 			Name: v.Name,
-			Type: v.Type.String(),
+			Type: v.Type.ToString(),
 			Icon: icon{
 				ID:  v.Icon.ID,
 				URL: v.Icon.URL,

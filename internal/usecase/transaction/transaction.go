@@ -9,6 +9,10 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
+const (
+	PackageName = "usecase/transaction"
+)
+
 type TransactionUC struct {
 	Transaction interfaces.TransactionModel
 	MainCateg   interfaces.MainCategModel
@@ -23,44 +27,47 @@ func NewTransactionUC(t interfaces.TransactionModel, m interfaces.MainCategModel
 	}
 }
 
-func (t *TransactionUC) Create(ctx context.Context, user *domain.User, transaction *domain.Transaction) error {
+func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
 	// check if the main category exists
-	_, err := t.MainCateg.GetByID(transaction.MainCateg.ID, user.ID)
+	mainCateg, err := t.MainCateg.GetByID(trans.MainCategID, trans.UserID)
 	if errors.Is(err, domain.ErrDataNotFound) {
 		return domain.ErrDataNotFound
 	}
 	if err != nil {
-		logger.Error("t.MainCateg.GetFullInfoByID failed", "package", "usecase", "err", err)
 		return err
 	}
 
+	// check if the type in main category matches the transaction type
+	if trans.Type != mainCateg.Type {
+		logger.Error("Create Transaction failed", "package", PackageName, "err", domain.ErrTypeNotConsistent)
+		return domain.ErrTypeNotConsistent
+	}
+
 	// check if the sub category exists
-	subCateg, err := t.SubCateg.GetByID(transaction.SubCateg.ID, user.ID)
+	subCateg, err := t.SubCateg.GetByID(trans.SubCategID, trans.UserID)
 	if errors.Is(err, domain.ErrDataNotFound) {
 		return domain.ErrDataNotFound
 	}
 	if err != nil {
-		logger.Error("t.SubCateg.GetByID failed", "package", "usecase", "err", err)
 		return err
 	}
 
 	// check if the sub category matches the main category
-	if subCateg.MainCategID != transaction.MainCateg.ID {
-		return domain.ErrDataNotFound
+	if subCateg.MainCategID != trans.MainCategID {
+		logger.Error("Create Transaction failed", "package", PackageName, "err", domain.ErrMainCategNotConsistent)
+		return domain.ErrMainCategNotConsistent
 	}
 
-	if err := t.Transaction.Create(ctx, transaction); err != nil {
-		logger.Error("t.Transaction.Create failed", "package", "usecase", "err", err)
+	if err := t.Transaction.Create(ctx, trans); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (t *TransactionUC) GetAll(ctx context.Context, query *domain.GetQuery, user *domain.User) ([]domain.Transaction, error) {
+func (t *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error) {
 	transactions, err := t.Transaction.GetAll(ctx, query, user.ID)
 	if err != nil {
-		logger.Error("t.Transaction.GetAll failed", "package", "usecase", "err", err)
 		return nil, err
 	}
 

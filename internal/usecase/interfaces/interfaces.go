@@ -21,7 +21,7 @@ type MainCategModel interface {
 	Create(categ *domain.MainCateg, userID int64) error
 
 	// GetAll returns all main categories by user id.
-	GetAll(userID int64, categType domain.MainCategType) ([]domain.MainCateg, error)
+	GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)
 
 	// Update updates a main category.
 	Update(categ *domain.MainCateg) error
@@ -63,8 +63,8 @@ type IconModel interface {
 // TransactionModel is the interface that wraps the basic methods for transaction model.
 type TransactionModel interface {
 	// Create inserts a new transaction into the database.
-	Create(ctx context.Context, transaction *domain.Transaction) error
+	Create(ctx context.Context, trans domain.CreateTransactionInput) error
 
 	// GetAll returns all transactions by user id and query.
-	GetAll(ctx context.Context, query *domain.GetQuery, userID int64) ([]domain.Transaction, error)
+	GetAll(ctx context.Context, query domain.GetQuery, userID int64) ([]domain.Transaction, error)
 }

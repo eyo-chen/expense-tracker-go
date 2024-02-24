@@ -7,11 +7,12 @@ func cvtToGetTransactionResp(trans []domain.Transaction) getTransactionResp {
 
 	for _, t := range trans {
 		resp = append(resp, transaction{
-			ID: t.ID,
+			ID:   t.ID,
+			Type: t.Type.ToString(),
 			MainCateg: mainCateg{
 				ID:   t.MainCateg.ID,
 				Name: t.MainCateg.Name,
-				Type: t.MainCateg.Type.String(),
+				Type: t.MainCateg.Type.ToString(),
 				Icon: icon{
 					ID:  t.MainCateg.Icon.ID,
 					URL: t.MainCateg.Icon.URL,

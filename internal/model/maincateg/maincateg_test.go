@@ -115,10 +115,10 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 							 AND type = ?
 							 `
 	var result maincateg.MainCateg
-	err = s.db.QueryRow(checkStmt, users[0].ID, "test", domain.Expense.ModelValue()).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	err = s.db.QueryRow(checkStmt, users[0].ID, "test", domain.Expense.ToModelValue()).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categ.Name, result.Name, desc)
-	s.Require().Equal(categ.Type.ModelValue(), result.Type, desc)
+	s.Require().Equal(categ.Type.ToModelValue(), result.Type, desc)
 	s.Require().Equal(icons[0].ID, result.IconID, desc)
 }
 
@@ -310,7 +310,7 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
-	s.Require().Equal(inputCateg.Type.ModelValue(), result.Type, desc)
+	s.Require().Equal(inputCateg.Type.ToModelValue(), result.Type, desc)
 }
 
 func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) {
@@ -337,7 +337,7 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 	err = s.db.QueryRow(checkStmt, categs[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
-	s.Require().Equal(inputCateg.Type.ModelValue(), result.Type, desc)
+	s.Require().Equal(inputCateg.Type.ToModelValue(), result.Type, desc)
 
 	// check if the other data is not updated
 	var result2 maincateg.MainCateg
@@ -354,7 +354,7 @@ func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 	domainMainCateg := &domain.MainCateg{
 		ID:   categs[0].ID,
 		Name: categs[1].Name, // update categ1 with categ2 name
-		Type: domain.CvtToMainCategType(categs[0].Type),
+		Type: domain.CvtToTransactionType(categs[0].Type),
 		Icon: domain.Icon{
 			ID: categs[0].IconID,
 		},
@@ -370,7 +370,7 @@ func update_DuplicateIcon_ReturnError(s *MainCategSuite, desc string) {
 	domainMainCateg := &domain.MainCateg{
 		ID:   categs[0].ID,
 		Name: categs[0].Name + "2", // make sure the name is different
-		Type: domain.CvtToMainCategType(categs[0].Type),
+		Type: domain.CvtToTransactionType(categs[0].Type),
 		Icon: domain.Icon{
 			ID: categs[1].IconID, // update categ1 with categ2 icon
 		},

@@ -35,7 +35,7 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 
 	categ := domain.MainCateg{
 		Name: input.Name,
-		Type: domain.CvtToMainCategType(input.Type),
+		Type: domain.CvtToTransactionType(input.Type),
 		Icon: domain.Icon{
 			ID: input.IconID,
 		},
@@ -72,7 +72,7 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 
 func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
 	qType := r.URL.Query().Get("type")
-	categType := domain.CvtToMainCategType(qType)
+	categType := domain.CvtToTransactionType(qType)
 	user := ctxutil.GetUser(r)
 
 	categs, err := m.MainCateg.GetAll(user.ID, categType)
@@ -114,7 +114,7 @@ func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	categ := domain.MainCateg{
 		ID:   id,
 		Name: input.Name,
-		Type: domain.CvtToMainCategType(input.Type),
+		Type: domain.CvtToTransactionType(input.Type),
 		Icon: domain.Icon{
 			ID: input.IconID,
 		},

@@ -21,7 +21,7 @@ type MainCategUC interface {
 	Create(categ *domain.MainCateg, userID int64) error
 
 	// GetAll is a function that returns all main categories by user id.
-	GetAll(userID int64, categType domain.MainCategType) ([]domain.MainCateg, error)
+	GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)
 
 	// Update is a function that updates a main category.
 	Update(categ *domain.MainCateg, userID int64) error
@@ -51,8 +51,8 @@ type SubCategUC interface {
 // TransactionUC is the interface that wraps the basic methods for transaction usecase.
 type TransactionUC interface {
 	// Create is a function that creates a transaction.
-	Create(ctx context.Context, user *domain.User, transaction *domain.Transaction) error
+	Create(ctx context.Context, trans domain.CreateTransactionInput) error
 
 	// GetAll is a function that returns all transactions by query and user id.
-	GetAll(ctx context.Context, query *domain.GetQuery, user *domain.User) ([]domain.Transaction, error)
+	GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error)
 }

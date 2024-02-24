@@ -16,11 +16,11 @@ type MainCategFactory struct {
 }
 
 func setIncomeType(maincateg *MainCateg) {
-	maincateg.Type = domain.Income.ModelValue()
+	maincateg.Type = domain.Income.ToModelValue()
 }
 
 func setExpenseType(maincateg *MainCateg) {
-	maincateg.Type = domain.Expense.ModelValue()
+	maincateg.Type = domain.Expense.ToModelValue()
 }
 
 func NewMainCategFactory(db *sql.DB) *MainCategFactory {

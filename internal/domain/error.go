@@ -35,4 +35,10 @@ var (
 
 	// icon not found error
 	ErrIconNotFound = errors.New("icon not found")
+
+	// main category in sub category is not consistent with the main category
+	ErrMainCategNotConsistent = errors.New("main category in sub category is not consistent with the main category")
+
+	// type in main category is not consistent with the tranmsaction type
+	ErrTypeNotConsistent = errors.New("type in main category is not consistent with the tranmsaction type")
 )

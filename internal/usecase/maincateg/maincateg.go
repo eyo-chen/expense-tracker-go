@@ -32,8 +32,8 @@ func (m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *MainCategUC) GetAll(userID int64, categType domain.MainCategType) ([]domain.MainCateg, error) {
-	categs, err := m.MainCateg.GetAll(userID, categType)
+func (m *MainCategUC) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
+	categs, err := m.MainCateg.GetAll(userID, transType)
 	if err != nil {
 		return nil, err
 	}
