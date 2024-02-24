@@ -34,6 +34,7 @@ type subCateg struct {
 
 type transaction struct {
 	ID        int64     `json:"id"`
+	Type      string    `json:"type"`
 	MainCateg mainCateg `json:"main_category"`
 	SubCateg  subCateg  `json:"sub_category"`
 	Price     float64   `json:"price"`

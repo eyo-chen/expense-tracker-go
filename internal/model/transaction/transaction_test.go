@@ -135,7 +135,8 @@ func getAll_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
-	trans, err := s.transactionModel.GetAll(mockCtx, nil, user.ID)
+	query := domain.GetQuery{}
+	trans, err := s.transactionModel.GetAll(mockCtx, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -148,7 +149,8 @@ func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc strin
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
-	trans, err := s.transactionModel.GetAll(mockCtx, nil, user.ID)
+	query := domain.GetQuery{}
+	trans, err := s.transactionModel.GetAll(mockCtx, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -164,11 +166,10 @@ func getAll_WithDiffDate_ReturnSuccessfully(s *TransactionSuite, desc string) {
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1)
 
-	getQuery := &domain.GetQuery{
+	getQuery := domain.GetQuery{
 		StartDate: mockTimeNow.AddDate(0, 0, -3).Format("2006-01-02"),
 		EndDate:   mockTimeNow.AddDate(0, 0, -2).Format("2006-01-02"),
 	}
-
 	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)

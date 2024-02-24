@@ -70,7 +70,7 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	startDate := r.URL.Query().Get("start_date")
 	endDate := r.URL.Query().Get("end_date")
 
-	query := &domain.GetQuery{
+	query := domain.GetQuery{
 		StartDate: startDate,
 		EndDate:   endDate,
 	}
@@ -83,9 +83,8 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	transactions, err := t.transaction.GetAll(ctx, query, user)
+	transactions, err := t.transaction.GetAll(ctx, query, *user)
 	if err != nil {
-		logger.Error("t.transaction.GetAll failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}

@@ -54,5 +54,5 @@ type TransactionUC interface {
 	Create(ctx context.Context, trans domain.CreateTransactionInput) error
 
 	// GetAll is a function that returns all transactions by query and user id.
-	GetAll(ctx context.Context, query *domain.GetQuery, user *domain.User) ([]domain.Transaction, error)
+	GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error)
 }

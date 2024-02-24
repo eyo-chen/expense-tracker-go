@@ -10,6 +10,7 @@ import (
 func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.SubCateg, i icon.Icon) domain.Transaction {
 	return domain.Transaction{
 		ID:     t.ID,
+		Type:   domain.CvtToTransactionType(t.Type),
 		UserID: t.UserID,
 		Price:  t.Price,
 		Note:   t.Note,

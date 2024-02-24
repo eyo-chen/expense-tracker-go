@@ -19,6 +19,7 @@ var (
 
 func BluePrint(i int, last Transaction) Transaction {
 	return Transaction{
+		Type:  domain.Income.ToModelValue(),
 		Price: float64(i*10.0 + 1.0),
 		Note:  "test" + fmt.Sprint(i),
 		Date:  mockTimeNow,
@@ -48,6 +49,7 @@ func GetAll_GenExpResult(ts []Transaction, u user.User, ms []maincateg.MainCateg
 		expResult = append(expResult, domain.Transaction{
 			ID:     ts[i].ID,
 			UserID: u.ID,
+			Type:   domain.CvtToTransactionType(ts[i].Type),
 			MainCateg: domain.MainCateg{
 				ID:   ms[i].ID,
 				Name: ms[i].Name,

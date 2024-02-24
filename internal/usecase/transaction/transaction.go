@@ -65,10 +65,9 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 	return nil
 }
 
-func (t *TransactionUC) GetAll(ctx context.Context, query *domain.GetQuery, user *domain.User) ([]domain.Transaction, error) {
+func (t *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error) {
 	transactions, err := t.Transaction.GetAll(ctx, query, user.ID)
 	if err != nil {
-		logger.Error("t.Transaction.GetAll failed", "package", PackageName, "err", err)
 		return nil, err
 	}
 

@@ -65,6 +65,11 @@ func EnableCORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Headers", "Origin, Authorization, Content-Type")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }
