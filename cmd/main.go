@@ -32,7 +32,7 @@ func main() {
 	// Setup model, usecase, and handler
 	model := model.New(mysqlDB)
 	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon, &model.Transaction)
-	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction)
+	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction, &usecase.Icon)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}
