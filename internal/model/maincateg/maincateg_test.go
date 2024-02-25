@@ -58,22 +58,17 @@ func (s *MainCategSuite) SetupTest() {
 
 func (s *MainCategSuite) TearDownTest() {
 	tx, err := s.db.Begin()
-	if err != nil {
-		s.Require().NoError(err)
-	}
+	s.Require().NoError(err)
 	defer tx.Rollback()
 
-	if _, err := tx.Exec("DELETE FROM main_categories"); err != nil {
-		s.Require().NoError(err)
-	}
+	_, err = tx.Exec("DELETE FROM main_categories")
+	s.Require().NoError(err)
 
-	if _, err := tx.Exec("DELETE FROM users"); err != nil {
-		s.Require().NoError(err)
-	}
+	_, err = tx.Exec("DELETE FROM users")
+	s.Require().NoError(err)
 
-	if _, err := tx.Exec("DELETE FROM icons"); err != nil {
-		s.Require().NoError(err)
-	}
+	_, err = tx.Exec("DELETE FROM icons")
+	s.Require().NoError(err)
 
 	s.Require().NoError(tx.Commit())
 

@@ -7,6 +7,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
@@ -17,6 +18,7 @@ type IconSuite struct {
 	db      *sql.DB
 	migrate *migrate.Migrate
 	model   interfaces.IconModel
+	f       *testutil.Factory[Icon]
 }
 
 func TestIconSuite(t *testing.T) {
@@ -26,9 +28,11 @@ func TestIconSuite(t *testing.T) {
 func (s *IconSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
 	db, migrate := testutil.ConnToDB(port)
+	logger.Register()
 	s.model = NewIconModel(db)
 	s.db = db
 	s.migrate = migrate
+	s.f = testutil.NewFactory(db, Icon{}, Blueprint, Inserter)
 }
 
 func (s *IconSuite) TearDownSuite() {
@@ -37,51 +41,96 @@ func (s *IconSuite) TearDownSuite() {
 	dockerutil.PurgeDocker()
 }
 
-func (s *IconSuite) TestGetByID() {
-	tests := []struct {
-		Desc        string
-		ID          int64
-		SetupFun    func() error
-		Expected    *domain.Icon
-		ExpectedErr error
-	}{
-		{
-			Desc: "Get icon successfully",
-			ID:   1,
-			SetupFun: func() error {
-				stmt := `INSERT INTO icons (url) VALUES (?)`
-				_, err := s.db.Exec(stmt, "https://test.com")
-				return err
-			},
-			Expected: &domain.Icon{
-				ID:  1,
-				URL: "https://test.com",
-			},
-			ExpectedErr: nil,
-		},
-		{
-			Desc:        "Not found",
-			ID:          2,
-			Expected:    nil,
-			ExpectedErr: domain.ErrIconNotFound,
-		},
-	}
+func (s *IconSuite) SetupTest() {
+	s.model = NewIconModel(s.db)
+	s.f = testutil.NewFactory(s.db, Icon{}, Blueprint, Inserter)
+}
 
-	for _, test := range tests {
-		s.T().Run(test.Desc, func(t *testing.T) {
-			if test.SetupFun != nil {
-				err := test.SetupFun()
-				s.NoError(err, test.Desc)
-			}
+func (s *IconSuite) TearDownTest() {
+	tx, err := s.db.Begin()
+	s.Require().NoError(err)
+	defer tx.Rollback()
 
-			icon, err := s.model.GetByID(test.ID)
-			if test.ExpectedErr != nil {
-				s.EqualError(err, test.ExpectedErr.Error(), test.Desc)
-				return
-			}
+	_, err = tx.Exec("DELETE FROM icons")
+	s.Require().NoError(err)
 
-			s.Equal(test.Expected, icon, test.Desc)
-			s.Equal(test.Expected.ID, icon.ID, test.Desc)
+	s.Require().NoError(tx.Commit())
+	s.f.Reset()
+}
+
+func (s *IconSuite) TestList() {
+	for scenario, fn := range map[string]func(s *IconSuite, desc string){
+		"when has icons, return all":    list_WithIcons_ReturnAll,
+		"when has no icons, return nil": list_WithoutIcons_ReturnNil,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
 		})
 	}
+}
+
+func list_WithIcons_ReturnAll(s *IconSuite, desc string) {
+	icons, err := s.f.BuildList(2).InsertList()
+	s.Require().NoError(err, desc)
+
+	expRes := []domain.Icon{
+		{
+			ID:  icons[0].ID,
+			URL: icons[0].URL,
+		},
+		{
+			ID:  icons[1].ID,
+			URL: icons[1].URL,
+		},
+	}
+
+	res, err := s.model.List()
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, res, desc)
+}
+
+func list_WithoutIcons_ReturnNil(s *IconSuite, desc string) {
+	res, err := s.model.List()
+	s.Require().NoError(err, desc)
+	s.Require().Nil(res, desc)
+}
+
+func (s *IconSuite) TestGetByID() {
+	for scenario, fn := range map[string]func(s *IconSuite, desc string){
+		"when has icon, return icon":   getByID_WithIcon_ReturnIcon,
+		"when has no icon, return err": getByID_WithoutIcon_ReturnErr,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
+	icons, err := s.f.BuildList(2).InsertList()
+	s.Require().NoError(err, desc)
+
+	expRes := domain.Icon{
+		ID:  icons[0].ID,
+		URL: icons[0].URL,
+	}
+
+	res, err := s.model.GetByID(icons[0].ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, res, desc)
+}
+
+func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
+	_, err := s.f.BuildList(2).InsertList()
+	s.Require().NoError(err, desc)
+
+	expRes := domain.Icon{}
+
+	res, err := s.model.GetByID(999)
+	s.Require().Equal(expRes, res, desc)
+	s.Require().Equal(domain.ErrIconNotFound, err, desc)
 }
