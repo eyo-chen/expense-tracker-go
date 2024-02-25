@@ -59,3 +59,9 @@ type TransactionUC interface {
 	// GetAccInfo is a function that returns the accunulated information by user id.
 	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error)
 }
+
+// IconUC is the interface that wraps the basic methods for icon usecase.
+type IconUC interface {
+	// List is a function that returns all icons.
+	List() ([]domain.Icon, error)
+}

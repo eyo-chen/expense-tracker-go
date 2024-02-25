@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/icon"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/subcateg"
@@ -13,6 +14,7 @@ type Usecase struct {
 	MainCateg   maincateg.MainCategUC
 	SubCateg    subcateg.SubCategUC
 	Transaction transaction.TransactionUC
+	Icon        icon.IconUC
 }
 
 func New(u interfaces.UserModel, m interfaces.MainCategModel, s interfaces.SubCategModel, i interfaces.IconModel, t interfaces.TransactionModel) *Usecase {
@@ -21,5 +23,6 @@ func New(u interfaces.UserModel, m interfaces.MainCategModel, s interfaces.SubCa
 		MainCateg:   *maincateg.NewMainCategUC(m, i),
 		SubCateg:    *subcateg.NewSubCategUC(s, m),
 		Transaction: *transaction.NewTransactionUC(t, m, s),
+		Icon:        *icon.NewIconUC(i),
 	}
 }
