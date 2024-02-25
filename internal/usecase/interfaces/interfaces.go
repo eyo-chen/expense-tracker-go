@@ -57,7 +57,10 @@ type SubCategModel interface {
 // IconModel is the interface that wraps the basic methods for icon model.
 type IconModel interface {
 	// GetByID returns an icon by id.
-	GetByID(id int64) (*domain.Icon, error)
+	GetByID(id int64) (domain.Icon, error)
+
+	// List returns all icons.
+	List() ([]domain.Icon, error)
 }
 
 // TransactionModel is the interface that wraps the basic methods for transaction model.

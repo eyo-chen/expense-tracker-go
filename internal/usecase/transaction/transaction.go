@@ -66,19 +66,9 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 }
 
 func (t *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error) {
-	transactions, err := t.Transaction.GetAll(ctx, query, user.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return transactions, nil
+	return t.Transaction.GetAll(ctx, query, user.ID)
 }
 
 func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
-	accInfo, err := t.Transaction.GetAccInfo(ctx, query, user.ID)
-	if err != nil {
-		return domain.AccInfo{}, err
-	}
-
-	return accInfo, nil
+	return t.Transaction.GetAccInfo(ctx, query, user.ID)
 }
