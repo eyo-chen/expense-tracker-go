@@ -55,4 +55,7 @@ type TransactionUC interface {
 
 	// GetAll is a function that returns all transactions by query and user id.
 	GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error)
+
+	// GetAccInfo is a function that returns the accunulated information by user id.
+	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error)
 }

@@ -13,6 +13,10 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
+const (
+	PackageName = "handler/transaction"
+)
+
 type TransactionHandler struct {
 	transaction interfaces.TransactionUC
 }
@@ -26,7 +30,7 @@ func NewTransactionHandler(t interfaces.TransactionUC) *TransactionHandler {
 func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input createTransactionReq
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
-		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
+		logger.Error("jsonutil.ReadJSON failed", "package", PackageName, "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -60,7 +64,7 @@ func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
-		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
+		logger.Error("jsonutil.WriteJSON failed", "package", PackageName, "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
@@ -95,7 +99,43 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
-		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
+		logger.Error("jsonutil.WriteJSON failed", "package", PackageName, "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
+
+func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) {
+	startDate := r.URL.Query().Get("start_date")
+	endDate := r.URL.Query().Get("end_date")
+
+	query := domain.GetAccInfoQuery{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	v := validator.New()
+	if !v.GetAccInfo(query) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	ctx := r.Context()
+	info, err := t.transaction.GetAccInfo(ctx, query, *user)
+	if err != nil {
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"total_income":  info.TotalIncome,
+		"total_expense": info.TotalExpense,
+		"total_balance": info.TotalBalance,
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", PackageName, "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}

@@ -73,3 +73,12 @@ func (t *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user 
 
 	return transactions, nil
 }
+
+func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
+	accInfo, err := t.Transaction.GetAccInfo(ctx, query, user.ID)
+	if err != nil {
+		return domain.AccInfo{}, err
+	}
+
+	return accInfo, nil
+}

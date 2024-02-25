@@ -67,4 +67,7 @@ type TransactionModel interface {
 
 	// GetAll returns all transactions by user id and query.
 	GetAll(ctx context.Context, query domain.GetQuery, userID int64) ([]domain.Transaction, error)
+
+	// GetAccInfo returns accumulated information by user id and query.
+	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error)
 }

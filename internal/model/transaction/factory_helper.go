@@ -27,9 +27,9 @@ func BluePrint(i int, last Transaction) Transaction {
 }
 
 func Inserter(db *sql.DB, t Transaction) (Transaction, error) {
-	stmt := `INSERT INTO transactions (user_id, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?)`
+	stmt := `INSERT INTO transactions (user_id, type, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?, ?)`
 
-	res, err := db.Exec(stmt, t.UserID, t.MainCategID, t.SubCategID, t.Price, t.Note, t.Date)
+	res, err := db.Exec(stmt, t.UserID, t.Type, t.MainCategID, t.SubCategID, t.Price, t.Note, t.Date)
 	if err != nil {
 		return Transaction{}, err
 	}
