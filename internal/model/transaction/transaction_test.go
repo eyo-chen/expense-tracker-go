@@ -113,6 +113,8 @@ func (s *TransactionSuite) TestCreate() {
 	s.Equal(t.SubCategID, checkT.SubCategID)
 	s.Equal(t.Price, checkT.Price)
 	s.Equal(t.Note, checkT.Note)
+
+	s.TearDownTest()
 }
 
 func (s *TransactionSuite) TestGetAll() {

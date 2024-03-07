@@ -6,52 +6,55 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
+	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
 )
 
 type MainCategFactory struct {
-	mainCateg *testutil.Factory[MainCateg]
-	user      *testutil.Factory[user.User]
-	icon      *testutil.Factory[icon.Icon]
+	MainCateg *efactory.Factory[MainCateg]
+	User      *efactory.Factory[user.User]
+	Icon      *efactory.Factory[icon.Icon]
 }
 
-func setIncomeType(maincateg *MainCateg) {
-	maincateg.Type = domain.Income.ToModelValue()
+func setIncomeType(m *MainCateg) {
+	m.Type = domain.Income.ToModelValue()
 }
 
-func setExpenseType(maincateg *MainCateg) {
-	maincateg.Type = domain.Expense.ToModelValue()
+func setExpenseType(m *MainCateg) {
+	m.Type = domain.Expense.ToModelValue()
 }
 
 func NewMainCategFactory(db *sql.DB) *MainCategFactory {
+	categConfig := efactory.Config[MainCateg]{
+		DB:          &esql.Config{DB: db},
+		StorageName: "main_categories",
+		BluePrint:   BluePrint,
+	}
+
+	userConfig := efactory.Config[user.User]{
+		DB: &esql.Config{DB: db},
+	}
+
+	iconConfig := efactory.Config[icon.Icon]{
+		DB: &esql.Config{DB: db},
+	}
+
 	return &MainCategFactory{
-		mainCateg: testutil.NewFactory[MainCateg](db, MainCateg{}, BluePrint, Inserter).SetTrait("income", setIncomeType).SetTrait("expense", setExpenseType),
-		user:      testutil.NewFactory[user.User](db, user.User{}, BluePrintUser, InserterUser),
-		icon:      testutil.NewFactory[icon.Icon](db, icon.Icon{}, BluePrintIcon, InsertIcon),
+		MainCateg: efactory.New(MainCateg{}).SetConfig(categConfig).
+			SetTrait("income", setIncomeType).
+			SetTrait("expense", setExpenseType),
+		User: efactory.New(user.User{}).SetConfig(userConfig),
+		Icon: efactory.New(icon.Icon{}).SetConfig(iconConfig),
 	}
 }
 
-func (mf *MainCategFactory) PrepareUsers(i int, overwrites ...user.User) *MainCategFactory {
-	mf.user.BuildList(i).Overwrites(overwrites)
-	return mf
-}
-
-func (mf *MainCategFactory) PrepareIcons(i int, overwrites ...icon.Icon) *MainCategFactory {
-	mf.icon.BuildList(i).Overwrites(overwrites)
-	return mf
-}
-
-func (mf *MainCategFactory) InsertIcons() ([]icon.Icon, error) {
-	return mf.icon.InsertList()
-}
-
-func (mf *MainCategFactory) InsertUserAndIcon() ([]user.User, []icon.Icon, error) {
-	users, err := mf.user.InsertList()
+func (mf *MainCategFactory) InsertUserAndIcon(userI int, iconI int) ([]user.User, []icon.Icon, error) {
+	users, err := mf.User.BuildList(userI).Insert()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	icons, err := mf.icon.InsertList()
+	icons, err := mf.Icon.BuildList(iconI).Insert()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -59,29 +62,11 @@ func (mf *MainCategFactory) InsertUserAndIcon() ([]user.User, []icon.Icon, error
 	return users, icons, nil
 }
 
-func (mf *MainCategFactory) PrepareMainCateies(i int, overwrites ...MainCateg) *MainCategFactory {
-	mf.mainCateg.BuildList(i).Overwrites(overwrites)
-	return mf
-}
-
-func (mf *MainCategFactory) InsertMainCateies() ([]MainCateg, error) {
-	return mf.mainCateg.InsertList()
-}
-
-func (mf *MainCategFactory) PrepareMainCateg(overwrite MainCateg) *MainCategFactory {
-	mf.mainCateg.Build().Overwrite(overwrite)
-	return mf
-}
-
-func (mf *MainCategFactory) InsertMainCateg() (MainCateg, error) {
-	return mf.mainCateg.Insert()
-}
-
 func (mf *MainCategFactory) InsertMainCategWithAss(ow MainCateg) (MainCateg, user.User, icon.Icon, error) {
 	user := &user.User{}
 	icon := &icon.Icon{}
 
-	maincateg, _, err := mf.mainCateg.Build().Overwrite(ow).WithOne(user).WithOne(icon).InsertWithAss()
+	maincateg, _, err := mf.MainCateg.Build().Overwrite(ow).WithOne(user).WithOne(icon).InsertWithAss()
 
 	return maincateg, *user, *icon, err
 }
@@ -97,7 +82,10 @@ func (mf *MainCategFactory) InsertMainCategListWithAss(i int, userIdx int, iconI
 		userPtrList = append(userPtrList, &user.User{})
 	}
 
-	maincategList, _, err := mf.mainCateg.BuildList(i).WithTraits(traitName).WithMany(userIdx, userPtrList...).WithMany(iconIdx, iconPtrList...).InsertListWithAss()
+	maincategList, _, err := mf.MainCateg.BuildList(i).
+		WithTraits(traitName...).
+		WithMany(userPtrList...).WithMany(iconPtrList...).
+		InsertWithAss()
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -116,7 +104,7 @@ func (mf *MainCategFactory) InsertMainCategListWithAss(i int, userIdx int, iconI
 }
 
 func (mf *MainCategFactory) Reset() {
-	mf.mainCateg.Reset()
-	mf.user.Reset()
-	mf.icon.Reset()
+	mf.MainCateg.Reset()
+	mf.User.Reset()
+	mf.Icon.Reset()
 }

@@ -90,7 +90,7 @@ func (s *MainCategSuite) TestCreate() {
 }
 
 func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.PrepareUsers(1).PrepareIcons(1).InsertUserAndIcon()
+	users, icons, err := s.f.InsertUserAndIcon(1, 1)
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
@@ -121,14 +121,14 @@ func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 	createdMainCateg, user, _, err := s.f.InsertMainCategWithAss(maincateg.MainCateg{})
 	s.Require().NoError(err, desc)
 
-	icons, err := s.f.PrepareIcons(1).InsertIcons()
+	icon, err := s.f.Icon.Build().Insert()
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
 		Name: createdMainCateg.Name,
 		Type: domain.Income,
 		Icon: domain.Icon{
-			ID: icons[0].ID,
+			ID: icon.ID,
 		},
 	}
 	err = s.mainCategModel.Create(categ, user.ID)
