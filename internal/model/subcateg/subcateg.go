@@ -24,7 +24,7 @@ type SubCateg struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	UserID      int64  `json:"user_id" efactory:"User"`
-	MainCategID int64  `json:"main_category_id" efactory:"MainCateg,main_categories" eDB:"main_category_id"`
+	MainCategID int64  `json:"main_category_id" efactory:"MainCateg,main_categories" esql:"main_category_id"`
 }
 
 func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
