@@ -7,22 +7,35 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
+	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
 )
 
 type TransactionFactory struct {
-	transaction *testutil.Factory[Transaction]
-	user        *testutil.Factory[user.User]
-	maincateg   *testutil.Factory[maincateg.MainCateg]
-	subcateg    *testutil.Factory[subcateg.SubCateg]
+	transaction *efactory.Factory[Transaction]
+	user        *efactory.Factory[user.User]
+	maincateg   *efactory.Factory[maincateg.MainCateg]
+	subcateg    *efactory.Factory[subcateg.SubCateg]
 }
 
 func NewTransactionFactory(db *sql.DB) *TransactionFactory {
 	return &TransactionFactory{
-		transaction: testutil.NewFactory(db, Transaction{}, BluePrint, Inserter),
-		user:        testutil.NewFactory(db, user.User{}, user.Blueprint, user.Inserter),
-		maincateg:   testutil.NewFactory(db, maincateg.MainCateg{}, maincateg.BluePrint, maincateg.Inserter),
-		subcateg:    testutil.NewFactory(db, subcateg.SubCateg{}, subcateg.Blueprint, subcateg.Inserter),
+		transaction: efactory.New(Transaction{}).SetConfig(efactory.Config[Transaction]{
+			DB:        &esql.Config{DB: db},
+			BluePrint: BluePrint,
+		}),
+		user: efactory.New(user.User{}).SetConfig(efactory.Config[user.User]{
+			DB: &esql.Config{DB: db},
+		}),
+		maincateg: efactory.New(maincateg.MainCateg{}).SetConfig(efactory.Config[maincateg.MainCateg]{
+			DB:          &esql.Config{DB: db},
+			StorageName: "main_categories",
+			BluePrint:   maincateg.BluePrint,
+		}),
+		subcateg: efactory.New(subcateg.SubCateg{}).SetConfig(efactory.Config[subcateg.SubCateg]{
+			DB:          &esql.Config{DB: db},
+			StorageName: "sub_categories",
+		}),
 	}
 }
 
@@ -51,7 +64,7 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 		iconPtrList = append(iconPtrList, &icon.Icon{})
 	}
 
-	maincategList, _, err := tf.maincateg.BuildList(i).WithOne(&u).WithMany(i, iconPtrList...).InsertListWithAss()
+	maincategList, _, err := tf.maincateg.BuildList(i).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
 	if err != nil {
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}
@@ -61,7 +74,7 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 		owSub = append(owSub, subcateg.SubCateg{UserID: m.UserID, MainCategID: m.ID})
 	}
 
-	subcategList, err := tf.subcateg.BuildList(i).Overwrites(owSub).InsertList()
+	subcategList, err := tf.subcateg.BuildList(i).Overwrites(owSub...).Insert()
 	if err != nil {
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}
@@ -75,7 +88,7 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 		})
 	}
 
-	transList, err := tf.transaction.BuildList(i).Overwrites(owTrans).Overwrites(ow).InsertList()
+	transList, err := tf.transaction.BuildList(i).Overwrites(owTrans...).Overwrites(ow...).Insert()
 	if err != nil {
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}

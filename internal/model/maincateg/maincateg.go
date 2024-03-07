@@ -26,8 +26,8 @@ type MainCateg struct {
 	ID     int64  `json:"id"`
 	Name   string `json:"name"`
 	Type   string `json:"type"`
-	IconID int64  `json:"icon_id" factory:"Icon,icons"`
-	UserID int64  `json:"user_id" factory:"User,users"`
+	IconID int64  `json:"icon_id" efactory:"Icon"`
+	UserID int64  `json:"user_id" efactory:"User"`
 }
 
 func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {

@@ -21,14 +21,14 @@ type TransactionModel struct {
 }
 
 type Transaction struct {
-	ID          int64     `json:"id"`
-	Type        string    `json:"type"`
-	UserID      int64     `json:"user_id" factory:"User,users"`
-	MainCategID int64     `json:"main_category_id" factory:"MainCateg,main_categories"`
-	SubCategID  int64     `json:"sub_category_id" factory:"SubCateg,sub_categories"`
-	Price       float64   `json:"price"`
-	Note        string    `json:"note"`
-	Date        time.Time `json:"date"`
+	ID          int64
+	Type        string
+	UserID      int64 `efactory:"User"`
+	MainCategID int64 `efactory:"MainCateg,main_categories" esql:"main_category_id"`
+	SubCategID  int64 `efactory:"SubCateg,sub_categories" esql:"sub_category_id"`
+	Price       float64
+	Note        string
+	Date        time.Time
 }
 
 func NewTransactionModel(db *sql.DB) *TransactionModel {
