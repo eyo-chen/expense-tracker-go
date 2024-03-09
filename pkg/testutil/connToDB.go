@@ -24,7 +24,7 @@ func ConnToDB(port string) (*sql.DB, *migrate.Migrate) {
 	}
 
 	baseDir := filepath.Join("..", "..", "..")
-	migrationDir := fmt.Sprintf("file://%s/migrations/", baseDir)
+	migrationDir := fmt.Sprintf("file://%s/migrations/schema", baseDir)
 	migration, err := migrate.NewWithDatabaseInstance(
 		migrationDir,
 		"mysql", driver,
