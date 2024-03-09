@@ -13,6 +13,9 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/usecase"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate"
+	"github.com/golang-migrate/migrate/database/mysql"
+	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/joho/godotenv"
 )
 
@@ -28,6 +31,16 @@ func main() {
 		logger.Fatal("Unable to connect to mysql database", "error", err)
 	}
 	defer mysqlDB.Close()
+
+	logger.Info("Applying schema migrations...")
+	if err := applySchemaMigrations(mysqlDB); err != nil {
+		logger.Fatal("Unable to apply schema migrations", "error", err)
+	}
+
+	logger.Info("Applying data migrations...")
+	if err := applyDataMigrations(mysqlDB); err != nil {
+		logger.Fatal("Unable to apply data migrations", "error", err)
+	}
 
 	// Setup model, usecase, and handler
 	model := model.New(mysqlDB)
@@ -69,6 +82,52 @@ func initServe(handler *handler.Handler) error {
 
 	logger.Info("Starting server", "addr", srv.Addr)
 	if err := srv.ListenAndServe(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func applySchemaMigrations(db *sql.DB) error {
+	driver, err := mysql.WithInstance(db, &mysql.Config{
+		MigrationsTable: "schema_migrations",
+	})
+	if err != nil {
+		return err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://./migrations/schema/",
+		"mysql", driver,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+
+	return nil
+}
+
+func applyDataMigrations(db *sql.DB) error {
+	driver, err := mysql.WithInstance(db, &mysql.Config{
+		MigrationsTable: "data_migrations",
+	})
+	if err != nil {
+		return err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://./migrations/data/",
+		"mysql", driver,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return err
 	}
 
