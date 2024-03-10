@@ -36,8 +36,10 @@ type AccInfo struct {
 
 // GetQuery contains query for getting transactions
 type GetQuery struct {
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
+	StartDate   *string `json:"start_date"`
+	EndDate     *string `json:"end_date"`
+	MainCategID *int64  `json:"main_category_id"`
+	SubCategID  *int64  `json:"sub_category_id"`
 }
 
 // GetAccInfoQuery contains query for getting accumulated information

@@ -195,8 +195,9 @@ func getAll_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc st
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2, 3)
 
+	startDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
 	getQuery := domain.GetQuery{
-		StartDate: mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly),
+		StartDate: &startDate,
 	}
 	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
 	s.Require().NoError(err, desc)
@@ -219,8 +220,9 @@ func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc strin
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1)
 
+	endDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
 	getQuery := domain.GetQuery{
-		EndDate: mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly),
+		EndDate: &endDate,
 	}
 	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
 	s.Require().NoError(err, desc)
@@ -243,9 +245,11 @@ func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transaction
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2)
 
+	startDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
+	endDate := mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly)
 	getQuery := domain.GetQuery{
-		StartDate: mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly),
-		EndDate:   mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly),
+		StartDate: &startDate,
+		EndDate:   &endDate,
 	}
 	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
 	s.Require().NoError(err, desc)

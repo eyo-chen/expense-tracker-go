@@ -26,28 +26,28 @@ func (v *Validator) GetTransaction(q domain.GetQuery) bool {
 }
 
 func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery) bool {
-	v.Check(isValidDateFormat(q.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
-	v.Check(isValidDateFormat(q.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
-	v.Check(checkStartDateBeforeEndDate(q.StartDate, q.EndDate), "startDate", "Start date must be before end date")
+	v.Check(isValidDateFormat(&q.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
+	v.Check(isValidDateFormat(&q.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
+	v.Check(checkStartDateBeforeEndDate(&q.StartDate, &q.EndDate), "startDate", "Start date must be before end date")
 
 	return v.Valid()
 }
 
-func isValidDateFormat(dateString string) bool {
-	if dateString == "" {
+func isValidDateFormat(dateString *string) bool {
+	if dateString == nil {
 		return true
 	}
 
-	_, err := time.Parse(time.DateOnly, dateString)
+	_, err := time.Parse(time.DateOnly, *dateString)
 	return err == nil
 }
 
-func checkStartDateBeforeEndDate(startDate, endDate string) bool {
-	if startDate == "" || endDate == "" {
+func checkStartDateBeforeEndDate(startDate, endDate *string) bool {
+	if startDate == nil || endDate == nil {
 		return true
 	}
 
-	start, _ := time.Parse(time.DateOnly, startDate)
-	end, _ := time.Parse(time.DateOnly, endDate)
+	start, _ := time.Parse(time.DateOnly, *startDate)
+	end, _ := time.Parse(time.DateOnly, *endDate)
 	return start.Before(end) || start.Equal(end)
 }

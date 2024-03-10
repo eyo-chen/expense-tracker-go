@@ -48,7 +48,7 @@ func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransa
 }
 
 func (t *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, userID int64) ([]domain.Transaction, error) {
-	qStmt := getAllQStmt(query, userID)
+	qStmt := getAllQStmt(query)
 	args := getAllArgs(query, userID)
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
