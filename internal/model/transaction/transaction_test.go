@@ -398,7 +398,7 @@ func getAccInfo_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, des
 		TotalBalance: 3000,
 	}
 
-	startDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
+	startDate := mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly)
 	query := domain.GetAccInfoQuery{
 		StartDate: &startDate,
 	}
