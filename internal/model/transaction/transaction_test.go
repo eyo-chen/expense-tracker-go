@@ -398,8 +398,9 @@ func getAccInfo_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, des
 		TotalBalance: 3000,
 	}
 
+	startDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
 	query := domain.GetAccInfoQuery{
-		StartDate: mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly),
+		StartDate: &startDate,
 	}
 	accInfo, err := s.transactionModel.GetAccInfo(mockCtx, query, user.ID)
 	s.Require().NoError(err, desc)
@@ -426,8 +427,9 @@ func getAccInfo_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc s
 		TotalBalance: -999,
 	}
 
+	endDate := mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly)
 	query := domain.GetAccInfoQuery{
-		EndDate: mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly),
+		EndDate: &endDate,
 	}
 	accInfo, err := s.transactionModel.GetAccInfo(mockCtx, query, user.ID)
 	s.Require().NoError(err, desc)
@@ -454,9 +456,11 @@ func getAccInfo_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transac
 		TotalBalance: 0,
 	}
 
+	startDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
+	endDate := mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly)
 	query := domain.GetAccInfoQuery{
-		StartDate: mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly),
-		EndDate:   mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly),
+		StartDate: &startDate,
+		EndDate:   &endDate,
 	}
 	accInfo, err := s.transactionModel.GetAccInfo(mockCtx, query, user.ID)
 	s.Require().NoError(err, desc)

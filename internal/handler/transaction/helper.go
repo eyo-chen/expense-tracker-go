@@ -46,3 +46,20 @@ func genGetAllQuery(r *http.Request) (domain.GetQuery, error) {
 
 	return query, nil
 }
+
+func genGetAccInfoQuery(r *http.Request) domain.GetAccInfoQuery {
+	rawStartDate := r.URL.Query().Get("start_date")
+	rawEndDate := r.URL.Query().Get("end_date")
+
+	var query domain.GetAccInfoQuery
+
+	if rawStartDate != "" {
+		query.StartDate = &rawStartDate
+	}
+
+	if rawEndDate != "" {
+		query.EndDate = &rawEndDate
+	}
+
+	return query
+}

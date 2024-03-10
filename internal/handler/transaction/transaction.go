@@ -104,14 +104,7 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-
-	query := domain.GetAccInfoQuery{
-		StartDate: startDate,
-		EndDate:   endDate,
-	}
-
+	query := genGetAccInfoQuery(r)
 	v := validator.New()
 	if !v.GetAccInfo(query) {
 		errutil.VildateErrorResponse(w, r, v.Error)

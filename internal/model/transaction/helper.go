@@ -41,29 +41,29 @@ func getAllArgs(query domain.GetQuery, userID int64) []interface{} {
 	args = append(args, userID)
 
 	if query.StartDate != nil && query.EndDate != nil {
-		args = append(args, query.StartDate, query.EndDate)
+		args = append(args, *query.StartDate, *query.EndDate)
 	}
 
 	if query.StartDate != nil {
-		args = append(args, query.StartDate)
+		args = append(args, *query.StartDate)
 	}
 
 	if query.EndDate != nil {
-		args = append(args, query.EndDate)
+		args = append(args, *query.EndDate)
 	}
 
 	if query.MainCategID != nil {
-		args = append(args, query.MainCategID)
+		args = append(args, *query.MainCategID)
 	}
 
 	if query.SubCategID != nil {
-		args = append(args, query.SubCategID)
+		args = append(args, *query.SubCategID)
 	}
 
 	return args
 }
 
-func getAccInfoQStmt(query domain.GetAccInfoQuery, userID int64) string {
+func getAccInfoQStmt(query domain.GetAccInfoQuery) string {
 	qStmt := `SELECT
 						SUM(CASE WHEN type = '1' THEN price ELSE 0 END) AS total_income,
 						SUM(CASE WHEN type = '2' THEN price ELSE 0 END) AS total_expense,
@@ -72,15 +72,15 @@ func getAccInfoQStmt(query domain.GetAccInfoQuery, userID int64) string {
 						WHERE user_id = ?
 						`
 
-	if query.StartDate != "" && query.EndDate != "" {
+	if query.StartDate != nil && query.EndDate != nil {
 		qStmt += " AND date BETWEEN ? AND ?"
 	}
 
-	if query.StartDate != "" {
+	if query.StartDate != nil {
 		qStmt += " AND date >= ?"
 	}
 
-	if query.EndDate != "" {
+	if query.EndDate != nil {
 		qStmt += " AND date <= ?"
 	}
 
@@ -93,16 +93,16 @@ func getAccInfoArgs(query domain.GetAccInfoQuery, userID int64) []interface{} {
 	var args []interface{}
 	args = append(args, userID)
 
-	if query.StartDate != "" && query.EndDate != "" {
-		args = append(args, query.StartDate, query.EndDate)
+	if query.StartDate != nil && query.EndDate != nil {
+		args = append(args, *query.StartDate, *query.EndDate)
 	}
 
-	if query.StartDate != "" {
-		args = append(args, query.StartDate)
+	if query.StartDate != nil {
+		args = append(args, *query.StartDate)
 	}
 
-	if query.EndDate != "" {
-		args = append(args, query.EndDate)
+	if query.EndDate != nil {
+		args = append(args, *query.EndDate)
 	}
 
 	return args

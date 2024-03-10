@@ -77,7 +77,7 @@ func (t *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, us
 }
 
 func (t *TransactionModel) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error) {
-	qStmt := getAccInfoQStmt(query, userID)
+	qStmt := getAccInfoQStmt(query)
 	args := getAccInfoArgs(query, userID)
 
 	var accInfo domain.AccInfo
