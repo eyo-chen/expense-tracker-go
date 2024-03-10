@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	UniqueIconUser     = "main_categories.unique_icon_user"
-	UniqueNameUserType = "main_categories.unique_name_user_type"
+	uniqueIconUser     = "main_categories.unique_icon_user"
+	uniqueNameUserType = "main_categories.unique_name_user_type"
+	packagename        = "model/maincateg"
 )
 
 type MainCategModel struct {
@@ -35,15 +36,15 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 
 	c := cvtToMainCateg(categ, userID)
 	if _, err := m.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID); err != nil {
-		if errorutil.ParseError(err, UniqueNameUserType) {
+		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
 
-		if errorutil.ParseError(err, UniqueIconUser) {
+		if errorutil.ParseError(err, uniqueIconUser) {
 			return domain.ErrUniqueIconUser
 		}
 
-		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
 		return err
 	}
 
@@ -63,7 +64,7 @@ func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) 
 
 	rows, err := m.DB.Query(stmt, userID)
 	if err != nil {
-		logger.Error("m.DB.Query failed", "package", "model", "err", err)
+		logger.Error("m.DB.Query failed", "package", packagename, "err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -73,7 +74,7 @@ func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) 
 		var categ MainCateg
 		var icon icon.Icon
 		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &icon.ID, &icon.URL); err != nil {
-			logger.Error("rows.Scan failed", "package", "model", "err", err)
+			logger.Error("rows.Scan failed", "package", packagename, "err", err)
 			return nil, err
 		}
 
@@ -88,15 +89,15 @@ func (m *MainCategModel) Update(categ *domain.MainCateg) error {
 
 	c := cvtToMainCateg(categ, 0)
 	if _, err := m.DB.Exec(stmt, c.Name, c.Type, c.IconID, c.ID); err != nil {
-		if errorutil.ParseError(err, UniqueNameUserType) {
+		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
 
-		if errorutil.ParseError(err, UniqueIconUser) {
+		if errorutil.ParseError(err, uniqueIconUser) {
 			return domain.ErrUniqueIconUser
 		}
 
-		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
 		return err
 	}
 
@@ -107,7 +108,7 @@ func (m *MainCategModel) Delete(id int64) error {
 	stmt := `DELETE FROM main_categories WHERE id = ?`
 
 	if _, err := m.DB.Exec(stmt, id); err != nil {
-		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
 		return err
 	}
 
@@ -123,7 +124,7 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 			return nil, domain.ErrMainCategNotFound
 		}
 
-		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
+		logger.Error("m.DB.QueryRow failed", "package", packagename, "err", err)
 		return nil, err
 	}
 

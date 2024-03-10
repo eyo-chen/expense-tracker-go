@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	PackageName = "handler/transaction"
+	packageName = "handler/transaction"
 )
 
 type TransactionHandler struct {
@@ -30,7 +30,7 @@ func NewTransactionHandler(t interfaces.TransactionUC) *TransactionHandler {
 func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input createTransactionReq
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
-		logger.Error("jsonutil.ReadJSON failed", "package", PackageName, "err", err)
+		logger.Error("jsonutil.ReadJSON failed", "package", packageName, "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
@@ -64,19 +64,17 @@ func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
-		logger.Error("jsonutil.WriteJSON failed", "package", PackageName, "err", err)
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
 func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-
-	query := domain.GetQuery{
-		StartDate: startDate,
-		EndDate:   endDate,
+	query, err := genGetAllQuery(r)
+	if err != nil {
+		errutil.BadRequestResponse(w, r, err)
+		return
 	}
 
 	v := validator.New()
@@ -99,21 +97,14 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
-		logger.Error("jsonutil.WriteJSON failed", "package", PackageName, "err", err)
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
 func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-
-	query := domain.GetAccInfoQuery{
-		StartDate: startDate,
-		EndDate:   endDate,
-	}
-
+	query := genGetAccInfoQuery(r)
 	v := validator.New()
 	if !v.GetAccInfo(query) {
 		errutil.VildateErrorResponse(w, r, v.Error)
@@ -135,7 +126,7 @@ func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
-		logger.Error("jsonutil.WriteJSON failed", "package", PackageName, "err", err)
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
