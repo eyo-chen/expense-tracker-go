@@ -119,12 +119,14 @@ func (s *TransactionSuite) TestCreate() {
 
 func (s *TransactionSuite) TestGetAll() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when no error, return successfully":                      getAll_NoError_ReturnSuccessfully,
-		"when with multiple users, return successfully":           getAll_WithMultipleUsers_ReturnSuccessfully,
-		"when with many transactions, return all transactions":    getAll_WithManyTransaction_ReturnSuccessfully,
-		"when query start date, return data after start date":     getAll_QueryStartDate_ReturnDataAfterStartDate,
-		"when query end date, return data before end date":        getAll_QueryEndDate_ReturnDataBeforeEndDate,
-		"when query start and end date, return data between them": getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate,
+		"when no error, return successfully":                             getAll_NoError_ReturnSuccessfully,
+		"when with multiple users, return successfully":                  getAll_WithMultipleUsers_ReturnSuccessfully,
+		"when with many transactions, return all transactions":           getAll_WithManyTransaction_ReturnSuccessfully,
+		"when query start date, return data after start date":            getAll_QueryStartDate_ReturnDataAfterStartDate,
+		"when query end date, return data before end date":               getAll_QueryEndDate_ReturnDataBeforeEndDate,
+		"when query start and end date, return data between them":        getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate,
+		"when query main category id, return data with main category id": getAll_QueryMainCategID_ReturnDataWithMainCategID,
+		"when query sub category id, return data with sub category id":   getAll_QuerySubCategID_ReturnDataWithSubCategID,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -250,6 +252,46 @@ func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transaction
 	getQuery := domain.GetQuery{
 		StartDate: &startDate,
 		EndDate:   &endDate,
+	}
+	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+}
+
+func getAll_QueryMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc string) {
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(4)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
+
+	getQuery := domain.GetQuery{
+		MainCategID: &mainList[0].ID,
+	}
+	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+}
+
+func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc string) {
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(4)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1)
+
+	getQuery := domain.GetQuery{
+		SubCategID: &subList[1].ID,
 	}
 	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
 	s.Require().NoError(err, desc)
