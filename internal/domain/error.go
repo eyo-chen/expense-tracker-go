@@ -41,4 +41,7 @@ var (
 
 	// type in main category is not consistent with the tranmsaction type
 	ErrTypeNotConsistent = errors.New("type in main category is not consistent with the tranmsaction type")
+
+	// transaction data not found error
+	ErrTransactionDataNotFound = errors.New("transaction data not found")
 )

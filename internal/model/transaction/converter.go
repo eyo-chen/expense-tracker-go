@@ -43,3 +43,14 @@ func cvtToModelTransaction(t domain.CreateTransactionInput) Transaction {
 		Date:        t.Date,
 	}
 }
+
+func cvtToDomainTransactionWithoutCategory(t Transaction) domain.Transaction {
+	return domain.Transaction{
+		ID:     t.ID,
+		Type:   domain.CvtToTransactionType(t.Type),
+		UserID: t.UserID,
+		Price:  t.Price,
+		Note:   t.Note,
+		Date:   t.Date,
+	}
+}
