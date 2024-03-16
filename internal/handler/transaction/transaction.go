@@ -131,3 +131,36 @@ func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 }
+
+func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id, err := jsonutil.ReadID(r)
+	if err != nil {
+		logger.Error("jsonutil.ReadID failed", "package", packageName, "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+	if !v.Delete(id) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	ctx := r.Context()
+	user := ctxutil.GetUser(r)
+	if err := t.transaction.Delete(ctx, id, *user); err != nil {
+		if errors.Is(err, domain.ErrTransactionDataNotFound) {
+			errutil.BadRequestResponse(w, r, err)
+			return
+		}
+
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusOK, nil, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}

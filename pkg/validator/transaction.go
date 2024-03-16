@@ -33,6 +33,11 @@ func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery) bool {
 	return v.Valid()
 }
 
+func (v *Validator) Delete(id int64) bool {
+	v.Check(id > 0, "id", "ID must be greater than 0")
+	return v.Valid()
+}
+
 func isValidDateFormat(dateString *string) bool {
 	if dateString == nil {
 		return true
