@@ -548,3 +548,93 @@ func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc strin
 	s.Require().NoError(err, desc)
 	s.Require().Equal(1, countUser2, desc)
 }
+
+func (s *TransactionSuite) TestGetByIDAndUserID() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when only one data, return successfully":       getByIDAndUserID_OnlyOneData_ReturnSuccessfully,
+		"when with multiple data, return successfully":  getByIDAndUserID_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully": getByIDAndUserID_WithMultipleUsers_ReturnSuccessfully,
+		"when id not found, return error":               getByIDAndUserID_IDNotFound_ReturnError,
+		"when user id not found, return error":          getByIDAndUserID_UserIDNotFound_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByIDAndUserID_OnlyOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.Transaction{
+		ID:     transactions[0].ID,
+		UserID: transactions[0].UserID,
+		Type:   domain.CvtToTransactionType(transactions[0].Type),
+		Price:  transactions[0].Price,
+		Note:   transactions[0].Note,
+		Date:   transactions[0].Date,
+	}
+
+	trans, err := s.transactionModel.GetByIDAndUserID(mockCtx, transactions[0].ID, transactions[0].UserID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+}
+
+func getByIDAndUserID_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.Transaction{
+		ID:     transactions[0].ID,
+		UserID: transactions[0].UserID,
+		Type:   domain.CvtToTransactionType(transactions[0].Type),
+		Price:  transactions[0].Price,
+		Note:   transactions[0].Note,
+		Date:   transactions[0].Date,
+	}
+
+	trans, err := s.transactionModel.GetByIDAndUserID(mockCtx, transactions[0].ID, transactions[0].UserID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, err)
+}
+
+func getByIDAndUserID_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.Transaction{
+		ID:     transactions[0].ID,
+		UserID: transactions[0].UserID,
+		Type:   domain.CvtToTransactionType(transactions[0].Type),
+		Price:  transactions[0].Price,
+		Note:   transactions[0].Note,
+		Date:   transactions[0].Date,
+	}
+
+	trans, err := s.transactionModel.GetByIDAndUserID(mockCtx, transactions[0].ID, transactions[0].UserID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, err)
+}
+
+func getByIDAndUserID_IDNotFound_ReturnError(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	_, err = s.transactionModel.GetByIDAndUserID(mockCtx, transactions[0].ID+1, transactions[0].UserID)
+	s.Require().Error(err, desc)
+}
+
+func getByIDAndUserID_UserIDNotFound_ReturnError(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	_, err = s.transactionModel.GetByIDAndUserID(mockCtx, transactions[0].ID, transactions[0].UserID+1)
+	s.Require().Error(err, desc)
+}

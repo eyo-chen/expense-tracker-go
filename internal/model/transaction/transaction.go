@@ -107,6 +107,10 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	var trans Transaction
 	if err := t.DB.QueryRowContext(ctx, qStmt, id, userID).
 		Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.MainCategID, &trans.SubCategID, &trans.Price, &trans.Note, &trans.Date); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Transaction{}, domain.ErrTransactionDataNotFound
+		}
+
 		logger.Error("t.DB.QueryRowContext failed", "package", PackageName, "err", err)
 		return domain.Transaction{}, err
 	}
