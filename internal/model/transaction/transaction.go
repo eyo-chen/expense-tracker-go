@@ -115,7 +115,5 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 		return domain.Transaction{}, err
 	}
 
-	domainTrans := cvtToDomainTransactionWithoutCategory(trans)
-
-	return domainTrans, nil
+	return cvtToDomainTransactionWithoutCategory(trans), nil
 }

@@ -77,6 +77,6 @@ type TransactionModel interface {
 	// Delete deletes a transaction by id.
 	Delete(ctx context.Context, id int64) error
 
-	// GetByIDAndUserID returns a transaction by id and user id.
+	// GetByIDAndUserID returns a transaction by id and user id. Note that returned transaction is not included main category, sub category, and icon.
 	GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error)
 }
