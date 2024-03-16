@@ -100,3 +100,18 @@ func (t *TransactionModel) Delete(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error) {
+	qStmt := "SELECT id, user_id, type, main_category_id, sub_category_id, price, note, date FROM transactions WHERE id = ? AND user_id = ?"
+
+	var trans Transaction
+	if err := t.DB.QueryRowContext(ctx, qStmt, id, userID).
+		Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.MainCategID, &trans.SubCategID, &trans.Price, &trans.Note, &trans.Date); err != nil {
+		logger.Error("t.DB.QueryRowContext failed", "package", PackageName, "err", err)
+		return domain.Transaction{}, err
+	}
+
+	domainTrans := cvtToDomainTransactionWithoutCategory(trans)
+
+	return domainTrans, nil
+}
