@@ -524,7 +524,7 @@ func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc strin
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	transactions2, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
 	s.Require().NoError(err, desc)
 
 	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
@@ -540,4 +540,11 @@ func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc strin
 	stmt := "SELECT id FROM transactions WHERE id = ?"
 	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
 	s.Require().Equal(sql.ErrNoRows, err, desc)
+
+	// check if other user's data still exists
+	var countUser2 int
+	stmt = "SELECT COUNT(*) FROM transactions WHERE user_id = ?"
+	err = s.db.QueryRow(stmt, transactions2[0].UserID).Scan(&countUser2)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(1, countUser2, desc)
 }
