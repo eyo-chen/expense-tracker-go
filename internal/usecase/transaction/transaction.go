@@ -72,3 +72,12 @@ func (t *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user 
 func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
 	return t.Transaction.GetAccInfo(ctx, query, user.ID)
 }
+
+func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) error {
+	// check permission
+	if _, err := t.Transaction.GetByIDAndUserID(ctx, id, user.ID); err != nil {
+		return err
+	}
+
+	return t.Transaction.Delete(ctx, id)
+}
