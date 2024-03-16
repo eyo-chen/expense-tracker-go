@@ -73,4 +73,7 @@ type TransactionModel interface {
 
 	// GetAccInfo returns accumulated information by user id and query.
 	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error)
+
+	// Delete deletes a transaction by id.
+	Delete(ctx context.Context, id int64) error
 }

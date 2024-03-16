@@ -89,3 +89,14 @@ func (t *TransactionModel) GetAccInfo(ctx context.Context, query domain.GetAccIn
 
 	return accInfo, nil
 }
+
+func (t *TransactionModel) Delete(ctx context.Context, id int64) error {
+	qStmt := "DELETE FROM transactions WHERE id = ?"
+
+	if _, err := t.DB.ExecContext(ctx, qStmt, id); err != nil {
+		logger.Error("t.DB.ExecContext failed", "package", PackageName, "err", err)
+		return err
+	}
+
+	return nil
+}
