@@ -466,3 +466,78 @@ func getAccInfo_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transac
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
 }
+
+func (s *TransactionSuite) TestDelete() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when with one data, delete successfully":       delete_WithOneData_DeleteSuccessfully,
+		"when with multiple data, delete successfully":  delete_WithMultipleData_DeleteSuccessfully,
+		"when with multiple users, delete successfully": delete_WithMultipleUsers_DeleteSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func delete_WithOneData_DeleteSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
+	s.Require().NoError(err, desc)
+
+	var count int
+	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(0, count, desc)
+
+	// check if data exists
+	var checkT transaction.Transaction
+	stmt := "SELECT id FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
+	s.Require().Equal(sql.ErrNoRows, err, desc)
+}
+
+func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
+	s.Require().NoError(err, desc)
+
+	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
+	s.Require().NoError(err, desc)
+
+	var count int
+	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(2, count, desc)
+
+	// check if data exists
+	var checkT transaction.Transaction
+	stmt := "SELECT id FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
+	s.Require().Equal(sql.ErrNoRows, err, desc)
+}
+
+func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
+	s.Require().NoError(err, desc)
+
+	var count int
+	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(3, count, desc)
+
+	// check if data exists
+	var checkT transaction.Transaction
+	stmt := "SELECT id FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
+	s.Require().Equal(sql.ErrNoRows, err, desc)
+}
