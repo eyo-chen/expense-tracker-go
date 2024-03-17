@@ -6,7 +6,7 @@ type ChartData struct {
 	Datasets []float64
 }
 
-// DateRange contains start date and end date
+// ChartDateRange contains start date and end date for chart data
 type ChartDateRange struct {
 	StartDate string
 	EndDate   string
