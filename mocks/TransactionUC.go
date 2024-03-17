@@ -109,6 +109,34 @@ func (_m *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user
 	return r0, r1
 }
 
+// GetChartData provides a mock function with given fields: ctx, chartType, dataRange, user
+func (_m *TransactionUC) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
+	ret := _m.Called(ctx, chartType, dataRange, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetChartData")
+	}
+
+	var r0 domain.ChartData
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartType, domain.ChartDateRange, domain.User) (domain.ChartData, error)); ok {
+		return rf(ctx, chartType, dataRange, user)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartType, domain.ChartDateRange, domain.User) domain.ChartData); ok {
+		r0 = rf(ctx, chartType, dataRange, user)
+	} else {
+		r0 = ret.Get(0).(domain.ChartData)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartType, domain.ChartDateRange, domain.User) error); ok {
+		r1 = rf(ctx, chartType, dataRange, user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewTransactionUC creates a new instance of TransactionUC. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTransactionUC(t interface {

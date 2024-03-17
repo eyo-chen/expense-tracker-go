@@ -1,6 +1,7 @@
 package transaction_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +13,6 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -59,19 +59,20 @@ func delete_NoError_DeleteSuccessfully(s *TransactionSuite, desc string) {
 		ID: 1,
 	}
 
-	s.mockTransactionUC.On("Delete", mock.Anything, int64(1), user).Return(nil)
-
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.Delete))
-	defer srv.Close()
 	req := httptest.NewRequest(http.MethodDelete, srv.URL+"/v1/transaction/id", nil)
-	defer req.Body.Close()
 	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
 	defer res.Result().Body.Close()
 
 	// set context value on request
 	req = mux.SetURLVars(req, map[string]string{"id": "1"})
 	req = ctxutil.SetUser(req, &user)
+
+	// mock service
+	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(nil)
 
 	s.transactionHlr.Delete(res, req)
 
@@ -85,10 +86,10 @@ func delete_IncorrectID_ReturnBadReq(s *TransactionSuite, desc string) {
 
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.Delete))
-	defer srv.Close()
 	req := httptest.NewRequest(http.MethodDelete, srv.URL+"/v1/transaction/id", nil)
-	defer req.Body.Close()
 	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
 	defer res.Result().Body.Close()
 
 	// set context value on request
@@ -107,10 +108,10 @@ func delete_IDLessThanZero_ReturnBadReq(s *TransactionSuite, desc string) {
 
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.Delete))
-	defer srv.Close()
 	req := httptest.NewRequest(http.MethodDelete, srv.URL+"/v1/transaction/id", nil)
-	defer req.Body.Close()
 	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
 	defer res.Result().Body.Close()
 
 	// set context value on request
@@ -127,21 +128,207 @@ func delete_DataNotFound_ReturnBadReq(s *TransactionSuite, desc string) {
 		ID: 1,
 	}
 
-	s.mockTransactionUC.On("Delete", mock.Anything, int64(1), user).Return(domain.ErrTransactionDataNotFound)
-
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.Delete))
-	defer srv.Close()
 	req := httptest.NewRequest(http.MethodDelete, srv.URL+"/v1/transaction/id", nil)
-	defer req.Body.Close()
 	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
 	defer res.Result().Body.Close()
 
 	// set context value on request
 	req = mux.SetURLVars(req, map[string]string{"id": "1"})
 	req = ctxutil.SetUser(req, &user)
 
+	// mock service
+	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(domain.ErrTransactionDataNotFound)
+
 	s.transactionHlr.Delete(res, req)
 
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func (s *TransactionSuite) TestGetChartData() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, return data":                          getChartData_NoError_ReturnData,
+		"when no start date, return bad request":              getChartData_NoStartDate_ReturnBadReq,
+		"when no end date, return bad request":                getChartData_NoEndDate_ReturnBadReq,
+		"when start date before end date, return bad request": getChartData_StartDateBeforeEndDate_ReturnBadReq,
+		"when no type, return bad request":                    getChartData_NoType_ReturnBadReq,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetChartData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&end_date=2024-03-08&type=bar", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// mock service
+	s.mockTransactionUC.On("GetChartData",
+		req.Context(),
+		domain.ChartTypeBar,
+		domain.ChartDateRange{
+			StartDate: "2024-03-01",
+			EndDate:   "2024-03-08",
+		},
+		user,
+	).Return(domain.ChartData{
+		Labels:   []string{"2024-03-01", "2024-03-02", "2024-03-03"},
+		Datasets: []float64{100, 200, 300},
+	}, nil)
+
+	// expected expected response
+	expResp := map[string]interface{}{
+		"chart_data": map[string]interface{}{
+			"labels":   []interface{}{"2024-03-01", "2024-03-02", "2024-03-03"},
+			"datasets": []interface{}{100.0, 200.0, 300.0},
+		},
+	}
+
+	// action
+	s.transactionHlr.GetChartData(res, req)
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusOK, res.Code, desc)
+}
+
+func getChartData_NoStartDate_ReturnBadReq(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetChartData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?end_date=2024-03-08&type=bar", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// action
+	s.transactionHlr.GetChartData(res, req)
+
+	expResp := map[string]interface{}{
+		"start_date": "Start date must be in YYYY-MM-DD format",
+	}
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func getChartData_NoEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetChartData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&type=bar", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// action
+	s.transactionHlr.GetChartData(res, req)
+
+	expResp := map[string]interface{}{
+		"start_date": "Start date must be before end date",
+		"end_date":   "End date must be in YYYY-MM-DD format",
+	}
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func getChartData_StartDateBeforeEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetChartData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-08&end_date=2024-03-01&type=bar", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// action
+	s.transactionHlr.GetChartData(res, req)
+
+	expResp := map[string]interface{}{
+		"start_date": "Start date must be before end date",
+	}
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func getChartData_NoType_ReturnBadReq(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetChartData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&end_date=2024-03-08", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// action
+	s.transactionHlr.GetChartData(res, req)
+
+	expResp := map[string]interface{}{
+		"type": "Chart type must be bar, pie or line",
+	}
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
 }
