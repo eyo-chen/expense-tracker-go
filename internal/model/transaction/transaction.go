@@ -121,7 +121,7 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 
 func (t *TransactionModel) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartData, error) {
 	qStmt := `
-	  SELECT DATE_FORMAT(date, '%Y-%m-%d'),
+	  SELECT DATE_FORMAT(date, '%a'),
 		       SUM(price)
 		FROM transactions
 		WHERE user_id = ?
@@ -139,7 +139,7 @@ func (t *TransactionModel) GetChartData(ctx context.Context, chartType domain.Ch
 	var chartData domain.ChartData
 	for rows.Next() {
 		var date string
-		var price float32
+		var price float64
 		if err := rows.Scan(&date, &price); err != nil {
 			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
 			return domain.ChartData{}, err
