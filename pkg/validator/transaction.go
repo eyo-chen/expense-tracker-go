@@ -39,10 +39,10 @@ func (v *Validator) Delete(id int64) bool {
 }
 
 func (v *Validator) GetChartData(dateRange domain.ChartDateRange, chartType domain.ChartType) bool {
-	v.Check(isValidDateFormat(&dateRange.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
-	v.Check(isValidDateFormat(&dateRange.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
-	v.Check(checkStartDateBeforeEndDate(&dateRange.StartDate, &dateRange.EndDate), "startDate", "Start date must be before end date")
-	v.Check(chartType.IsValid(), "chartType", "Chart type must be bar, pie or line")
+	v.Check(isValidDateFormat(&dateRange.StartDate), "start_date", "Start date must be in YYYY-MM-DD format")
+	v.Check(isValidDateFormat(&dateRange.EndDate), "end_date", "End date must be in YYYY-MM-DD format")
+	v.Check(checkStartDateBeforeEndDate(&dateRange.StartDate, &dateRange.EndDate), "start_date", "Start date must be before end date")
+	v.Check(chartType.IsValid(), "type", "Chart type must be bar, pie or line")
 	return v.Valid()
 }
 
