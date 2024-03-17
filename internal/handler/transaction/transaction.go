@@ -135,7 +135,6 @@ func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) 
 func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
-		logger.Error("jsonutil.ReadID failed", "package", packageName, "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
