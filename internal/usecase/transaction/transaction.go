@@ -81,3 +81,7 @@ func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) 
 
 	return t.Transaction.Delete(ctx, id)
 }
+
+func (t *TransactionUC) GetChartData(ctx context.Context, chartType domain.ChartType, chartDateRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
+	return t.Transaction.GetChartData(ctx, chartType, chartDateRange, user.ID)
+}
