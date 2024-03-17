@@ -61,6 +61,9 @@ type TransactionUC interface {
 
 	// Delete deletes a transaction by id.
 	Delete(ctx context.Context, id int64, user domain.User) error
+
+	// GetChartData returns chart data.
+	GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartData, error)
 }
 
 // IconUC is the interface that wraps the basic methods for icon usecase.
