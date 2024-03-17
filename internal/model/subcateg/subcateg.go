@@ -63,6 +63,7 @@ func (m *SubCategModel) GetAll(userID int64) ([]*domain.SubCateg, error) {
 
 		categs = append(categs, cvtToDomainSubCateg(&categ))
 	}
+	defer rows.Close()
 
 	return categs, nil
 }
@@ -87,6 +88,7 @@ func (m *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.S
 
 		categs = append(categs, cvtToDomainSubCateg(&categ))
 	}
+	defer rows.Close()
 
 	return categs, nil
 }

@@ -72,6 +72,7 @@ func (t *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, us
 
 		transactions = append(transactions, cvtToDomainTransaction(trans, mainCateg, subCateg, icon))
 	}
+	defer rows.Close()
 
 	return transactions, nil
 }
@@ -116,4 +117,38 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	}
 
 	return cvtToDomainTransactionWithoutCategory(trans), nil
+}
+
+func (t *TransactionModel) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartData, error) {
+	qStmt := `
+	  SELECT DATE_FORMAT(date, '%a'),
+		       SUM(price)
+		FROM transactions
+		WHERE user_id = ?
+		AND type = 2
+		AND date BETWEEN ? AND ?
+		GROUP BY date
+	`
+
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dataRange.StartDate, dataRange.EndDate)
+	if err != nil {
+		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		return domain.ChartData{}, err
+	}
+
+	var chartData domain.ChartData
+	for rows.Next() {
+		var date string
+		var price float64
+		if err := rows.Scan(&date, &price); err != nil {
+			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
+			return domain.ChartData{}, err
+		}
+
+		chartData.Labels = append(chartData.Labels, date)
+		chartData.Datasets = append(chartData.Datasets, price)
+	}
+	defer rows.Close()
+
+	return chartData, nil
 }
