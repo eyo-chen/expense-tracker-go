@@ -67,11 +67,12 @@ func delete_NoError_DeleteSuccessfully(s *TransactionSuite, desc string) {
 	defer req.Body.Close()
 	defer res.Result().Body.Close()
 
-	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(nil)
-
 	// set context value on request
 	req = mux.SetURLVars(req, map[string]string{"id": "1"})
 	req = ctxutil.SetUser(req, &user)
+
+	// mock service
+	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(nil)
 
 	s.transactionHlr.Delete(res, req)
 
@@ -135,12 +136,12 @@ func delete_DataNotFound_ReturnBadReq(s *TransactionSuite, desc string) {
 	defer req.Body.Close()
 	defer res.Result().Body.Close()
 
-	// mock service
-	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(domain.ErrTransactionDataNotFound)
-
 	// set context value on request
 	req = mux.SetURLVars(req, map[string]string{"id": "1"})
 	req = ctxutil.SetUser(req, &user)
+
+	// mock service
+	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(domain.ErrTransactionDataNotFound)
 
 	s.transactionHlr.Delete(res, req)
 
