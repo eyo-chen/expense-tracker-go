@@ -82,3 +82,75 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 	err := s.transactionUC.Delete(mockCtx, int64(1), user)
 	s.Require().Equal(errors.New("error"), err, desc)
 }
+
+func (s *TransactionSuite) TestGetChartData() {
+	tests := []struct {
+		desc           string
+		setupFun       func()
+		chartType      domain.ChartType
+		chartDateRange domain.ChartDateRange
+		user           domain.User
+		expResult      domain.ChartData
+		expErr         error
+	}{
+		{
+			desc: "when no error, return chart data",
+			setupFun: func() {
+				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, domain.ChartDateRange{
+					StartDate: "2021-01-01",
+					EndDate:   "2021-01-31",
+				}, int64(1)).
+					Return(domain.ChartData{
+						Labels:   []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"},
+						Datasets: []float64{100, 200, 300, 400, 500, 600, 700},
+					}, nil).Once()
+			},
+			chartType: domain.ChartTypeBar,
+			chartDateRange: domain.ChartDateRange{
+				StartDate: "2021-01-01",
+				EndDate:   "2021-01-31",
+			},
+			user: domain.User{
+				ID: 1,
+			},
+			expResult: domain.ChartData{
+				Labels:   []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"},
+				Datasets: []float64{100, 200, 300, 400, 500, 600, 700},
+			},
+			expErr: nil,
+		},
+		{
+			desc: "when get chart data fail, return error",
+			setupFun: func() {
+				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, domain.ChartDateRange{
+					StartDate: "2021-01-01",
+					EndDate:   "2021-01-31",
+				}, int64(1)).
+					Return(domain.ChartData{}, errors.New("error")).Once()
+			},
+			chartType: domain.ChartTypeBar,
+			chartDateRange: domain.ChartDateRange{
+				StartDate: "2021-01-01",
+				EndDate:   "2021-01-31",
+			},
+			user: domain.User{
+				ID: 1,
+			},
+			expResult: domain.ChartData{},
+			expErr:    errors.New("error"),
+		},
+	}
+
+	for _, t := range tests {
+		s.Run(t.desc, func() {
+			s.SetupTest()
+			t.setupFun()
+
+			result, err := s.transactionUC.GetChartData(mockCtx, t.chartType, t.chartDateRange, t.user)
+			s.Require().Equal(t.expResult, result)
+			s.Require().Equal(t.expErr, err)
+
+			s.TearDownTest()
+		})
+	}
+}
