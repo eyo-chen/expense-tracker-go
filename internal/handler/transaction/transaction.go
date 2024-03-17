@@ -163,3 +163,39 @@ func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (t *TransactionHandler) GetChartData(w http.ResponseWriter, r *http.Request) {
+	startDate := r.URL.Query().Get("start_date")
+	endDate := r.URL.Query().Get("end_date")
+	rawChartType := r.URL.Query().Get("type")
+
+	dateRange := domain.ChartDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+	chartType := domain.CvtToChartType(rawChartType)
+
+	v := validator.New()
+	if !v.GetChartData(dateRange, chartType) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	ctx := r.Context()
+	data, err := t.transaction.GetChartData(ctx, chartType, dateRange, *user)
+	if err != nil {
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"chart_data": data,
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
