@@ -80,6 +80,7 @@ func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) 
 
 		categs = append(categs, getAllCvtToDomainMainCateg(categ, icon))
 	}
+	defer rows.Close()
 
 	return categs, nil
 }

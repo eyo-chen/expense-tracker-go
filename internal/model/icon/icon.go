@@ -44,6 +44,7 @@ func (m *IconModel) List() ([]domain.Icon, error) {
 
 		icons = append(icons, cvtToDomainIcon(icon))
 	}
+	defer rows.Close()
 
 	return icons, nil
 }
