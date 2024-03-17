@@ -13,7 +13,6 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -60,8 +59,6 @@ func delete_NoError_DeleteSuccessfully(s *TransactionSuite, desc string) {
 		ID: 1,
 	}
 
-	s.mockTransactionUC.On("Delete", mock.Anything, int64(1), user).Return(nil)
-
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.Delete))
 	req := httptest.NewRequest(http.MethodDelete, srv.URL+"/v1/transaction/id", nil)
@@ -69,6 +66,8 @@ func delete_NoError_DeleteSuccessfully(s *TransactionSuite, desc string) {
 	defer srv.Close()
 	defer req.Body.Close()
 	defer res.Result().Body.Close()
+
+	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(nil)
 
 	// set context value on request
 	req = mux.SetURLVars(req, map[string]string{"id": "1"})
@@ -128,8 +127,6 @@ func delete_DataNotFound_ReturnBadReq(s *TransactionSuite, desc string) {
 		ID: 1,
 	}
 
-	s.mockTransactionUC.On("Delete", mock.Anything, int64(1), user).Return(domain.ErrTransactionDataNotFound)
-
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.Delete))
 	req := httptest.NewRequest(http.MethodDelete, srv.URL+"/v1/transaction/id", nil)
@@ -137,6 +134,9 @@ func delete_DataNotFound_ReturnBadReq(s *TransactionSuite, desc string) {
 	defer srv.Close()
 	defer req.Body.Close()
 	defer res.Result().Body.Close()
+
+	// mock service
+	s.mockTransactionUC.On("Delete", req.Context(), int64(1), user).Return(domain.ErrTransactionDataNotFound)
 
 	// set context value on request
 	req = mux.SetURLVars(req, map[string]string{"id": "1"})
@@ -150,10 +150,10 @@ func delete_DataNotFound_ReturnBadReq(s *TransactionSuite, desc string) {
 func (s *TransactionSuite) TestGetChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
 		"when no error, return data":                          getChartData_NoError_ReturnData,
-		"when no start date, return bad request":              getChartData_NoStartDate_ReturnBadRequest,
-		"when no end date, return bad request":                getChartData_NoEndDate_ReturnBadRequest,
-		"when start date before end date, return bad request": getChartData_StartDateBeforeEndDate_ReturnBadRequest,
-		"when no type, return bad request":                    getChartData_NoType_ReturnBadRequest,
+		"when no start date, return bad request":              getChartData_NoStartDate_ReturnBadReq,
+		"when no end date, return bad request":                getChartData_NoEndDate_ReturnBadReq,
+		"when start date before end date, return bad request": getChartData_StartDateBeforeEndDate_ReturnBadReq,
+		"when no type, return bad request":                    getChartData_NoType_ReturnBadReq,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -211,7 +211,7 @@ func getChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	s.Require().Equal(http.StatusOK, res.Code, desc)
 }
 
-func getChartData_NoStartDate_ReturnBadRequest(s *TransactionSuite, desc string) {
+func getChartData_NoStartDate_ReturnBadReq(s *TransactionSuite, desc string) {
 	user := domain.User{
 		ID: 1,
 	}
@@ -241,7 +241,7 @@ func getChartData_NoStartDate_ReturnBadRequest(s *TransactionSuite, desc string)
 	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
 }
 
-func getChartData_NoEndDate_ReturnBadRequest(s *TransactionSuite, desc string) {
+func getChartData_NoEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
 	user := domain.User{
 		ID: 1,
 	}
@@ -272,7 +272,7 @@ func getChartData_NoEndDate_ReturnBadRequest(s *TransactionSuite, desc string) {
 	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
 }
 
-func getChartData_StartDateBeforeEndDate_ReturnBadRequest(s *TransactionSuite, desc string) {
+func getChartData_StartDateBeforeEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
 	user := domain.User{
 		ID: 1,
 	}
@@ -302,7 +302,7 @@ func getChartData_StartDateBeforeEndDate_ReturnBadRequest(s *TransactionSuite, d
 	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
 }
 
-func getChartData_NoType_ReturnBadRequest(s *TransactionSuite, desc string) {
+func getChartData_NoType_ReturnBadReq(s *TransactionSuite, desc string) {
 	user := domain.User{
 		ID: 1,
 	}
