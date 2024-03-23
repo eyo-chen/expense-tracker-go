@@ -111,7 +111,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					"Sat": 700,
 				}
 
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
 			chartType: domain.ChartTypeBar,
@@ -143,7 +143,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					"Tue": 300,
 				}
 
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
 			chartType: domain.ChartTypeBar,
@@ -168,7 +168,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					EndDate:   "2024-03-23",
 				}
 
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
 					Return(nil, errors.New("error")).Once()
 			},
 			chartType: domain.ChartTypeBar,
