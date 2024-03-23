@@ -119,7 +119,7 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	return cvtToDomainTransactionWithoutCategory(trans), nil
 }
 
-func (t *TransactionModel) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error) {
+func (t *TransactionModel) GetBarChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error) {
 	qStmt := `
 	  SELECT DATE_FORMAT(date, '%a'),
 		       SUM(price)

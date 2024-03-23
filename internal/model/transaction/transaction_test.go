@@ -672,7 +672,7 @@ func getChartData_BarChartOneData_ReturnSuccessfully(s *TransactionSuite, desc s
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[0].Date.Format(time.DateOnly),
 	}
-	chartData, err := s.transactionModel.GetChartData(mockCtx, chartType, dataRange, user.ID)
+	chartData, err := s.transactionModel.GetBarChartData(mockCtx, chartType, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -707,7 +707,7 @@ func getChartData_BarChartMultipleData_ReturnSuccessfully(s *TransactionSuite, d
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[8].Date.Format(time.DateOnly),
 	}
-	chartData, err := s.transactionModel.GetChartData(mockCtx, chartType, dataRange, user.ID)
+	chartData, err := s.transactionModel.GetBarChartData(mockCtx, chartType, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -753,7 +753,7 @@ func getChartData_BarChartMultipleUsers_ReturnSuccessfully(s *TransactionSuite, 
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[8].Date.Format(time.DateOnly),
 	}
-	chartData, err := s.transactionModel.GetChartData(mockCtx, chartType, dataRange, user.ID)
+	chartData, err := s.transactionModel.GetBarChartData(mockCtx, chartType, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
