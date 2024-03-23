@@ -101,6 +101,54 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 	return transList, u, maincategList, subcategList, iconList, nil
 }
 
+// InsertMainCategList inserts a list of main categories
+func (tf *TransactionFactory) InsertMainCategList(i int, ow ...maincateg.MainCateg) ([]maincateg.MainCateg, user.User, []icon.Icon, error) {
+	u := user.User{}
+
+	iconPtrList := make([]interface{}, 0, i)
+	for k := 0; k < i; k++ {
+		iconPtrList = append(iconPtrList, &icon.Icon{})
+	}
+
+	maincategList, _, err := tf.maincateg.BuildList(i).Overwrites(ow...).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
+	if err != nil {
+		return nil, user.User{}, []icon.Icon{}, err
+	}
+
+	iconList := make([]icon.Icon, 0, i)
+	for _, v := range iconPtrList {
+		iconList = append(iconList, *v.(*icon.Icon))
+	}
+
+	return maincategList, u, iconList, nil
+}
+
+// InsertTransactionWithGivenUser inserts a transaction with a given user
+// it assumes that the user has main category
+func (tf *TransactionFactory) InsertTransactionWithGivenUser(i int, u user.User, ow ...Transaction) ([]Transaction, subcateg.SubCateg, error) {
+	// create only one sub category
+	owSub := subcateg.SubCateg{UserID: u.ID, MainCategID: ow[0].MainCategID}
+	s, err := tf.subcateg.Build().Overwrite(owSub).Insert()
+	if err != nil {
+		return []Transaction{}, subcateg.SubCateg{}, err
+	}
+
+	owTrans := make([]Transaction, i)
+	for k := 0; k < i; k++ {
+		owTrans[k] = Transaction{
+			UserID:     u.ID,
+			SubCategID: s.ID,
+		}
+	}
+
+	transList, err := tf.transaction.BuildList(i).Overwrites(owTrans...).Overwrites(ow...).Insert()
+	if err != nil {
+		return []Transaction{}, subcateg.SubCateg{}, err
+	}
+
+	return transList, s, nil
+}
+
 func (tf *TransactionFactory) Reset() {
 	tf.transaction.Reset()
 	tf.user.Reset()
