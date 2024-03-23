@@ -96,42 +96,85 @@ func (s *TransactionSuite) TestGetChartData() {
 		{
 			desc: "when no error, return chart data",
 			setupFun: func() {
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, domain.ChartDateRange{
-					StartDate: "2021-01-01",
-					EndDate:   "2021-01-31",
-				}, int64(1)).
-					Return(domain.ChartData{
-						Labels:   []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"},
-						Datasets: []float64{100, 200, 300, 400, 500, 600, 700},
-					}, nil).Once()
+				chartDataRange := domain.ChartDateRange{
+					StartDate: "2024-03-17",
+					EndDate:   "2024-03-23",
+				}
+
+				chartDataByWeekday := domain.ChartDataByWeekday{
+					"Sun": 100,
+					"Mon": 200,
+					"Tue": 300,
+					"Wed": 400,
+					"Thu": 500,
+					"Fri": 600,
+					"Sat": 700,
+				}
+
+				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+					Return(chartDataByWeekday, nil).Once()
 			},
 			chartType: domain.ChartTypeBar,
 			chartDateRange: domain.ChartDateRange{
-				StartDate: "2021-01-01",
-				EndDate:   "2021-01-31",
+				StartDate: "2024-03-17",
+				EndDate:   "2024-03-23",
 			},
 			user: domain.User{
 				ID: 1,
 			},
 			expResult: domain.ChartData{
-				Labels:   []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"},
+				Labels:   []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"},
 				Datasets: []float64{100, 200, 300, 400, 500, 600, 700},
+			},
+			expErr: nil,
+		},
+		{
+			desc: "when chart data by weekday is not fully filled, still return chart data",
+			setupFun: func() {
+				chartDataRange := domain.ChartDateRange{
+					StartDate: "2024-03-17",
+					EndDate:   "2024-03-23",
+				}
+
+				// only have data for Sun, Mon, Tue
+				chartDataByWeekday := domain.ChartDataByWeekday{
+					"Sun": 100,
+					"Mon": 200,
+					"Tue": 300,
+				}
+
+				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+					Return(chartDataByWeekday, nil).Once()
+			},
+			chartType: domain.ChartTypeBar,
+			chartDateRange: domain.ChartDateRange{
+				StartDate: "2024-03-17",
+				EndDate:   "2024-03-23",
+			},
+			user: domain.User{
+				ID: 1,
+			},
+			expResult: domain.ChartData{
+				Labels:   []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"},
+				Datasets: []float64{100, 200, 300, 0, 0, 0, 0},
 			},
 			expErr: nil,
 		},
 		{
 			desc: "when get chart data fail, return error",
 			setupFun: func() {
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, domain.ChartDateRange{
-					StartDate: "2021-01-01",
-					EndDate:   "2021-01-31",
-				}, int64(1)).
-					Return(domain.ChartData{}, errors.New("error")).Once()
+				chartDataRange := domain.ChartDateRange{
+					StartDate: "2024-03-17",
+					EndDate:   "2024-03-23",
+				}
+
+				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+					Return(nil, errors.New("error")).Once()
 			},
 			chartType: domain.ChartTypeBar,
 			chartDateRange: domain.ChartDateRange{
-				StartDate: "2021-01-01",
-				EndDate:   "2021-01-31",
+				StartDate: "2024-03-17",
+				EndDate:   "2024-03-23",
 			},
 			user: domain.User{
 				ID: 1,

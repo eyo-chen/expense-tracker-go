@@ -119,7 +119,7 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	return cvtToDomainTransactionWithoutCategory(trans), nil
 }
 
-func (t *TransactionModel) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartData, error) {
+func (t *TransactionModel) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error) {
 	qStmt := `
 	  SELECT DATE_FORMAT(date, '%a'),
 		       SUM(price)
@@ -133,22 +133,26 @@ func (t *TransactionModel) GetChartData(ctx context.Context, chartType domain.Ch
 	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dataRange.StartDate, dataRange.EndDate)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
-		return domain.ChartData{}, err
+		return domain.ChartDataByWeekday{}, err
 	}
 
-	var chartData domain.ChartData
+	dataByTime := domain.ChartDataByWeekday{}
 	for rows.Next() {
 		var date string
 		var price float64
 		if err := rows.Scan(&date, &price); err != nil {
 			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
-			return domain.ChartData{}, err
+			return domain.ChartDataByWeekday{}, err
 		}
 
-		chartData.Labels = append(chartData.Labels, date)
-		chartData.Datasets = append(chartData.Datasets, price)
+		// Normally, this case will never happen
+		if v, ok := dataByTime[date]; ok {
+			dataByTime[date] = v + price
+		} else {
+			dataByTime[date] = price
+		}
 	}
 	defer rows.Close()
 
-	return chartData, nil
+	return dataByTime, nil
 }

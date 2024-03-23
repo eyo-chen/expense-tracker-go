@@ -13,6 +13,10 @@ const (
 	PackageName = "usecase/transaction"
 )
 
+var (
+	weekDayFormat = "Mon"
+)
+
 type TransactionUC struct {
 	Transaction interfaces.TransactionModel
 	MainCateg   interfaces.MainCategModel
@@ -83,5 +87,30 @@ func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) 
 }
 
 func (t *TransactionUC) GetChartData(ctx context.Context, chartType domain.ChartType, chartDateRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
-	return t.Transaction.GetChartData(ctx, chartType, chartDateRange, user.ID)
+	dataByWeekday, err := t.Transaction.GetChartData(ctx, chartType, chartDateRange, user.ID)
+	if err != nil {
+		return domain.ChartData{}, err
+	}
+
+	start, end, err := cvtDateToTime(chartDateRange.StartDate, chartDateRange.EndDate)
+	if err != nil {
+		logger.Error("cvtDateToTime failed", "package", PackageName, "err", err)
+		return domain.ChartData{}, err
+	}
+
+	var chartData domain.ChartData
+	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, 1) {
+		weekDay := t.Format(weekDayFormat)
+
+		chartData.Labels = append(chartData.Labels, weekDay)
+
+		// if there is no data for the weekday, append 0
+		if _, ok := dataByWeekday[weekDay]; !ok {
+			chartData.Datasets = append(chartData.Datasets, 0)
+		} else {
+			chartData.Datasets = append(chartData.Datasets, dataByWeekday[weekDay])
+		}
+	}
+
+	return chartData, nil
 }

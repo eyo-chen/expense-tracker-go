@@ -138,22 +138,24 @@ func (_m *TransactionModel) GetByIDAndUserID(ctx context.Context, id int64, user
 }
 
 // GetChartData provides a mock function with given fields: ctx, chartType, dataRange, userID
-func (_m *TransactionModel) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartData, error) {
+func (_m *TransactionModel) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error) {
 	ret := _m.Called(ctx, chartType, dataRange, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetChartData")
 	}
 
-	var r0 domain.ChartData
+	var r0 domain.ChartDataByWeekday
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartType, domain.ChartDateRange, int64) (domain.ChartData, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartType, domain.ChartDateRange, int64) (domain.ChartDataByWeekday, error)); ok {
 		return rf(ctx, chartType, dataRange, userID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartType, domain.ChartDateRange, int64) domain.ChartData); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartType, domain.ChartDateRange, int64) domain.ChartDataByWeekday); ok {
 		r0 = rf(ctx, chartType, dataRange, userID)
 	} else {
-		r0 = ret.Get(0).(domain.ChartData)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(domain.ChartDataByWeekday)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartType, domain.ChartDateRange, int64) error); ok {
