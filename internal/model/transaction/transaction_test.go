@@ -655,13 +655,16 @@ func (s *TransactionSuite) TestGetChartData() {
 }
 
 func getChartData_BarChartOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue()}
+	ow1 := transaction.Transaction{
+		Price: 999,
+		Type:  domain.Expense.ToModelValue(),
+		Date:  mockTimeNow.AddDate(0, 0, -4),
+	}
 	transactions, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(1, ow1)
 	s.Require().NoError(err, desc)
 
-	expResult := domain.ChartData{
-		Labels:   []string{transactions[0].Date.Format(weekDayFormat)},
-		Datasets: []float64{transactions[0].Price},
+	expResult := domain.ChartDataByWeekday{
+		ow1.Date.Format(weekDayFormat): 999,
 	}
 
 	chartType := domain.ChartTypeBar
@@ -675,32 +678,34 @@ func getChartData_BarChartOneData_ReturnSuccessfully(s *TransactionSuite, desc s
 }
 
 func getChartData_BarChartMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -4)}
-	ow2 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -4)}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow4 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow5 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
-	ow6 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
-	ow7 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
-	ow8 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
-	ow9 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
-	ow10 := transaction.Transaction{Price: 2000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
+	date, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
 	transactions, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
 	s.Require().NoError(err, desc)
 
-	expResult := domain.ChartData{
-		Labels: []string{
-			transactions[0].Date.Format(weekDayFormat),
-			transactions[2].Date.Format(weekDayFormat),
-			transactions[4].Date.Format(weekDayFormat),
-			transactions[6].Date.Format(weekDayFormat)},
-		Datasets: []float64{1000, 1000, 999, 1001},
+	expResult := domain.ChartDataByWeekday{
+		transactions[0].Date.Format(weekDayFormat): 1000,
+		transactions[2].Date.Format(weekDayFormat): 1000,
+		transactions[4].Date.Format(weekDayFormat): 999,
+		transactions[6].Date.Format(weekDayFormat): 1001,
+		transactions[8].Date.Format(weekDayFormat): 2000,
 	}
 
 	chartType := domain.ChartTypeBar
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
-		EndDate:   transactions[7].Date.Format(time.DateOnly),
+		EndDate:   transactions[8].Date.Format(time.DateOnly),
 	}
 	chartData, err := s.transactionModel.GetChartData(mockCtx, chartType, dataRange, user.ID)
 	s.Require().NoError(err, desc)
@@ -708,43 +713,45 @@ func getChartData_BarChartMultipleData_ReturnSuccessfully(s *TransactionSuite, d
 }
 
 func getChartData_BarChartMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -4)}
-	ow2 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -4)}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow4 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow5 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
-	ow6 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
-	ow7 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
-	ow8 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
-	ow9 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
-	ow10 := transaction.Transaction{Price: 2000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
+	date, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
 	transactions, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	ow11 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -4)}
-	ow12 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow11 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow12 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow11, ow12)
 	s.Require().NoError(err, desc)
 
-	ow13 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow14 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
+	ow13 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow14 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
-	expResult := domain.ChartData{
-		Labels: []string{
-			transactions[0].Date.Format(weekDayFormat),
-			transactions[2].Date.Format(weekDayFormat),
-			transactions[4].Date.Format(weekDayFormat),
-			transactions[6].Date.Format(weekDayFormat)},
-		Datasets: []float64{1000, 1000, 999, 1001},
+	expResult := domain.ChartDataByWeekday{
+		transactions[0].Date.Format(weekDayFormat): 1000,
+		transactions[2].Date.Format(weekDayFormat): 1000,
+		transactions[4].Date.Format(weekDayFormat): 999,
+		transactions[6].Date.Format(weekDayFormat): 1001,
+		transactions[8].Date.Format(weekDayFormat): 2000,
 	}
 
 	chartType := domain.ChartTypeBar
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
-		EndDate:   transactions[7].Date.Format(time.DateOnly),
+		EndDate:   transactions[8].Date.Format(time.DateOnly),
 	}
 	chartData, err := s.transactionModel.GetChartData(mockCtx, chartType, dataRange, user.ID)
 	s.Require().NoError(err, desc)

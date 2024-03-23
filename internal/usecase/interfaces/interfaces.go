@@ -81,5 +81,5 @@ type TransactionModel interface {
 	GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error)
 
 	// GetChartData returns chart data.
-	GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartData, error)
+	GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error)
 }
