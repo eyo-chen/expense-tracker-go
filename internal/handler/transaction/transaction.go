@@ -183,7 +183,7 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	data, err := t.transaction.GetChartData(ctx, chartType, dateRange, *user)
+	data, err := t.transaction.GetBarChartData(ctx, chartType, dateRange, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return

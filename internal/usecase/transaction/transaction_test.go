@@ -83,7 +83,7 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
-func (s *TransactionSuite) TestGetChartData() {
+func (s *TransactionSuite) TestGetBarChartData() {
 	tests := []struct {
 		desc           string
 		setupFun       func()
@@ -189,7 +189,7 @@ func (s *TransactionSuite) TestGetChartData() {
 			s.SetupTest()
 			t.setupFun()
 
-			result, err := s.transactionUC.GetChartData(mockCtx, t.chartType, t.chartDateRange, t.user)
+			result, err := s.transactionUC.GetBarChartData(mockCtx, t.chartType, t.chartDateRange, t.user)
 			s.Require().Equal(t.expResult, result)
 			s.Require().Equal(t.expErr, err)
 

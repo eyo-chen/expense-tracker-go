@@ -109,12 +109,12 @@ func (_m *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user
 	return r0, r1
 }
 
-// GetChartData provides a mock function with given fields: ctx, chartType, dataRange, user
-func (_m *TransactionUC) GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
+// GetBarChartData provides a mock function with given fields: ctx, chartType, dataRange, user
+func (_m *TransactionUC) GetBarChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
 	ret := _m.Called(ctx, chartType, dataRange, user)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetChartData")
+		panic("no return value specified for GetBarChartData")
 	}
 
 	var r0 domain.ChartData
