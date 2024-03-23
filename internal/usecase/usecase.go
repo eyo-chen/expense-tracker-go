@@ -1,8 +1,8 @@
 package usecase
 
 import (
+	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/icon"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/subcateg"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/transaction"

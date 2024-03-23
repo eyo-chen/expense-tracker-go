@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/auth"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/golang-jwt/jwt/v5"

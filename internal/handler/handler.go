@@ -2,11 +2,11 @@ package handler
 
 import (
 	"github.com/OYE0303/expense-tracker-go/internal/handler/icon"
-	"github.com/OYE0303/expense-tracker-go/internal/handler/interfaces"
 	"github.com/OYE0303/expense-tracker-go/internal/handler/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/handler/subcateg"
 	"github.com/OYE0303/expense-tracker-go/internal/handler/transaction"
 	"github.com/OYE0303/expense-tracker-go/internal/handler/user"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 )
 
 type Handler struct {
