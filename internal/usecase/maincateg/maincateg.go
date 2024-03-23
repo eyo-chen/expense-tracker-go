@@ -2,7 +2,7 @@ package maincateg
 
 import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
