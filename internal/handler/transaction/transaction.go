@@ -164,7 +164,7 @@ func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TransactionHandler) GetChartData(w http.ResponseWriter, r *http.Request) {
+func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Request) {
 	startDate := r.URL.Query().Get("start_date")
 	endDate := r.URL.Query().Get("end_date")
 	rawChartType := r.URL.Query().Get("type")
