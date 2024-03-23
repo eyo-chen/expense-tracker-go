@@ -156,3 +156,40 @@ func (t *TransactionModel) GetBarChartData(ctx context.Context, chartType domain
 
 	return dataByTime, nil
 }
+
+func (t *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
+	qStmt := `
+	  SELECT mc.name,
+		       SUM(ts.price)
+		FROM transactions AS ts
+		INNER JOIN main_categories AS mc
+		ON ts.main_category_id = mc.id
+		WHERE ts.user_id = ?
+		AND ts.type = ?
+		AND ts.date BETWEEN ? AND ?
+		GROUP BY mc.name
+	`
+
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType, dataRange.StartDate, dataRange.EndDate)
+	if err != nil {
+		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		return domain.ChartData{}, err
+	}
+
+	var labels []string
+	var datasets []float64
+	for rows.Next() {
+		var name string
+		var price float64
+		if err := rows.Scan(&name, &price); err != nil {
+			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
+			return domain.ChartData{}, err
+		}
+
+		labels = append(labels, name)
+		datasets = append(datasets, price)
+	}
+	defer rows.Close()
+
+	return domain.ChartData{Labels: labels, Datasets: datasets}, nil
+}
