@@ -641,11 +641,11 @@ func getByIDAndUserID_UserIDNotFound_ReturnError(s *TransactionSuite, desc strin
 	s.Require().Error(err, desc)
 }
 
-func (s *TransactionSuite) TestGetChartData() {
+func (s *TransactionSuite) TestGetBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when bar chart with one data, return successfully":       getChartData_BarChartOneData_ReturnSuccessfully,
-		"when bar chart with multiple data, return successfully":  getChartData_BarChartMultipleData_ReturnSuccessfully,
-		"when bar chart with multiple users, return successfully": getChartData_BarChartMultipleUsers_ReturnSuccessfully,
+		"when with one data, return successfully":       getBarChartData_WithOneData_ReturnSuccessfully,
+		"when with multiple data, return successfully":  getBarChartData_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully": getBarChartData_WithMultipleUsers_ReturnSuccessfully,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -655,7 +655,7 @@ func (s *TransactionSuite) TestGetChartData() {
 	}
 }
 
-func getChartData_BarChartOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+func getBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{
 		Price: 999,
 		Type:  domain.Expense.ToModelValue(),
@@ -678,7 +678,7 @@ func getChartData_BarChartOneData_ReturnSuccessfully(s *TransactionSuite, desc s
 	s.Require().Equal(expResult, chartData, desc)
 }
 
-func getChartData_BarChartMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+func getBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	date, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err, desc)
 
@@ -713,7 +713,7 @@ func getChartData_BarChartMultipleData_ReturnSuccessfully(s *TransactionSuite, d
 	s.Require().Equal(expResult, chartData, desc)
 }
 
-func getChartData_BarChartMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
+func getBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	date, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err, desc)
 
