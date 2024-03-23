@@ -86,8 +86,8 @@ func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) 
 	return t.Transaction.Delete(ctx, id)
 }
 
-func (t *TransactionUC) GetChartData(ctx context.Context, chartType domain.ChartType, chartDateRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
-	dataByWeekday, err := t.Transaction.GetChartData(ctx, chartType, chartDateRange, user.ID)
+func (t *TransactionUC) GetBarChartData(ctx context.Context, chartType domain.ChartType, chartDateRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
+	dataByWeekday, err := t.Transaction.GetBarChartData(ctx, chartType, chartDateRange, user.ID)
 	if err != nil {
 		return domain.ChartData{}, err
 	}

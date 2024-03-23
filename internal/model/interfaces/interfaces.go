@@ -80,6 +80,6 @@ type TransactionModel interface {
 	// GetByIDAndUserID returns a transaction by id and user id. Note that returned transaction is not included main category, sub category, and icon.
 	GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error)
 
-	// GetChartData returns chart data.
-	GetChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error)
+	// GetBarChartData returns bar chart data.
+	GetBarChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error)
 }

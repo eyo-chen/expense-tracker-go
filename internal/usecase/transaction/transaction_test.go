@@ -83,7 +83,7 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
-func (s *TransactionSuite) TestGetChartData() {
+func (s *TransactionSuite) TestGetBarChartData() {
 	tests := []struct {
 		desc           string
 		setupFun       func()
@@ -111,7 +111,7 @@ func (s *TransactionSuite) TestGetChartData() {
 					"Sat": 700,
 				}
 
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
 			chartType: domain.ChartTypeBar,
@@ -143,7 +143,7 @@ func (s *TransactionSuite) TestGetChartData() {
 					"Tue": 300,
 				}
 
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
 			chartType: domain.ChartTypeBar,
@@ -168,7 +168,7 @@ func (s *TransactionSuite) TestGetChartData() {
 					EndDate:   "2024-03-23",
 				}
 
-				s.mockTransaction.On("GetChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
 					Return(nil, errors.New("error")).Once()
 			},
 			chartType: domain.ChartTypeBar,
@@ -189,7 +189,7 @@ func (s *TransactionSuite) TestGetChartData() {
 			s.SetupTest()
 			t.setupFun()
 
-			result, err := s.transactionUC.GetChartData(mockCtx, t.chartType, t.chartDateRange, t.user)
+			result, err := s.transactionUC.GetBarChartData(mockCtx, t.chartType, t.chartDateRange, t.user)
 			s.Require().Equal(t.expResult, result)
 			s.Require().Equal(t.expErr, err)
 

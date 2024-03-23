@@ -164,7 +164,7 @@ func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TransactionHandler) GetChartData(w http.ResponseWriter, r *http.Request) {
+func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Request) {
 	startDate := r.URL.Query().Get("start_date")
 	endDate := r.URL.Query().Get("end_date")
 	rawChartType := r.URL.Query().Get("type")
@@ -183,7 +183,7 @@ func (t *TransactionHandler) GetChartData(w http.ResponseWriter, r *http.Request
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	data, err := t.transaction.GetChartData(ctx, chartType, dateRange, *user)
+	data, err := t.transaction.GetBarChartData(ctx, chartType, dateRange, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
