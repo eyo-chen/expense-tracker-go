@@ -4,20 +4,20 @@ package domain
 type TransactionType int64
 
 const (
-	// UnSpecified is an enumeration of unspecified transaction type
-	UnSpecified TransactionType = iota
-	// Income is an enumeration of income transaction type
-	Income
-	// Expense is an enumeration of expense transaction type
-	Expense
+	// TransactionTypeUnSpecified is an enumeration of unspecified transaction type
+	TransactionTypeUnSpecified TransactionType = iota
+	// TransactionTypeIncome is an enumeration of income transaction type
+	TransactionTypeIncome
+	// TransactionTypeExpense is an enumeration of expense transaction type
+	TransactionTypeExpense
 )
 
 // ToString returns the string representation of TransactionType
 func (t TransactionType) ToString() string {
 	switch t {
-	case Income:
+	case TransactionTypeIncome:
 		return "income"
-	case Expense:
+	case TransactionTypeExpense:
 		return "expense"
 	}
 	return "unknown type"
@@ -26,9 +26,9 @@ func (t TransactionType) ToString() string {
 // ToModelValue returns the string enum of mysql
 func (t TransactionType) ToModelValue() string {
 	switch t {
-	case Income:
+	case TransactionTypeIncome:
 		return "1"
-	case Expense:
+	case TransactionTypeExpense:
 		return "2"
 	}
 	return "0"
@@ -37,7 +37,7 @@ func (t TransactionType) ToModelValue() string {
 // IsValid checks if the TransactionType is valid
 func (t TransactionType) IsValid() bool {
 	switch t {
-	case Income, Expense:
+	case TransactionTypeIncome, TransactionTypeExpense:
 		return true
 	}
 	return false
@@ -47,13 +47,13 @@ func (t TransactionType) IsValid() bool {
 func CvtToTransactionType(s string) TransactionType {
 	switch s {
 	case "income":
-		return Income
+		return TransactionTypeIncome
 	case "expense":
-		return Expense
+		return TransactionTypeExpense
 	case "1":
-		return Income
+		return TransactionTypeIncome
 	case "2":
-		return Expense
+		return TransactionTypeExpense
 	}
-	return UnSpecified
+	return TransactionTypeUnSpecified
 }

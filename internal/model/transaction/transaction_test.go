@@ -318,7 +318,7 @@ func (s *TransactionSuite) TestGetAccInfo() {
 }
 
 func getAccInfo_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue()}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue()}
 	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(1, ow1)
 	s.Require().NoError(err, desc)
 
@@ -335,11 +335,11 @@ func getAccInfo_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 }
 
 func getAccInfo_WithMultipleUsers_ReturnDataOnlyWithOneUser(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue()}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue()}
 	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(1, ow1)
 	s.Require().NoError(err, desc)
 
-	ow2 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue()}
+	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue()}
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1, ow2)
 	s.Require().NoError(err, desc)
 
@@ -356,9 +356,9 @@ func getAccInfo_WithMultipleUsers_ReturnDataOnlyWithOneUser(s *TransactionSuite,
 }
 
 func getAccInfo_WithManyTransaction_ReturnCorrectCalculation(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue()}
-	ow2 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue()}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue()}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue()}
+	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue()}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue()}
 	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(3, ow1, ow2, ow3)
 	s.Require().NoError(err, desc)
 
@@ -381,10 +381,10 @@ func getAccInfo_WithManyTransaction_ReturnCorrectCalculation(s *TransactionSuite
 }
 
 func getAccInfo_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow2 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
-	ow4 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
+	ow4 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
 	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
@@ -410,10 +410,10 @@ func getAccInfo_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, des
 }
 
 func getAccInfo_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow2 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
-	ow4 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
+	ow4 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
 	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
@@ -439,10 +439,10 @@ func getAccInfo_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc s
 }
 
 func getAccInfo_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *TransactionSuite, desc string) {
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
-	ow2 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
-	ow4 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
+	ow4 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
 	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
@@ -658,7 +658,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 func getBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{
 		Price: 999,
-		Type:  domain.Expense.ToModelValue(),
+		Type:  domain.TransactionTypeExpense.ToModelValue(),
 		Date:  mockTimeNow.AddDate(0, 0, -4),
 	}
 	transactions, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(1, ow1)
@@ -668,7 +668,7 @@ func getBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc st
 		ow1.Date.Format(weekDayFormat): 999,
 	}
 
-	transactionType := domain.Expense
+	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[0].Date.Format(time.DateOnly),
@@ -682,16 +682,16 @@ func getBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 	date, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err, desc)
 
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
-	ow2 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
-	ow4 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 1)}
-	ow5 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 2)}
-	ow6 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
-	ow7 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
-	ow8 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
-	ow9 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 4)}
-	ow10 := transaction.Transaction{Price: 2000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
 	transactions, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
 	s.Require().NoError(err, desc)
 
@@ -703,7 +703,7 @@ func getBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 		transactions[8].Date.Format(weekDayFormat): 2000,
 	}
 
-	transactionType := domain.Expense
+	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[8].Date.Format(time.DateOnly),
@@ -717,27 +717,27 @@ func getBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 	date, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err, desc)
 
-	ow1 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
-	ow2 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
-	ow3 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
-	ow4 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 1)}
-	ow5 := transaction.Transaction{Price: 2000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 2)}
-	ow6 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
-	ow7 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
-	ow8 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
-	ow9 := transaction.Transaction{Price: 1000, Type: domain.Income.ToModelValue(), Date: date.AddDate(0, 0, 4)}
-	ow10 := transaction.Transaction{Price: 2000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 0)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
 	transactions, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	ow11 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
-	ow12 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow11, ow12)
 	s.Require().NoError(err, desc)
 
-	ow13 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
-	ow14 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow13 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow14 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
@@ -749,7 +749,7 @@ func getBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 		transactions[8].Date.Format(weekDayFormat): 2000,
 	}
 
-	transactionType := domain.Expense
+	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[8].Date.Format(time.DateOnly),
@@ -776,7 +776,7 @@ func (s *TransactionSuite) TestGetPieChartData() {
 func getPieChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{
 		Price: 999,
-		Type:  domain.Expense.ToModelValue(),
+		Type:  domain.TransactionTypeExpense.ToModelValue(),
 		Date:  mockTimeNow.AddDate(0, 0, -4),
 	}
 	transactions, user, mainCategs, _, _, err := s.f.InsertTransactionsWithOneUser(1, ow1)
@@ -791,7 +791,7 @@ func getPieChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc st
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[0].Date.Format(time.DateOnly),
 	}
-	transactionType := domain.Expense
+	transactionType := domain.TransactionTypeExpense
 
 	chartData, err := s.transactionModel.GetPieChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
@@ -799,10 +799,10 @@ func getPieChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc st
 }
 
 func getPieChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	mainCategOW1 := maincateg.MainCateg{Name: "food", Type: domain.Expense.ToModelValue()}
-	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.Expense.ToModelValue()}
-	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.Expense.ToModelValue()}
-	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.Income.ToModelValue()} // income type
+	mainCategOW1 := maincateg.MainCateg{Name: "food", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
 	mainCategList, user, _, err := s.f.InsertMainCategList(5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
@@ -832,7 +832,7 @@ func getPieChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 		Datasets: []float64{1000, 2000, 4000},
 	}
 
-	transactionType := domain.Expense
+	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
 		StartDate: date.Format(time.DateOnly),
 		EndDate:   date.AddDate(0, 0, 1).Format(time.DateOnly),
@@ -843,10 +843,10 @@ func getPieChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 }
 
 func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	mainCategOW1 := maincateg.MainCateg{Name: "food", Type: domain.Expense.ToModelValue()}
-	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.Expense.ToModelValue()}
-	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.Expense.ToModelValue()}
-	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.Income.ToModelValue()} // income type
+	mainCategOW1 := maincateg.MainCateg{Name: "food", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
 	mainCategList, user, _, err := s.f.InsertMainCategList(5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
@@ -872,13 +872,13 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 	s.Require().NoError(err, desc)
 
 	// prepare more user
-	ow11 := transaction.Transaction{Price: 999, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
-	ow12 := transaction.Transaction{Price: 1, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
+	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 1)}
+	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 2)}
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow11, ow12)
 	s.Require().NoError(err, desc)
 
-	ow13 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
-	ow14 := transaction.Transaction{Price: 1000, Type: domain.Expense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
+	ow13 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 3)}
+	ow14 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: date.AddDate(0, 0, 4)}
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
@@ -887,7 +887,7 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 		Datasets: []float64{1000, 2000, 4000},
 	}
 
-	transactionType := domain.Expense
+	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
 		StartDate: date.Format(time.DateOnly),
 		EndDate:   date.AddDate(0, 0, 1).Format(time.DateOnly),

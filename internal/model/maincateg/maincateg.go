@@ -58,7 +58,7 @@ func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) 
 					 ON mc.icon_id = i.id
 					 WHERE user_id = ?`
 
-	if transType != domain.UnSpecified {
+	if transType != domain.TransactionTypeUnSpecified {
 		stmt += ` AND type = ` + transType.ToModelValue()
 	}
 
