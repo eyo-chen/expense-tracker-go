@@ -19,7 +19,7 @@ var (
 
 func BluePrint(i int, last Transaction) Transaction {
 	return Transaction{
-		Type:  domain.Income.ToModelValue(),
+		Type:  domain.TransactionTypeIncome.ToModelValue(),
 		Price: float64(i*10.0 + 1.0),
 		Note:  "test" + fmt.Sprint(i),
 		Date:  mockTimeNow,

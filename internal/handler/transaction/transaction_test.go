@@ -187,7 +187,7 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 			StartDate: "2024-03-01",
 			EndDate:   "2024-03-08",
 		},
-		domain.Expense,
+		domain.TransactionTypeExpense,
 		user,
 	).Return(domain.ChartData{
 		Labels:   []string{"2024-03-01", "2024-03-02", "2024-03-03"},
@@ -372,7 +372,7 @@ func getPieChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 			StartDate: "2024-03-01",
 			EndDate:   "2024-03-08",
 		},
-		domain.Expense,
+		domain.TransactionTypeExpense,
 		user,
 	).Return(domain.ChartData{
 		Labels:   []string{"2024-03-01", "2024-03-02", "2024-03-03"},

@@ -95,7 +95,7 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 
 	categ := &domain.MainCateg{
 		Name: "test",
-		Type: domain.Expense,
+		Type: domain.TransactionTypeExpense,
 		Icon: domain.Icon{
 			ID: icons[0].ID,
 		},
@@ -110,7 +110,7 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 							 AND type = ?
 							 `
 	var result maincateg.MainCateg
-	err = s.db.QueryRow(checkStmt, users[0].ID, "test", domain.Expense.ToModelValue()).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	err = s.db.QueryRow(checkStmt, users[0].ID, "test", domain.TransactionTypeExpense.ToModelValue()).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categ.Name, result.Name, desc)
 	s.Require().Equal(categ.Type.ToModelValue(), result.Type, desc)
@@ -126,7 +126,7 @@ func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 
 	categ := &domain.MainCateg{
 		Name: createdMainCateg.Name,
-		Type: domain.Income,
+		Type: domain.TransactionTypeIncome,
 		Icon: domain.Icon{
 			ID: icon.ID,
 		},
@@ -141,7 +141,7 @@ func create_DuplicateIcon_ReturnError(s *MainCategSuite, desc string) {
 
 	categ := &domain.MainCateg{
 		Name: createdMainCateg.Name + "1", // different name
-		Type: domain.Expense,
+		Type: domain.TransactionTypeExpense,
 		Icon: domain.Icon{
 			ID: icon.ID,
 		},
@@ -173,7 +173,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 		{
 			ID:   mainCategList[1].ID,
 			Name: mainCategList[1].Name,
-			Type: domain.Income,
+			Type: domain.TransactionTypeIncome,
 			Icon: domain.Icon{
 				ID:  icons[1].ID,
 				URL: icons[1].URL,
@@ -181,7 +181,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.Income)
+	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeIncome)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -194,7 +194,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 		{
 			ID:   mainCategList[0].ID,
 			Name: mainCategList[0].Name,
-			Type: domain.Expense,
+			Type: domain.TransactionTypeExpense,
 			Icon: domain.Icon{
 				ID:  icons[0].ID,
 				URL: icons[0].URL,
@@ -202,7 +202,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.Expense)
+	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeExpense)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -215,7 +215,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 		{
 			ID:   mainCategList[0].ID,
 			Name: mainCategList[0].Name,
-			Type: domain.Expense,
+			Type: domain.TransactionTypeExpense,
 			Icon: domain.Icon{
 				ID:  icons[0].ID,
 				URL: icons[0].URL,
@@ -224,7 +224,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 		{
 			ID:   mainCategList[1].ID,
 			Name: mainCategList[1].Name,
-			Type: domain.Income,
+			Type: domain.TransactionTypeIncome,
 			Icon: domain.Icon{
 				ID:  icons[1].ID,
 				URL: icons[1].URL,
@@ -232,7 +232,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.UnSpecified)
+	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -245,7 +245,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 		{
 			ID:   mainCategList[1].ID,
 			Name: mainCategList[1].Name,
-			Type: domain.Income,
+			Type: domain.TransactionTypeIncome,
 			Icon: domain.Icon{
 				ID:  icons[1].ID,
 				URL: icons[1].URL,
@@ -254,7 +254,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 		{
 			ID:   mainCategList[2].ID,
 			Name: mainCategList[2].Name,
-			Type: domain.Expense,
+			Type: domain.TransactionTypeExpense,
 			Icon: domain.Icon{
 				ID:  icons[2].ID,
 				URL: icons[2].URL,
@@ -262,7 +262,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[1].ID, domain.UnSpecified)
+	categs, err := s.mainCategModel.GetAll(users[1].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err)
 	s.Require().Equal(expResult, categs)
 }
@@ -289,7 +289,7 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 	inputCateg := &domain.MainCateg{
 		ID:   categ.ID,
 		Name: "test2",
-		Type: domain.Income,
+		Type: domain.TransactionTypeIncome,
 		Icon: domain.Icon{
 			ID: categ.IconID,
 		},
@@ -315,7 +315,7 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 	inputCateg := &domain.MainCateg{
 		ID:   categs[0].ID,
 		Name: "update name",
-		Type: domain.Income,
+		Type: domain.TransactionTypeIncome,
 		Icon: domain.Icon{
 			ID: categs[0].IconID,
 		},

@@ -111,14 +111,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					"Sat": 700,
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
-			transactionType: domain.Expense,
+			transactionType: domain.TransactionTypeExpense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -143,14 +143,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					"Tue": 300,
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
-			transactionType: domain.Expense,
+			transactionType: domain.TransactionTypeExpense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -168,14 +168,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					EndDate:   "2024-03-23",
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(nil, errors.New("error")).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
-			transactionType: domain.Expense,
+			transactionType: domain.TransactionTypeExpense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -221,14 +221,14 @@ func (s *TransactionSuite) TestGetPieChartData() {
 					Datasets: []float64{100, 200},
 				}
 
-				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
+				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(chartData, nil).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
-			transactionType: domain.Expense,
+			transactionType: domain.TransactionTypeExpense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -246,14 +246,14 @@ func (s *TransactionSuite) TestGetPieChartData() {
 					EndDate:   "2024-03-23",
 				}
 
-				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
+				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(domain.ChartData{}, errors.New("error")).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
-			transactionType: domain.Expense,
+			transactionType: domain.TransactionTypeExpense,
 			user: domain.User{
 				ID: 1,
 			},
