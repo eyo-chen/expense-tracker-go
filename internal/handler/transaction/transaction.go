@@ -167,23 +167,23 @@ func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Request) {
 	startDate := r.URL.Query().Get("start_date")
 	endDate := r.URL.Query().Get("end_date")
-	rawChartType := r.URL.Query().Get("type")
+	rawTransactionType := r.URL.Query().Get("type")
 
 	dateRange := domain.ChartDateRange{
 		StartDate: startDate,
 		EndDate:   endDate,
 	}
-	chartType := domain.CvtToChartType(rawChartType)
+	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
 	v := validator.New()
-	if !v.GetChartData(dateRange, chartType) {
+	if !v.GetChartData(dateRange, transactionType) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	data, err := t.transaction.GetBarChartData(ctx, chartType, dateRange, *user)
+	data, err := t.transaction.GetBarChartData(ctx, dateRange, transactionType, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return

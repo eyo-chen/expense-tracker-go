@@ -668,12 +668,12 @@ func getBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc st
 		ow1.Date.Format(weekDayFormat): 999,
 	}
 
-	chartType := domain.ChartTypeBar
+	transactionType := domain.Expense
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[0].Date.Format(time.DateOnly),
 	}
-	chartData, err := s.transactionModel.GetBarChartData(mockCtx, chartType, dataRange, user.ID)
+	chartData, err := s.transactionModel.GetBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -703,12 +703,12 @@ func getBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 		transactions[8].Date.Format(weekDayFormat): 2000,
 	}
 
-	chartType := domain.ChartTypeBar
+	transactionType := domain.Expense
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[8].Date.Format(time.DateOnly),
 	}
-	chartData, err := s.transactionModel.GetBarChartData(mockCtx, chartType, dataRange, user.ID)
+	chartData, err := s.transactionModel.GetBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -749,12 +749,12 @@ func getBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 		transactions[8].Date.Format(weekDayFormat): 2000,
 	}
 
-	chartType := domain.ChartTypeBar
+	transactionType := domain.Expense
 	dataRange := domain.ChartDateRange{
 		StartDate: transactions[0].Date.Format(time.DateOnly),
 		EndDate:   transactions[8].Date.Format(time.DateOnly),
 	}
-	chartData, err := s.transactionModel.GetBarChartData(mockCtx, chartType, dataRange, user.ID)
+	chartData, err := s.transactionModel.GetBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }

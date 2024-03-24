@@ -63,7 +63,7 @@ type TransactionUC interface {
 	Delete(ctx context.Context, id int64, user domain.User) error
 
 	// GetBarChartData returns bar chart data.
-	GetBarChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, user domain.User) (domain.ChartData, error)
+	GetBarChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error)
 
 	// GetPieChartData returns pie chart data.
 	GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error)

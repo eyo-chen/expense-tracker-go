@@ -85,13 +85,13 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 
 func (s *TransactionSuite) TestGetBarChartData() {
 	tests := []struct {
-		desc           string
-		setupFun       func()
-		chartType      domain.ChartType
-		chartDateRange domain.ChartDateRange
-		user           domain.User
-		expResult      domain.ChartData
-		expErr         error
+		desc            string
+		setupFun        func()
+		chartDateRange  domain.ChartDateRange
+		transactionType domain.TransactionType
+		user            domain.User
+		expResult       domain.ChartData
+		expErr          error
 	}{
 		{
 			desc: "when no error, return chart data",
@@ -111,14 +111,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					"Sat": 700,
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
-			chartType: domain.ChartTypeBar,
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
+			transactionType: domain.Expense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -143,14 +143,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					"Tue": 300,
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
 					Return(chartDataByWeekday, nil).Once()
 			},
-			chartType: domain.ChartTypeBar,
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
+			transactionType: domain.Expense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -168,14 +168,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					EndDate:   "2024-03-23",
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, domain.ChartTypeBar, chartDataRange, int64(1)).
+				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
 					Return(nil, errors.New("error")).Once()
 			},
-			chartType: domain.ChartTypeBar,
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
+			transactionType: domain.Expense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -189,7 +189,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 			s.SetupTest()
 			t.setupFun()
 
-			result, err := s.transactionUC.GetBarChartData(mockCtx, t.chartType, t.chartDateRange, t.user)
+			result, err := s.transactionUC.GetBarChartData(mockCtx, t.chartDateRange, t.transactionType, t.user)
 			s.Require().Equal(t.expResult, result)
 			s.Require().Equal(t.expErr, err)
 

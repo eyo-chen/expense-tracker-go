@@ -171,7 +171,7 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetBarChartData))
-	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&end_date=2024-03-08&type=bar", nil)
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&end_date=2024-03-08&type=expense", nil)
 	res := httptest.NewRecorder()
 	defer srv.Close()
 	defer req.Body.Close()
@@ -183,11 +183,11 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	// mock service
 	s.mockTransactionUC.On("GetBarChartData",
 		req.Context(),
-		domain.ChartTypeBar,
 		domain.ChartDateRange{
 			StartDate: "2024-03-01",
 			EndDate:   "2024-03-08",
 		},
+		domain.Expense,
 		user,
 	).Return(domain.ChartData{
 		Labels:   []string{"2024-03-01", "2024-03-02", "2024-03-03"},
@@ -219,7 +219,7 @@ func getBarChartData_NoStartDate_ReturnBadReq(s *TransactionSuite, desc string) 
 
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetBarChartData))
-	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?end_date=2024-03-08&type=bar", nil)
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?end_date=2024-03-08&type=expense", nil)
 	res := httptest.NewRecorder()
 	defer srv.Close()
 	defer req.Body.Close()
@@ -249,7 +249,7 @@ func getBarChartData_NoEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
 
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetBarChartData))
-	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&type=bar", nil)
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&type=expense", nil)
 	res := httptest.NewRecorder()
 	defer srv.Close()
 	defer req.Body.Close()
@@ -280,7 +280,7 @@ func getBarChartData_StartDateAfterEndDate_ReturnBadReq(s *TransactionSuite, des
 
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetBarChartData))
-	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-08&end_date=2024-03-01&type=bar", nil)
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-08&end_date=2024-03-01&type=expense", nil)
 	res := httptest.NewRecorder()
 	defer srv.Close()
 	defer req.Body.Close()
@@ -323,7 +323,7 @@ func getBarChartData_NoType_ReturnBadReq(s *TransactionSuite, desc string) {
 	s.transactionHlr.GetBarChartData(res, req)
 
 	expResp := map[string]interface{}{
-		"type": "Chart type must be bar, pie or line",
+		"type": "Transaction type must be income or expense",
 	}
 
 	var responseBody map[string]interface{}
