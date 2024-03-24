@@ -32,10 +32,22 @@ func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.Sub
 	}
 }
 
-func cvtToModelTransaction(t domain.CreateTransactionInput) Transaction {
+func cvtCreateTransInputToModelTransaction(t domain.CreateTransactionInput) Transaction {
 	return Transaction{
 		Type:        t.Type.ToModelValue(),
 		UserID:      t.UserID,
+		MainCategID: t.MainCategID,
+		SubCategID:  t.SubCategID,
+		Price:       t.Price,
+		Note:        t.Note,
+		Date:        t.Date,
+	}
+}
+
+func cvtUpdateTransInputToModelTransaction(t domain.UpdateTransactionInput) Transaction {
+	return Transaction{
+		ID:          t.ID,
+		Type:        t.Type.ToModelValue(),
 		MainCategID: t.MainCategID,
 		SubCategID:  t.SubCategID,
 		Price:       t.Price,

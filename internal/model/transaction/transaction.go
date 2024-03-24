@@ -36,7 +36,7 @@ func NewTransactionModel(db *sql.DB) *TransactionModel {
 }
 
 func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
-	tr := cvtToModelTransaction(trans)
+	tr := cvtCreateTransInputToModelTransaction(trans)
 	qStmt := "INSERT INTO transactions (user_id, type, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?, ?)"
 
 	if _, err := t.DB.ExecContext(ctx, qStmt, tr.UserID, tr.Type, tr.MainCategID, tr.SubCategID, tr.Price, tr.Note, tr.Date); err != nil {
@@ -77,6 +77,29 @@ func (t *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, us
 	return transactions, nil
 }
 
+func (t *TransactionModel) Update(ctx context.Context, trans domain.UpdateTransactionInput) error {
+	tr := cvtUpdateTransInputToModelTransaction(trans)
+	qStmt := "UPDATE transactions SET type = ?, main_category_id = ?, sub_category_id = ?, price = ?, note = ?, date = ? WHERE id = ?"
+
+	if _, err := t.DB.ExecContext(ctx, qStmt, tr.Type, tr.MainCategID, tr.SubCategID, tr.Price, tr.Note, tr.Date, tr.ID); err != nil {
+		logger.Error("t.DB.ExecContext failed", "package", PackageName, "err", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *TransactionModel) Delete(ctx context.Context, id int64) error {
+	qStmt := "DELETE FROM transactions WHERE id = ?"
+
+	if _, err := t.DB.ExecContext(ctx, qStmt, id); err != nil {
+		logger.Error("t.DB.ExecContext failed", "package", PackageName, "err", err)
+		return err
+	}
+
+	return nil
+}
+
 func (t *TransactionModel) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error) {
 	qStmt := getAccInfoQStmt(query)
 	args := getAccInfoArgs(query, userID)
@@ -89,17 +112,6 @@ func (t *TransactionModel) GetAccInfo(ctx context.Context, query domain.GetAccIn
 	}
 
 	return accInfo, nil
-}
-
-func (t *TransactionModel) Delete(ctx context.Context, id int64) error {
-	qStmt := "DELETE FROM transactions WHERE id = ?"
-
-	if _, err := t.DB.ExecContext(ctx, qStmt, id); err != nil {
-		logger.Error("t.DB.ExecContext failed", "package", PackageName, "err", err)
-		return err
-	}
-
-	return nil
 }
 
 func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error) {
