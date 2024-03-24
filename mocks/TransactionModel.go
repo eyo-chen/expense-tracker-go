@@ -195,6 +195,24 @@ func (_m *TransactionModel) GetPieChartData(ctx context.Context, dataRange domai
 	return r0, r1
 }
 
+// Update provides a mock function with given fields: ctx, trans
+func (_m *TransactionModel) Update(ctx context.Context, trans domain.UpdateTransactionInput) error {
+	ret := _m.Called(ctx, trans)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.UpdateTransactionInput) error); ok {
+		r0 = rf(ctx, trans)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewTransactionModel creates a new instance of TransactionModel. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTransactionModel(t interface {
