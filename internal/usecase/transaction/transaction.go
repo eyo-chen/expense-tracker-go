@@ -114,3 +114,7 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartType domain.Ch
 
 	return chartData, nil
 }
+
+func (t *TransactionUC) GetPieChartData(ctx context.Context, transactionType domain.TransactionType, chartDateRange domain.ChartDateRange, user domain.User) (domain.ChartData, error) {
+	return t.Transaction.GetPieChartData(ctx, chartDateRange, transactionType, user.ID)
+}
