@@ -137,6 +137,34 @@ func (_m *TransactionUC) GetBarChartData(ctx context.Context, chartType domain.C
 	return r0, r1
 }
 
+// GetPieChartData provides a mock function with given fields: ctx, dataRange, transactionType, user
+func (_m *TransactionUC) GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
+	ret := _m.Called(ctx, dataRange, transactionType, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPieChartData")
+	}
+
+	var r0 domain.ChartData
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, domain.User) (domain.ChartData, error)); ok {
+		return rf(ctx, dataRange, transactionType, user)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, domain.User) domain.ChartData); ok {
+		r0 = rf(ctx, dataRange, transactionType, user)
+	} else {
+		r0 = ret.Get(0).(domain.ChartData)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, domain.TransactionType, domain.User) error); ok {
+		r1 = rf(ctx, dataRange, transactionType, user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewTransactionUC creates a new instance of TransactionUC. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTransactionUC(t interface {
