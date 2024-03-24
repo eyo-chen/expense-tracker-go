@@ -197,3 +197,81 @@ func (s *TransactionSuite) TestGetBarChartData() {
 		})
 	}
 }
+
+func (s *TransactionSuite) TestGetPieChartData() {
+	tests := []struct {
+		desc            string
+		setupFun        func()
+		transactionType domain.TransactionType
+		chartDateRange  domain.ChartDateRange
+		user            domain.User
+		expResult       domain.ChartData
+		expErr          error
+	}{
+		{
+			desc: "when no error, return chart data",
+			setupFun: func() {
+				chartDataRange := domain.ChartDateRange{
+					StartDate: "2024-03-17",
+					EndDate:   "2024-03-23",
+				}
+
+				chartData := domain.ChartData{
+					Labels:   []string{"label1", "label2"},
+					Datasets: []float64{100, 200},
+				}
+
+				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
+					Return(chartData, nil).Once()
+			},
+			transactionType: domain.Expense,
+			chartDateRange: domain.ChartDateRange{
+				StartDate: "2024-03-17",
+				EndDate:   "2024-03-23",
+			},
+			user: domain.User{
+				ID: 1,
+			},
+			expResult: domain.ChartData{
+				Labels:   []string{"label1", "label2"},
+				Datasets: []float64{100, 200},
+			},
+			expErr: nil,
+		},
+		{
+			desc: "when get chart data fail, return error",
+			setupFun: func() {
+				chartDataRange := domain.ChartDateRange{
+					StartDate: "2024-03-17",
+					EndDate:   "2024-03-23",
+				}
+
+				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
+					Return(domain.ChartData{}, errors.New("error")).Once()
+			},
+			transactionType: domain.Expense,
+			chartDateRange: domain.ChartDateRange{
+				StartDate: "2024-03-17",
+				EndDate:   "2024-03-23",
+			},
+			user: domain.User{
+				ID: 1,
+			},
+			expResult: domain.ChartData{},
+			expErr:    errors.New("error"),
+		},
+	}
+
+	for _, t := range tests {
+		s.Run(t.desc, func() {
+			s.SetupTest()
+			t.setupFun()
+
+			result, err := s.transactionUC.GetPieChartData(mockCtx, t.transactionType, t.chartDateRange, t.user)
+			s.Require().Equal(t.expResult, result)
+			s.Require().Equal(t.expErr, err)
+
+			s.TearDownTest()
+		})
+	}
+}
