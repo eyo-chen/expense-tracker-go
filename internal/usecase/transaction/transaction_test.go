@@ -202,8 +202,8 @@ func (s *TransactionSuite) TestGetPieChartData() {
 	tests := []struct {
 		desc            string
 		setupFun        func()
-		transactionType domain.TransactionType
 		chartDateRange  domain.ChartDateRange
+		transactionType domain.TransactionType
 		user            domain.User
 		expResult       domain.ChartData
 		expErr          error
@@ -224,11 +224,11 @@ func (s *TransactionSuite) TestGetPieChartData() {
 				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
 					Return(chartData, nil).Once()
 			},
-			transactionType: domain.Expense,
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
+			transactionType: domain.Expense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -249,11 +249,11 @@ func (s *TransactionSuite) TestGetPieChartData() {
 				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.Expense, int64(1)).
 					Return(domain.ChartData{}, errors.New("error")).Once()
 			},
-			transactionType: domain.Expense,
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
 				EndDate:   "2024-03-23",
 			},
+			transactionType: domain.Expense,
 			user: domain.User{
 				ID: 1,
 			},
@@ -267,7 +267,7 @@ func (s *TransactionSuite) TestGetPieChartData() {
 			s.SetupTest()
 			t.setupFun()
 
-			result, err := s.transactionUC.GetPieChartData(mockCtx, t.transactionType, t.chartDateRange, t.user)
+			result, err := s.transactionUC.GetPieChartData(mockCtx, t.chartDateRange, t.transactionType, t.user)
 			s.Require().Equal(t.expResult, result)
 			s.Require().Equal(t.expErr, err)
 
