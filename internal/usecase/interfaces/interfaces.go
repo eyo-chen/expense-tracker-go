@@ -56,11 +56,14 @@ type TransactionUC interface {
 	// GetAll returns all transactions by query and user id.
 	GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error)
 
-	// GetAccInfo returns the accunulated information by user id.
-	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error)
+	// Update updates a transaction.
+	Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error
 
 	// Delete deletes a transaction by id.
 	Delete(ctx context.Context, id int64, user domain.User) error
+
+	// GetAccInfo returns the accunulated information by user id.
+	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error)
 
 	// GetBarChartData returns bar chart data.
 	GetBarChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error)
