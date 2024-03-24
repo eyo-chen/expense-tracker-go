@@ -300,6 +300,207 @@ func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc s
 	s.Require().Equal(expResult, trans, desc)
 }
 
+func (s *TransactionSuite) TestUpdate() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when with one data, update successfully":       update_WithOneData_UpdateSuccessfully,
+		"when with multiple data, update successfully":  update_WithMultipleData_UpdateSuccessfully,
+		"when with multiple users, update successfully": update_WithMultipleUsers_UpdateSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func update_WithOneData_UpdateSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	t := domain.UpdateTransactionInput{
+		ID:          transactions[0].ID,
+		Type:        domain.CvtToTransactionType(transactions[0].Type),
+		MainCategID: transactions[0].MainCategID,
+		SubCategID:  transactions[0].SubCategID,
+		Price:       999,
+		Note:        "update note",
+		Date:        mockTimeNow.AddDate(0, 0, -1),
+	}
+
+	err = s.transactionModel.Update(mockCtx, t)
+	s.Require().NoError(err, desc)
+
+	var checkT transaction.Transaction
+	stmt := "SELECT type, main_category_id, sub_category_id, price, note, date FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.Type, &checkT.MainCategID, &checkT.SubCategID, &checkT.Price, &checkT.Note, &checkT.Date)
+	s.Require().NoError(err)
+	s.Require().Equal(t.Type.ToModelValue(), checkT.Type)
+	s.Require().Equal(t.MainCategID, checkT.MainCategID)
+	s.Require().Equal(t.SubCategID, checkT.SubCategID)
+	s.Require().Equal(t.Price, checkT.Price)
+	s.Require().Equal(t.Note, checkT.Note)
+	s.Require().Equal(t.Date, checkT.Date)
+}
+
+func update_WithMultipleData_UpdateSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(2)
+	s.Require().NoError(err, desc)
+
+	t := domain.UpdateTransactionInput{
+		ID:          transactions[0].ID,
+		Type:        domain.CvtToTransactionType(transactions[0].Type),
+		MainCategID: transactions[0].MainCategID,
+		SubCategID:  transactions[0].SubCategID,
+		Price:       999,
+		Note:        "update note",
+		Date:        mockTimeNow.AddDate(0, 0, -1),
+	}
+
+	err = s.transactionModel.Update(mockCtx, t)
+	s.Require().NoError(err, desc)
+
+	var checkT transaction.Transaction
+	stmt := "SELECT type, main_category_id, sub_category_id, price, note, date FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.Type, &checkT.MainCategID, &checkT.SubCategID, &checkT.Price, &checkT.Note, &checkT.Date)
+	s.Require().NoError(err)
+	s.Require().Equal(t.Type.ToModelValue(), checkT.Type)
+	s.Require().Equal(t.Price, checkT.Price)
+	s.Require().Equal(t.Note, checkT.Note)
+	s.Require().Equal(t.Date, checkT.Date)
+
+	// check if other data is not updated
+	var checkT2 transaction.Transaction
+	err = s.db.QueryRow(stmt, transactions[1].ID).Scan(&checkT2.Type, &checkT2.MainCategID, &checkT2.SubCategID, &checkT2.Price, &checkT2.Note, &checkT2.Date)
+	s.Require().NoError(err)
+	s.Require().Equal(transactions[1].Type, checkT2.Type)
+	s.Require().Equal(transactions[1].Price, checkT2.Price)
+	s.Require().Equal(transactions[1].Note, checkT2.Note)
+	s.Require().Equal(transactions[1].Date, checkT2.Date)
+}
+
+func update_WithMultipleUsers_UpdateSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	transactions2, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	t := domain.UpdateTransactionInput{
+		ID:          transactions[0].ID,
+		Type:        domain.CvtToTransactionType(transactions[0].Type),
+		MainCategID: transactions[0].MainCategID,
+		SubCategID:  transactions[0].SubCategID,
+		Price:       999,
+		Note:        "update note",
+		Date:        mockTimeNow,
+	}
+
+	err = s.transactionModel.Update(mockCtx, t)
+	s.Require().NoError(err, desc)
+
+	var checkT transaction.Transaction
+	stmt := "SELECT type, main_category_id, sub_category_id, price, note, date FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.Type, &checkT.MainCategID, &checkT.SubCategID, &checkT.Price, &checkT.Note, &checkT.Date)
+	s.Require().NoError(err)
+	s.Require().Equal(t.Type.ToModelValue(), checkT.Type)
+	s.Require().Equal(t.Price, checkT.Price)
+	s.Require().Equal(t.Note, checkT.Note)
+	s.Require().Equal(t.Date, checkT.Date)
+
+	// check if other user's data is not updated
+	var checkT2 transaction.Transaction
+	err = s.db.QueryRow(stmt, transactions2[0].ID).Scan(&checkT2.Type, &checkT2.MainCategID, &checkT2.SubCategID, &checkT2.Price, &checkT2.Note, &checkT2.Date)
+	s.Require().NoError(err)
+	s.Require().Equal(transactions2[0].Type, checkT2.Type)
+	s.Require().Equal(transactions2[0].Price, checkT2.Price)
+	s.Require().Equal(transactions2[0].Note, checkT2.Note)
+	s.Require().Equal(transactions2[0].Date, checkT2.Date)
+}
+
+func (s *TransactionSuite) TestDelete() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when with one data, delete successfully":       delete_WithOneData_DeleteSuccessfully,
+		"when with multiple data, delete successfully":  delete_WithMultipleData_DeleteSuccessfully,
+		"when with multiple users, delete successfully": delete_WithMultipleUsers_DeleteSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func delete_WithOneData_DeleteSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
+	s.Require().NoError(err, desc)
+
+	var count int
+	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(0, count, desc)
+
+	// check if data exists
+	var checkT transaction.Transaction
+	stmt := "SELECT id FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
+	s.Require().Equal(sql.ErrNoRows, err, desc)
+}
+
+func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
+	s.Require().NoError(err, desc)
+
+	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
+	s.Require().NoError(err, desc)
+
+	var count int
+	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(2, count, desc)
+
+	// check if data exists
+	var checkT transaction.Transaction
+	stmt := "SELECT id FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
+	s.Require().Equal(sql.ErrNoRows, err, desc)
+}
+
+func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc string) {
+	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	transactions2, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
+	s.Require().NoError(err, desc)
+
+	var count int
+	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(3, count, desc)
+
+	// check if data exists
+	var checkT transaction.Transaction
+	stmt := "SELECT id FROM transactions WHERE id = ?"
+	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
+	s.Require().Equal(sql.ErrNoRows, err, desc)
+
+	// check if other user's data still exists
+	var countUser2 int
+	stmt = "SELECT COUNT(*) FROM transactions WHERE user_id = ?"
+	err = s.db.QueryRow(stmt, transactions2[0].UserID).Scan(&countUser2)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(1, countUser2, desc)
+}
+
 func (s *TransactionSuite) TestGetAccInfo() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
 		"when no error, return successfully":                                  getAccInfo_NoError_ReturnSuccessfully,
@@ -467,88 +668,6 @@ func getAccInfo_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transac
 	accInfo, err := s.transactionModel.GetAccInfo(mockCtx, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
-}
-
-func (s *TransactionSuite) TestDelete() {
-	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when with one data, delete successfully":       delete_WithOneData_DeleteSuccessfully,
-		"when with multiple data, delete successfully":  delete_WithMultipleData_DeleteSuccessfully,
-		"when with multiple users, delete successfully": delete_WithMultipleUsers_DeleteSuccessfully,
-	} {
-		s.Run(testutil.GetFunName(fn), func() {
-			s.SetupTest()
-			fn(s, scenario)
-			s.TearDownTest()
-		})
-	}
-}
-
-func delete_WithOneData_DeleteSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
-	s.Require().NoError(err, desc)
-
-	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
-	s.Require().NoError(err, desc)
-
-	var count int
-	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(0, count, desc)
-
-	// check if data exists
-	var checkT transaction.Transaction
-	stmt := "SELECT id FROM transactions WHERE id = ?"
-	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
-	s.Require().Equal(sql.ErrNoRows, err, desc)
-}
-
-func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
-	s.Require().NoError(err, desc)
-
-	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
-	s.Require().NoError(err, desc)
-
-	var count int
-	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(2, count, desc)
-
-	// check if data exists
-	var checkT transaction.Transaction
-	stmt := "SELECT id FROM transactions WHERE id = ?"
-	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
-	s.Require().Equal(sql.ErrNoRows, err, desc)
-}
-
-func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(3)
-	s.Require().NoError(err, desc)
-
-	// prepare more users
-	transactions2, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(1)
-	s.Require().NoError(err, desc)
-
-	err = s.transactionModel.Delete(mockCtx, transactions[0].ID)
-	s.Require().NoError(err, desc)
-
-	var count int
-	err = s.db.QueryRow("SELECT COUNT(*) FROM transactions").Scan(&count)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(3, count, desc)
-
-	// check if data exists
-	var checkT transaction.Transaction
-	stmt := "SELECT id FROM transactions WHERE id = ?"
-	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
-	s.Require().Equal(sql.ErrNoRows, err, desc)
-
-	// check if other user's data still exists
-	var countUser2 int
-	stmt = "SELECT COUNT(*) FROM transactions WHERE user_id = ?"
-	err = s.db.QueryRow(stmt, transactions2[0].UserID).Scan(&countUser2)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(1, countUser2, desc)
 }
 
 func (s *TransactionSuite) TestGetByIDAndUserID() {

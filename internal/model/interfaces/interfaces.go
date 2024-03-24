@@ -71,11 +71,14 @@ type TransactionModel interface {
 	// GetAll returns all transactions by user id and query.
 	GetAll(ctx context.Context, query domain.GetQuery, userID int64) ([]domain.Transaction, error)
 
-	// GetAccInfo returns accumulated information by user id and query.
-	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error)
+	// Update updates a transaction.
+	Update(ctx context.Context, trans domain.UpdateTransactionInput) error
 
 	// Delete deletes a transaction by id.
 	Delete(ctx context.Context, id int64) error
+
+	// GetAccInfo returns accumulated information by user id and query.
+	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error)
 
 	// GetByIDAndUserID returns a transaction by id and user id. Note that returned transaction is not included main category, sub category, and icon.
 	GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error)

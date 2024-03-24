@@ -27,6 +27,17 @@ type CreateTransactionInput struct {
 	Note        string          `json:"note"`
 }
 
+// UpdateTransactionInput represents input for updating transaction
+type UpdateTransactionInput struct {
+	ID          int64           `json:"id"`
+	Type        TransactionType `json:"type"`
+	MainCategID int64           `json:"main_category_id"`
+	SubCategID  int64           `json:"sub_category_id"`
+	Price       float64         `json:"price"`
+	Date        time.Time       `json:"date"`
+	Note        string          `json:"note"`
+}
+
 // AccInfo contains accumulated information
 type AccInfo struct {
 	TotalIncome  float64 `json:"total_income"`
