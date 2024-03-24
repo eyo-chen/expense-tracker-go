@@ -46,6 +46,14 @@ func (v *Validator) GetChartData(dateRange domain.ChartDateRange, chartType doma
 	return v.Valid()
 }
 
+func (v *Validator) GetPieChartData(dateRange domain.ChartDateRange, transactionType domain.TransactionType) bool {
+	v.Check(isValidDateFormat(&dateRange.StartDate), "start_date", "Start date must be in YYYY-MM-DD format")
+	v.Check(isValidDateFormat(&dateRange.EndDate), "end_date", "End date must be in YYYY-MM-DD format")
+	v.Check(checkStartDateBeforeEndDate(&dateRange.StartDate, &dateRange.EndDate), "start_date", "Start date must be before end date")
+	v.Check(transactionType.IsValid(), "type", "Transaction type must be income or expense")
+	return v.Valid()
+}
+
 func isValidDateFormat(dateString *string) bool {
 	if dateString == nil {
 		return true

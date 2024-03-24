@@ -167,6 +167,34 @@ func (_m *TransactionModel) GetByIDAndUserID(ctx context.Context, id int64, user
 	return r0, r1
 }
 
+// GetPieChartData provides a mock function with given fields: ctx, dataRange, transactionType, userID
+func (_m *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
+	ret := _m.Called(ctx, dataRange, transactionType, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPieChartData")
+	}
+
+	var r0 domain.ChartData
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) (domain.ChartData, error)); ok {
+		return rf(ctx, dataRange, transactionType, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) domain.ChartData); ok {
+		r0 = rf(ctx, dataRange, transactionType, userID)
+	} else {
+		r0 = ret.Get(0).(domain.ChartData)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) error); ok {
+		r1 = rf(ctx, dataRange, transactionType, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewTransactionModel creates a new instance of TransactionModel. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTransactionModel(t interface {

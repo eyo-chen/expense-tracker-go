@@ -199,3 +199,38 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Request) {
+	startDate := r.URL.Query().Get("start_date")
+	endDate := r.URL.Query().Get("end_date")
+	rawTransactionType := r.URL.Query().Get("type")
+	transactionType := domain.CvtToTransactionType(rawTransactionType)
+
+	dateRange := domain.ChartDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	v := validator.New()
+	if !v.GetPieChartData(dateRange, transactionType) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	data, err := t.transaction.GetPieChartData(r.Context(), dateRange, transactionType, *user)
+	if err != nil {
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"chart_data": data,
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}

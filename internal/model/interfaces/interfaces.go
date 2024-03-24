@@ -82,4 +82,7 @@ type TransactionModel interface {
 
 	// GetBarChartData returns bar chart data.
 	GetBarChartData(ctx context.Context, chartType domain.ChartType, dataRange domain.ChartDateRange, userID int64) (domain.ChartDataByWeekday, error)
+
+	// GetPieChartData returns pie chart data.
+	GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error)
 }
