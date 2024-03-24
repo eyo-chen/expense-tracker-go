@@ -93,7 +93,7 @@ func (t *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransacti
 	}
 
 	// check if the sub category matches the main category
-	if subCateg.MainCategID != trans.MainCategID {
+	if trans.MainCategID != subCateg.MainCategID {
 		logger.Error("Update Transaction failed", "package", PackageName, "err", domain.ErrMainCategNotConsistent)
 		return domain.ErrMainCategNotConsistent
 	}
