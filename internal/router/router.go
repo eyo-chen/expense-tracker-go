@@ -38,8 +38,9 @@ func New(handler *hd.Handler) http.Handler {
 	// transaction
 	r.Handle("/v1/transaction", auth.ThenFunc(handler.Transaction.Create)).Methods(http.MethodPost)
 	r.Handle("/v1/transaction", auth.ThenFunc(handler.Transaction.GetAll)).Methods(http.MethodGet)
-	r.Handle("/v1/transaction/info", auth.ThenFunc(handler.Transaction.GetAccInfo)).Methods(http.MethodGet)
+	r.Handle("/v1/transaction/{id}", auth.ThenFunc(handler.Transaction.Update)).Methods(http.MethodPut)
 	r.Handle("/v1/transaction/{id}", auth.ThenFunc(handler.Transaction.Delete)).Methods(http.MethodDelete)
+	r.Handle("/v1/transaction/info", auth.ThenFunc(handler.Transaction.GetAccInfo)).Methods(http.MethodGet)
 	r.Handle("/v1/transaction/bar-chart", auth.ThenFunc(handler.Transaction.GetBarChartData)).Methods(http.MethodGet)
 	r.Handle("/v1/transaction/pie-chart", auth.ThenFunc(handler.Transaction.GetPieChartData)).Methods(http.MethodGet)
 
