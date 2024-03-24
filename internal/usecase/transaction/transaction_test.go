@@ -4,16 +4,20 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/transaction"
 	"github.com/OYE0303/expense-tracker-go/mocks"
+	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
 )
 
 var (
-	mockCtx = context.Background()
+	mockCtx     = context.Background()
+	mockLoc, _  = time.LoadLocation("")
+	mockTimeNow = time.Unix(1629446406, 0).Truncate(24 * time.Hour).In(mockLoc)
 )
 
 type TransactionSuite struct {
@@ -28,6 +32,10 @@ func TestTransactionSuite(t *testing.T) {
 	suite.Run(t, new(TransactionSuite))
 }
 
+func (s *TransactionSuite) SetupSuite() {
+	logger.Register()
+}
+
 func (s *TransactionSuite) SetupTest() {
 	s.mockTransaction = mocks.NewTransactionModel(s.T())
 	s.mockMainCateg = mocks.NewMainCategModel(s.T())
@@ -39,6 +47,197 @@ func (s *TransactionSuite) TearDownTest() {
 	s.mockTransaction.AssertExpectations(s.T())
 	s.mockMainCateg.AssertExpectations(s.T())
 	s.mockSubCateg.AssertExpectations(s.T())
+}
+
+func (s *TransactionSuite) TestUpdate() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, update successfully":                                                      update_NoError_UpdateSuccessfully,
+		"when get main category fail, return error":                                               update_GetMainCategFail_ReturnError,
+		"when type of main category not match transaction type, return error":                     update_TypeNotMatch_ReturnError,
+		"when get sub category fail, return error":                                                update_GetSubCategFail_ReturnError,
+		"when main category of sub category not match main category of transaction, return error": update_MainCategNotMatch_ReturnError,
+		"when get transaction fail, return error":                                                 update_GetTransFail_UpdateSuccessfully,
+		"when update fail, return error":                                                          update_UpdateFail_UpdateSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func update_NoError_UpdateSuccessfully(s *TransactionSuite, desc string) {
+	user := domain.User{ID: 1}
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 1}
+	trans := domain.UpdateTransactionInput{
+		ID:          1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+		Return(&mainCateg, nil).Once()
+
+	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+		Return(&subCateg, nil).Once()
+
+	s.mockTransaction.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
+		Return(domain.Transaction{}, nil).Once()
+
+	s.mockTransaction.On("Update", mockCtx, trans).
+		Return(nil).Once()
+
+	err := s.transactionUC.Update(mockCtx, trans, user)
+	s.Require().NoError(err, desc)
+}
+
+func update_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
+	user := domain.User{ID: 1}
+	trans := domain.UpdateTransactionInput{
+		ID:          1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+		Return(nil, errors.New("error")).Once()
+
+	err := s.transactionUC.Update(mockCtx, trans, user)
+	s.Require().Equal(errors.New("error"), err, desc)
+}
+
+func update_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
+	user := domain.User{ID: 1}
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeIncome} // set type to income
+	trans := domain.UpdateTransactionInput{
+		ID:          1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+		Return(&mainCateg, nil).Once()
+
+	err := s.transactionUC.Update(mockCtx, trans, user)
+	s.Require().Equal(domain.ErrTypeNotConsistent, err, desc)
+}
+
+func update_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
+	user := domain.User{ID: 1}
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	trans := domain.UpdateTransactionInput{
+		ID:          1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+		Return(&mainCateg, nil).Once()
+
+	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+		Return(nil, errors.New("error")).Once()
+
+	err := s.transactionUC.Update(mockCtx, trans, user)
+	s.Require().Equal(errors.New("error"), err, desc)
+}
+
+func update_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
+	user := domain.User{ID: 1}
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 2}
+	trans := domain.UpdateTransactionInput{
+		ID:          1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+		Return(&mainCateg, nil).Once()
+
+	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+		Return(&subCateg, nil).Once()
+
+	err := s.transactionUC.Update(mockCtx, trans, user)
+	s.Require().Equal(domain.ErrMainCategNotConsistent, err, desc)
+}
+
+func update_GetTransFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
+	user := domain.User{ID: 1}
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 1}
+	trans := domain.UpdateTransactionInput{
+		ID:          1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+		Return(&mainCateg, nil).Once()
+
+	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+		Return(&subCateg, nil).Once()
+
+	s.mockTransaction.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
+		Return(domain.Transaction{}, errors.New("error")).Once()
+
+	err := s.transactionUC.Update(mockCtx, trans, user)
+	s.Require().Equal(errors.New("error"), err, desc)
+}
+
+func update_UpdateFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
+	user := domain.User{ID: 1}
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 1}
+	trans := domain.UpdateTransactionInput{
+		ID:          1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+		Return(&mainCateg, nil).Once()
+
+	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+		Return(&subCateg, nil).Once()
+
+	s.mockTransaction.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
+		Return(domain.Transaction{}, nil).Once()
+
+	s.mockTransaction.On("Update", mockCtx, trans).
+		Return(errors.New("error")).Once()
+
+	err := s.transactionUC.Update(mockCtx, trans, user)
+	s.Require().Equal(errors.New("error"), err, desc)
 }
 
 func (s *TransactionSuite) TestDelete() {

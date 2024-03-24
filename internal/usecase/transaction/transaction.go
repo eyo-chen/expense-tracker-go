@@ -73,8 +73,37 @@ func (t *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user 
 	return t.Transaction.GetAll(ctx, query, user.ID)
 }
 
-func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
-	return t.Transaction.GetAccInfo(ctx, query, user.ID)
+func (t *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error {
+	// check if the main category exists
+	mainCateg, err := t.MainCateg.GetByID(trans.MainCategID, user.ID)
+	if err != nil {
+		return err
+	}
+
+	// check if the type in main category matches the transaction type
+	if trans.Type != mainCateg.Type {
+		logger.Error("Update Transaction failed", "package", PackageName, "err", domain.ErrTypeNotConsistent)
+		return domain.ErrTypeNotConsistent
+	}
+
+	// check if the sub category exists
+	subCateg, err := t.SubCateg.GetByID(trans.SubCategID, user.ID)
+	if err != nil {
+		return err
+	}
+
+	// check if the sub category matches the main category
+	if trans.MainCategID != subCateg.MainCategID {
+		logger.Error("Update Transaction failed", "package", PackageName, "err", domain.ErrMainCategNotConsistent)
+		return domain.ErrMainCategNotConsistent
+	}
+
+	// check permission
+	if _, err := t.Transaction.GetByIDAndUserID(ctx, trans.ID, user.ID); err != nil {
+		return err
+	}
+
+	return t.Transaction.Update(ctx, trans)
 }
 
 func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) error {
@@ -84,6 +113,10 @@ func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) 
 	}
 
 	return t.Transaction.Delete(ctx, id)
+}
+
+func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
+	return t.Transaction.GetAccInfo(ctx, query, user.ID)
 }
 
 func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
