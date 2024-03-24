@@ -150,11 +150,11 @@ func delete_DataNotFound_ReturnBadReq(s *TransactionSuite, desc string) {
 
 func (s *TransactionSuite) TestGetBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when no error, return data":                          getBarChartData_NoError_ReturnData,
-		"when no start date, return bad request":              getBarChartData_NoStartDate_ReturnBadReq,
-		"when no end date, return bad request":                getBarChartData_NoEndDate_ReturnBadReq,
-		"when start date before end date, return bad request": getBarChartData_StartDateBeforeEndDate_ReturnBadReq,
-		"when no type, return bad request":                    getBarChartData_NoType_ReturnBadReq,
+		"when no error, return data":                         getBarChartData_NoError_ReturnData,
+		"when no start date, return bad request":             getBarChartData_NoStartDate_ReturnBadReq,
+		"when no end date, return bad request":               getBarChartData_NoEndDate_ReturnBadReq,
+		"when start date after end date, return bad request": getBarChartData_StartDateAfterEndDate_ReturnBadReq,
+		"when no type, return bad request":                   getBarChartData_NoType_ReturnBadReq,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -273,7 +273,7 @@ func getBarChartData_NoEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
 	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
 }
 
-func getBarChartData_StartDateBeforeEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
+func getBarChartData_StartDateAfterEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
 	user := domain.User{
 		ID: 1,
 	}
