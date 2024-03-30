@@ -137,6 +137,36 @@ func (_m *TransactionUC) GetBarChartData(ctx context.Context, dataRange domain.C
 	return r0, r1
 }
 
+// GetMonthlyData provides a mock function with given fields: ctx, dateRange, user
+func (_m *TransactionUC) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error) {
+	ret := _m.Called(ctx, dateRange, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMonthlyData")
+	}
+
+	var r0 []domain.TransactionType
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetMonthlyDateRange, domain.User) ([]domain.TransactionType, error)); ok {
+		return rf(ctx, dateRange, user)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetMonthlyDateRange, domain.User) []domain.TransactionType); ok {
+		r0 = rf(ctx, dateRange, user)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.TransactionType)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, domain.GetMonthlyDateRange, domain.User) error); ok {
+		r1 = rf(ctx, dateRange, user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetPieChartData provides a mock function with given fields: ctx, dataRange, transactionType, user
 func (_m *TransactionUC) GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
 	ret := _m.Called(ctx, dataRange, transactionType, user)

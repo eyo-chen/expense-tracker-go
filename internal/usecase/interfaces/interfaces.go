@@ -70,6 +70,9 @@ type TransactionUC interface {
 
 	// GetPieChartData returns pie chart data.
 	GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error)
+
+	// GetMonthlyData returns monthly data.
+	GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error)
 }
 
 // IconUC is the interface that wraps the basic methods for icon usecase.

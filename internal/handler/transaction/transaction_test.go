@@ -2,9 +2,11 @@ package transaction_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/handler/transaction"
@@ -516,4 +518,212 @@ func getPieChartData_NoType_ReturnBadReq(s *TransactionSuite, desc string) {
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func (s *TransactionSuite) TestGetMonthlyData() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, return data":                          getMonthlyData_NoError_ReturnData,
+		"when start dats is wrong format, return bad request": getMonthlyData_StartDateWrongFormat_ReturnBadReq,
+		"when end date is wrong format, return bad request":   getMonthlyData_EndDateWrongFormat_ReturnBadReq,
+		"when start date after end date, return bad request":  getMonthlyData_StartDateAfterEndDate_ReturnBadReq,
+		"when get monthly data failed, return internal error": getMonthlyData_GetMonthylDataFail_ReturnInternalServerError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getMonthlyData_NoError_ReturnData(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	startDate, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	endDate, err := time.Parse(time.DateOnly, "2024-03-08")
+	s.Require().NoError(err, desc)
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetMonthlyData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/monthly-data?start_date=2024-03-01&end_date=2024-03-08", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	montlyData := []domain.TransactionType{
+		domain.TransactionTypeIncome,
+		domain.TransactionTypeExpense,
+		domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeBoth,
+	}
+
+	// mock service
+	s.mockTransactionUC.On("GetMonthlyData",
+		req.Context(), dateRange, user,
+	).Return(montlyData, nil)
+
+	expResp := map[string]interface{}{
+		"monthly_data": []interface{}{
+			"income",
+			"expense",
+			"no data",
+			"both",
+		},
+	}
+
+	// action
+	s.transactionHlr.GetMonthlyData(res, req)
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusOK, res.Code, desc)
+}
+
+func getMonthlyData_StartDateWrongFormat_ReturnBadReq(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetMonthlyData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/monthly-data?start_date=2024/03/01&end_date=2024-03-08", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// action
+	s.transactionHlr.GetMonthlyData(res, req)
+
+	expResp := map[string]interface{}{
+		"error": "start date must be in YYYY-MM-DD format",
+	}
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func getMonthlyData_EndDateWrongFormat_ReturnBadReq(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetMonthlyData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/monthly-data?start_date=2024-03-01&end_date=2024/03/08", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// action
+	s.transactionHlr.GetMonthlyData(res, req)
+
+	expResp := map[string]interface{}{
+		"error": "end date must be in YYYY-MM-DD format",
+	}
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func getMonthlyData_StartDateAfterEndDate_ReturnBadReq(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetMonthlyData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/monthly-data?start_date=2024-03-08&end_date=2024-03-01", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// action
+	s.transactionHlr.GetMonthlyData(res, req)
+
+	expResp := map[string]interface{}{
+		"start_date": "Start date must be before end date",
+	}
+
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func getMonthlyData_GetMonthylDataFail_ReturnInternalServerError(s *TransactionSuite, desc string) {
+	user := domain.User{
+		ID: 1,
+	}
+
+	startDate, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	endDate, err := time.Parse(time.DateOnly, "2024-03-08")
+	s.Require().NoError(err, desc)
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetMonthlyData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/monthly-data?start_date=2024-03-01&end_date=2024-03-08", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	expResult := map[string]interface{}{
+		"error": "error",
+	}
+
+	// mock service
+	s.mockTransactionUC.On("GetMonthlyData",
+		req.Context(), dateRange, user,
+	).Return(nil, errors.New("error"))
+
+	// action
+	s.transactionHlr.GetMonthlyData(res, req)
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, responseBody, desc)
+	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)
 }

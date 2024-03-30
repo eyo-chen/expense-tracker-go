@@ -30,3 +30,17 @@ func cvtToGetTransactionResp(trans []domain.Transaction) getTransactionResp {
 
 	return getTransactionResp{Transactions: resp}
 }
+
+func cvtToGetMonthlyResp(data []domain.TransactionType) []string {
+	resp := make([]string, len(data))
+
+	for i, d := range data {
+		if d == domain.TransactionTypeUnSpecified {
+			resp[i] = "no data"
+		} else {
+			resp[i] = d.ToString()
+		}
+	}
+
+	return resp
+}
