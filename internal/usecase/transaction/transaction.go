@@ -151,3 +151,25 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange doma
 func (t *TransactionUC) GetPieChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
 	return t.Transaction.GetPieChartData(ctx, chartDateRange, transactionType, user.ID)
 }
+
+func (t *TransactionUC) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error) {
+	data := make([]domain.TransactionType, 0, 31) // allocate capacity for 31 days(max days in a month)
+
+	monthlyData, err := t.Transaction.GetMonthlyData(ctx, dateRange, user.ID)
+	if err != nil {
+		return data, err
+	}
+
+	for t := dateRange.StartDate; t.Before(dateRange.EndDate) || t.Equal(dateRange.EndDate); t = t.AddDate(0, 0, 1) {
+		day := t.Day()
+
+		transactionType, ok := monthlyData[day]
+		if !ok {
+			data = append(data, domain.TransactionTypeUnSpecified)
+		} else {
+			data = append(data, transactionType)
+		}
+	}
+
+	return data, nil
+}
