@@ -131,7 +131,7 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	return cvtToDomainTransactionWithoutCategory(trans), nil
 }
 
-func (t *TransactionModel) GetBarChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartDataByWeekday, error) {
+func (t *TransactionModel) GetBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartDataByWeekday, error) {
 	qStmt := `
 	  SELECT DATE_FORMAT(date, '%a'),
 		       SUM(price)
@@ -142,7 +142,7 @@ func (t *TransactionModel) GetBarChartData(ctx context.Context, dataRange domain
 		GROUP BY date
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dataRange.StartDate, dataRange.EndDate)
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.StartDate, dateRange.EndDate)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.ChartDataByWeekday{}, err
@@ -169,7 +169,7 @@ func (t *TransactionModel) GetBarChartData(ctx context.Context, dataRange domain
 	return dataByTime, nil
 }
 
-func (t *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
+func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
 	qStmt := `
 	  SELECT mc.name,
 		       SUM(ts.price)
@@ -182,7 +182,7 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain
 		GROUP BY mc.name
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dataRange.StartDate, dataRange.EndDate)
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.StartDate, dateRange.EndDate)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.ChartData{}, err
