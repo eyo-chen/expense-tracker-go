@@ -10,6 +10,9 @@ const (
 	TransactionTypeIncome
 	// TransactionTypeExpense is an enumeration of expense transaction type
 	TransactionTypeExpense
+	// TransactionTypeBoth is an enumeration of both income and expense transaction type
+	// it's only used in monthly data
+	TransactionTypeBoth
 )
 
 // ToString returns the string representation of TransactionType
@@ -19,6 +22,8 @@ func (t TransactionType) ToString() string {
 		return "income"
 	case TransactionTypeExpense:
 		return "expense"
+	case TransactionTypeBoth:
+		return "both"
 	}
 	return "unknown type"
 }
@@ -50,6 +55,8 @@ func CvtToTransactionType(s string) TransactionType {
 		return TransactionTypeIncome
 	case "expense":
 		return TransactionTypeExpense
+	case "both":
+		return TransactionTypeBoth
 	case "1":
 		return TransactionTypeIncome
 	case "2":
