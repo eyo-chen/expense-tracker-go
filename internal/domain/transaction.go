@@ -58,3 +58,12 @@ type GetAccInfoQuery struct {
 	StartDate *string `json:"start_date"`
 	EndDate   *string `json:"end_date"`
 }
+
+// GetMonthlyDateRange contains date range for monthly data
+type GetMonthlyDateRange struct {
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+}
+
+// MonthDayToTransactionType contains mapping from month day to transaction type
+type MonthDayToTransactionType map[string]TransactionType
