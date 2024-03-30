@@ -151,3 +151,28 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange doma
 func (t *TransactionUC) GetPieChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
 	return t.Transaction.GetPieChartData(ctx, chartDateRange, transactionType, user.ID)
 }
+
+func (t *TransactionUC) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error) {
+	data := make([]domain.TransactionType, 0, dateRange.EndDate.Day())
+
+	monthlyData, err := t.Transaction.GetMonthlyData(ctx, dateRange, user.ID)
+	if err != nil {
+		return data, err
+	}
+
+	// loop from 1 to the last day of the month(30 or 31)
+	// Note that it's important to start at index 1, not 0
+	// because monthlyData contains the data from day 1, there's no data for day 0
+	// inside the loop, we use `append` to help us to insert the data to the correct index
+	for t := dateRange.StartDate; t.Before(dateRange.EndDate) || t.Equal(dateRange.EndDate); t = t.AddDate(0, 0, 1) {
+		day := t.Day()
+
+		if transactionType, ok := monthlyData[day]; ok {
+			data = append(data, transactionType)
+		} else {
+			data = append(data, domain.TransactionTypeUnSpecified)
+		}
+	}
+
+	return data, nil
+}

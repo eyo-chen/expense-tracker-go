@@ -66,4 +66,4 @@ type GetMonthlyDateRange struct {
 }
 
 // MonthDayToTransactionType contains mapping from month day to transaction type
-type MonthDayToTransactionType map[string]TransactionType
+type MonthDayToTransactionType map[int]TransactionType

@@ -1046,7 +1046,7 @@ func getMonthlyData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc str
 	}
 
 	expResult := domain.MonthDayToTransactionType{
-		"4": domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 3)
+		4: domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 3)
 	}
 
 	monthlyData, err := s.transactionModel.GetMonthlyData(mockCtx, dateRange, user.ID)
@@ -1079,10 +1079,10 @@ func getMonthlyData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, des
 	}
 
 	expResult := domain.MonthDayToTransactionType{
-		"2": domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 1)
-		"5": domain.TransactionTypeIncome,  // startDate.AddDate(0, 0, 4)
-		"6": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 5)
-		"7": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
+		2: domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 1)
+		5: domain.TransactionTypeIncome,  // startDate.AddDate(0, 0, 4)
+		6: domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 5)
+		7: domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
 	}
 
 	monthlyData, err := s.transactionModel.GetMonthlyData(mockCtx, dateRange, user.ID)
@@ -1123,10 +1123,10 @@ func getMonthlyData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, de
 	}
 
 	expResult := domain.MonthDayToTransactionType{
-		"2": domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 1)
-		"5": domain.TransactionTypeIncome,  // startDate.AddDate(0, 0, 4)
-		"6": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 5)
-		"7": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
+		2: domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 1)
+		5: domain.TransactionTypeIncome,  // startDate.AddDate(0, 0, 4)
+		6: domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 5)
+		7: domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
 	}
 
 	monthlyData, err := s.transactionModel.GetMonthlyData(mockCtx, dateRange, user.ID)
