@@ -165,6 +165,24 @@ func (_m *TransactionUC) GetPieChartData(ctx context.Context, dataRange domain.C
 	return r0, r1
 }
 
+// Update provides a mock function with given fields: ctx, trans, user
+func (_m *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error {
+	ret := _m.Called(ctx, trans, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.UpdateTransactionInput, domain.User) error); ok {
+		r0 = rf(ctx, trans, user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewTransactionUC creates a new instance of TransactionUC. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTransactionUC(t interface {
