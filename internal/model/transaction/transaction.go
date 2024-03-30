@@ -206,7 +206,7 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain
 	return domain.ChartData{Labels: labels, Datasets: datasets}, nil
 }
 
-func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) domain.MonthDayToTransactionType {
+func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error) {
 	qStmt := `
 		SELECT
 		DAY(date) AS day,
@@ -224,7 +224,7 @@ func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.
 	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.StartDate, dateRange.EndDate)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
-		return nil
+		return domain.MonthDayToTransactionType{}, err
 	}
 	defer rows.Close()
 
@@ -234,11 +234,11 @@ func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.
 		var t domain.TransactionType
 		if err := rows.Scan(&date, &t); err != nil {
 			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
-			return nil
+			return domain.MonthDayToTransactionType{}, err
 		}
 
 		data[date] = t
 	}
 
-	return data
+	return data, nil
 }
