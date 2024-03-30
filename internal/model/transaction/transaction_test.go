@@ -1015,3 +1015,121 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
+
+func (s *TransactionSuite) TestGetMonthlyData() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when with one data, return successfully":       getMonthlyData_WithOneData_ReturnSuccessfully,
+		"when with multiple data, return successfully":  getMonthlyData_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully": getMonthlyData_WithMultipleUsers_ReturnSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getMonthlyData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	endDate, err := time.Parse(time.DateOnly, "2024-03-31")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 3)}
+	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(1, ow1)
+	s.Require().NoError(err, desc)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	expResult := domain.MonthDayToTransactionType{
+		"4": domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 3)
+	}
+
+	monthlyData, err := s.transactionModel.GetMonthlyData(mockCtx, dateRange, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, monthlyData, desc)
+}
+
+func getMonthlyData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	endDate, err := time.Parse(time.DateOnly, "2024-03-31")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 1)}
+	ow2 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 1)}
+	ow3 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 4)}
+	ow4 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 4)}
+	ow5 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 5)}
+	ow6 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 5)}
+	ow7 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 6)}
+	ow8 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 6)}
+	ow9 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
+	ow10 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
+	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
+	s.Require().NoError(err, desc)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	expResult := domain.MonthDayToTransactionType{
+		"2": domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 1)
+		"5": domain.TransactionTypeIncome,  // startDate.AddDate(0, 0, 4)
+		"6": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 5)
+		"7": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
+	}
+
+	monthlyData, err := s.transactionModel.GetMonthlyData(mockCtx, dateRange, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, monthlyData, desc)
+}
+
+func getMonthlyData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	endDate, err := time.Parse(time.DateOnly, "2024-03-31")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 1)}
+	ow2 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 1)}
+	ow3 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 4)}
+	ow4 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 4)}
+	ow5 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 5)}
+	ow6 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 5)}
+	ow7 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue(), Date: startDate.AddDate(0, 0, 6)}
+	ow8 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 6)}
+	ow9 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
+	ow10 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
+	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	ow11 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 1)}
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1, ow11)
+	s.Require().NoError(err, desc)
+	ow12 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 2)}
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1, ow12)
+	s.Require().NoError(err, desc)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	expResult := domain.MonthDayToTransactionType{
+		"2": domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 1)
+		"5": domain.TransactionTypeIncome,  // startDate.AddDate(0, 0, 4)
+		"6": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 5)
+		"7": domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
+	}
+
+	monthlyData, err := s.transactionModel.GetMonthlyData(mockCtx, dateRange, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, monthlyData, desc)
+}
