@@ -230,7 +230,7 @@ func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.
 
 	data := domain.MonthDayToTransactionType{}
 	for rows.Next() {
-		var date string
+		var date int
 		var t domain.TransactionType
 		if err := rows.Scan(&date, &t); err != nil {
 			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
