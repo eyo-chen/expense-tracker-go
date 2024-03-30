@@ -94,6 +94,6 @@ func checkStartDateBeforeEndDate(startDate, endDate *string) bool {
 	return start.Before(end) || start.Equal(end)
 }
 
-func checkStartDateBeforeEndDateTime(startDate, endDate time.Time) bool {
-	return startDate.Before(endDate) || startDate.Equal(endDate)
+func checkStartDateBeforeEndDateTime(start, end time.Time) bool {
+	return start.Before(end) || start.Equal(end)
 }
