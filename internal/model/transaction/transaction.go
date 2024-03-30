@@ -205,3 +205,40 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain
 
 	return domain.ChartData{Labels: labels, Datasets: datasets}, nil
 }
+
+func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) domain.MonthDayToTransactionType {
+	qStmt := `
+		SELECT
+		DAY(date) AS day,
+		CASE
+			WHEN COUNT(DISTINCT type) = 1 AND MAX(type) = 1 THEN 1
+			WHEN COUNT(DISTINCT type) = 1 AND MAX(type) = 2 THEN 2
+		ELSE 3
+		END AS type
+		FROM transactions
+		WHERE user_id = ?
+		AND date BETWEEN ? AND ?
+		GROUP BY DAY(date)
+	`
+
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.StartDate, dateRange.EndDate)
+	if err != nil {
+		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		return nil
+	}
+	defer rows.Close()
+
+	data := domain.MonthDayToTransactionType{}
+	for rows.Next() {
+		var date string
+		var t domain.TransactionType
+		if err := rows.Scan(&date, &t); err != nil {
+			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
+			return nil
+		}
+
+		data[date] = t
+	}
+
+	return data
+}

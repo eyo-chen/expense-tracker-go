@@ -167,6 +167,26 @@ func (_m *TransactionModel) GetByIDAndUserID(ctx context.Context, id int64, user
 	return r0, r1
 }
 
+// GetMonthlyData provides a mock function with given fields: ctx, dateRange, userID
+func (_m *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) domain.MonthDayToTransactionType {
+	ret := _m.Called(ctx, dateRange, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMonthlyData")
+	}
+
+	var r0 domain.MonthDayToTransactionType
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetMonthlyDateRange, int64) domain.MonthDayToTransactionType); ok {
+		r0 = rf(ctx, dateRange, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(domain.MonthDayToTransactionType)
+		}
+	}
+
+	return r0
+}
+
 // GetPieChartData provides a mock function with given fields: ctx, dataRange, transactionType, userID
 func (_m *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
 	ret := _m.Called(ctx, dataRange, transactionType, userID)
