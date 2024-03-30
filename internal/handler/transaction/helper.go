@@ -1,8 +1,10 @@
 package transaction
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
@@ -62,4 +64,21 @@ func genGetAccInfoQuery(r *http.Request) domain.GetAccInfoQuery {
 	}
 
 	return query
+}
+
+func genGetMonthlyDataRange(r *http.Request) (time.Time, time.Time, error) {
+	rawStartDate := r.URL.Query().Get("start_date")
+	rawEndDate := r.URL.Query().Get("end_date")
+
+	startDate, err := time.Parse(time.DateOnly, rawStartDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("start date must be yyyy-mm-dd format")
+	}
+
+	endDate, err := time.Parse(time.DateOnly, rawEndDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("end date must be in yyyy-mm-dd format")
+	}
+
+	return startDate, endDate, nil
 }
