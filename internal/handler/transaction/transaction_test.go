@@ -189,6 +189,7 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 			StartDate: "2024-03-01",
 			EndDate:   "2024-03-08",
 		},
+		domain.TimeRangeTypeOneMonth,
 		domain.TransactionTypeExpense,
 		user,
 	).Return(domain.ChartData{
