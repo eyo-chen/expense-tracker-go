@@ -133,7 +133,7 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 
 func (t *TransactionModel) GetDateBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
 	qStmt := `
-	  SELECT date,
+	  SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
 		       SUM(price)
 		FROM transactions
 		WHERE user_id = ?
