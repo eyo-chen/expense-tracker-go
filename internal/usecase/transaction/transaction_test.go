@@ -300,18 +300,18 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					EndDate:   "2024-03-23",
 				}
 
-				chartDataByWeekday := domain.ChartDataByWeekday{
-					"Sun": 100,
-					"Mon": 200,
-					"Tue": 300,
-					"Wed": 400,
-					"Thu": 500,
-					"Fri": 600,
-					"Sat": 700,
+				DateToChartData := domain.DateToChartData{
+					"2024-03-17": 100,
+					"2024-03-18": 200,
+					"2024-03-19": 300,
+					"2024-03-20": 400,
+					"2024-03-21": 500,
+					"2024-03-22": 600,
+					"2024-03-23": 700,
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
-					Return(chartDataByWeekday, nil).Once()
+				s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+					Return(DateToChartData, nil).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
@@ -322,7 +322,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 				ID: 1,
 			},
 			expResult: domain.ChartData{
-				Labels:   []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"},
+				Labels:   []string{"2024-03-17", "2024-03-18", "2024-03-19", "2024-03-20", "2024-03-21", "2024-03-22", "2024-03-23"},
 				Datasets: []float64{100, 200, 300, 400, 500, 600, 700},
 			},
 			expErr: nil,
@@ -336,14 +336,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 				}
 
 				// only have data for Sun, Mon, Tue
-				chartDataByWeekday := domain.ChartDataByWeekday{
-					"Sun": 100,
-					"Mon": 200,
-					"Tue": 300,
+				DateToChartData := domain.DateToChartData{
+					"2024-03-17": 100,
+					"2024-03-18": 200,
+					"2024-03-19": 300,
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
-					Return(chartDataByWeekday, nil).Once()
+				s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+					Return(DateToChartData, nil).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
 				StartDate: "2024-03-17",
@@ -354,7 +354,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 				ID: 1,
 			},
 			expResult: domain.ChartData{
-				Labels:   []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"},
+				Labels:   []string{"2024-03-17", "2024-03-18", "2024-03-19", "2024-03-20", "2024-03-21", "2024-03-22", "2024-03-23"},
 				Datasets: []float64{100, 200, 300, 0, 0, 0, 0},
 			},
 			expErr: nil,
@@ -367,7 +367,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 					EndDate:   "2024-03-23",
 				}
 
-				s.mockTransaction.On("GetBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+				s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(nil, errors.New("error")).Once()
 			},
 			chartDateRange: domain.ChartDateRange{
