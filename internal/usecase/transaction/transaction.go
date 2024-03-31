@@ -3,6 +3,7 @@ package transaction
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
@@ -120,7 +121,7 @@ func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQ
 }
 
 func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
-	dataByWeekday, err := t.Transaction.GetBarChartData(ctx, chartDateRange, transactionType, user.ID)
+	dailyToData, err := t.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, user.ID)
 	if err != nil {
 		return domain.ChartData{}, err
 	}
@@ -133,15 +134,15 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange doma
 
 	var chartData domain.ChartData
 	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, 1) {
-		weekDay := t.Format(weekDayFormat)
+		date := t.Format(time.DateOnly)
 
-		chartData.Labels = append(chartData.Labels, weekDay)
+		chartData.Labels = append(chartData.Labels, date)
 
 		// if there is no data for the weekday, append 0
-		if _, ok := dataByWeekday[weekDay]; !ok {
+		if _, ok := dailyToData[date]; !ok {
 			chartData.Datasets = append(chartData.Datasets, 0)
 		} else {
-			chartData.Datasets = append(chartData.Datasets, dataByWeekday[weekDay])
+			chartData.Datasets = append(chartData.Datasets, dailyToData[date])
 		}
 	}
 

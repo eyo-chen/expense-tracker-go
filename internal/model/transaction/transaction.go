@@ -131,42 +131,38 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	return cvtToDomainTransactionWithoutCategory(trans), nil
 }
 
-func (t *TransactionModel) GetBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartDataByWeekday, error) {
+func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
 	qStmt := `
-	  SELECT DATE_FORMAT(date, '%a'),
+	  SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
 		       SUM(price)
 		FROM transactions
 		WHERE user_id = ?
 		AND type = ?
 		AND date BETWEEN ? AND ?
 		GROUP BY date
+		ORDER BY date
 	`
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.StartDate, dateRange.EndDate)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
-		return domain.ChartDataByWeekday{}, err
+		return domain.DateToChartData{}, err
 	}
 
-	dataByTime := domain.ChartDataByWeekday{}
+	dateToData := domain.DateToChartData{}
 	for rows.Next() {
 		var date string
 		var price float64
 		if err := rows.Scan(&date, &price); err != nil {
 			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
-			return domain.ChartDataByWeekday{}, err
+			return domain.DateToChartData{}, err
 		}
 
-		// Normally, this case will never happen
-		if v, ok := dataByTime[date]; ok {
-			dataByTime[date] = v + price
-		} else {
-			dataByTime[date] = price
-		}
+		dateToData[date] = price
 	}
 	defer rows.Close()
 
-	return dataByTime, nil
+	return dateToData, nil
 }
 
 func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
