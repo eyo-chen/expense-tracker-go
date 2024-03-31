@@ -66,7 +66,7 @@ type TransactionUC interface {
 	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error)
 
 	// GetBarChartData returns bar chart data.
-	GetBarChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error)
+	GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error)
 
 	// GetPieChartData returns pie chart data.
 	GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error)

@@ -2,6 +2,14 @@ package transaction
 
 import (
 	"time"
+
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
+)
+
+var (
+	weekDayFormat = "Mon"
+	dayFormat     = "01/02"
+	monthFormat   = "Jun"
 )
 
 func cvtDateToTime(startDate, endDate string) (time.Time, time.Time, error) {
@@ -20,4 +28,81 @@ func cvtDateToTime(startDate, endDate string) (time.Time, time.Time, error) {
 	}
 
 	return start, end, nil
+}
+
+func genChartData(dateToDate domain.DateToChartData, timeRangeType domain.TimeRangeType, start, end time.Time) domain.ChartData {
+	if timeRangeType.IsDailyType() && timeRangeType != domain.TimeRangeTypeThreeMonths {
+		return genDailyChartData(dateToDate, timeRangeType, start, end)
+	}
+
+	if timeRangeType == domain.TimeRangeTypeThreeMonths {
+		return genThreeMonthsChartData(dateToDate, start, end)
+	}
+
+	return genMonthlyChartData(dateToDate, start, end)
+}
+
+func genDailyChartData(dateToData domain.DateToChartData, timeRangeType domain.TimeRangeType, start, end time.Time) domain.ChartData {
+	var chartData domain.ChartData
+	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, 1) {
+		var label string
+		if timeRangeType == domain.TimeRangeTypeOneWeekDay {
+			label = t.Format(weekDayFormat)
+		} else {
+			label = t.Format(dayFormat)
+		}
+
+		date := t.Format(time.DateOnly)
+		chartData.Labels = append(chartData.Labels, label)
+
+		// if there is no data for the weekday, append 0
+		if _, ok := dateToData[date]; !ok {
+			chartData.Datasets = append(chartData.Datasets, 0)
+		} else {
+			chartData.Datasets = append(chartData.Datasets, dateToData[date])
+		}
+	}
+
+	return chartData
+}
+
+func genThreeMonthsChartData(dateToData domain.DateToChartData, start, end time.Time) domain.ChartData {
+	var chartData domain.ChartData
+	var accAmount float64
+	var index int
+	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, 1) {
+		date := t.Format(time.DateOnly)
+
+		if _, ok := dateToData[date]; ok {
+			accAmount += dateToData[date]
+		}
+
+		if index%3 == 0 {
+			chartData.Labels = append(chartData.Labels, t.Format(weekDayFormat))
+			chartData.Datasets = append(chartData.Datasets, accAmount)
+			accAmount = 0
+		}
+
+		index++
+	}
+
+	return chartData
+}
+
+func genMonthlyChartData(dateToData domain.DateToChartData, start, end time.Time) domain.ChartData {
+	var chartData domain.ChartData
+	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 1, 0) {
+		date := t.Format(time.DateOnly)
+
+		chartData.Labels = append(chartData.Labels, t.Format(monthFormat))
+
+		// if there is no data for the weekday, append 0
+		if _, ok := dateToData[date]; !ok {
+			chartData.Datasets = append(chartData.Datasets, 0)
+		} else {
+			chartData.Datasets = append(chartData.Datasets, float64(dateToData[date]))
+		}
+	}
+
+	return chartData
 }
