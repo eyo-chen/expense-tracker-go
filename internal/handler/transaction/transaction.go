@@ -233,8 +233,8 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
 	dateRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 
 	v := validator.New()
@@ -274,8 +274,8 @@ func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Requ
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
 	dateRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 
 	v := validator.New()

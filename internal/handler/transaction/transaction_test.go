@@ -190,8 +190,8 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	s.mockTransactionUC.On("GetBarChartData",
 		req.Context(),
 		domain.ChartDateRange{
-			StartDate: start,
-			EndDate:   end,
+			Start: start,
+			End:   end,
 		},
 		domain.TimeRangeTypeOneMonth,
 		domain.TransactionTypeExpense,
@@ -380,8 +380,8 @@ func getPieChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	s.mockTransactionUC.On("GetPieChartData",
 		req.Context(),
 		domain.ChartDateRange{
-			StartDate: start,
-			EndDate:   end,
+			Start: start,
+			End:   end,
 		},
 		domain.TransactionTypeExpense,
 		user,

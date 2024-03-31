@@ -794,8 +794,8 @@ func getDailyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, de
 
 	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
@@ -833,8 +833,8 @@ func getDailyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuit
 
 	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
@@ -883,8 +883,8 @@ func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSui
 
 	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
@@ -925,8 +925,8 @@ func getPieChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc st
 	}
 
 	dataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 	transactionType := domain.TransactionTypeExpense
 
@@ -973,8 +973,8 @@ func getPieChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 
 	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 	chartData, err := s.transactionModel.GetPieChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
@@ -1030,8 +1030,8 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 
 	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 	chartData, err := s.transactionModel.GetPieChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)

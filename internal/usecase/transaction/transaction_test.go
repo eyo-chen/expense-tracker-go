@@ -305,8 +305,8 @@ func getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData(s *Transactio
 	s.Require().NoError(err)
 
 	chartDataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -337,8 +337,8 @@ func getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData(s *TransactionSuite
 	s.Require().NoError(err)
 
 	chartDataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -369,8 +369,8 @@ func getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData(s *TransactionSuit
 	s.Require().NoError(err)
 
 	chartDataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -404,8 +404,8 @@ func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuit
 	s.Require().NoError(err)
 
 	chartDataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -439,8 +439,8 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 	s.Require().NoError(err)
 
 	chartDataRange := domain.ChartDateRange{
-		StartDate: start,
-		EndDate:   end,
+		Start: start,
+		End:   end,
 	}
 
 	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
@@ -472,8 +472,8 @@ func (s *TransactionSuite) TestGetPieChartData() {
 				s.Require().NoError(err)
 
 				chartDataRange := domain.ChartDateRange{
-					StartDate: start,
-					EndDate:   end,
+					Start: start,
+					End:   end,
 				}
 
 				chartData := domain.ChartData{
@@ -505,8 +505,8 @@ func (s *TransactionSuite) TestGetPieChartData() {
 				s.Require().NoError(err)
 
 				chartDataRange := domain.ChartDateRange{
-					StartDate: start,
-					EndDate:   end,
+					Start: start,
+					End:   end,
 				}
 
 				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).

@@ -3,7 +3,6 @@ package transaction
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -144,7 +143,7 @@ func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange d
 		ORDER BY date
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.StartDate, dateRange.EndDate)
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
@@ -179,10 +178,7 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain
 		GROUP BY mc.name
 	`
 
-	fmt.Println("start date: ", dateRange.StartDate)
-	fmt.Println("end date: ", dateRange.EndDate)
-
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.StartDate, dateRange.EndDate)
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.ChartData{}, err

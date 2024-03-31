@@ -18,6 +18,6 @@ type ChartData struct {
 
 // ChartDateRange contains start date and end date for chart data
 type ChartDateRange struct {
-	StartDate time.Time
-	EndDate   time.Time
+	Start time.Time
+	End   time.Time
 }
