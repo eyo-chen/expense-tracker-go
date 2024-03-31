@@ -232,15 +232,18 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 	rawTransactionType := r.URL.Query().Get("type")
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
+	rawTimeRangeType := r.URL.Query().Get("time_range")
+	timeRangeType := domain.CvtToTimeRangeType(rawTimeRangeType)
+
 	v := validator.New()
-	if !v.GetBarChartData(dateRange, transactionType) {
+	if !v.GetBarChartData(dateRange, transactionType, timeRangeType) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	data, err := t.transaction.GetBarChartData(ctx, dateRange, domain.TimeRangeTypeOneMonth, transactionType, *user)
+	data, err := t.transaction.GetBarChartData(ctx, dateRange, timeRangeType, transactionType, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return

@@ -52,16 +52,17 @@ func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery) bool {
 }
 
 // GetChartData validates the input for getting bar chart data.
-func (v *Validator) GetBarChartData(dateRange domain.ChartDateRange, transactionType domain.TransactionType) bool {
-	v.Check(checkStartDateBeforeEndDateTime(dateRange.StartDate, dateRange.EndDate), "start_date", "start date must be before end date")
-	v.Check(transactionType.IsValid(), "type", "Transaction type must be income or expense")
+func (v *Validator) GetBarChartData(dateRange domain.ChartDateRange, transactionType domain.TransactionType, timeRangeType domain.TimeRangeType) bool {
+	v.Check(checkStartDateBeforeEndDateTime(dateRange.Start, dateRange.End), "start_date", "start date must be before end date")
+	v.Check(transactionType.IsValid(), "type", "transaction type must be income or expense")
+	v.Check(timeRangeType.IsValid(), "time_range", "time range is invalid")
 	return v.Valid()
 }
 
 // GetPieChartData validates the input for getting pie chart data.
 func (v *Validator) GetPieChartData(dateRange domain.ChartDateRange, transactionType domain.TransactionType) bool {
-	v.Check(checkStartDateBeforeEndDateTime(dateRange.StartDate, dateRange.EndDate), "start_date", "start date must be before end date")
-	v.Check(transactionType.IsValid(), "type", "Transaction type must be income or expense")
+	v.Check(checkStartDateBeforeEndDateTime(dateRange.Start, dateRange.End), "start_date", "start date must be before end date")
+	v.Check(transactionType.IsValid(), "type", "transaction type must be income or expense")
 	return v.Valid()
 }
 
