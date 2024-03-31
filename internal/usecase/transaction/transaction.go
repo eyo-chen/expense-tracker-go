@@ -3,7 +3,6 @@ package transaction
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
@@ -12,10 +11,6 @@ import (
 
 const (
 	PackageName = "usecase/transaction"
-)
-
-var (
-	weekDayFormat = "Mon"
 )
 
 type TransactionUC struct {
@@ -120,10 +115,14 @@ func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQ
 	return t.Transaction.GetAccInfo(ctx, query, user.ID)
 }
 
-func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
-	dailyToData, err := t.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, user.ID)
-	if err != nil {
-		return domain.ChartData{}, err
+func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
+	var dateToData domain.DateToChartData
+	var err error
+	if timeRangeType.IsDailyType() {
+		dateToData, err = t.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, user.ID)
+		if err != nil {
+			return domain.ChartData{}, err
+		}
 	}
 
 	start, end, err := cvtDateToTime(chartDateRange.StartDate, chartDateRange.EndDate)
@@ -132,21 +131,7 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange doma
 		return domain.ChartData{}, err
 	}
 
-	var chartData domain.ChartData
-	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, 1) {
-		date := t.Format(time.DateOnly)
-
-		chartData.Labels = append(chartData.Labels, date)
-
-		// if there is no data for the weekday, append 0
-		if _, ok := dailyToData[date]; !ok {
-			chartData.Datasets = append(chartData.Datasets, 0)
-		} else {
-			chartData.Datasets = append(chartData.Datasets, dailyToData[date])
-		}
-	}
-
-	return chartData, nil
+	return genChartData(dateToData, timeRangeType, start, end), nil
 }
 
 func (t *TransactionUC) GetPieChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {

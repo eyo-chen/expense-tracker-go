@@ -388,7 +388,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 			s.SetupTest()
 			t.setupFun()
 
-			result, err := s.transactionUC.GetBarChartData(mockCtx, t.chartDateRange, t.transactionType, t.user)
+			result, err := s.transactionUC.GetBarChartData(mockCtx, t.chartDateRange, domain.TimeRangeTypeOneMonth, t.transactionType, t.user)
 			s.Require().Equal(t.expResult, result)
 			s.Require().Equal(t.expErr, err)
 

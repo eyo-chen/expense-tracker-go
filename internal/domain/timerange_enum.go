@@ -56,3 +56,11 @@ func CvtToTimeRangeType(s string) TimeRangeType {
 	}
 	return TimeRangeTypeUnSpecified
 }
+
+func (t TimeRangeType) IsDailyType() bool {
+	switch t {
+	case TimeRangeTypeOneWeekDay, TimeRangeTypeOneWeek, TimeRangeTypeTwoWeeks, TimeRangeTypeOneMonth, TimeRangeTypeThreeMonths:
+		return true
+	}
+	return false
+}
