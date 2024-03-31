@@ -82,3 +82,20 @@ func genGetMonthlyDataRange(r *http.Request) (time.Time, time.Time, error) {
 
 	return startDate, endDate, nil
 }
+
+func genStartAndEnd(r *http.Request) (time.Time, time.Time, error) {
+	rawStartDate := r.URL.Query().Get("start_date")
+	rawEndDate := r.URL.Query().Get("end_date")
+
+	startDate, err := time.Parse(time.DateOnly, rawStartDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("start date must be in YYYY-MM-DD format")
+	}
+
+	endDate, err := time.Parse(time.DateOnly, rawEndDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("end date must be in YYYY-MM-DD format")
+	}
+
+	return startDate, endDate, nil
+}

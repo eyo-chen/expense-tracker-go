@@ -222,18 +222,23 @@ func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) 
 }
 
 func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-	rawTransactionType := r.URL.Query().Get("type")
-
-	dateRange := domain.ChartDateRange{
-		StartDate: startDate,
-		EndDate:   endDate,
+	start, end, err := genStartAndEnd(r)
+	if err != nil {
+		logger.Error("genStartAndEnd failed", "package", packageName, "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
 	}
+
+	rawTransactionType := r.URL.Query().Get("type")
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
+	dateRange := domain.ChartDateRange{
+		StartDate: start,
+		EndDate:   end,
+	}
+
 	v := validator.New()
-	if !v.GetChartData(dateRange, transactionType) {
+	if !v.GetBarChartData(dateRange, transactionType) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
@@ -258,14 +263,19 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 }
 
 func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
+	start, end, err := genStartAndEnd(r)
+	if err != nil {
+		logger.Error("genStartAndEnd failed", "package", packageName, "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
 	rawTransactionType := r.URL.Query().Get("type")
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
 	dateRange := domain.ChartDateRange{
-		StartDate: startDate,
-		EndDate:   endDate,
+		StartDate: start,
+		EndDate:   end,
 	}
 
 	v := validator.New()

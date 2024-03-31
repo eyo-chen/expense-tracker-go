@@ -16,7 +16,7 @@ func (v *Validator) CreateTransaction(t domain.CreateTransactionInput) bool {
 	return v.Valid()
 }
 
-// GetTransaction validates the queries for getting transactions.
+// GetTransaction validates the input for getting transactions.
 func (v *Validator) GetTransaction(q domain.GetQuery) bool {
 	v.Check(isValidDateFormat(q.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
 	v.Check(isValidDateFormat(q.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
@@ -42,7 +42,7 @@ func (v *Validator) Delete(id int64) bool {
 	return v.Valid()
 }
 
-// GetAccInfo validates the queries for getting account info.
+// GetAccInfo validates the input for getting account info.
 func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery) bool {
 	v.Check(isValidDateFormat(q.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
 	v.Check(isValidDateFormat(q.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
@@ -51,27 +51,23 @@ func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery) bool {
 	return v.Valid()
 }
 
-// GetChartData validates the queries for getting chart data.
-func (v *Validator) GetChartData(dateRange domain.ChartDateRange, transactionType domain.TransactionType) bool {
-	v.Check(isValidDateFormat(&dateRange.StartDate), "start_date", "Start date must be in YYYY-MM-DD format")
-	v.Check(isValidDateFormat(&dateRange.EndDate), "end_date", "End date must be in YYYY-MM-DD format")
-	v.Check(checkStartDateBeforeEndDate(&dateRange.StartDate, &dateRange.EndDate), "start_date", "Start date must be before end date")
+// GetChartData validates the input for getting bar chart data.
+func (v *Validator) GetBarChartData(dateRange domain.ChartDateRange, transactionType domain.TransactionType) bool {
+	v.Check(checkStartDateBeforeEndDateTime(dateRange.StartDate, dateRange.EndDate), "start_date", "start date must be before end date")
 	v.Check(transactionType.IsValid(), "type", "Transaction type must be income or expense")
 	return v.Valid()
 }
 
-// GetPieChartData validates the queries for getting pie chart data.
+// GetPieChartData validates the input for getting pie chart data.
 func (v *Validator) GetPieChartData(dateRange domain.ChartDateRange, transactionType domain.TransactionType) bool {
-	v.Check(isValidDateFormat(&dateRange.StartDate), "start_date", "Start date must be in YYYY-MM-DD format")
-	v.Check(isValidDateFormat(&dateRange.EndDate), "end_date", "End date must be in YYYY-MM-DD format")
-	v.Check(checkStartDateBeforeEndDate(&dateRange.StartDate, &dateRange.EndDate), "start_date", "Start date must be before end date")
+	v.Check(checkStartDateBeforeEndDateTime(dateRange.StartDate, dateRange.EndDate), "start_date", "start date must be before end date")
 	v.Check(transactionType.IsValid(), "type", "Transaction type must be income or expense")
 	return v.Valid()
 }
 
 // GetMonthlyData validates the date range for getting monthly data.
 func (v *Validator) GetMonthlyData(dateRange domain.GetMonthlyDateRange) bool {
-	v.Check(checkStartDateBeforeEndDateTime(dateRange.StartDate, dateRange.EndDate), "start_date", "Start date must be before end date")
+	v.Check(checkStartDateBeforeEndDateTime(dateRange.StartDate, dateRange.EndDate), "start_date", "start date must be before end date")
 	return v.Valid()
 }
 

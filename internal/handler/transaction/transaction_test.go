@@ -167,6 +167,10 @@ func (s *TransactionSuite) TestGetBarChartData() {
 }
 
 func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-03-08")
+	s.Require().NoError(err, desc)
 	user := domain.User{
 		ID: 1,
 	}
@@ -186,8 +190,8 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	s.mockTransactionUC.On("GetBarChartData",
 		req.Context(),
 		domain.ChartDateRange{
-			StartDate: "2024-03-01",
-			EndDate:   "2024-03-08",
+			StartDate: start,
+			EndDate:   end,
 		},
 		domain.TimeRangeTypeOneMonth,
 		domain.TransactionTypeExpense,
@@ -209,7 +213,7 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	s.transactionHlr.GetBarChartData(res, req)
 
 	var responseBody map[string]interface{}
-	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusOK, res.Code, desc)
@@ -353,6 +357,10 @@ func (s *TransactionSuite) TestGetPieChartData() {
 }
 
 func getPieChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-03-08")
+	s.Require().NoError(err, desc)
 	user := domain.User{
 		ID: 1,
 	}
@@ -372,8 +380,8 @@ func getPieChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	s.mockTransactionUC.On("GetPieChartData",
 		req.Context(),
 		domain.ChartDateRange{
-			StartDate: "2024-03-01",
-			EndDate:   "2024-03-08",
+			StartDate: start,
+			EndDate:   end,
 		},
 		domain.TransactionTypeExpense,
 		user,
@@ -394,7 +402,7 @@ func getPieChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 	s.transactionHlr.GetPieChartData(res, req)
 
 	var responseBody map[string]interface{}
-	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusOK, res.Code, desc)
