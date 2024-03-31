@@ -137,12 +137,12 @@ func (_m *TransactionModel) GetByIDAndUserID(ctx context.Context, id int64, user
 	return r0, r1
 }
 
-// GetDateBarChartData provides a mock function with given fields: ctx, dateRange, transactionType, userID
-func (_m *TransactionModel) GetDateBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
+// GetDailyBarChartData provides a mock function with given fields: ctx, dateRange, transactionType, userID
+func (_m *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
 	ret := _m.Called(ctx, dateRange, transactionType, userID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetDateBarChartData")
+		panic("no return value specified for GetDailyBarChartData")
 	}
 
 	var r0 domain.DateToChartData

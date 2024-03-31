@@ -760,11 +760,11 @@ func getByIDAndUserID_UserIDNotFound_ReturnError(s *TransactionSuite, desc strin
 	s.Require().Error(err, desc)
 }
 
-func (s *TransactionSuite) TestGetDateBarChartData() {
+func (s *TransactionSuite) TestGetDailyBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when with one data, return successfully":       getDateBarChartData_WithOneData_ReturnSuccessfully,
-		"when with multiple data, return successfully":  getDateBarChartData_WithMultipleData_ReturnSuccessfully,
-		"when with multiple users, return successfully": getBarChartData_WithMultipleUsers_ReturnSuccessfully,
+		"when with one data, return successfully":       getDailyBarChartData_WithOneData_ReturnSuccessfully,
+		"when with multiple data, return successfully":  getDailyBarChartData_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully": getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -774,7 +774,7 @@ func (s *TransactionSuite) TestGetDateBarChartData() {
 	}
 }
 
-func getDateBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+func getDailyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	mockDate, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err, desc)
 
@@ -795,12 +795,12 @@ func getDateBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, des
 		StartDate: "2024-03-17",
 		EndDate:   "2024-03-17",
 	}
-	chartData, err := s.transactionModel.GetDateBarChartData(mockCtx, dataRange, transactionType, user.ID)
+	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
 
-func getDateBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+func getDailyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	date, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err, desc)
 
@@ -832,12 +832,12 @@ func getDateBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite
 		StartDate: "2024-03-17",
 		EndDate:   "2024-03-21",
 	}
-	chartData, err := s.transactionModel.GetDateBarChartData(mockCtx, dataRange, transactionType, user.ID)
+	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
 
-func getBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
+func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	date, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err, desc)
 
@@ -880,7 +880,7 @@ func getBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 		StartDate: "2024-03-17",
 		EndDate:   "2024-03-21",
 	}
-	chartData, err := s.transactionModel.GetDateBarChartData(mockCtx, dataRange, transactionType, user.ID)
+	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }

@@ -131,7 +131,7 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	return cvtToDomainTransactionWithoutCategory(trans), nil
 }
 
-func (t *TransactionModel) GetDateBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
+func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
 	qStmt := `
 	  SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
 		       SUM(price)
