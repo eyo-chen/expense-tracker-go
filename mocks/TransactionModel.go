@@ -109,36 +109,6 @@ func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, u
 	return r0, r1
 }
 
-// GetBarChartData provides a mock function with given fields: ctx, dataRange, transactionType, userID
-func (_m *TransactionModel) GetBarChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartDataByWeekday, error) {
-	ret := _m.Called(ctx, dataRange, transactionType, userID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetBarChartData")
-	}
-
-	var r0 domain.ChartDataByWeekday
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) (domain.ChartDataByWeekday, error)); ok {
-		return rf(ctx, dataRange, transactionType, userID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) domain.ChartDataByWeekday); ok {
-		r0 = rf(ctx, dataRange, transactionType, userID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(domain.ChartDataByWeekday)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) error); ok {
-		r1 = rf(ctx, dataRange, transactionType, userID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetByIDAndUserID provides a mock function with given fields: ctx, id, userID
 func (_m *TransactionModel) GetByIDAndUserID(ctx context.Context, id int64, userID int64) (domain.Transaction, error) {
 	ret := _m.Called(ctx, id, userID)
@@ -160,6 +130,36 @@ func (_m *TransactionModel) GetByIDAndUserID(ctx context.Context, id int64, user
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64, int64) error); ok {
 		r1 = rf(ctx, id, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDateBarChartData provides a mock function with given fields: ctx, dateRange, transactionType, userID
+func (_m *TransactionModel) GetDateBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
+	ret := _m.Called(ctx, dateRange, transactionType, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDateBarChartData")
+	}
+
+	var r0 domain.DateToChartData
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) (domain.DateToChartData, error)); ok {
+		return rf(ctx, dateRange, transactionType, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) domain.DateToChartData); ok {
+		r0 = rf(ctx, dateRange, transactionType, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(domain.DateToChartData)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, domain.TransactionType, int64) error); ok {
+		r1 = rf(ctx, dateRange, transactionType, userID)
 	} else {
 		r1 = ret.Error(1)
 	}

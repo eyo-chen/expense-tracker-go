@@ -120,7 +120,7 @@ func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQ
 }
 
 func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
-	dataByWeekday, err := t.Transaction.GetBarChartData(ctx, chartDateRange, transactionType, user.ID)
+	dataByWeekday, err := t.Transaction.GetDateBarChartData(ctx, chartDateRange, transactionType, user.ID)
 	if err != nil {
 		return domain.ChartData{}, err
 	}
