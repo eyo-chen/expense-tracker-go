@@ -143,7 +143,7 @@ func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange d
 		ORDER BY date
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.StartDate, dateRange.EndDate)
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
@@ -178,7 +178,7 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain
 		GROUP BY mc.name
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.StartDate, dateRange.EndDate)
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.ChartData{}, err

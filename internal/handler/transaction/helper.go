@@ -82,3 +82,23 @@ func genGetMonthlyDataRange(r *http.Request) (time.Time, time.Time, error) {
 
 	return startDate, endDate, nil
 }
+
+func genChartDateRange(r *http.Request) (domain.ChartDateRange, error) {
+	rawStartDate := r.URL.Query().Get("start_date")
+	rawEndDate := r.URL.Query().Get("end_date")
+
+	start, err := time.Parse(time.DateOnly, rawStartDate)
+	if err != nil {
+		return domain.ChartDateRange{}, errors.New("start date must be in YYYY-MM-DD format")
+	}
+
+	end, err := time.Parse(time.DateOnly, rawEndDate)
+	if err != nil {
+		return domain.ChartDateRange{}, errors.New("end date must be in YYYY-MM-DD format")
+	}
+
+	return domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}, nil
+}

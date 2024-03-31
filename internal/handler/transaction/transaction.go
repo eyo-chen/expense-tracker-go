@@ -222,25 +222,28 @@ func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) 
 }
 
 func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-	rawTransactionType := r.URL.Query().Get("type")
-
-	dateRange := domain.ChartDateRange{
-		StartDate: startDate,
-		EndDate:   endDate,
+	dateRange, err := genChartDateRange(r)
+	if err != nil {
+		logger.Error("genChartDateRange failed", "package", packageName, "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
 	}
+
+	rawTransactionType := r.URL.Query().Get("type")
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
+	rawTimeRangeType := r.URL.Query().Get("time_range")
+	timeRangeType := domain.CvtToTimeRangeType(rawTimeRangeType)
+
 	v := validator.New()
-	if !v.GetChartData(dateRange, transactionType) {
+	if !v.GetBarChartData(dateRange, transactionType, timeRangeType) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	data, err := t.transaction.GetBarChartData(ctx, dateRange, domain.TimeRangeTypeOneMonth, transactionType, *user)
+	data, err := t.transaction.GetBarChartData(ctx, dateRange, timeRangeType, transactionType, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -258,15 +261,15 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 }
 
 func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
+	dateRange, err := genChartDateRange(r)
+	if err != nil {
+		logger.Error("genChartDateRange failed", "package", packageName, "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
 	rawTransactionType := r.URL.Query().Get("type")
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
-
-	dateRange := domain.ChartDateRange{
-		StartDate: startDate,
-		EndDate:   endDate,
-	}
 
 	v := validator.New()
 	if !v.GetPieChartData(dateRange, transactionType) {

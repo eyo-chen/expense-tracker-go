@@ -125,13 +125,7 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange doma
 		}
 	}
 
-	start, end, err := cvtDateToTime(chartDateRange.StartDate, chartDateRange.EndDate)
-	if err != nil {
-		logger.Error("cvtDateToTime failed", "package", PackageName, "err", err)
-		return domain.ChartData{}, err
-	}
-
-	return genChartData(dateToData, timeRangeType, start, end), nil
+	return genChartData(dateToData, timeRangeType, chartDateRange.Start, chartDateRange.End), nil
 }
 
 func (t *TransactionUC) GetPieChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {

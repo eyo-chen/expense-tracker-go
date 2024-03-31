@@ -299,9 +299,14 @@ func (s *TransactionSuite) TestGetBarChartData() {
 }
 
 func getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-23")
+	s.Require().NoError(err)
+
 	chartDataRange := domain.ChartDateRange{
-		StartDate: "2024-03-17",
-		EndDate:   "2024-03-23",
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -326,9 +331,14 @@ func getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData(s *Transactio
 }
 
 func getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-23")
+	s.Require().NoError(err)
+
 	chartDataRange := domain.ChartDateRange{
-		StartDate: "2024-03-17",
-		EndDate:   "2024-03-23",
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -353,9 +363,14 @@ func getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData(s *TransactionSuite
 }
 
 func getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-30")
+	s.Require().NoError(err)
+
 	chartDataRange := domain.ChartDateRange{
-		StartDate: "2024-03-17",
-		EndDate:   "2024-03-30",
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -383,9 +398,14 @@ func getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData(s *TransactionSuit
 }
 
 func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-31")
+	s.Require().NoError(err)
+
 	chartDataRange := domain.ChartDateRange{
-		StartDate: "2024-03-01",
-		EndDate:   "2024-03-31",
+		Start: start,
+		End:   end,
 	}
 
 	DateToChartData := domain.DateToChartData{
@@ -413,9 +433,14 @@ func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuit
 }
 
 func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-23")
+	s.Require().NoError(err)
+
 	chartDataRange := domain.ChartDateRange{
-		StartDate: "2024-03-17",
-		EndDate:   "2024-03-23",
+		Start: start,
+		End:   end,
 	}
 
 	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
@@ -432,8 +457,7 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 func (s *TransactionSuite) TestGetPieChartData() {
 	tests := []struct {
 		desc            string
-		setupFun        func()
-		chartDateRange  domain.ChartDateRange
+		setupFun        func() domain.ChartDateRange
 		transactionType domain.TransactionType
 		user            domain.User
 		expResult       domain.ChartData
@@ -441,10 +465,15 @@ func (s *TransactionSuite) TestGetPieChartData() {
 	}{
 		{
 			desc: "when no error, return chart data",
-			setupFun: func() {
+			setupFun: func() domain.ChartDateRange {
+				start, err := time.Parse(time.DateOnly, "2024-03-17")
+				s.Require().NoError(err)
+				end, err := time.Parse(time.DateOnly, "2024-03-23")
+				s.Require().NoError(err)
+
 				chartDataRange := domain.ChartDateRange{
-					StartDate: "2024-03-17",
-					EndDate:   "2024-03-23",
+					Start: start,
+					End:   end,
 				}
 
 				chartData := domain.ChartData{
@@ -454,10 +483,8 @@ func (s *TransactionSuite) TestGetPieChartData() {
 
 				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(chartData, nil).Once()
-			},
-			chartDateRange: domain.ChartDateRange{
-				StartDate: "2024-03-17",
-				EndDate:   "2024-03-23",
+
+				return chartDataRange
 			},
 			transactionType: domain.TransactionTypeExpense,
 			user: domain.User{
@@ -471,18 +498,21 @@ func (s *TransactionSuite) TestGetPieChartData() {
 		},
 		{
 			desc: "when get chart data fail, return error",
-			setupFun: func() {
+			setupFun: func() domain.ChartDateRange {
+				start, err := time.Parse(time.DateOnly, "2024-03-17")
+				s.Require().NoError(err)
+				end, err := time.Parse(time.DateOnly, "2024-03-23")
+				s.Require().NoError(err)
+
 				chartDataRange := domain.ChartDateRange{
-					StartDate: "2024-03-17",
-					EndDate:   "2024-03-23",
+					Start: start,
+					End:   end,
 				}
 
 				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 					Return(domain.ChartData{}, errors.New("error")).Once()
-			},
-			chartDateRange: domain.ChartDateRange{
-				StartDate: "2024-03-17",
-				EndDate:   "2024-03-23",
+
+				return chartDataRange
 			},
 			transactionType: domain.TransactionTypeExpense,
 			user: domain.User{
@@ -496,9 +526,9 @@ func (s *TransactionSuite) TestGetPieChartData() {
 	for _, t := range tests {
 		s.Run(t.desc, func() {
 			s.SetupTest()
-			t.setupFun()
+			dateRange := t.setupFun()
 
-			result, err := s.transactionUC.GetPieChartData(mockCtx, t.chartDateRange, t.transactionType, t.user)
+			result, err := s.transactionUC.GetPieChartData(mockCtx, dateRange, t.transactionType, t.user)
 			s.Require().Equal(t.expResult, result)
 			s.Require().Equal(t.expErr, err)
 
