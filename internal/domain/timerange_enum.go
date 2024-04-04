@@ -64,3 +64,24 @@ func (t TimeRangeType) IsDailyType() bool {
 	}
 	return false
 }
+
+func (t TimeRangeType) GetVal() int32 {
+	switch t {
+	case TimeRangeTypeOneWeekDay:
+		return 7
+	case TimeRangeTypeOneWeek:
+		return 7
+	case TimeRangeTypeTwoWeeks:
+		return 14
+	case TimeRangeTypeOneMonth:
+		return 30
+	case TimeRangeTypeThreeMonths:
+		return 90
+	case TimeRangeTypeSixMonths:
+		return 6
+	case TimeRangeTypeOneYear:
+		return 12
+	default:
+		return 0
+	}
+}
