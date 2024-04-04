@@ -169,7 +169,7 @@ func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange d
 func (t *TransactionModel) GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
 	qStmt := `
 			SELECT YEAR(date),
-			LPAD(MONTH(date), 2, '0') AS month,
+						 LPAD(MONTH(date), 2, '0') AS month,
 						 SUM(price)
 			FROM transactions
 			WHERE user_id = ?

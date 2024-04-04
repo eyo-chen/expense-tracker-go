@@ -891,6 +891,139 @@ func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSui
 	s.Require().Equal(expResult, chartData, desc)
 }
 
+func (s *TransactionSuite) TestGetMonthlyBarChartData() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when with one data, return successfully":       getMonthlyBarChartData_WithOneData_ReturnSuccessfully,
+		"when with multiple data, return successfully":  getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully": getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getMonthlyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-03-20")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{
+		Price: 999,
+		Type:  domain.TransactionTypeExpense.ToModelValue(),
+		Date:  start,
+	}
+	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(1, ow1)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.DateToChartData{
+		"2024-03-01": 999,
+	}
+
+	transactionType := domain.TransactionTypeExpense
+	dataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, chartData, desc)
+}
+
+func getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-08-30")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 1, 0)}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 3, 0)}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 3, 0)}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 4, 0)}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 4, 0)}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 5, 0)}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 5, 0)}
+	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
+	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
+
+	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.DateToChartData{
+		"2024-03-01": 1000,
+		"2024-04-01": 1000,
+		"2024-06-01": 999,
+		"2024-07-01": 1001,
+		"2024-08-01": 2000,
+	}
+
+	transactionType := domain.TransactionTypeExpense
+	dataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, chartData, desc)
+}
+
+func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-08-30")
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 1, 0)}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 3, 0)}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 3, 0)}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 4, 0)}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 4, 0)}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 5, 0)}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 5, 0)}
+	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
+	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
+
+	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	ow13 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
+	ow14 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow13, ow14)
+	s.Require().NoError(err, desc)
+
+	ow15 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
+	ow16 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow15, ow16)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.DateToChartData{
+		"2024-03-01": 1000,
+		"2024-04-01": 1000,
+		"2024-06-01": 999,
+		"2024-07-01": 1001,
+		"2024-08-01": 2000,
+	}
+
+	transactionType := domain.TransactionTypeExpense
+	dataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, chartData, desc)
+}
+
 func (s *TransactionSuite) TestGetPieChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
 		"when pie chart with one data, return successfully":      getPieChartData_WithOneData_ReturnSuccessfully,
