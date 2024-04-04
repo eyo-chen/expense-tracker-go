@@ -106,7 +106,9 @@ func genMonthlyChartData(dateToData domain.DateToChartData, timeRangeType domain
 	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 1, 0) {
 		date := t.Format(time.DateOnly)
 
-		labels = append(labels, t.Format(monthFormat))
+		// get the first 3 characters of the month
+		shortMonth := t.Month().String()[:3]
+		labels = append(labels, shortMonth)
 
 		// if there is no data for the weekday, append 0
 		if _, ok := dateToData[date]; !ok {
