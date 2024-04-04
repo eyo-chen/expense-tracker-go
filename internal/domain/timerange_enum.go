@@ -29,6 +29,7 @@ const (
 	TimeRangeTypeOneYear
 )
 
+// IsValid checks if the time range type is valid
 func (t TimeRangeType) IsValid() bool {
 	switch t {
 	case TimeRangeTypeOneWeekDay, TimeRangeTypeOneWeek, TimeRangeTypeTwoWeeks, TimeRangeTypeOneMonth, TimeRangeTypeThreeMonths, TimeRangeTypeSixMonths, TimeRangeTypeOneYear:
@@ -37,6 +38,7 @@ func (t TimeRangeType) IsValid() bool {
 	return false
 }
 
+// CvtToTimeRangeType converts a string to a time range type
 func CvtToTimeRangeType(s string) TimeRangeType {
 	switch s {
 	case "one_week_day":
@@ -57,6 +59,7 @@ func CvtToTimeRangeType(s string) TimeRangeType {
 	return TimeRangeTypeUnSpecified
 }
 
+// IsDailyType checks if the time range type is a daily type
 func (t TimeRangeType) IsDailyType() bool {
 	switch t {
 	case TimeRangeTypeOneWeekDay, TimeRangeTypeOneWeek, TimeRangeTypeTwoWeeks, TimeRangeTypeOneMonth, TimeRangeTypeThreeMonths:
@@ -65,6 +68,7 @@ func (t TimeRangeType) IsDailyType() bool {
 	return false
 }
 
+// GetVal returns the value of the time range type
 func (t TimeRangeType) GetVal() int32 {
 	switch t {
 	case TimeRangeTypeOneWeekDay:
