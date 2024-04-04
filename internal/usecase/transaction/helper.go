@@ -9,26 +9,7 @@ import (
 var (
 	weekDayFormat = "Mon"
 	dayFormat     = "01/02"
-	monthFormat   = "Jun"
 )
-
-func cvtDateToTime(startDate, endDate string) (time.Time, time.Time, error) {
-	if startDate == "" || endDate == "" {
-		return time.Time{}, time.Time{}, nil
-	}
-
-	start, err := time.Parse(time.DateOnly, startDate)
-	if err != nil {
-		return time.Time{}, time.Time{}, err
-	}
-
-	end, err := time.Parse(time.DateOnly, endDate)
-	if err != nil {
-		return time.Time{}, time.Time{}, err
-	}
-
-	return start, end, nil
-}
 
 func genChartData(dateToDate domain.DateToChartData, timeRangeType domain.TimeRangeType, start, end time.Time) domain.ChartData {
 	if timeRangeType.IsDailyType() && timeRangeType != domain.TimeRangeTypeThreeMonths {
@@ -85,7 +66,7 @@ func genThreeMonthsChartData(dateToData domain.DateToChartData, timeRangeType do
 		}
 
 		if index%3 == 0 {
-			labels = append(labels, t.Format(monthFormat))
+			labels = append(labels, t.Format(dayFormat))
 			datasets = append(datasets, accAmount)
 			accAmount = 0
 		}
