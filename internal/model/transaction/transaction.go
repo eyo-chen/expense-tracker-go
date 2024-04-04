@@ -3,6 +3,7 @@ package transaction
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -158,6 +159,44 @@ func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange d
 			return domain.DateToChartData{}, err
 		}
 
+		dateToData[date] = price
+	}
+	defer rows.Close()
+
+	return dateToData, nil
+}
+
+func (t *TransactionModel) GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error) {
+	qStmt := `
+			SELECT YEAR(date),
+			LPAD(MONTH(date), 2, '0') AS month,
+						 SUM(price)
+			FROM transactions
+			WHERE user_id = ?
+			AND type = ?
+			AND date BETWEEN ? AND ?
+			GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
+			ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')
+	`
+
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
+	if err != nil {
+		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		return domain.DateToChartData{}, err
+	}
+
+	dateToData := domain.DateToChartData{}
+	for rows.Next() {
+		var year string
+		var month string
+		var price float64
+		if err := rows.Scan(&year, &month, &price); err != nil {
+			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
+			return domain.DateToChartData{}, err
+		}
+
+		// set the date to the first day of the month
+		date := fmt.Sprintf("%s-%s-01", year, month)
 		dateToData[date] = price
 	}
 	defer rows.Close()
