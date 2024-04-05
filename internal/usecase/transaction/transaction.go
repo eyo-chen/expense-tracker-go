@@ -124,7 +124,7 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange doma
 			return domain.ChartData{}, err
 		}
 	} else {
-		dateToData, err = t.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, user.ID)
+		dateToData, err = t.Transaction.GetMonthlyBarChartData(ctx, chartDateRange, transactionType, user.ID)
 		if err != nil {
 			return domain.ChartData{}, err
 		}

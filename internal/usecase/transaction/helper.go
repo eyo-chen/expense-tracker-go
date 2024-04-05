@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	weekDayFormat = "Mon"
-	dayFormat     = "01/02"
+	weekDayFormat      = "Mon"
+	dayFormat          = "01/02"
+	yearAndMonthFormat = "2006-01"
 )
 
 func genChartData(dateToDate domain.DateToChartData, timeRangeType domain.TimeRangeType, start, end time.Time) domain.ChartData {
@@ -85,7 +86,16 @@ func genMonthlyChartData(dateToData domain.DateToChartData, timeRangeType domain
 	datasets := make([]float64, 0, timeRangeType.GetVal())
 
 	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 1, 0) {
-		date := t.Format(time.DateOnly)
+		/*
+			Have to use the format "YYYY-MM"
+			Because what frontend send is the random start date, and time duration
+			For example, "2024-03-15", and "3 months"
+			If we're using "YYYY-MM-DD" format in model and usecase, and assume the date is "01"("2024-03-01")
+			Then there's no way to match the date("2024-03-15") with the data("2024-03-01")
+			So we have to use "YYYY-MM" format to match the date of the month
+			Because both "2024-03-15" and "2024-03-01" will be formatted to "2024-03"
+		*/
+		date := t.Format(yearAndMonthFormat)
 
 		// get the first 3 characters of the month
 		shortMonth := t.Month().String()[:3]

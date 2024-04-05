@@ -920,7 +920,7 @@ func getMonthlyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, 
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
-		"2024-03-01": 999,
+		"2024-03": 999,
 	}
 
 	transactionType := domain.TransactionTypeExpense
@@ -956,11 +956,11 @@ func getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSu
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
-		"2024-03-01": 1000,
-		"2024-04-01": 1000,
-		"2024-06-01": 999,
-		"2024-07-01": 1001,
-		"2024-08-01": 2000,
+		"2024-03": 1000,
+		"2024-04": 1000,
+		"2024-06": 999,
+		"2024-07": 1001,
+		"2024-08": 2000,
 	}
 
 	transactionType := domain.TransactionTypeExpense
@@ -1007,11 +1007,11 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
-		"2024-03-01": 1000,
-		"2024-04-01": 1000,
-		"2024-06-01": 999,
-		"2024-07-01": 1001,
-		"2024-08-01": 2000,
+		"2024-03": 1000,
+		"2024-04": 1000,
+		"2024-06": 999,
+		"2024-07": 1001,
+		"2024-08": 2000,
 	}
 
 	transactionType := domain.TransactionTypeExpense
