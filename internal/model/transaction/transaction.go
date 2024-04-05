@@ -195,8 +195,7 @@ func (t *TransactionModel) GetMonthlyBarChartData(ctx context.Context, dateRange
 			return domain.DateToChartData{}, err
 		}
 
-		// set the date to the first day of the month
-		date := fmt.Sprintf("%s-%s-01", year, month)
+		date := fmt.Sprintf("%s-%s", year, month)
 		dateToData[date] = price
 	}
 	defer rows.Close()
