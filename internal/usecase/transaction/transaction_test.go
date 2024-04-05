@@ -496,14 +496,14 @@ func getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData(s *TransactionSui
 	}
 
 	DateToChartData := domain.DateToChartData{
-		"2024-03-01": 100,
-		"2024-04-01": 500,
-		"2024-06-01": 700,
-		"2024-07-01": 900,
-		"2024-08-01": 1100,
+		"2024-03": 100,
+		"2024-04": 500,
+		"2024-06": 700,
+		"2024-07": 900,
+		"2024-08": 1100,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -529,20 +529,20 @@ func getBarChartData_WithTimeRangeTypeOneYear_ReturnDateData(s *TransactionSuite
 	}
 
 	DateToChartData := domain.DateToChartData{
-		"2024-03-01": 100,
-		"2024-04-01": 500,
-		"2024-06-01": 700,
-		"2024-07-01": 900,
-		"2024-08-01": 1100,
-		"2024-09-01": 1300,
-		"2024-10-01": 1500,
-		"2024-11-01": 1700,
-		"2024-12-01": 1900,
-		"2025-01-01": 2100,
-		"2025-02-01": 2300,
+		"2024-03": 100,
+		"2024-04": 500,
+		"2024-06": 700,
+		"2024-07": 900,
+		"2024-08": 1100,
+		"2024-09": 1300,
+		"2024-10": 1500,
+		"2024-11": 1700,
+		"2024-12": 1900,
+		"2025-01": 2100,
+		"2025-02": 2300,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
