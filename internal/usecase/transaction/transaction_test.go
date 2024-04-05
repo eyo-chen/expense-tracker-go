@@ -284,11 +284,14 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 
 func (s *TransactionSuite) TestGetBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when time range type is one week day, return week day data": getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData,
-		"when time range type is one week, return date data":         getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData,
-		"when time range type is two weeks, return date data":        getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData,
-		"when time range type is one month, return date data":        getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData,
-		"when get chart data fail, return error":                     getBarChartData_GetChartDataFail_ReturnError,
+		"when time range type is one week day, return week day data":         getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData,
+		"when time range type is one week, return date data":                 getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData,
+		"when time range type is two weeks, return date data":                getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData,
+		"when time range type is one month, return date data":                getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData,
+		"when time ragne type is three months, return date accumulated data": getBarChartData_WithTimeRangeTypeThreeMonths_ReturnDateData,
+		"when time range type is six months, return month data":              getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData,
+		"when time range type is one year, return month data":                getBarChartData_WithTimeRangeTypeOneYear_ReturnDateData,
+		"when get chart data fail, return error":                             getBarChartData_GetChartDataFail_ReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -428,6 +431,127 @@ func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuit
 	}
 
 	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.TransactionTypeExpense, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getBarChartData_WithTimeRangeTypeThreeMonths_ReturnDateData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-05-31")
+	s.Require().NoError(err)
+
+	chartDataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	DateToChartData := domain.DateToChartData{
+		"2024-03-01": 100,
+		"2024-03-02": 200,
+		"2024-03-05": 500,
+		"2024-03-06": 600,
+		"2024-03-14": 700,
+		"2024-03-19": 800,
+		"2024-03-20": 900,
+		"2024-04-01": 1000,
+		"2024-04-02": 1100,
+		"2024-04-05": 1200,
+		"2024-04-06": 1300,
+		"2024-04-14": 1400,
+		"2024-04-19": 1500,
+		"2024-04-20": 1600,
+		"2024-05-01": 1700,
+		"2024-05-02": 1800,
+		"2024-05-05": 1900,
+		"2024-05-06": 2000,
+		"2024-05-14": 2100,
+		"2024-05-19": 2200,
+		"2024-05-20": 2300,
+	}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+		Return(DateToChartData, nil).Once()
+
+	// prepare expected result
+	expResult := domain.ChartData{
+		Labels:   []string{"03/01", "03/04", "03/07", "03/10", "03/13", "03/16", "03/19", "03/22", "03/25", "03/28", "03/31", "04/03", "04/06", "04/09", "04/12", "04/15", "04/18", "04/21", "04/24", "04/27", "04/30", "05/03", "05/06", "05/09", "05/12", "05/15", "05/18", "05/21", "05/24", "05/27", "05/30"},
+		Datasets: []float64{100, 200, 1100, 0, 0, 700, 800, 900, 0, 0, 0, 2100, 2500, 0, 0, 1400, 0, 3100, 0, 0, 0, 3500, 3900, 0, 0, 2100, 0, 4500, 0, 0, 0},
+	}
+
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.TransactionTypeExpense, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-08-31")
+	s.Require().NoError(err)
+
+	chartDataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	DateToChartData := domain.DateToChartData{
+		"2024-03-01": 100,
+		"2024-04-01": 500,
+		"2024-06-01": 700,
+		"2024-07-01": 900,
+		"2024-08-01": 1100,
+	}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+		Return(DateToChartData, nil).Once()
+
+	// prepare expected result
+	expResult := domain.ChartData{
+		Labels:   []string{"Mar", "Apr", "May", "Jun", "Jul", "Aug"},
+		Datasets: []float64{100, 500, 0, 700, 900, 1100},
+	}
+
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.TransactionTypeExpense, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getBarChartData_WithTimeRangeTypeOneYear_ReturnDateData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2025-02-28")
+	s.Require().NoError(err)
+
+	chartDataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	DateToChartData := domain.DateToChartData{
+		"2024-03-01": 100,
+		"2024-04-01": 500,
+		"2024-06-01": 700,
+		"2024-07-01": 900,
+		"2024-08-01": 1100,
+		"2024-09-01": 1300,
+		"2024-10-01": 1500,
+		"2024-11-01": 1700,
+		"2024-12-01": 1900,
+		"2025-01-01": 2100,
+		"2025-02-01": 2300,
+	}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+		Return(DateToChartData, nil).Once()
+
+	// prepare expected result
+	expResult := domain.ChartData{
+		Labels:   []string{"Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"},
+		Datasets: []float64{100, 500, 0, 700, 900, 1100, 1300, 1500, 1700, 1900, 2100, 2300},
+	}
+
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.TransactionTypeExpense, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
