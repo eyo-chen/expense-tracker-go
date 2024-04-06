@@ -223,6 +223,45 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain
 	return domain.ChartData{Labels: labels, Datasets: datasets}, nil
 }
 
+func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
+	qStmt := `
+		SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
+		       SUM(
+						CASE WHEN
+							type = 1 THEN price
+						ELSE
+							-price
+						END
+					 )
+		FROM transactions
+		WHERE user_id = ?
+		AND date BETWEEN ? AND ?
+		GROUP BY date
+	`
+
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.Start, dateRange.End)
+	if err != nil {
+		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		return domain.DateToChartData{}, err
+	}
+
+	dataToDate := domain.DateToChartData{}
+	for rows.Next() {
+		var date string
+		var price float64
+		if err := rows.Scan(&date, &price); err != nil {
+			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
+			return domain.DateToChartData{}, err
+		}
+
+		dataToDate[date] = price
+	}
+	defer rows.Close()
+
+	return dataToDate, nil
+
+}
+
 func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error) {
 	qStmt := `
 		SELECT
