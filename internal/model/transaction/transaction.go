@@ -225,12 +225,13 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain
 
 func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
 	qStmt := `
-		SELECT date,
+		SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
 		       SUM(
 						CASE WHEN
 							type = 1 THEN price
 						ELSE
 							-price
+						END
 					 )
 		FROM transactions
 		WHERE user_id = ?
