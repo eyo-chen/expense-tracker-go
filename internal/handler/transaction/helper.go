@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -101,4 +102,24 @@ func genChartDateRange(r *http.Request) (domain.ChartDateRange, error) {
 		Start: start,
 		End:   end,
 	}, nil
+}
+
+func genMainCategIDs(r *http.Request) (*[]int64, error) {
+	rawMainCategIDs := r.URL.Query().Get("main_category_ids")
+	if rawMainCategIDs == "" {
+		return nil, nil
+	}
+
+	strSlice := strings.Split(rawMainCategIDs, ",")
+	intSlice := make([]int64, len(strSlice))
+
+	for i, str := range strSlice {
+		num, err := strconv.Atoi(str)
+		if err != nil {
+			return nil, err
+		}
+		intSlice[i] = int64(num)
+	}
+
+	return &intSlice, nil
 }

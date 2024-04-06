@@ -153,6 +153,7 @@ func delete_DataNotFound_ReturnBadReq(s *TransactionSuite, desc string) {
 func (s *TransactionSuite) TestGetBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
 		"when no error, return data":                         getBarChartData_NoError_ReturnData,
+		"when no main category ids, pass nil to service":     getBarChartData_NoMainCategoryIDs_PassNilToService,
 		"when no start date, return bad request":             getBarChartData_NoStartDate_ReturnBadReq,
 		"when no end date, return bad request":               getBarChartData_NoEndDate_ReturnBadReq,
 		"when start date after end date, return bad request": getBarChartData_StartDateAfterEndDate_ReturnBadReq,
@@ -168,6 +169,64 @@ func (s *TransactionSuite) TestGetBarChartData() {
 }
 
 func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-03-08")
+	s.Require().NoError(err, desc)
+	user := domain.User{
+		ID: 1,
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.transactionHlr.GetBarChartData))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/transaction/chart?start_date=2024-03-01&end_date=2024-03-08&type=expense&time_range=one_week_day&main_category_ids=1,2,3", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	dateRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	mainCategIDs := []int64{1, 2, 3}
+
+	// mock service
+	s.mockTransactionUC.On("GetBarChartData",
+		req.Context(),
+		dateRange,
+		domain.TimeRangeTypeOneWeekDay,
+		domain.TransactionTypeExpense,
+		&mainCategIDs,
+		user,
+	).Return(domain.ChartData{
+		Labels:   []string{"Mon", "Tue", "Wed"},
+		Datasets: []float64{100, 200, 300},
+	}, nil)
+
+	// expected expected response
+	expResp := map[string]interface{}{
+		"chart_data": map[string]interface{}{
+			"labels":   []interface{}{"Mon", "Tue", "Wed"},
+			"datasets": []interface{}{100.0, 200.0, 300.0},
+		},
+	}
+
+	// action
+	s.transactionHlr.GetBarChartData(res, req)
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusOK, res.Code, desc)
+}
+
+func getBarChartData_NoMainCategoryIDs_PassNilToService(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-01")
 	s.Require().NoError(err, desc)
 	end, err := time.Parse(time.DateOnly, "2024-03-08")
@@ -198,6 +257,7 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 		dateRange,
 		domain.TimeRangeTypeOneWeekDay,
 		domain.TransactionTypeExpense,
+		(*[]int64)(nil),
 		user,
 	).Return(domain.ChartData{
 		Labels:   []string{"Mon", "Tue", "Wed"},

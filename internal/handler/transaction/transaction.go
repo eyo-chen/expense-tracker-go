@@ -229,6 +229,13 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	mainCatagIDs, err := genMainCategIDs(r)
+	if err != nil {
+		logger.Error("genMainCategIDs failed", "package", packageName, "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
 	rawTransactionType := r.URL.Query().Get("type")
 	transactionType := domain.CvtToTransactionType(rawTransactionType)
 
@@ -243,7 +250,7 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	data, err := t.transaction.GetBarChartData(ctx, dateRange, timeRangeType, transactionType, *user)
+	data, err := t.transaction.GetBarChartData(ctx, dateRange, timeRangeType, transactionType, mainCatagIDs, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return

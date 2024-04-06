@@ -107,3 +107,88 @@ func getAccInfoArgs(query domain.GetAccInfoQuery, userID int64) []interface{} {
 
 	return args
 }
+
+func getGetDailyBarChartDataQuery(mainCategIDs *[]int64) string {
+	qStmt := `
+	  SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
+		       SUM(price)
+		FROM transactions
+		WHERE user_id = ?
+		AND type = ?
+		AND date BETWEEN ? AND ?
+	`
+
+	if mainCategIDs != nil {
+		qStmt += "AND main_category_id IN (?"
+		for i := 1; i < len(*mainCategIDs); i++ {
+			qStmt += ", ?"
+		}
+		qStmt += ")"
+	}
+
+	qStmt += `GROUP BY date
+						ORDER BY date`
+
+	return qStmt
+}
+
+func genGetDailyBarChartDataArgs(userID int64, transactionType domain.TransactionType, dateRange domain.ChartDateRange, mainCategIDs *[]int64) []interface{} {
+	l := 4
+	if mainCategIDs != nil {
+		l += len(*mainCategIDs)
+	}
+
+	args := make([]interface{}, 0, l)
+	args = append(args, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
+
+	if mainCategIDs != nil {
+		for _, id := range *mainCategIDs {
+			args = append(args, id)
+		}
+	}
+
+	return args
+}
+
+func getGetMonthlyBarChartDataQuery(mainCategIDs *[]int64) string {
+	qStmt := `
+		SELECT YEAR(date),
+					 LPAD(MONTH(date), 2, '0') AS month,
+					 SUM(price)
+		FROM transactions
+		WHERE user_id = ?
+		AND type = ?
+		AND date BETWEEN ? AND ?
+		`
+
+	if mainCategIDs != nil {
+		qStmt += "AND main_category_id IN (?"
+		for i := 1; i < len(*mainCategIDs); i++ {
+			qStmt += ", ?"
+		}
+		qStmt += ")"
+	}
+
+	qStmt += `GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
+						ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')`
+
+	return qStmt
+}
+
+func getGetMonthlyBarChartDataArgs(userID int64, transactionType domain.TransactionType, dateRange domain.ChartDateRange, mainCategIDs *[]int64) []interface{} {
+	l := 4
+	if mainCategIDs != nil {
+		l += len(*mainCategIDs)
+	}
+
+	args := make([]interface{}, 0, l)
+	args = append(args, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
+
+	if mainCategIDs != nil {
+		for _, id := range *mainCategIDs {
+			args = append(args, id)
+		}
+	}
+
+	return args
+}

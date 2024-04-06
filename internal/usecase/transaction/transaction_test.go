@@ -319,7 +319,9 @@ func getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData(s *Transactio
 		"2024-03-22": 600,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -328,7 +330,7 @@ func getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData(s *Transactio
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -351,7 +353,9 @@ func getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData(s *TransactionSuite
 		"2024-03-22": 600,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -360,7 +364,7 @@ func getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData(s *TransactionSuite
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -386,7 +390,9 @@ func getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData(s *TransactionSuit
 		"2024-03-29": 900,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -395,7 +401,7 @@ func getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData(s *TransactionSuit
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 700, 0, 0, 0, 0, 800, 900, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeTwoWeeks, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeTwoWeeks, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -421,7 +427,9 @@ func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuit
 		"2024-03-20": 900,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -430,7 +438,7 @@ func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuit
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 0, 0, 0, 0, 0, 0, 0, 700, 0, 0, 0, 0, 800, 900, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -470,7 +478,9 @@ func getBarChartData_WithTimeRangeTypeThreeMonths_ReturnDateData(s *TransactionS
 		"2024-05-20": 2300,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -479,7 +489,7 @@ func getBarChartData_WithTimeRangeTypeThreeMonths_ReturnDateData(s *TransactionS
 		Datasets: []float64{100, 200, 1100, 0, 0, 700, 800, 900, 0, 0, 0, 2100, 2500, 0, 0, 1400, 0, 3100, 0, 0, 0, 3500, 3900, 0, 0, 2100, 0, 4500, 0, 0, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -503,7 +513,9 @@ func getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData(s *TransactionSui
 		"2024-08": 1100,
 	}
 
-	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -512,7 +524,7 @@ func getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData(s *TransactionSui
 		Datasets: []float64{100, 500, 0, 700, 900, 1100},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -542,7 +554,9 @@ func getBarChartData_WithTimeRangeTypeOneYear_ReturnDateData(s *TransactionSuite
 		"2025-02": 2300,
 	}
 
-	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -551,7 +565,7 @@ func getBarChartData_WithTimeRangeTypeOneYear_ReturnDateData(s *TransactionSuite
 		Datasets: []float64{100, 500, 0, 700, 900, 1100, 1300, 1500, 1700, 1900, 2100, 2300},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -567,13 +581,15 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 		End:   end,
 	}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	mainCategIDs := []int64{1}
+
+	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, &mainCategIDs, int64(1)).
 		Return(domain.DateToChartData{}, errors.New("error")).Once()
 
 	// prepare expected result
 	expResult := domain.ChartData{}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, &mainCategIDs, domain.User{ID: 1})
 	s.Require().Equal(errors.New("error"), err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
