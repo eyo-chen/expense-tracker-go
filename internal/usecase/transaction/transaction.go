@@ -115,16 +115,16 @@ func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQ
 	return t.Transaction.GetAccInfo(ctx, query, user.ID)
 }
 
-func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
+func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, mainCategIDs *[]int64, user domain.User) (domain.ChartData, error) {
 	var dateToData domain.DateToChartData
 	var err error
 	if timeRangeType.IsDailyType() {
-		dateToData, err = t.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, user.ID)
+		dateToData, err = t.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, mainCategIDs, user.ID)
 		if err != nil {
 			return domain.ChartData{}, err
 		}
 	} else {
-		dateToData, err = t.Transaction.GetMonthlyBarChartData(ctx, chartDateRange, transactionType, user.ID)
+		dateToData, err = t.Transaction.GetMonthlyBarChartData(ctx, chartDateRange, transactionType, mainCategIDs, user.ID)
 		if err != nil {
 			return domain.ChartData{}, err
 		}
