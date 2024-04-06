@@ -87,7 +87,7 @@ type TransactionModel interface {
 	GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs *[]int64, userID int64) (domain.DateToChartData, error)
 
 	// GetMonthlyBarChartData returns bar chart data grouped by month.
-	GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error)
+	GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs *[]int64, userID int64) (domain.DateToChartData, error)
 
 	// GetPieChartData returns pie chart data.
 	GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error)
