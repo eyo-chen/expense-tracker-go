@@ -107,3 +107,39 @@ func getAccInfoArgs(query domain.GetAccInfoQuery, userID int64) []interface{} {
 
 	return args
 }
+
+func getGetDailyBarChartDataQuery(mainCategIDs []int64) string {
+	qStmt := `
+	  SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
+		       SUM(price)
+		FROM transactions
+		WHERE user_id = ?
+		AND type = ?
+		AND main_category_id IN (?
+	`
+
+	for i := 1; i < len(mainCategIDs); i++ {
+		qStmt += ", ?"
+	}
+
+	qStmt += ")"
+
+	qStmt += ` AND date BETWEEN ? AND ?
+						GROUP BY date
+						ORDER BY date`
+
+	return qStmt
+}
+
+func genGetDailyBarChartDataArgs(userID int64, transactionType domain.TransactionType, mainCategIDs []int64, dateRange domain.ChartDateRange) []interface{} {
+	args := make([]interface{}, 0, len(mainCategIDs)+4)
+	args = append(args, userID, transactionType.ToModelValue())
+
+	for _, id := range mainCategIDs {
+		args = append(args, id)
+	}
+
+	args = append(args, dateRange.Start, dateRange.End)
+
+	return args
+}

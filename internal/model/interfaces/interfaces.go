@@ -84,7 +84,7 @@ type TransactionModel interface {
 	GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error)
 
 	// GetDailyBarChartData returns bar chart data grouped by date.
-	GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error)
+	GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs []int64, userID int64) (domain.DateToChartData, error)
 
 	// GetMonthlyBarChartData returns bar chart data grouped by month.
 	GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.DateToChartData, error)
