@@ -762,9 +762,10 @@ func getByIDAndUserID_UserIDNotFound_ReturnError(s *TransactionSuite, desc strin
 
 func (s *TransactionSuite) TestGetDailyBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when with one data, return successfully":       getDailyBarChartData_WithOneData_ReturnSuccessfully,
-		"when with multiple data, return successfully":  getDailyBarChartData_WithMultipleData_ReturnSuccessfully,
-		"when with multiple users, return successfully": getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully,
+		"when with one data, return successfully":                       getDailyBarChartData_WithOneData_ReturnSuccessfully,
+		"when with multiple data, return successfully":                  getDailyBarChartData_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully":                 getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully,
+		"when no main category ids, do not filter by main category ids": getDailyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -907,11 +908,58 @@ func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSui
 	s.Require().Equal(expResult, chartData, desc)
 }
 
+func getDailyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-03-21")
+	s.Require().NoError(err, desc)
+
+	mainCategOW1 := maincateg.MainCateg{Name: "food", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
+	mainCategList, user, _, err := s.f.InsertMainCategList(5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[1].ID}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 1), MainCategID: mainCategList[2].ID}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 0, 1), MainCategID: mainCategList[3].ID}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 0, 2), MainCategID: mainCategList[3].ID}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 2), MainCategID: mainCategList[0].ID}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 3), MainCategID: mainCategList[1].ID}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 3), MainCategID: mainCategList[2].ID}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 0, 4), MainCategID: mainCategList[3].ID}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 4), MainCategID: mainCategList[2].ID}
+	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 5), MainCategID: mainCategList[0].ID}
+	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 5), MainCategID: mainCategList[1].ID}
+	_, _, err = s.f.InsertTransactionWithGivenUser(10, user, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.DateToChartData{
+		"2024-03-17": 1000,
+		"2024-03-18": 1000,
+		"2024-03-19": 999,
+		"2024-03-20": 1001,
+		"2024-03-21": 2000,
+	}
+
+	transactionType := domain.TransactionTypeExpense
+	dataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, nil, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, chartData, desc)
+}
+
 func (s *TransactionSuite) TestGetMonthlyBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when with one data, return successfully":       getMonthlyBarChartData_WithOneData_ReturnSuccessfully,
-		"when with multiple data, return successfully":  getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully,
-		"when with multiple users, return successfully": getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully,
+		"when with one data, return successfully":                      getMonthlyBarChartData_WithOneData_ReturnSuccessfully,
+		"when with multiple data, return successfully":                 getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully":                getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully,
+		"when no main category ids, do no filter by main category ids": getMonthlyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -1031,8 +1079,6 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 		"2024-08": 2000,
 	}
 
-	// only get data with mainCategList[1] and mainCategList[2]
-
 	// prepare more users
 	ow13 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
 	ow14 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
@@ -1044,6 +1090,7 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow15, ow16)
 	s.Require().NoError(err, desc)
 
+	// only get data with mainCategList[1] and mainCategList[2]
 	mainCategIDs := []int64{mainCategList[1].ID, mainCategList[2].ID}
 	transactionType := domain.TransactionTypeExpense
 	dataRange := domain.ChartDateRange{
@@ -1051,6 +1098,52 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 		End:   end,
 	}
 	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, &mainCategIDs, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, chartData, desc)
+}
+
+func getMonthlyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err, desc)
+	end, err := time.Parse(time.DateOnly, "2024-08-30")
+	s.Require().NoError(err, desc)
+
+	mainCategOW1 := maincateg.MainCateg{Name: "food", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
+	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
+	mainCategList, user, _, err := s.f.InsertMainCategList(5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	s.Require().NoError(err, desc)
+
+	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
+	ow2 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[1].ID}
+	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0), MainCategID: mainCategList[2].ID}
+	ow4 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 1, 0), MainCategID: mainCategList[3].ID}
+	ow5 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 3, 0), MainCategID: mainCategList[3].ID}
+	ow6 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 3, 0), MainCategID: mainCategList[0].ID}
+	ow7 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 4, 0), MainCategID: mainCategList[1].ID}
+	ow8 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 4, 0), MainCategID: mainCategList[2].ID}
+	ow9 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 5, 0), MainCategID: mainCategList[3].ID}
+	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 5, 0), MainCategID: mainCategList[2].ID}
+	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0), MainCategID: mainCategList[0].ID}
+	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0), MainCategID: mainCategList[1].ID}
+	_, _, err = s.f.InsertTransactionWithGivenUser(12, user, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	s.Require().NoError(err, desc)
+
+	expResult := domain.DateToChartData{
+		"2024-03": 1000,
+		"2024-04": 1000,
+		"2024-06": 999,
+		"2024-07": 1001,
+		"2024-08": 2000,
+	}
+
+	transactionType := domain.TransactionTypeExpense
+	dataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, nil, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
