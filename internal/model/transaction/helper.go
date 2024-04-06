@@ -159,8 +159,6 @@ func getGetMonthlyBarChartDataQuery(mainCategIDs *[]int64) string {
 		WHERE user_id = ?
 		AND type = ?
 		AND date BETWEEN ? AND ?
-		GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
-		ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')
 		`
 
 	if mainCategIDs != nil {
