@@ -231,7 +231,8 @@ func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange 
 	}
 
 	qStmt := `
-					SELECT date, @csum := @csum + total_price
+					SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
+								 @csum := @csum + total_price
 					FROM (
 						SELECT date, 
 							SUM(
