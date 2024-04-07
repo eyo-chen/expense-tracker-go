@@ -1297,9 +1297,9 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 
 func (s *TransactionSuite) TestGetDailyLineChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when with two data, return successfully":      getDailyLineChartData_WithTwoData_ReturnSuccessFully,
-		"when with multiple data, return successfully": getDailyLineChartData_WithMultipleData_ReturnSuccessfully,
-		// "when with multiple users, return successfully": getDailyLineChartData_WithMultipleUsers_ReturnSuccessfully,
+		"when with two data, return successfully":       getDailyLineChartData_WithTwoData_ReturnSuccessFully,
+		"when with multiple data, return successfully":  getDailyLineChartData_WithMultipleData_ReturnSuccessfully,
+		"when with multiple users, return successfully": getDailyLineChartData_WithMultipleUsers_ReturnSuccessfully,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -1483,10 +1483,10 @@ func getMonthlyLineChartData_WithMultipleData_ReturnSuccessfully(s *TransactionS
 
 	expResult := domain.DateToChartData{
 		"2024-03": -1000,
-		"2024-04": 0,
-		"2024-06": 1001,
-		"2024-07": -1001,
-		"2024-08": -1000,
+		"2024-04": -1000,
+		"2024-06": 1,
+		"2024-07": -1000,
+		"2024-08": -2000,
 	}
 
 	dataRange := domain.ChartDateRange{
@@ -1532,10 +1532,10 @@ func getMonthlyLineChartData_WithMultipleUsers_ReturnSuccessfully(s *Transaction
 
 	expResult := domain.DateToChartData{
 		"2024-03": -1000,
-		"2024-04": 0,
-		"2024-06": 1001,
-		"2024-07": -1001,
-		"2024-08": -1000,
+		"2024-04": -1000,
+		"2024-06": 1,
+		"2024-07": -1000,
+		"2024-08": -2000,
 	}
 
 	dataRange := domain.ChartDateRange{
