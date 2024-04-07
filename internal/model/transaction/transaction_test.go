@@ -1357,10 +1357,10 @@ func getDailyLineChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSui
 
 	expResult := domain.DateToChartData{
 		"2024-03-01": -1000,
-		"2024-03-02": 0,
-		"2024-03-04": 1001,
-		"2024-03-05": -1001,
-		"2024-03-06": -1000,
+		"2024-03-02": -1000,
+		"2024-03-04": 1,
+		"2024-03-05": -1000,
+		"2024-03-06": -2000,
 	}
 
 	dataRange := domain.ChartDateRange{
@@ -1406,10 +1406,10 @@ func getDailyLineChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSu
 
 	expResult := domain.DateToChartData{
 		"2024-03-01": -1000,
-		"2024-03-02": 0,
-		"2024-03-04": 1001,
-		"2024-03-05": -1001,
-		"2024-03-06": -1000,
+		"2024-03-02": -1000,
+		"2024-03-04": 1,
+		"2024-03-05": -1000,
+		"2024-03-06": -2000,
 	}
 
 	dataRange := domain.ChartDateRange{
@@ -1483,10 +1483,10 @@ func getMonthlyLineChartData_WithMultipleData_ReturnSuccessfully(s *TransactionS
 
 	expResult := domain.DateToChartData{
 		"2024-03": -1000,
-		"2024-04": 0,
-		"2024-06": 1001,
-		"2024-07": -1001,
-		"2024-08": -1000,
+		"2024-04": -1000,
+		"2024-06": 1,
+		"2024-07": -1000,
+		"2024-08": -2000,
 	}
 
 	dataRange := domain.ChartDateRange{
@@ -1532,10 +1532,10 @@ func getMonthlyLineChartData_WithMultipleUsers_ReturnSuccessfully(s *Transaction
 
 	expResult := domain.DateToChartData{
 		"2024-03": -1000,
-		"2024-04": 0,
-		"2024-06": 1001,
-		"2024-07": -1001,
-		"2024-08": -1000,
+		"2024-04": -1000,
+		"2024-06": 1,
+		"2024-07": -1000,
+		"2024-08": -2000,
 	}
 
 	dataRange := domain.ChartDateRange{
