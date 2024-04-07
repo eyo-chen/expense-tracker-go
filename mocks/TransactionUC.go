@@ -137,6 +137,34 @@ func (_m *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange dom
 	return r0, r1
 }
 
+// GetLineChartData provides a mock function with given fields: ctx, chartDateRange, timeRangeType, user
+func (_m *TransactionUC) GetLineChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, user domain.User) (domain.ChartData, error) {
+	ret := _m.Called(ctx, chartDateRange, timeRangeType, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLineChartData")
+	}
+
+	var r0 domain.ChartData
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.User) (domain.ChartData, error)); ok {
+		return rf(ctx, chartDateRange, timeRangeType, user)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.User) domain.ChartData); ok {
+		r0 = rf(ctx, chartDateRange, timeRangeType, user)
+	} else {
+		r0 = ret.Get(0).(domain.ChartData)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.User) error); ok {
+		r1 = rf(ctx, chartDateRange, timeRangeType, user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetMonthlyData provides a mock function with given fields: ctx, dateRange, user
 func (_m *TransactionUC) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error) {
 	ret := _m.Called(ctx, dateRange, user)

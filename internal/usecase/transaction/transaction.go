@@ -137,6 +137,24 @@ func (t *TransactionUC) GetPieChartData(ctx context.Context, chartDateRange doma
 	return t.Transaction.GetPieChartData(ctx, chartDateRange, transactionType, user.ID)
 }
 
+func (t *TransactionUC) GetLineChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, user domain.User) (domain.ChartData, error) {
+	var dateToData domain.DateToChartData
+	var err error
+	if timeRangeType.IsDailyType() {
+		dateToData, err = t.Transaction.GetDailyLineChartData(ctx, chartDateRange, user.ID)
+		if err != nil {
+			return domain.ChartData{}, err
+		}
+	} else {
+		dateToData, err = t.Transaction.GetMonthlyLineChartData(ctx, chartDateRange, user.ID)
+		if err != nil {
+			return domain.ChartData{}, err
+		}
+	}
+
+	return genLineChartData(dateToData, timeRangeType, chartDateRange.Start, chartDateRange.End), nil
+}
+
 func (t *TransactionUC) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error) {
 	data := make([]domain.TransactionType, 0, dateRange.EndDate.Day())
 
