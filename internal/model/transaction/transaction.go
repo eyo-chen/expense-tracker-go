@@ -271,21 +271,31 @@ func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange 
 }
 
 func (t *TransactionModel) GetMonthlyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
+	_, err := t.DB.Exec("SET @csum := 0")
+	if err != nil {
+		logger.Error("t.DB.Exec failed", "package", PackageName, "err", err)
+		return domain.DateToChartData{}, err
+	}
+
 	qStmt := `
-				 SELECT YEAR(date),
-				 				LPAD(MONTH(date), 2, '0') AS month,
-								SUM(
-									CASE WHEN
-										type = 1 THEN price
-									ELSE
-										-price
-									END
-								)
-				 FROM transactions
-				 WHERE user_id = ?
-				 AND date BETWEEN ? AND ?
-				 GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
-				 ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')
+					SELECT year,
+								 month,
+								 @csum := @csum + total_price
+					FROM (
+						SELECT YEAR(date) AS year,
+									 LPAD(MONTH(date), 2, '0') AS month,
+									 SUM(
+										CASE WHEN
+											type = 1 THEN price
+											ELSE -price
+										END
+									) AS total_price
+						FROM transactions
+						WHERE user_id = ?
+						AND date BETWEEN ? AND ?
+						GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
+						ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')
+					) AS temp
 				 `
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.Start, dateRange.End)
