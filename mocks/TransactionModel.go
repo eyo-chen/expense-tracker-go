@@ -257,6 +257,36 @@ func (_m *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain
 	return r0, r1
 }
 
+// GetMonthlyLineChartData provides a mock function with given fields: ctx, dateRange, userID
+func (_m *TransactionModel) GetMonthlyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
+	ret := _m.Called(ctx, dateRange, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMonthlyLineChartData")
+	}
+
+	var r0 domain.DateToChartData
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, int64) (domain.DateToChartData, error)); ok {
+		return rf(ctx, dateRange, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, int64) domain.DateToChartData); ok {
+		r0 = rf(ctx, dateRange, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(domain.DateToChartData)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, int64) error); ok {
+		r1 = rf(ctx, dateRange, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetPieChartData provides a mock function with given fields: ctx, dataRange, transactionType, userID
 func (_m *TransactionModel) GetPieChartData(ctx context.Context, dataRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
 	ret := _m.Called(ctx, dataRange, transactionType, userID)

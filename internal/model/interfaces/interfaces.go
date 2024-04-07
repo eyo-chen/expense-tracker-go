@@ -95,6 +95,9 @@ type TransactionModel interface {
 	// GetDailyLineChartData returns line chart data grouped by date.
 	GetDailyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error)
 
+	// GetMonthlyLineChartData returns line chart data grouped by month.
+	GetMonthlyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error)
+
 	// GetMonthlyData returns monthly data.
 	GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error)
 }
