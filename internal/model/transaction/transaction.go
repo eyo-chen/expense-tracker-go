@@ -259,7 +259,48 @@ func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange 
 	defer rows.Close()
 
 	return dataToDate, nil
+}
 
+func (t *TransactionModel) GetMonthlyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
+	qStmt := `
+				 SELECT YEAR(date),
+				 				LPAD(MONTH(date), 2, '0') AS month,
+								SUM(
+									CASE WHEN
+										type = 1 THEN price
+									ELSE
+										-price
+									END
+								)
+				 FROM transactions
+				 WHERE user_id = ?
+				 AND date BETWEEN ? AND ?
+				 GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
+				 ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')
+				 `
+
+	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.Start, dateRange.End)
+	if err != nil {
+		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		return domain.DateToChartData{}, err
+	}
+
+	dateToData := domain.DateToChartData{}
+	for rows.Next() {
+		var year string
+		var month string
+		var price float64
+		if err := rows.Scan(&year, &month, &price); err != nil {
+			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
+			return domain.DateToChartData{}, err
+		}
+
+		date := fmt.Sprintf("%s-%s", year, month)
+		dateToData[date] = price
+	}
+	defer rows.Close()
+
+	return dateToData, nil
 }
 
 func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error) {
