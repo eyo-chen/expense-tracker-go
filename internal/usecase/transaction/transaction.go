@@ -137,7 +137,7 @@ func (t *TransactionUC) GetPieChartData(ctx context.Context, chartDateRange doma
 	return t.Transaction.GetPieChartData(ctx, chartDateRange, transactionType, user.ID)
 }
 
-func (t *TransactionUC) GetLineChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
+func (t *TransactionUC) GetLineChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, user domain.User) (domain.ChartData, error) {
 	var dateToData domain.DateToChartData
 	var err error
 	if timeRangeType.IsDailyType() {
