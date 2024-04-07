@@ -284,13 +284,13 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 
 func (s *TransactionSuite) TestGetBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when time range type is one week day, return week day data":         getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData,
-		"when time range type is one week, return date data":                 getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData,
-		"when time range type is two weeks, return date data":                getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData,
-		"when time range type is one month, return date data":                getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData,
-		"when time ragne type is three months, return date accumulated data": getBarChartData_WithTimeRangeTypeThreeMonths_ReturnDateData,
-		"when time range type is six months, return month data":              getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData,
-		"when time range type is one year, return month data":                getBarChartData_WithTimeRangeTypeOneYear_ReturnDateData,
+		"when time range type is one week day, return week day data":         getBarChartData_WithOneWeekDay_ReturnWeekDayData,
+		"when time range type is one week, return date data":                 getBarChartData_WithOneWeek_ReturnDateData,
+		"when time range type is two weeks, return date data":                getBarChartData_WithTwoWeeks_ReturnDateData,
+		"when time range type is one month, return date data":                getBarChartData_WithOneMonth_ReturnDateData,
+		"when time ragne type is three months, return date accumulated data": getBarChartData_WithThreeMonths_ReturnDateData,
+		"when time range type is six months, return month data":              getBarChartData_WithSixMonths_ReturnDateData,
+		"when time range type is one year, return month data":                getBarChartData_WithOneYear_ReturnDateData,
 		"when get chart data fail, return error":                             getBarChartData_GetChartDataFail_ReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
@@ -301,7 +301,7 @@ func (s *TransactionSuite) TestGetBarChartData() {
 	}
 }
 
-func getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc string) {
+func getBarChartData_WithOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err)
 	end, err := time.Parse(time.DateOnly, "2024-03-23")
@@ -335,7 +335,7 @@ func getBarChartData_WithTimeRangeTypeOneWeekDay_ReturnWeekDayData(s *Transactio
 	s.Require().Equal(expResult, result, desc)
 }
 
-func getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData(s *TransactionSuite, desc string) {
+func getBarChartData_WithOneWeek_ReturnDateData(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err)
 	end, err := time.Parse(time.DateOnly, "2024-03-23")
@@ -369,7 +369,7 @@ func getBarChartData_WithTimeRangeTypeOneWeek_ReturnDateData(s *TransactionSuite
 	s.Require().Equal(expResult, result, desc)
 }
 
-func getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData(s *TransactionSuite, desc string) {
+func getBarChartData_WithTwoWeeks_ReturnDateData(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-17")
 	s.Require().NoError(err)
 	end, err := time.Parse(time.DateOnly, "2024-03-30")
@@ -406,7 +406,7 @@ func getBarChartData_WithTimeRangeTypeTwoWeeks_ReturnDateData(s *TransactionSuit
 	s.Require().Equal(expResult, result, desc)
 }
 
-func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuite, desc string) {
+func getBarChartData_WithOneMonth_ReturnDateData(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-01")
 	s.Require().NoError(err)
 	end, err := time.Parse(time.DateOnly, "2024-03-31")
@@ -443,7 +443,7 @@ func getBarChartData_WithTimeRangeTypeOneMonth_ReturnDateData(s *TransactionSuit
 	s.Require().Equal(expResult, result, desc)
 }
 
-func getBarChartData_WithTimeRangeTypeThreeMonths_ReturnDateData(s *TransactionSuite, desc string) {
+func getBarChartData_WithThreeMonths_ReturnDateData(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-01")
 	s.Require().NoError(err)
 	end, err := time.Parse(time.DateOnly, "2024-05-31")
@@ -494,7 +494,7 @@ func getBarChartData_WithTimeRangeTypeThreeMonths_ReturnDateData(s *TransactionS
 	s.Require().Equal(expResult, result, desc)
 }
 
-func getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData(s *TransactionSuite, desc string) {
+func getBarChartData_WithSixMonths_ReturnDateData(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-01")
 	s.Require().NoError(err)
 	end, err := time.Parse(time.DateOnly, "2024-08-31")
@@ -529,7 +529,7 @@ func getBarChartData_WithTimeRangeTypeSixMonths_ReturnDateData(s *TransactionSui
 	s.Require().Equal(expResult, result, desc)
 }
 
-func getBarChartData_WithTimeRangeTypeOneYear_ReturnDateData(s *TransactionSuite, desc string) {
+func getBarChartData_WithOneYear_ReturnDateData(s *TransactionSuite, desc string) {
 	start, err := time.Parse(time.DateOnly, "2024-03-01")
 	s.Require().NoError(err)
 	end, err := time.Parse(time.DateOnly, "2025-02-28")
