@@ -132,7 +132,7 @@ func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int6
 	return cvtToDomainTransactionWithoutCategory(trans), nil
 }
 
-func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs *[]int64, userID int64) (domain.DateToChartData, error) {
+func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs []int64, userID int64) (domain.DateToChartData, error) {
 	qStmt := getGetDailyBarChartDataQuery(mainCategIDs)
 	args := genGetDailyBarChartDataArgs(userID, transactionType, dateRange, mainCategIDs)
 
@@ -158,7 +158,7 @@ func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange d
 	return dateToData, nil
 }
 
-func (t *TransactionModel) GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs *[]int64, userID int64) (domain.DateToChartData, error) {
+func (t *TransactionModel) GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs []int64, userID int64) (domain.DateToChartData, error) {
 	qStmt := getGetMonthlyBarChartDataQuery(mainCategIDs)
 	args := getGetMonthlyBarChartDataArgs(userID, transactionType, dateRange, mainCategIDs)
 

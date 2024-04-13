@@ -845,7 +845,7 @@ func getDailyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuit
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, &mainCategIDs, user.ID)
+	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -903,7 +903,7 @@ func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSui
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, &mainCategIDs, user.ID)
+	chartData, err := s.transactionModel.GetDailyBarChartData(mockCtx, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1039,7 +1039,7 @@ func getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSu
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, &mainCategIDs, user.ID)
+	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1097,7 +1097,7 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, &mainCategIDs, user.ID)
+	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCtx, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }

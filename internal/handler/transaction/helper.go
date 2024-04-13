@@ -104,7 +104,7 @@ func genChartDateRange(r *http.Request) (domain.ChartDateRange, error) {
 	}, nil
 }
 
-func genMainCategIDs(r *http.Request) (*[]int64, error) {
+func genMainCategIDs(r *http.Request) ([]int64, error) {
 	rawMainCategIDs := r.URL.Query().Get("main_category_ids")
 	if rawMainCategIDs == "" {
 		return nil, nil
@@ -121,5 +121,5 @@ func genMainCategIDs(r *http.Request) (*[]int64, error) {
 		intSlice[i] = int64(num)
 	}
 
-	return &intSlice, nil
+	return intSlice, nil
 }

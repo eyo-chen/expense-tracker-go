@@ -110,7 +110,7 @@ func (_m *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user
 }
 
 // GetBarChartData provides a mock function with given fields: ctx, chartDateRange, timeRangeType, transactionType, mainCategIDs, user
-func (_m *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, mainCategIDs *[]int64, user domain.User) (domain.ChartData, error) {
+func (_m *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, mainCategIDs []int64, user domain.User) (domain.ChartData, error) {
 	ret := _m.Called(ctx, chartDateRange, timeRangeType, transactionType, mainCategIDs, user)
 
 	if len(ret) == 0 {
@@ -119,16 +119,16 @@ func (_m *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange dom
 
 	var r0 domain.ChartData
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.TransactionType, *[]int64, domain.User) (domain.ChartData, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.TransactionType, []int64, domain.User) (domain.ChartData, error)); ok {
 		return rf(ctx, chartDateRange, timeRangeType, transactionType, mainCategIDs, user)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.TransactionType, *[]int64, domain.User) domain.ChartData); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.TransactionType, []int64, domain.User) domain.ChartData); ok {
 		r0 = rf(ctx, chartDateRange, timeRangeType, transactionType, mainCategIDs, user)
 	} else {
 		r0 = ret.Get(0).(domain.ChartData)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.TransactionType, *[]int64, domain.User) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ChartDateRange, domain.TimeRangeType, domain.TransactionType, []int64, domain.User) error); ok {
 		r1 = rf(ctx, chartDateRange, timeRangeType, transactionType, mainCategIDs, user)
 	} else {
 		r1 = ret.Error(1)
