@@ -720,7 +720,7 @@ func getLineChartData_WithOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc
 	// prepare expected result
 	expResult := domain.ChartData{
 		Labels:   []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"},
-		Datasets: []float64{100, 300, 300, 300, -200, 400, 400},
+		Datasets: []float64{100, 200, 200, 200, -500, 600, 600},
 	}
 
 	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.User{ID: 1})
@@ -752,7 +752,7 @@ func getLineChartData_WithOneWeek_ReturnData(s *TransactionSuite, desc string) {
 	// prepare expected result
 	expResult := domain.ChartData{
 		Labels:   []string{"03/17", "03/18", "03/19", "03/20", "03/21", "03/22", "03/23"},
-		Datasets: []float64{100, -200, -200, -200, -700, -100, -100},
+		Datasets: []float64{100, -300, -300, -300, -500, 600, 600},
 	}
 
 	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.User{ID: 1})
@@ -787,7 +787,7 @@ func getLineChartData_WithTwoWeeks_ReturnData(s *TransactionSuite, desc string) 
 	// prepare expected result
 	expResult := domain.ChartData{
 		Labels:   []string{"03/17", "03/18", "03/19", "03/20", "03/21", "03/22", "03/23", "03/24", "03/25", "03/26", "03/27", "03/28", "03/29", "03/30"},
-		Datasets: []float64{-100, 100, 100, 100, 600, 0, 700, 700, 700, 700, 700, -100, 800, 800},
+		Datasets: []float64{-100, 200, 200, 200, 500, -600, 700, 700, 700, 700, 700, -800, 900, 900},
 	}
 
 	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.User{ID: 1})
@@ -825,7 +825,7 @@ func getLineChartData_WithOneMonth_ReturnData(s *TransactionSuite, desc string) 
 	// prepare expected result
 	expResult := domain.ChartData{
 		Labels:   []string{"03/05", "03/06", "03/07", "03/08", "03/09", "03/10", "03/11", "03/12", "03/13", "03/14", "03/15", "03/16", "03/17", "03/18", "03/19", "03/20", "03/21", "03/22", "03/23", "03/24", "03/25", "03/26", "03/27", "03/28", "03/29", "03/30", "03/31", "04/01", "04/02", "04/03"},
-		Datasets: []float64{500, -100, -100, -100, -100, -200, -200, -200, -200, 500, 500, 0, 0, 0, -800, 100, 100, 100, 100, 100, 1100, 1100, 1100, 1100, 1100, 1100, -300, -300, -200, -200},
+		Datasets: []float64{500, -600, -600, -600, -600, -100, -100, -100, -100, 700, 700, -500, -500, -500, -800, 900, 900, 900, 900, 900, 1000, 1000, 1000, 1000, 1000, 1000, -1400, -1400, 100, 100},
 	}
 
 	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.User{ID: 1})
@@ -874,7 +874,7 @@ func getLineChartData_WithThreeMonths_ReturnData(s *TransactionSuite, desc strin
 	// prepare expected result
 	expResult := domain.ChartData{
 		Labels:   []string{"03/01", "03/04", "03/07", "03/10", "03/13", "03/16", "03/19", "03/22", "03/25", "03/28", "03/31", "04/03", "04/06", "04/09", "04/12", "04/15", "04/18", "04/21", "04/24", "04/27", "04/30", "05/03", "05/06", "05/09", "05/12", "05/15", "05/18", "05/21", "05/24", "05/27", "05/30"},
-		Datasets: []float64{100, 300, -800, -800, -800, -1500, -700, 200, 200, 200, 200, 100, 200, 200, 200, -1200, -1200, 1900, 1900, 1900, 1900, -1600, 2300, 2300, 2300, 200, 200, 100, 100, 100, 100},
+		Datasets: []float64{100, 200, -600, -600, -600, -700, 800, 900, 900, 900, 900, -1100, 1300, 1300, 1300, -1400, -1400, 1600, 1600, 1600, 1600, -1800, 2000, 2000, 2000, -2100, -2100, -2300, -2300, -2300, -2300},
 	}
 
 	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.User{ID: 1})
@@ -907,7 +907,7 @@ func getLineChartData_WithSixMonths_ReturnMonthData(s *TransactionSuite, desc st
 	// prepare expected result
 	expResult := domain.ChartData{
 		Labels:   []string{"Mar", "Apr", "May", "Jun", "Jul", "Aug"},
-		Datasets: []float64{-100, -600, -600, -1300, -2200, -3300},
+		Datasets: []float64{-100, -500, -500, -700, -900, -1100},
 	}
 
 	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.User{ID: 1})
@@ -946,7 +946,7 @@ func getLineChartData_WithOneYear_ReturnMonthData(s *TransactionSuite, desc stri
 	// prepare expected result
 	expResult := domain.ChartData{
 		Labels:   []string{"Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"},
-		Datasets: []float64{100, 600, 600, -100, 800, -300, 1000, -500, -2200, -4100, -2000, 300},
+		Datasets: []float64{100, 500, 500, -700, 900, -1100, 1300, -1500, -1700, -1900, 2100, 2300},
 	}
 
 	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.User{ID: 1})
