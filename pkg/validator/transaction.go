@@ -66,6 +66,13 @@ func (v *Validator) GetPieChartData(dateRange domain.ChartDateRange, transaction
 	return v.Valid()
 }
 
+// GetLineChartData validates the input for getting line chart data.
+func (v *Validator) GetLineChartData(dateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType) bool {
+	v.Check(checkStartDateBeforeEndDateTime(dateRange.Start, dateRange.End), "start_date", "start date must be before end date")
+	v.Check(timeRangeType.IsValid(), "time_range", "time range is invalid")
+	return v.Valid()
+}
+
 // GetMonthlyData validates the date range for getting monthly data.
 func (v *Validator) GetMonthlyData(dateRange domain.GetMonthlyDateRange) bool {
 	v.Check(checkStartDateBeforeEndDateTime(dateRange.StartDate, dateRange.EndDate), "start_date", "start date must be before end date")
