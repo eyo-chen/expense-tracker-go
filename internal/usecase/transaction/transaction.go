@@ -65,8 +65,22 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 	return nil
 }
 
-func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, error) {
-	return t.Transaction.GetAll(ctx, opt, user.ID)
+func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, domain.Cursor, error) {
+	trans, err := t.Transaction.GetAll(ctx, opt, user.ID)
+	if err != nil {
+		return nil, domain.Cursor{}, err
+	}
+
+	var cursor domain.Cursor
+	if len(trans) == opt.Cursor.Size {
+		cursor.NextKey = trans[len(trans)-1].ID
+		cursor.Size = opt.Cursor.Size
+	} else {
+		cursor.NextKey = 0
+		cursor.Size = 0
+	}
+
+	return trans, cursor, nil
 }
 
 func (t *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error {
