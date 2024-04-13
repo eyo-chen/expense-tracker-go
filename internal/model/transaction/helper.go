@@ -153,10 +153,8 @@ func genGetDailyBarChartDataArgs(userID int64, transactionType domain.Transactio
 	args := make([]interface{}, 0, l)
 	args = append(args, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
 
-	if mainCategIDs != nil {
-		for _, id := range mainCategIDs {
-			args = append(args, id)
-		}
+	for _, id := range mainCategIDs {
+		args = append(args, id)
 	}
 
 	return args
@@ -196,10 +194,8 @@ func getGetMonthlyBarChartDataArgs(userID int64, transactionType domain.Transact
 	args := make([]interface{}, 0, l)
 	args = append(args, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
 
-	if mainCategIDs != nil {
-		for _, id := range mainCategIDs {
-			args = append(args, id)
-		}
+	for _, id := range mainCategIDs {
+		args = append(args, id)
 	}
 
 	return args
