@@ -8,46 +8,42 @@ import (
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
-func genGetAllQuery(r *http.Request) (domain.GetQuery, error) {
+func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
+	var opt domain.GetTransOpt
+
 	rawStartDate := r.URL.Query().Get("start_date")
-	rawEndDate := r.URL.Query().Get("end_date")
-	rawMainCategID := r.URL.Query().Get("main_category_id")
-	rawSubCategID := r.URL.Query().Get("sub_category_id")
-
-	var query domain.GetQuery
-
 	if rawStartDate != "" {
-		query.StartDate = &rawStartDate
+		date, err := time.Parse(time.DateOnly, rawStartDate)
+		if err != nil {
+			return domain.GetTransOpt{}, err
+		}
+		opt.Filter.StartDate = &date
 	}
 
+	rawEndDate := r.URL.Query().Get("end_date")
 	if rawEndDate != "" {
-		query.EndDate = &rawEndDate
-	}
-
-	if rawMainCategID != "" {
-		id, err := strconv.ParseInt(rawMainCategID, 10, 64)
+		date, err := time.Parse(time.DateOnly, rawEndDate)
 		if err != nil {
-			logger.Error("strconv.ParseInt failed", "package", packageName, "err", err)
-			return domain.GetQuery{}, err
+			return domain.GetTransOpt{}, err
 		}
-
-		query.MainCategID = &id
+		opt.Filter.EndDate = &date
 	}
 
-	if rawSubCategID != "" {
-		id, err := strconv.ParseInt(rawSubCategID, 10, 64)
-		if err != nil {
-			logger.Error("strconv.ParseInt failed", "package", packageName, "err", err)
-			return domain.GetQuery{}, err
-		}
-
-		query.SubCategID = &id
+	mainCategIDs, err := genMainCategIDs(r)
+	if err != nil {
+		return domain.GetTransOpt{}, err
 	}
+	opt.Filter.MainCategIDs = mainCategIDs
 
-	return query, nil
+	subCategIDs, err := genSubCategIDs(r)
+	if err != nil {
+		return domain.GetTransOpt{}, err
+	}
+	opt.Filter.SubCategIDs = subCategIDs
+
+	return opt, nil
 }
 
 func genGetAccInfoQuery(r *http.Request) domain.GetAccInfoQuery {
@@ -111,6 +107,26 @@ func genMainCategIDs(r *http.Request) ([]int64, error) {
 	}
 
 	strSlice := strings.Split(rawMainCategIDs, ",")
+	intSlice := make([]int64, len(strSlice))
+
+	for i, str := range strSlice {
+		num, err := strconv.Atoi(str)
+		if err != nil {
+			return nil, err
+		}
+		intSlice[i] = int64(num)
+	}
+
+	return intSlice, nil
+}
+
+func genSubCategIDs(r *http.Request) ([]int64, error) {
+	rawSubCategIDs := r.URL.Query().Get("sub_category_ids")
+	if rawSubCategIDs == "" {
+		return nil, nil
+	}
+
+	strSlice := strings.Split(rawSubCategIDs, ",")
 	intSlice := make([]int64, len(strSlice))
 
 	for i, str := range strSlice {

@@ -45,12 +45,17 @@ type AccInfo struct {
 	TotalBalance float64 `json:"total_balance"`
 }
 
-// GetQuery contains query for getting transactions
-type GetQuery struct {
-	StartDate   *string `json:"start_date"`
-	EndDate     *string `json:"end_date"`
-	MainCategID *int64  `json:"main_category_id"`
-	SubCategID  *int64  `json:"sub_category_id"`
+// Filter contains filter for getting transactions
+type Filter struct {
+	StartDate    *time.Time
+	EndDate      *time.Time
+	MainCategIDs []int64
+	SubCategIDs  []int64
+}
+
+// GetTransOpt contains options for getting transactions
+type GetTransOpt struct {
+	Filter Filter
 }
 
 // GetAccInfoQuery contains query for getting accumulated information
