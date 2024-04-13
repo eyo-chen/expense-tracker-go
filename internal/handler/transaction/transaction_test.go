@@ -201,7 +201,7 @@ func getBarChartData_NoError_ReturnData(s *TransactionSuite, desc string) {
 		dateRange,
 		domain.TimeRangeTypeOneWeekDay,
 		domain.TransactionTypeExpense,
-		&mainCategIDs,
+		mainCategIDs,
 		user,
 	).Return(domain.ChartData{
 		Labels:   []string{"Mon", "Tue", "Wed"},
@@ -257,7 +257,7 @@ func getBarChartData_NoMainCategoryIDs_PassNilToService(s *TransactionSuite, des
 		dateRange,
 		domain.TimeRangeTypeOneWeekDay,
 		domain.TransactionTypeExpense,
-		(*[]int64)(nil),
+		[]int64(nil),
 		user,
 	).Return(domain.ChartData{
 		Labels:   []string{"Mon", "Tue", "Wed"},
