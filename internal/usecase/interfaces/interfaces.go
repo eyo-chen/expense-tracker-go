@@ -53,8 +53,8 @@ type TransactionUC interface {
 	// Create creates a transaction.
 	Create(ctx context.Context, trans domain.CreateTransactionInput) error
 
-	// GetAll returns all transactions by query and user id.
-	GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error)
+	// GetAll returns all transactions by query option and user id.
+	GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, error)
 
 	// Update updates a transaction.
 	Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error

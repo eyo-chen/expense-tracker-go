@@ -144,8 +144,8 @@ func getAll_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
-	query := domain.GetQuery{}
-	trans, err := s.transactionModel.GetAll(mockCtx, query, user.ID)
+	opt := domain.GetTransOpt{}
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -158,8 +158,8 @@ func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc strin
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
-	query := domain.GetQuery{}
-	trans, err := s.transactionModel.GetAll(mockCtx, query, user.ID)
+	opt := domain.GetTransOpt{}
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -176,9 +176,8 @@ func getAll_WithManyTransaction_ReturnSuccessfully(s *TransactionSuite, desc str
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1, 2)
 
-	query := domain.GetQuery{}
-
-	trans, err := s.transactionModel.GetAll(mockCtx, query, user.ID)
+	opt := domain.GetTransOpt{}
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -199,11 +198,14 @@ func getAll_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc st
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2, 3)
 
-	startDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
-	getQuery := domain.GetQuery{
-		StartDate: &startDate,
+	startDate := mockTimeNow.AddDate(0, 0, -2)
+
+	opt := domain.GetTransOpt{
+		Filter: domain.Filter{
+			StartDate: &startDate,
+		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -224,11 +226,13 @@ func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc strin
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1)
 
-	endDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
-	getQuery := domain.GetQuery{
-		EndDate: &endDate,
+	endDate := mockTimeNow.AddDate(0, 0, -2)
+	opt := domain.GetTransOpt{
+		Filter: domain.Filter{
+			StartDate: &endDate,
+		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -249,13 +253,15 @@ func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transaction
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2)
 
-	startDate := mockTimeNow.AddDate(0, 0, -2).Format(time.DateOnly)
-	endDate := mockTimeNow.AddDate(0, 0, -1).Format(time.DateOnly)
-	getQuery := domain.GetQuery{
-		StartDate: &startDate,
-		EndDate:   &endDate,
+	startDate := mockTimeNow.AddDate(0, 0, -2)
+	endDate := mockTimeNow.AddDate(0, 0, -1)
+	opt := domain.GetTransOpt{
+		Filter: domain.Filter{
+			StartDate: &startDate,
+			EndDate:   &endDate,
+		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -272,10 +278,12 @@ func getAll_QueryMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
-	getQuery := domain.GetQuery{
-		MainCategID: &mainList[0].ID,
+	opt := domain.GetTransOpt{
+		Filter: domain.Filter{
+			MainCategIDs: []int64{mainList[0].ID},
+		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -292,10 +300,12 @@ func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc s
 
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1)
 
-	getQuery := domain.GetQuery{
-		SubCategID: &subList[1].ID,
+	opt := domain.GetTransOpt{
+		Filter: domain.Filter{
+			SubCategIDs: []int64{subList[1].ID},
+		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, getQuery, user.ID)
+	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }

@@ -72,21 +72,21 @@ func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	query, err := genGetAllQuery(r)
+	opt, err := genGetTransOpt(r)
 	if err != nil {
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
 
 	v := validator.New()
-	if !v.GetTransaction(query) {
+	if !v.GetTransaction(opt) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	transactions, err := t.transaction.GetAll(ctx, query, *user)
+	transactions, err := t.transaction.GetAll(ctx, opt, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -335,7 +335,6 @@ func (t *TransactionHandler) GetLineChartData(w http.ResponseWriter, r *http.Req
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
-
 }
 
 func (t *TransactionHandler) GetMonthlyData(w http.ResponseWriter, r *http.Request) {

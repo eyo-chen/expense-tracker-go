@@ -79,9 +79,9 @@ func (_m *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfo
 	return r0, r1
 }
 
-// GetAll provides a mock function with given fields: ctx, query, user
-func (_m *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error) {
-	ret := _m.Called(ctx, query, user)
+// GetAll provides a mock function with given fields: ctx, opt, user
+func (_m *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, error) {
+	ret := _m.Called(ctx, opt, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
@@ -89,19 +89,19 @@ func (_m *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user
 
 	var r0 []domain.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetQuery, domain.User) ([]domain.Transaction, error)); ok {
-		return rf(ctx, query, user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, domain.User) ([]domain.Transaction, error)); ok {
+		return rf(ctx, opt, user)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetQuery, domain.User) []domain.Transaction); ok {
-		r0 = rf(ctx, query, user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, domain.User) []domain.Transaction); ok {
+		r0 = rf(ctx, opt, user)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, domain.GetQuery, domain.User) error); ok {
-		r1 = rf(ctx, query, user)
+	if rf, ok := ret.Get(1).(func(context.Context, domain.GetTransOpt, domain.User) error); ok {
+		r1 = rf(ctx, opt, user)
 	} else {
 		r1 = ret.Error(1)
 	}

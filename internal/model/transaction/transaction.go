@@ -48,9 +48,9 @@ func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransa
 	return nil
 }
 
-func (t *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, userID int64) ([]domain.Transaction, error) {
-	qStmt := getAllQStmt(query)
-	args := getAllArgs(query, userID)
+func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, error) {
+	qStmt := getAllQStmt(opt)
+	args := getAllArgs(opt, userID)
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {

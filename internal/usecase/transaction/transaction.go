@@ -65,8 +65,8 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 	return nil
 }
 
-func (t *TransactionUC) GetAll(ctx context.Context, query domain.GetQuery, user domain.User) ([]domain.Transaction, error) {
-	return t.Transaction.GetAll(ctx, query, user.ID)
+func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, error) {
+	return t.Transaction.GetAll(ctx, opt, user.ID)
 }
 
 func (t *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error {

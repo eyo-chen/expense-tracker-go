@@ -2,7 +2,7 @@ package transaction
 
 import "github.com/OYE0303/expense-tracker-go/internal/domain"
 
-func getAllQStmt(query domain.GetQuery) string {
+func getAllQStmt(opt domain.GetTransOpt) string {
 	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
 						FROM transactions AS t
 						INNER JOIN main_categories AS mc 
@@ -13,51 +13,63 @@ func getAllQStmt(query domain.GetQuery) string {
 						ON mc.icon_id = i.id
 						WHERE t.user_id = ?`
 
-	if query.StartDate != nil && query.EndDate != nil {
+	if opt.Filter.StartDate != nil && opt.Filter.EndDate != nil {
 		qStmt += " AND date BETWEEN ? AND ?"
 	}
 
-	if query.StartDate != nil {
+	if opt.Filter.StartDate != nil {
 		qStmt += " AND date >= ?"
 	}
 
-	if query.EndDate != nil {
+	if opt.Filter.EndDate != nil {
 		qStmt += " AND date <= ?"
 	}
 
-	if query.MainCategID != nil {
-		qStmt += " AND mc.id = ?"
+	if opt.Filter.MainCategIDs != nil {
+		qStmt += " AND mc.id IN (?"
+		for i := 1; i < len(opt.Filter.MainCategIDs); i++ {
+			qStmt += ", ?"
+		}
+		qStmt += ")"
 	}
 
-	if query.SubCategID != nil {
-		qStmt += " AND sc.id = ?"
+	if opt.Filter.SubCategIDs != nil {
+		qStmt += " AND sc.id IN (?"
+		for i := 1; i < len(opt.Filter.SubCategIDs); i++ {
+			qStmt += ", ?"
+		}
+		qStmt += ")"
 	}
 
 	return qStmt
 }
 
-func getAllArgs(query domain.GetQuery, userID int64) []interface{} {
+func getAllArgs(opt domain.GetTransOpt, userID int64) []interface{} {
 	var args []interface{}
 	args = append(args, userID)
 
-	if query.StartDate != nil && query.EndDate != nil {
-		args = append(args, *query.StartDate, *query.EndDate)
+	if opt.Filter.StartDate != nil && opt.Filter.EndDate != nil {
+		args = append(args, *opt.Filter.StartDate, *opt.Filter.EndDate)
 	}
 
-	if query.StartDate != nil {
-		args = append(args, *query.StartDate)
+	if opt.Filter.StartDate != nil {
+		args = append(args, *opt.Filter.StartDate)
 	}
 
-	if query.EndDate != nil {
-		args = append(args, *query.EndDate)
+	if opt.Filter.EndDate != nil {
+		args = append(args, *opt.Filter.EndDate)
 	}
 
-	if query.MainCategID != nil {
-		args = append(args, *query.MainCategID)
+	if opt.Filter.MainCategIDs != nil {
+		for _, id := range opt.Filter.MainCategIDs {
+			args = append(args, id)
+		}
 	}
 
-	if query.SubCategID != nil {
-		args = append(args, *query.SubCategID)
+	if opt.Filter.SubCategIDs != nil {
+		for _, id := range opt.Filter.SubCategIDs {
+			args = append(args, id)
+		}
 	}
 
 	return args

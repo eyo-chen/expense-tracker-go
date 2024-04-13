@@ -53,6 +53,19 @@ type GetQuery struct {
 	SubCategID  *int64  `json:"sub_category_id"`
 }
 
+// Filter contains filter for getting transactions
+type Filter struct {
+	StartDate    *time.Time
+	EndDate      *time.Time
+	MainCategIDs []int64
+	SubCategIDs  []int64
+}
+
+// GetTransOpt contains options for getting transactions
+type GetTransOpt struct {
+	Filter Filter
+}
+
 // GetAccInfoQuery contains query for getting accumulated information
 type GetAccInfoQuery struct {
 	StartDate *string `json:"start_date"`

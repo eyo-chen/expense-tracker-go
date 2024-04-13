@@ -80,7 +80,7 @@ func (_m *TransactionModel) GetAccInfo(ctx context.Context, query domain.GetAccI
 }
 
 // GetAll provides a mock function with given fields: ctx, query, userID
-func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, userID int64) ([]domain.Transaction, error) {
+func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetTransOpt, userID int64) ([]domain.Transaction, error) {
 	ret := _m.Called(ctx, query, userID)
 
 	if len(ret) == 0 {
@@ -89,10 +89,10 @@ func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, u
 
 	var r0 []domain.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetQuery, int64) ([]domain.Transaction, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, int64) ([]domain.Transaction, error)); ok {
 		return rf(ctx, query, userID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetQuery, int64) []domain.Transaction); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, int64) []domain.Transaction); ok {
 		r0 = rf(ctx, query, userID)
 	} else {
 		if ret.Get(0) != nil {
@@ -100,7 +100,7 @@ func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetQuery, u
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, domain.GetQuery, int64) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.GetTransOpt, int64) error); ok {
 		r1 = rf(ctx, query, userID)
 	} else {
 		r1 = ret.Error(1)
