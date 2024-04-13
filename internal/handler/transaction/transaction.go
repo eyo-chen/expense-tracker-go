@@ -302,6 +302,42 @@ func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+func (t *TransactionHandler) GetLineChartData(w http.ResponseWriter, r *http.Request) {
+	dateRange, err := genChartDateRange(r)
+	if err != nil {
+		logger.Error("genChartDateRange failed", "package", packageName, "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	rawTimeRangeType := r.URL.Query().Get("time_range")
+	timeRangeType := domain.CvtToTimeRangeType(rawTimeRangeType)
+
+	v := validator.New()
+	if !v.GetLineChartData(dateRange, timeRangeType) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	data, err := t.transaction.GetLineChartData(r.Context(), dateRange, timeRangeType, *user)
+	if err != nil {
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"chart_data": data,
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+}
+
 func (t *TransactionHandler) GetMonthlyData(w http.ResponseWriter, r *http.Request) {
 	startDate, endDate, err := genGetMonthlyDataRange(r)
 	if err != nil {
