@@ -17,10 +17,9 @@ import (
 )
 
 var (
-	mockCtx       = context.Background()
-	mockLoc, _    = time.LoadLocation("")
-	mockTimeNow   = time.Unix(1629446406, 0).Truncate(24 * time.Hour).In(mockLoc)
-	weekDayFormat = "Mon"
+	mockCtx     = context.Background()
+	mockLoc, _  = time.LoadLocation("")
+	mockTimeNow = time.Unix(1629446406, 0).Truncate(24 * time.Hour).In(mockLoc)
 )
 
 type TransactionSuite struct {
