@@ -39,11 +39,11 @@ func genDailyChartData(dateToData domain.DateToChartData, timeRangeType domain.T
 		labels = append(labels, label)
 
 		date := t.Format(time.DateOnly)
-		// if there is no data for the weekday, append 0
-		if _, ok := dateToData[date]; !ok {
-			datasets = append(datasets, 0)
-		} else {
+		if _, ok := dateToData[date]; ok {
 			datasets = append(datasets, dateToData[date])
+		} else {
+			// if there is no data for the weekday, append 0
+			datasets = append(datasets, 0)
 		}
 	}
 
@@ -102,10 +102,10 @@ func genMonthlyChartData(dateToData domain.DateToChartData, timeRangeType domain
 		labels = append(labels, shortMonth)
 
 		// if there is no data for the weekday, append 0
-		if _, ok := dateToData[date]; !ok {
-			datasets = append(datasets, 0)
-		} else {
+		if _, ok := dateToData[date]; ok {
 			datasets = append(datasets, dateToData[date])
+		} else {
+			datasets = append(datasets, 0)
 		}
 	}
 
@@ -128,10 +128,10 @@ func genLineChartData(dateToDate domain.DateToChartData, timeRangeType domain.Ti
 }
 
 func genDailyLineChartData(dateToData domain.DateToChartData, timeRangeType domain.TimeRangeType, start, end time.Time) domain.ChartData {
+	var prevAmount float64
 	labels := make([]string, 0, timeRangeType.GetVal())
 	datasets := make([]float64, 0, timeRangeType.GetVal())
 
-	accAmount := 0.0
 	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 0, 1) {
 		var label string
 		if timeRangeType == domain.TimeRangeTypeOneWeekDay {
@@ -139,15 +139,16 @@ func genDailyLineChartData(dateToData domain.DateToChartData, timeRangeType doma
 		} else {
 			label = t.Format(dayFormat)
 		}
-
 		labels = append(labels, label)
 
 		date := t.Format(time.DateOnly)
 		if _, ok := dateToData[date]; ok {
-			accAmount += dateToData[date]
+			datasets = append(datasets, dateToData[date])
+			prevAmount = dateToData[date]
+		} else {
+			// if there is no data for the weekday, append the previous amount
+			datasets = append(datasets, prevAmount)
 		}
-
-		datasets = append(datasets, accAmount)
 	}
 
 	return domain.ChartData{
@@ -156,8 +157,34 @@ func genDailyLineChartData(dateToData domain.DateToChartData, timeRangeType doma
 	}
 }
 
+/*
+Note that the data for line chart is already accumulated when querying from the database
+So we don't need to accumulate the data again
+In three months line chart, we only need to
+1. Find the correct date as the label (every 3 days)
+2. Find the data for the date
+
+How to find the correct data for the date?
+For every found data, update the previous amount
+When it's time to append the data to the datasets, append the previous amount
+
+For example, the dateToData is
+
+	{
+		"2024-03-01": 100,
+		"2024-03-02": 200,
+		"2024-03-03": 300,
+		"2024-03-04": 400,
+		"2024-03-10": 500,
+	}
+
+For 03/01, the data is 100
+For 03/04, the data is 400
+For 03/07, the data is 400
+For 03/10, the data is 500
+*/
 func genThreeMonthsLineChartData(dateToData domain.DateToChartData, timeRangeType domain.TimeRangeType, start, end time.Time) domain.ChartData {
-	var accAmount float64
+	var prevAmount float64
 	var index int
 	labels := make([]string, 0, timeRangeType.GetVal())
 	datasets := make([]float64, 0, timeRangeType.GetVal())
@@ -166,12 +193,12 @@ func genThreeMonthsLineChartData(dateToData domain.DateToChartData, timeRangeTyp
 		date := t.Format(time.DateOnly)
 
 		if _, ok := dateToData[date]; ok {
-			accAmount += dateToData[date]
+			prevAmount = dateToData[date] // update the previous amount when there is data
 		}
 
 		if index%3 == 0 {
 			labels = append(labels, t.Format(dayFormat))
-			datasets = append(datasets, accAmount)
+			datasets = append(datasets, prevAmount)
 		}
 
 		index++
@@ -184,10 +211,10 @@ func genThreeMonthsLineChartData(dateToData domain.DateToChartData, timeRangeTyp
 }
 
 func genMonthlyLineChartData(dateToData domain.DateToChartData, timeRangeType domain.TimeRangeType, start, end time.Time) domain.ChartData {
+	var prevAmount float64
 	labels := make([]string, 0, timeRangeType.GetVal())
 	datasets := make([]float64, 0, timeRangeType.GetVal())
 
-	accAmount := 0.0
 	for t := start; t.Before(end) || t.Equal(end); t = t.AddDate(0, 1, 0) {
 		/*
 			Have to use the format "YYYY-MM"
@@ -205,10 +232,12 @@ func genMonthlyLineChartData(dateToData domain.DateToChartData, timeRangeType do
 		labels = append(labels, shortMonth)
 
 		if _, ok := dateToData[date]; ok {
-			accAmount += dateToData[date]
+			datasets = append(datasets, dateToData[date])
+			prevAmount = dateToData[date]
+		} else {
+			// if there is no data for the weekday, append the previous amount
+			datasets = append(datasets, prevAmount)
 		}
-
-		datasets = append(datasets, accAmount)
 	}
 
 	return domain.ChartData{
