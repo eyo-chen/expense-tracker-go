@@ -229,7 +229,7 @@ func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc strin
 	endDate := mockTimeNow.AddDate(0, 0, -2)
 	opt := domain.GetTransOpt{
 		Filter: domain.Filter{
-			StartDate: &endDate,
+			EndDate: &endDate,
 		},
 	}
 	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
