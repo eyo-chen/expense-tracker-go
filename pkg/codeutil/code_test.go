@@ -160,12 +160,15 @@ func encodeCursor_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc stri
 
 	// prepare expected result
 	cursorKey := "ID:123,MainCategID:456"
-	encodedString := base64.StdEncoding.EncodeToString([]byte(cursorKey))
 
 	// action
 	result, err := codeutil.EncodeCursor(cursorMap, nil)
 	s.Require().NoError(err, desc)
-	s.Require().Equal(encodedString, result, desc)
+
+	// check decoded string
+	decodedBytes, err := base64.StdEncoding.DecodeString(result)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(cursorKey, string(decodedBytes), desc)
 }
 
 func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, desc string) {
@@ -186,10 +189,13 @@ func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, d
 
 	// prepare expected result
 	cursorKey := "ID:123,MainCategID:456new"
-	encodedString := base64.StdEncoding.EncodeToString([]byte(cursorKey))
 
 	// action
 	result, err := codeutil.EncodeCursor(cursorMap, fieldSource)
 	s.Require().NoError(err, desc)
-	s.Require().Equal(encodedString, result, desc)
+
+	// check encoded string
+	decodedBytes, err := base64.StdEncoding.DecodeString(result)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(cursorKey, string(decodedBytes), desc)
 }
