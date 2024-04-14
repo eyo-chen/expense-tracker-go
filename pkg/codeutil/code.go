@@ -15,9 +15,6 @@ var (
 	// ErrInvalidCursor is an error for invalid cursor
 	ErrInvalidCursor = errors.New("invalid cursor")
 
-	// ErrEmptyCursor is an error for empty cursor
-	ErrEmptyCursor = errors.New("empty cursor")
-
 	// ErrInvalidFormatCursor is an error for invalid format cursor
 	ErrInvalidFormatCursor = errors.New("invalid format cursor")
 )
@@ -37,7 +34,7 @@ func DecodeCursor(encodedString string) (map[string]string, error) {
 	decodedString := string(decodedBytes)
 	pairs := strings.Split(decodedString, ",")
 	if len(pairs) == 0 {
-		return nil, ErrEmptyCursor
+		return nil, ErrInvalidFormatCursor
 	}
 
 	result := map[string]string{}
