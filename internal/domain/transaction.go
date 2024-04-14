@@ -53,9 +53,16 @@ type Filter struct {
 	SubCategIDs  []int64
 }
 
+// Cursor contains next key for pagination
+type Cursor struct {
+	NextKey int64 `json:"next_key"`
+	Size    int   `json:"size"`
+}
+
 // GetTransOpt contains options for getting transactions
 type GetTransOpt struct {
-	Filter Filter
+	Filter Filter `json:"filter"`
+	Cursor Cursor `json:"cursor"`
 }
 
 // GetAccInfoQuery contains query for getting accumulated information

@@ -86,7 +86,7 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	transactions, err := t.transaction.GetAll(ctx, opt, *user)
+	transactions, cursor, err := t.transaction.GetAll(ctx, opt, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -95,6 +95,7 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	transResp := cvtToGetTransactionResp(transactions)
 	respData := map[string]interface{}{
 		"transactions": transResp.Transactions,
+		"cursor":       cursor,
 	}
 
 	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {

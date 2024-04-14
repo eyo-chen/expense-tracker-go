@@ -41,6 +41,14 @@ func getAllQStmt(opt domain.GetTransOpt) string {
 		qStmt += ")"
 	}
 
+	if opt.Cursor.NextKey != 0 {
+		qStmt += " AND t.id < ?"
+	}
+
+	if opt.Cursor.Size != 0 {
+		qStmt += " ORDER BY t.id DESC LIMIT ?"
+	}
+
 	return qStmt
 }
 
@@ -70,6 +78,14 @@ func getAllArgs(opt domain.GetTransOpt, userID int64) []interface{} {
 		for _, id := range opt.Filter.SubCategIDs {
 			args = append(args, id)
 		}
+	}
+
+	if opt.Cursor.NextKey != 0 {
+		args = append(args, opt.Cursor.NextKey)
+	}
+
+	if opt.Cursor.Size != 0 {
+		args = append(args, opt.Cursor.Size)
 	}
 
 	return args

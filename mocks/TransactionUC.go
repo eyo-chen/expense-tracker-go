@@ -80,7 +80,7 @@ func (_m *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfo
 }
 
 // GetAll provides a mock function with given fields: ctx, opt, user
-func (_m *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, error) {
+func (_m *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, domain.Cursor, error) {
 	ret := _m.Called(ctx, opt, user)
 
 	if len(ret) == 0 {
@@ -88,8 +88,9 @@ func (_m *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, use
 	}
 
 	var r0 []domain.Transaction
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, domain.User) ([]domain.Transaction, error)); ok {
+	var r1 domain.Cursor
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, domain.User) ([]domain.Transaction, domain.Cursor, error)); ok {
 		return rf(ctx, opt, user)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, domain.User) []domain.Transaction); ok {
@@ -100,13 +101,19 @@ func (_m *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, use
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, domain.GetTransOpt, domain.User) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.GetTransOpt, domain.User) domain.Cursor); ok {
 		r1 = rf(ctx, opt, user)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(domain.Cursor)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, domain.GetTransOpt, domain.User) error); ok {
+		r2 = rf(ctx, opt, user)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // GetBarChartData provides a mock function with given fields: ctx, chartDateRange, timeRangeType, transactionType, mainCategIDs, user

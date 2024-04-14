@@ -43,6 +43,24 @@ func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
 	}
 	opt.Filter.SubCategIDs = subCategIDs
 
+	rawNextKey := r.URL.Query().Get("next_key")
+	if rawNextKey != "" {
+		nextKey, err := strconv.Atoi(rawNextKey)
+		if err != nil {
+			return domain.GetTransOpt{}, err
+		}
+		opt.Cursor.NextKey = int64(nextKey)
+	}
+
+	rawSize := r.URL.Query().Get("size")
+	if rawSize != "" {
+		size, err := strconv.Atoi(rawSize)
+		if err != nil {
+			return domain.GetTransOpt{}, err
+		}
+		opt.Cursor.Size = size
+	}
+
 	return opt, nil
 }
 
