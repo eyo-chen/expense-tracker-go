@@ -2,6 +2,7 @@ package codeutil_test
 
 import (
 	"encoding/base64"
+	"strings"
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
@@ -151,6 +152,11 @@ func encodeCursor_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 	s.Require().Equal(codeutil.ErrFieldNotFound, err, desc)
 }
 
+// Because the output of the encoded string is random, we can't check the exact value
+// For example, the encoded string can be "SUQ6MTIzLE1haW5DYWdlZElEOjQ1Ng==" or "SUQ6MTIzLE1haW5DYWdlZElEOjewdwe=="
+// Same thing for the output of the decoded string, the output value is random
+// For example, the decoded string can be "ID:123,MainCategID:456" or "MainCategID:456,ID:123"
+// The only way we can check is to check the number of pairs and the value of the pairs respectively (using for loop)
 func encodeCursor_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc string) {
 	// prepare cursor map
 	cursorMap := map[string]string{
@@ -159,7 +165,10 @@ func encodeCursor_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc stri
 	}
 
 	// prepare expected result
-	cursorKey := "ID:123,MainCategID:456"
+	expectedCursorMap := map[string]string{
+		"ID":          "123",
+		"MainCategID": "456",
+	}
 
 	// action
 	result, err := codeutil.EncodeCursor(cursorMap, nil)
@@ -168,7 +177,21 @@ func encodeCursor_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc stri
 	// check decoded string
 	decodedBytes, err := base64.StdEncoding.DecodeString(result)
 	s.Require().NoError(err, desc)
-	s.Require().Equal(cursorKey, string(decodedBytes), desc)
+
+	// using for loop to check the value of the pairs
+	decodedString := string(decodedBytes)
+	pairs := strings.Split(decodedString, ",")
+	s.Require().Equal(2, len(pairs), desc)
+	for _, pair := range pairs {
+		keyValue := strings.Split(pair, ":")
+		s.Require().Equal(2, len(keyValue), desc)
+
+		key := strings.TrimSpace(keyValue[0])
+		value := strings.TrimSpace(keyValue[1])
+		v, ok := expectedCursorMap[key]
+		s.Require().True(ok, desc)
+		s.Require().Equal(v, value, desc)
+	}
 }
 
 func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, desc string) {
@@ -188,7 +211,10 @@ func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, d
 	}
 
 	// prepare expected result
-	cursorKey := "ID:123,MainCategID:456new"
+	expectedCursorMap := map[string]string{
+		"ID":          "123",
+		"MainCategID": "456new",
+	}
 
 	// action
 	result, err := codeutil.EncodeCursor(cursorMap, fieldSource)
@@ -197,5 +223,19 @@ func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, d
 	// check encoded string
 	decodedBytes, err := base64.StdEncoding.DecodeString(result)
 	s.Require().NoError(err, desc)
-	s.Require().Equal(cursorKey, string(decodedBytes), desc)
+
+	// using for loop to check the value of the pairs
+	decodedString := string(decodedBytes)
+	pairs := strings.Split(decodedString, ",")
+	s.Require().Equal(2, len(pairs), desc)
+	for _, pair := range pairs {
+		keyValue := strings.Split(pair, ":")
+		s.Require().Equal(2, len(keyValue), desc)
+
+		key := strings.TrimSpace(keyValue[0])
+		value := strings.TrimSpace(keyValue[1])
+		v, ok := expectedCursorMap[key]
+		s.Require().True(ok, desc)
+		s.Require().Equal(v, value, desc)
+	}
 }
