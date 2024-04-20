@@ -10,6 +10,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
 	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
+	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
@@ -49,7 +50,17 @@ func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransa
 }
 
 func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, error) {
-	qStmt := getAllQStmt(opt)
+	if opt.Cursor.NextKey != "" {
+		decodedNextKey, err := codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
+		if err != nil {
+			logger.Error("codeutil.DecodeCursor failed", "package", PackageName, "err", err)
+			return nil, err
+		}
+
+		opt.Cursor.DecodedNextKey = decodedNextKey
+	}
+
+	qStmt := getAllQStmt(opt, Transaction{})
 	args := getAllArgs(opt, userID)
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, args...)

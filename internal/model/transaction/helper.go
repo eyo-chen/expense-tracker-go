@@ -1,8 +1,15 @@
 package transaction
 
-import "github.com/OYE0303/expense-tracker-go/internal/domain"
+import (
+	"bytes"
+	"fmt"
+	"reflect"
+	"unicode"
 
-func getAllQStmt(opt domain.GetTransOpt) string {
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
+)
+
+func getAllQStmt(opt domain.GetTransOpt, t Transaction) string {
 	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
 						FROM transactions AS t
 						INNER JOIN main_categories AS mc 
@@ -41,8 +48,11 @@ func getAllQStmt(opt domain.GetTransOpt) string {
 		qStmt += ")"
 	}
 
-	if opt.Cursor.NextKey != 0 {
-		qStmt += " AND t.id < ?"
+	if len(opt.Cursor.DecodedNextKey) != 0 {
+		for key := range opt.Cursor.DecodedNextKey {
+			s := fmt.Sprintf(" AND t.%s < ?", genDBFieldNames(key, t))
+			qStmt += s
+		}
 	}
 
 	if opt.Cursor.Size != 0 {
@@ -50,6 +60,46 @@ func getAllQStmt(opt domain.GetTransOpt) string {
 	}
 
 	return qStmt
+}
+
+// genDBFieldNames generates db field names from struct field names
+// e.g. "UserID" -> "user_id", "MainCategID" -> "main_category_id"
+func genDBFieldNames(key string, t Transaction) string {
+	val := reflect.ValueOf(t)
+
+	for i := 0; i < val.NumField(); i++ {
+		fieldName := val.Type().Field(i).Name
+		if fieldName != key {
+			continue
+		}
+
+		t := val.Type().Field(i).Tag.Get("esql")
+		fmt.Println("t: ", t)
+		if t == "" {
+			return camelToSnake(key)
+		}
+
+		return t
+	}
+
+	return ""
+}
+
+func camelToSnake(input string) string {
+	var buf bytes.Buffer
+
+	for i, r := range input {
+		if unicode.IsUpper(r) {
+			if i > 0 && unicode.IsLower(rune(input[i-1])) {
+				buf.WriteRune('_')
+			}
+			buf.WriteRune(unicode.ToLower(r))
+		} else {
+			buf.WriteRune(r)
+		}
+	}
+
+	return buf.String()
 }
 
 func getAllArgs(opt domain.GetTransOpt, userID int64) []interface{} {
@@ -80,8 +130,10 @@ func getAllArgs(opt domain.GetTransOpt, userID int64) []interface{} {
 		}
 	}
 
-	if opt.Cursor.NextKey != 0 {
-		args = append(args, opt.Cursor.NextKey)
+	if len(opt.Cursor.DecodedNextKey) != 0 {
+		for _, v := range opt.Cursor.DecodedNextKey {
+			args = append(args, v)
+		}
 	}
 
 	if opt.Cursor.Size != 0 {

@@ -55,8 +55,9 @@ type Filter struct {
 
 // Cursor contains next key for pagination
 type Cursor struct {
-	NextKey int64 `json:"next_key"`
-	Size    int   `json:"size"`
+	NextKey        string            `json:"next_key"`
+	Size           int               `json:"size"`
+	DecodedNextKey map[string]string `json:"-"`
 }
 
 // GetTransOpt contains options for getting transactions

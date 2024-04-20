@@ -6,6 +6,7 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
+	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
@@ -73,10 +74,24 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 
 	var cursor domain.Cursor
 	if len(trans) == opt.Cursor.Size {
-		cursor.NextKey = trans[len(trans)-1].ID
 		cursor.Size = opt.Cursor.Size
+
+		// if it's the first page, we need to initialize the nextKey
+		if len(opt.Cursor.DecodedNextKey) == 0 {
+			opt.Cursor.DecodedNextKey = map[string]string{
+				"ID": "0",
+			}
+		}
+
+		// encode the nextKey to string
+		encodedNextKey, err := codeutil.EncodeCursor(opt.Cursor.DecodedNextKey, trans[len(trans)-1])
+		if err != nil {
+			return nil, domain.Cursor{}, err
+		}
+
+		cursor.NextKey = encodedNextKey
 	} else {
-		cursor.NextKey = 0
+		cursor.NextKey = ""
 		cursor.Size = 0
 	}
 

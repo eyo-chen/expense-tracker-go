@@ -3,8 +3,10 @@ package codeutil
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
@@ -81,7 +83,7 @@ func EncodeCursor(cursor map[string]string, fieldSource interface{}) (string, er
 		if !ok {
 			return "", ErrFieldNotFound
 		}
-		pairs = append(pairs, key+":"+v.(string))
+		pairs = append(pairs, key+":"+cvtToString(v))
 	}
 
 	encodedString := base64.StdEncoding.EncodeToString([]byte(strings.Join(pairs, ",")))
@@ -96,4 +98,25 @@ func getFieldValue(val interface{}, fieldName string) (interface{}, bool) {
 	}
 
 	return field.Interface(), true
+}
+
+// cvtToString converts any value to string
+// e.g. 1 -> "1", 1.1 -> "1.1", true -> "true"
+func cvtToString(v interface{}) string {
+	switch val := v.(type) {
+	case string:
+		return val
+	case int, int8, int16, int32, int64:
+		return fmt.Sprintf("%d", val)
+	case uint, uint8, uint16, uint32:
+		return fmt.Sprintf("%d", val)
+	case float32, float64:
+		return fmt.Sprintf("%f", val)
+	case bool:
+		return fmt.Sprintf("%t", val)
+	case time.Time:
+		return val.Format(time.RFC3339)
+	default:
+		return ""
+	}
 }
