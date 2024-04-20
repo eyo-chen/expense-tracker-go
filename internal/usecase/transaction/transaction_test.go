@@ -118,7 +118,7 @@ func getAll_WithDecodedNextKey_ReturnCorrectCursor(s *TransactionSuite, desc str
 	mockDecodedNextKey := domain.DecodedNextKey{
 		"ID": "1",
 	}
-	mockOpt := domain.GetTransOpt{Cursor: domain.Cursor{Size: 1}}
+	mockOpt := domain.GetTransOpt{Cursor: domain.Cursor{Size: 1, NextKey: "eyJJRCI6IjEifQ=="}}
 	mockUser := domain.User{ID: 1}
 	mockTrans := []domain.Transaction{{ID: 2, UserID: 1}}
 
