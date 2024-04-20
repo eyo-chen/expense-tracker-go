@@ -82,7 +82,6 @@ func genDBFieldNames(key string, t Transaction) string {
 		}
 
 		t := val.Type().Field(i).Tag.Get("esql")
-		fmt.Println("t: ", t)
 		if t == "" {
 			return camelToSnake(key)
 		}
