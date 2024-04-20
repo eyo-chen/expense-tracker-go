@@ -49,6 +49,8 @@ type AccInfo struct {
 type Filter struct {
 	StartDate    *time.Time
 	EndDate      *time.Time
+	MinPrice     *float64
+	MaxPrice     *float64
 	MainCategIDs []int64
 	SubCategIDs  []int64
 }
