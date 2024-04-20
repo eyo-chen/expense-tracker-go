@@ -144,7 +144,7 @@ func getAll_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
 	opt := domain.GetTransOpt{}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -158,7 +158,7 @@ func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc strin
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
 	opt := domain.GetTransOpt{}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -176,7 +176,7 @@ func getAll_WithManyTransaction_ReturnSuccessfully(s *TransactionSuite, desc str
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1, 2)
 
 	opt := domain.GetTransOpt{}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -204,7 +204,7 @@ func getAll_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc st
 			StartDate: &startDate,
 		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -231,7 +231,7 @@ func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc strin
 			EndDate: &endDate,
 		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -260,7 +260,7 @@ func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transaction
 			EndDate:   &endDate,
 		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -282,7 +282,7 @@ func getAll_QueryMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc
 			MainCategIDs: []int64{mainList[0].ID},
 		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -304,7 +304,7 @@ func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc s
 			SubCategIDs: []int64{subList[1].ID},
 		},
 	}
-	trans, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
