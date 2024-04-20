@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -87,7 +88,7 @@ func decodeCursor_ValidEncodedString_ReturnCursorMap(s *CodeUtilSuite, desc stri
 	encodedString := base64.StdEncoding.EncodeToString([]byte(cursorKey))
 
 	// prepare expected result
-	cursorMap := map[string]string{
+	cursorMap := domain.DecodedNextKey{
 		"ID":          "123",
 		"MainCategID": "456",
 	}
@@ -110,7 +111,7 @@ func decodeCursor_WithCorrectSourceField_ReturnCursorMap(s *CodeUtilSuite, desc 
 	}{}
 
 	// prepare expected result
-	cursorMap := map[string]string{
+	cursorMap := domain.DecodedNextKey{
 		"ID":          "123",
 		"MainCategID": "456",
 	}
@@ -136,7 +137,7 @@ func (s *CodeUtilSuite) TestEncodeCursor() {
 
 func encodeCursor_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 	// prepare cursor map
-	cursorMap := map[string]string{
+	cursorMap := domain.DecodedNextKey{
 		"ID":          "123",
 		"MainCategID": "456",
 	}
@@ -160,13 +161,13 @@ func encodeCursor_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 // The only way we can check is to check the number of pairs and the value of the pairs respectively (using for loop)
 func encodeCursor_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc string) {
 	// prepare cursor map
-	cursorMap := map[string]string{
+	cursorMap := domain.DecodedNextKey{
 		"ID":          "123",
 		"MainCategID": "456",
 	}
 
 	// prepare expected result
-	expectedCursorMap := map[string]string{
+	expectedCursorMap := domain.DecodedNextKey{
 		"ID":          "123",
 		"MainCategID": "456",
 	}
@@ -197,7 +198,7 @@ func encodeCursor_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc stri
 
 func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, desc string) {
 	// prepare cursor map
-	cursorMap := map[string]string{
+	cursorMap := domain.DecodedNextKey{
 		"ID":          "123",
 		"MainCategID": "456",
 	}
@@ -212,7 +213,7 @@ func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, d
 	}
 
 	// prepare expected result
-	expectedCursorMap := map[string]string{
+	expectedCursorMap := domain.DecodedNextKey{
 		"ID":          "123",
 		"MainCategID": "456new",
 	}

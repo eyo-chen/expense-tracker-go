@@ -55,9 +55,13 @@ type Filter struct {
 
 // Cursor contains next key for pagination
 type Cursor struct {
-	NextKey int64 `json:"next_key"`
-	Size    int   `json:"size"`
+	NextKey string `json:"next_key"`
+	Size    int    `json:"size"`
 }
+
+// DecodedNextKey contains decoded next key.
+// e.g. {"date": "2021-01-01", "id": "1"}
+type DecodedNextKey map[string]string
 
 // GetTransOpt contains options for getting transactions
 type GetTransOpt struct {

@@ -80,7 +80,7 @@ func (_m *TransactionModel) GetAccInfo(ctx context.Context, query domain.GetAccI
 }
 
 // GetAll provides a mock function with given fields: ctx, query, userID
-func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetTransOpt, userID int64) ([]domain.Transaction, error) {
+func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKey, error) {
 	ret := _m.Called(ctx, query, userID)
 
 	if len(ret) == 0 {
@@ -88,8 +88,9 @@ func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetTransOpt
 	}
 
 	var r0 []domain.Transaction
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, int64) ([]domain.Transaction, error)); ok {
+	var r1 domain.DecodedNextKey
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, int64) ([]domain.Transaction, domain.DecodedNextKey, error)); ok {
 		return rf(ctx, query, userID)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, domain.GetTransOpt, int64) []domain.Transaction); ok {
@@ -100,13 +101,21 @@ func (_m *TransactionModel) GetAll(ctx context.Context, query domain.GetTransOpt
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, domain.GetTransOpt, int64) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, domain.GetTransOpt, int64) domain.DecodedNextKey); ok {
 		r1 = rf(ctx, query, userID)
 	} else {
-		r1 = ret.Error(1)
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(domain.DecodedNextKey)
+		}
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, domain.GetTransOpt, int64) error); ok {
+		r2 = rf(ctx, query, userID)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // GetByIDAndUserID provides a mock function with given fields: ctx, id, userID

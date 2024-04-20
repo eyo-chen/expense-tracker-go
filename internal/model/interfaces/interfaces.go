@@ -69,7 +69,7 @@ type TransactionModel interface {
 	Create(ctx context.Context, trans domain.CreateTransactionInput) error
 
 	// GetAll returns all transactions by user id and query option.
-	GetAll(ctx context.Context, query domain.GetTransOpt, userID int64) ([]domain.Transaction, error)
+	GetAll(ctx context.Context, query domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKey, error)
 
 	// Update updates a transaction.
 	Update(ctx context.Context, trans domain.UpdateTransactionInput) error

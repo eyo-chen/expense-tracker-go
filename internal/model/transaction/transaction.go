@@ -10,6 +10,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
 	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
+	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
@@ -48,14 +49,24 @@ func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransa
 	return nil
 }
 
-func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, error) {
-	qStmt := getAllQStmt(opt)
-	args := getAllArgs(opt, userID)
+func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKey, error) {
+	var decodedNextKey domain.DecodedNextKey
+	if opt.Cursor.NextKey != "" {
+		var err error
+		decodedNextKey, err = codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
+		if err != nil {
+			logger.Error("codeutil.DecodeCursor failed", "package", PackageName, "err", err)
+			return nil, nil, err
+		}
+	}
+
+	qStmt := getAllQStmt(opt, decodedNextKey, Transaction{})
+	args := getAllArgs(opt, decodedNextKey, userID)
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
-		return nil, err
+		return nil, nil, err
 	}
 	defer rows.Close()
 
@@ -68,14 +79,14 @@ func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, u
 
 		if err := rows.Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.Price, &trans.Note, &trans.Date, &mainCateg.ID, &mainCateg.Name, &mainCateg.Type, &subCateg.ID, &subCateg.Name, &icon.ID, &icon.URL); err != nil {
 			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
-			return nil, err
+			return nil, nil, err
 		}
 
 		transactions = append(transactions, cvtToDomainTransaction(trans, mainCateg, subCateg, icon))
 	}
 	defer rows.Close()
 
-	return transactions, nil
+	return transactions, decodedNextKey, nil
 }
 
 func (t *TransactionModel) Update(ctx context.Context, trans domain.UpdateTransactionInput) error {
