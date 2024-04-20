@@ -3,12 +3,14 @@ package transaction_test
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/transaction"
+	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
@@ -128,6 +130,7 @@ func (s *TransactionSuite) TestGetAll() {
 		"when query start and end date, return data between them":        getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate,
 		"when query main category id, return data with main category id": getAll_QueryMainCategID_ReturnDataWithMainCategID,
 		"when query sub category id, return data with sub category id":   getAll_QuerySubCategID_ReturnDataWithSubCategID,
+		"when with next key cursor, return data after cursor key":        getAll_WithNextKeyCursor_ReturnDataAfterCursorKey,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -144,9 +147,10 @@ func getAll_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
 	opt := domain.GetTransOpt{}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
 }
 
 func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
@@ -158,9 +162,10 @@ func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc strin
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
 	opt := domain.GetTransOpt{}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
 }
 
 func getAll_WithManyTransaction_ReturnSuccessfully(s *TransactionSuite, desc string) {
@@ -176,9 +181,10 @@ func getAll_WithManyTransaction_ReturnSuccessfully(s *TransactionSuite, desc str
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1, 2)
 
 	opt := domain.GetTransOpt{}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
 }
 
 func getAll_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc string) {
@@ -204,9 +210,10 @@ func getAll_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc st
 			StartDate: &startDate,
 		},
 	}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
 }
 
 func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc string) {
@@ -231,9 +238,10 @@ func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc strin
 			EndDate: &endDate,
 		},
 	}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
 }
 
 func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *TransactionSuite, desc string) {
@@ -260,9 +268,10 @@ func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transaction
 			EndDate:   &endDate,
 		},
 	}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
 }
 
 func getAll_QueryMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc string) {
@@ -282,9 +291,10 @@ func getAll_QueryMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc
 			MainCategIDs: []int64{mainList[0].ID},
 		},
 	}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
 }
 
 func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc string) {
@@ -304,9 +314,41 @@ func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc s
 			SubCategIDs: []int64{subList[1].ID},
 		},
 	}
-	trans, _, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc string) {
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(8)
+	s.Require().NoError(err, desc)
+
+	// prepare encodedNextKey
+	// Note that the order of the transactionList is based on the ID(default), and it's descending
+	// which means that this encodedNextKey will query the data from the 5th index
+	encodedNextKey, err := codeutil.EncodeCursor(domain.DecodedNextKey{"ID": "1"}, transactionList[6])
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 5, 4, 3)
+
+	opt := domain.GetTransOpt{
+		Cursor: domain.Cursor{
+			NextKey: encodedNextKey,
+			Size:    3,
+		},
+	}
+	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	decodedNextKeyID := transactionList[6].ID
+	s.Require().Equal(domain.DecodedNextKey{"ID": fmt.Sprint(decodedNextKeyID)}, deencodedNextKey, desc)
 }
 
 func (s *TransactionSuite) TestUpdate() {
