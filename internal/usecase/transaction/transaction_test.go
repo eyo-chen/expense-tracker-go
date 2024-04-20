@@ -9,6 +9,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/transaction"
 	"github.com/OYE0303/expense-tracker-go/mocks"
+	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -47,6 +48,92 @@ func (s *TransactionSuite) TearDownTest() {
 	s.mockTransaction.AssertExpectations(s.T())
 	s.mockMainCateg.AssertExpectations(s.T())
 	s.mockSubCateg.AssertExpectations(s.T())
+}
+
+func (s *TransactionSuite) TestGetAll() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, return transactions":                                        getAll_NoError_ReturnTransactions,
+		"when get transactions fail, return error":                                  getAll_GetTransFail_ReturnError,
+		"when it's the first page with size, return correct cursor":                 getAll_InitPageWithSize_ReturnCorrectCursor,
+		"when it's not the first page with decoded next key, return correct cursor": getAll_WithDecodedNextKey_ReturnCorrectCursor,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getAll_NoError_ReturnTransactions(s *TransactionSuite, desc string) {
+	mockDecodedNextKey := domain.DecodedNextKey{}
+	mockOpt := domain.GetTransOpt{}
+	mockUser := domain.User{ID: 1}
+	mockTrans := []domain.Transaction{{ID: 1, UserID: 1}}
+
+	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+		Return(mockTrans, mockDecodedNextKey, nil).Once()
+
+	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(mockTrans, result, desc)
+	s.Require().Equal(domain.Cursor{}, cursor, desc)
+}
+
+func getAll_GetTransFail_ReturnError(s *TransactionSuite, desc string) {
+	mockDecodedNextKey := domain.DecodedNextKey{}
+	mockOpt := domain.GetTransOpt{}
+	mockUser := domain.User{ID: 1}
+
+	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+		Return(nil, mockDecodedNextKey, errors.New("error")).Once()
+
+	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().Nil(result, desc)
+	s.Require().Equal(domain.Cursor{}, cursor, desc)
+}
+
+func getAll_InitPageWithSize_ReturnCorrectCursor(s *TransactionSuite, desc string) {
+	mockDecodedNextKey := domain.DecodedNextKey{}
+	mockOpt := domain.GetTransOpt{Cursor: domain.Cursor{Size: 1}}
+	mockUser := domain.User{ID: 1}
+	mockTrans := []domain.Transaction{{ID: 1, UserID: 1}}
+
+	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+		Return(mockTrans, mockDecodedNextKey, nil).Once()
+
+	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(mockTrans, result, desc)
+	s.Require().Equal(1, cursor.Size, desc)
+
+	// check decoded next key
+	encodedNextKey, err := codeutil.DecodeCursor(cursor.NextKey, nil)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(domain.DecodedNextKey{"ID": "1"}, encodedNextKey, desc)
+}
+
+func getAll_WithDecodedNextKey_ReturnCorrectCursor(s *TransactionSuite, desc string) {
+	mockDecodedNextKey := domain.DecodedNextKey{
+		"ID": "1",
+	}
+	mockOpt := domain.GetTransOpt{Cursor: domain.Cursor{Size: 1, NextKey: "eyJJRCI6IjEifQ=="}}
+	mockUser := domain.User{ID: 1}
+	mockTrans := []domain.Transaction{{ID: 2, UserID: 1}}
+
+	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+		Return(mockTrans, mockDecodedNextKey, nil).Once()
+
+	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(mockTrans, result, desc)
+	s.Require().Equal(1, cursor.Size, desc)
+
+	// check encoded next key
+	encodedNextKey, err := codeutil.DecodeCursor(cursor.NextKey, nil)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(domain.DecodedNextKey{"ID": "2"}, encodedNextKey, desc)
 }
 
 func (s *TransactionSuite) TestUpdate() {
