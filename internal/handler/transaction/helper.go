@@ -31,6 +31,24 @@ func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
 		opt.Filter.EndDate = &date
 	}
 
+	rawMinPrice := r.URL.Query().Get("min_price")
+	if rawMinPrice != "" {
+		minPrice, err := strconv.ParseFloat(rawMinPrice, 64)
+		if err != nil {
+			return domain.GetTransOpt{}, err
+		}
+		opt.Filter.MinPrice = &minPrice
+	}
+
+	rawMaxPrice := r.URL.Query().Get("max_price")
+	if rawMaxPrice != "" {
+		maxPrice, err := strconv.ParseFloat(rawMaxPrice, 64)
+		if err != nil {
+			return domain.GetTransOpt{}, err
+		}
+		opt.Filter.MaxPrice = &maxPrice
+	}
+
 	mainCategIDs, err := genMainCategIDs(r)
 	if err != nil {
 		return domain.GetTransOpt{}, err

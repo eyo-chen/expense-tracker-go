@@ -32,6 +32,14 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, t
 		qStmt += " AND date <= ?"
 	}
 
+	if opt.Filter.MinPrice != nil {
+		qStmt += " AND price >= ?"
+	}
+
+	if opt.Filter.MaxPrice != nil {
+		qStmt += " AND price <= ?"
+	}
+
 	if opt.Filter.MainCategIDs != nil {
 		qStmt += " AND mc.id IN (?"
 		for i := 1; i < len(opt.Filter.MainCategIDs); i++ {
@@ -116,6 +124,14 @@ func getAllArgs(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, us
 
 	if opt.Filter.EndDate != nil {
 		args = append(args, *opt.Filter.EndDate)
+	}
+
+	if opt.Filter.MinPrice != nil {
+		args = append(args, *opt.Filter.MinPrice)
+	}
+
+	if opt.Filter.MaxPrice != nil {
+		args = append(args, *opt.Filter.MaxPrice)
 	}
 
 	if opt.Filter.MainCategIDs != nil {
