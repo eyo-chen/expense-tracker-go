@@ -78,7 +78,7 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 
 		// if it's the first page, we need to initialize the nextKey
 		if opt.Cursor.NextKey == "" {
-			decodedNextKey = map[string]string{
+			decodedNextKey = domain.DecodedNextKey{
 				"ID": "0",
 			}
 		}

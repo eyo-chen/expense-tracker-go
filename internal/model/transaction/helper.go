@@ -9,7 +9,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 )
 
-func getAllQStmt(opt domain.GetTransOpt, decodedNextKey map[string]string, t Transaction) string {
+func getAllQStmt(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, t Transaction) string {
 	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
 						FROM transactions AS t
 						INNER JOIN main_categories AS mc 
@@ -102,7 +102,7 @@ func camelToSnake(input string) string {
 	return buf.String()
 }
 
-func getAllArgs(opt domain.GetTransOpt, decodedNextKey map[string]string, userID int64) []interface{} {
+func getAllArgs(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, userID int64) []interface{} {
 	var args []interface{}
 	args = append(args, userID)
 

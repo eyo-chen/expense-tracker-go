@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
@@ -27,7 +28,7 @@ var (
 
 // DecodeCursor decodes cursor from encoded string to map
 // fieldSource is used to check if the field exists in ecoded string
-func DecodeCursor(encodedString string, fieldSource interface{}) (map[string]string, error) {
+func DecodeCursor(encodedString string, fieldSource interface{}) (domain.DecodedNextKey, error) {
 	if encodedString == "" {
 		return nil, ErrEmptyEncodedString
 	}
@@ -44,7 +45,7 @@ func DecodeCursor(encodedString string, fieldSource interface{}) (map[string]str
 		return nil, ErrInvalidFormatCursor
 	}
 
-	result := map[string]string{}
+	result := domain.DecodedNextKey{}
 	for _, pair := range pairs {
 		keyValue := strings.Split(pair, ":")
 		if len(keyValue) != 2 {
@@ -69,9 +70,9 @@ func DecodeCursor(encodedString string, fieldSource interface{}) (map[string]str
 
 // EncodeCursor encodes cursor from map to encoded string
 // fieldSource is used to get the field value from the source
-func EncodeCursor(cursor map[string]string, fieldSource interface{}) (string, error) {
-	pairs := make([]string, 0, len(cursor))
-	for key, value := range cursor {
+func EncodeCursor(decodedNextKey domain.DecodedNextKey, fieldSource interface{}) (string, error) {
+	pairs := make([]string, 0, len(decodedNextKey))
+	for key, value := range decodedNextKey {
 		if fieldSource == nil {
 			pairs = append(pairs, key+":"+value)
 			continue

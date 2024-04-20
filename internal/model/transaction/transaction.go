@@ -49,8 +49,8 @@ func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransa
 	return nil
 }
 
-func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, map[string]string, error) {
-	var decodedNextKey map[string]string
+func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKey, error) {
+	var decodedNextKey domain.DecodedNextKey
 	if opt.Cursor.NextKey != "" {
 		var err error
 		decodedNextKey, err = codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
