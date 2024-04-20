@@ -49,24 +49,24 @@ func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransa
 	return nil
 }
 
-func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, error) {
+func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, map[string]string, error) {
+	var decodedNextKey map[string]string
 	if opt.Cursor.NextKey != "" {
-		decodedNextKey, err := codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
+		var err error
+		decodedNextKey, err = codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
 		if err != nil {
 			logger.Error("codeutil.DecodeCursor failed", "package", PackageName, "err", err)
-			return nil, err
+			return nil, nil, err
 		}
-
-		opt.Cursor.DecodedNextKey = decodedNextKey
 	}
 
-	qStmt := getAllQStmt(opt, Transaction{})
-	args := getAllArgs(opt, userID)
+	qStmt := getAllQStmt(opt, decodedNextKey, Transaction{})
+	args := getAllArgs(opt, decodedNextKey, userID)
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {
 		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
-		return nil, err
+		return nil, nil, err
 	}
 	defer rows.Close()
 
@@ -79,14 +79,14 @@ func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, u
 
 		if err := rows.Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.Price, &trans.Note, &trans.Date, &mainCateg.ID, &mainCateg.Name, &mainCateg.Type, &subCateg.ID, &subCateg.Name, &icon.ID, &icon.URL); err != nil {
 			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
-			return nil, err
+			return nil, nil, err
 		}
 
 		transactions = append(transactions, cvtToDomainTransaction(trans, mainCateg, subCateg, icon))
 	}
 	defer rows.Close()
 
-	return transactions, nil
+	return transactions, decodedNextKey, nil
 }
 
 func (t *TransactionModel) Update(ctx context.Context, trans domain.UpdateTransactionInput) error {

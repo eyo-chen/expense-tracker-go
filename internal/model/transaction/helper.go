@@ -9,7 +9,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 )
 
-func getAllQStmt(opt domain.GetTransOpt, t Transaction) string {
+func getAllQStmt(opt domain.GetTransOpt, decodedNextKey map[string]string, t Transaction) string {
 	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
 						FROM transactions AS t
 						INNER JOIN main_categories AS mc 
@@ -48,8 +48,8 @@ func getAllQStmt(opt domain.GetTransOpt, t Transaction) string {
 		qStmt += ")"
 	}
 
-	if len(opt.Cursor.DecodedNextKey) != 0 {
-		for key := range opt.Cursor.DecodedNextKey {
+	if len(decodedNextKey) != 0 {
+		for key := range decodedNextKey {
 			s := fmt.Sprintf(" AND t.%s < ?", genDBFieldNames(key, t))
 			qStmt += s
 		}
@@ -102,7 +102,7 @@ func camelToSnake(input string) string {
 	return buf.String()
 }
 
-func getAllArgs(opt domain.GetTransOpt, userID int64) []interface{} {
+func getAllArgs(opt domain.GetTransOpt, decodedNextKey map[string]string, userID int64) []interface{} {
 	var args []interface{}
 	args = append(args, userID)
 
@@ -130,8 +130,8 @@ func getAllArgs(opt domain.GetTransOpt, userID int64) []interface{} {
 		}
 	}
 
-	if len(opt.Cursor.DecodedNextKey) != 0 {
-		for _, v := range opt.Cursor.DecodedNextKey {
+	if len(decodedNextKey) != 0 {
+		for _, v := range decodedNextKey {
 			args = append(args, v)
 		}
 	}
