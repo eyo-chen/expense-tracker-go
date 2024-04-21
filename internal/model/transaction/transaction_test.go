@@ -125,6 +125,7 @@ func (s *TransactionSuite) TestGetAll() {
 		"when no error, return successfully":                             getAll_NoError_ReturnSuccessfully,
 		"when with multiple users, return successfully":                  getAll_WithMultipleUsers_ReturnSuccessfully,
 		"when with many transactions, return all transactions":           getAll_WithManyTransaction_ReturnSuccessfully,
+		"when with search keyword, return data with keyword":             getAll_WithSearchKeyword_ReturnDataWithKeyword,
 		"when query start date, return data after start date":            getAll_QueryStartDate_ReturnDataAfterStartDate,
 		"when query end date, return data before end date":               getAll_QueryEndDate_ReturnDataBeforeEndDate,
 		"when query start and end date, return data between them":        getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate,
@@ -164,6 +165,35 @@ func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc strin
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
 	opt := domain.GetTransOpt{}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_WithSearchKeyword_ReturnDataWithKeyword(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Note: "mysql database"}
+	ow2 := transaction.Transaction{Note: "postgresql database"}
+	ow3 := transaction.Transaction{Note: "mongodb database"}
+	ow4 := transaction.Transaction{Note: "go programming"}
+	ow5 := transaction.Transaction{Note: "javascript programming"}
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(5, ow1, ow2, ow3, ow4, ow5)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1, 2)
+
+	searchKeyword := "database"
+	opt := domain.GetTransOpt{
+		Search: domain.Search{
+			Keyword: &searchKeyword,
+		},
+	}
 	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
