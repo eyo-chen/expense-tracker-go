@@ -76,12 +76,12 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 	if len(trans) == opt.Cursor.Size {
 		cursor.Size = opt.Cursor.Size
 
-		// // if it's the first page, we need to initialize the nextKey
-		// if opt.Cursor.NextKey == "" {
-		// 	decodedNextKeys = domain.DecodedNextKey{
-		// 		"ID": "0",
-		// 	}
-		// }
+		// if it's the first page, we need to initialize the nextKey
+		if opt.Cursor.NextKey == "" {
+			decodedNextKeys = domain.DecodedNextKeys{
+				{Field: "ID"},
+			}
+		}
 
 		// encode the nextKey to string
 		encodedNextKey, err := codeutil.EncodeNextKeys(decodedNextKeys, trans[len(trans)-1])
