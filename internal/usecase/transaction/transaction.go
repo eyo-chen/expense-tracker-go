@@ -67,7 +67,7 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 }
 
 func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, domain.Cursor, error) {
-	trans, decodedNextKey, err := t.Transaction.GetAll(ctx, opt, user.ID)
+	trans, decodedNextKeys, err := t.Transaction.GetAll(ctx, opt, user.ID)
 	if err != nil {
 		return nil, domain.Cursor{}, err
 	}
@@ -76,15 +76,15 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 	if len(trans) == opt.Cursor.Size {
 		cursor.Size = opt.Cursor.Size
 
-		// if it's the first page, we need to initialize the nextKey
-		if opt.Cursor.NextKey == "" {
-			decodedNextKey = domain.DecodedNextKey{
-				"ID": "0",
-			}
-		}
+		// // if it's the first page, we need to initialize the nextKey
+		// if opt.Cursor.NextKey == "" {
+		// 	decodedNextKeys = domain.DecodedNextKey{
+		// 		"ID": "0",
+		// 	}
+		// }
 
 		// encode the nextKey to string
-		encodedNextKey, err := codeutil.EncodeCursor(decodedNextKey, trans[len(trans)-1])
+		encodedNextKey, err := codeutil.EncodeCursor(decodedNextKeys, trans[len(trans)-1])
 		if err != nil {
 			return nil, domain.Cursor{}, err
 		}

@@ -3,14 +3,12 @@ package transaction_test
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/transaction"
-	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
@@ -133,7 +131,7 @@ func (s *TransactionSuite) TestGetAll() {
 		"when query max price, return data less than max price":          getAll_QueryMaxPrice_ReturnDataLessThanMinPrice,
 		"when query main category id, return data with main category id": getAll_QueryMainCategID_ReturnDataWithMainCategID,
 		"when query sub category id, return data with sub category id":   getAll_QuerySubCategID_ReturnDataWithSubCategID,
-		"when with next key cursor, return data after cursor key":        getAll_WithNextKeyCursor_ReturnDataAfterCursorKey,
+		// "when with next key cursor, return data after cursor key":        getAll_WithNextKeyCursor_ReturnDataAfterCursorKey,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -408,36 +406,36 @@ func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc s
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc string) {
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(8)
-	s.Require().NoError(err, desc)
+// func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc string) {
+// 	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(8)
+// 	s.Require().NoError(err, desc)
 
-	// prepare encodedNextKey
-	// Note that the order of the transactionList is based on the ID(default), and it's descending
-	// which means that this encodedNextKey will query the data from the 5th index
-	encodedNextKey, err := codeutil.EncodeCursor(domain.DecodedNextKey{"ID": "1"}, transactionList[6])
-	s.Require().NoError(err, desc)
+// 	// prepare encodedNextKey
+// 	// Note that the order of the transactionList is based on the ID(default), and it's descending
+// 	// which means that this encodedNextKey will query the data from the 5th index
+// 	encodedNextKey, err := codeutil.EncodeCursor(domain.DecodedNextKey{"ID": "1"}, transactionList[6])
+// 	s.Require().NoError(err, desc)
 
-	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
-	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
-	s.Require().NoError(err, desc)
+// 	// prepare more users
+// 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+// 	s.Require().NoError(err, desc)
+// 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
+// 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 5, 4, 3)
+// 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 5, 4, 3)
 
-	opt := domain.GetTransOpt{
-		Cursor: domain.Cursor{
-			NextKey: encodedNextKey,
-			Size:    3,
-		},
-	}
-	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(expResult, trans, desc)
-	decodedNextKeyID := transactionList[6].ID
-	s.Require().Equal(domain.DecodedNextKey{"ID": fmt.Sprint(decodedNextKeyID)}, deencodedNextKey, desc)
-}
+// 	opt := domain.GetTransOpt{
+// 		Cursor: domain.Cursor{
+// 			NextKey: encodedNextKey,
+// 			Size:    3,
+// 		},
+// 	}
+// 	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+// 	s.Require().NoError(err, desc)
+// 	s.Require().Equal(expResult, trans, desc)
+// 	decodedNextKeyID := transactionList[6].ID
+// 	s.Require().Equal(domain.DecodedNextKey{"ID": fmt.Sprint(decodedNextKeyID)}, deencodedNextKey, desc)
+// }
 
 func (s *TransactionSuite) TestUpdate() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){

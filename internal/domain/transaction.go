@@ -70,6 +70,13 @@ type Cursor struct {
 // e.g. {"date": "2021-01-01", "id": "1"}
 type DecodedNextKey map[string]string
 
+type DecodedNextKeys []DecodedNextKeyInfo
+
+type DecodedNextKeyInfo struct {
+	Field string
+	Value string
+}
+
 // GetTransOpt contains options for getting transactions
 type GetTransOpt struct {
 	Filter Filter `json:"filter"`

@@ -49,19 +49,19 @@ func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransa
 	return nil
 }
 
-func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKey, error) {
-	var decodedNextKey domain.DecodedNextKey
+func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKeys, error) {
+	var decodedNextKeys domain.DecodedNextKeys
 	if opt.Cursor.NextKey != "" {
 		var err error
-		decodedNextKey, err = codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
+		decodedNextKeys, err = codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
 		if err != nil {
 			logger.Error("codeutil.DecodeCursor failed", "package", PackageName, "err", err)
 			return nil, nil, err
 		}
 	}
 
-	qStmt := getAllQStmt(opt, decodedNextKey, Transaction{})
-	args := getAllArgs(opt, decodedNextKey, userID)
+	qStmt := getAllQStmt(opt, decodedNextKeys, Transaction{})
+	args := getAllArgs(opt, decodedNextKeys, userID)
 
 	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {
@@ -86,7 +86,7 @@ func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, u
 	}
 	defer rows.Close()
 
-	return transactions, decodedNextKey, nil
+	return transactions, decodedNextKeys, nil
 }
 
 func (t *TransactionModel) Update(ctx context.Context, trans domain.UpdateTransactionInput) error {
