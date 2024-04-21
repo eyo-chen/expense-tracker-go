@@ -26,9 +26,9 @@ var (
 	ErrFieldNotFound = errors.New("field not found")
 )
 
-// DecodeCursor decodes cursor from encoded string to map
-// fieldSource is used to check if the field exists in ecoded string
-func DecodeCursor(encodedString string, fieldSource interface{}) (domain.DecodedNextKeys, error) {
+// DecodeNextKeys decodes encoded next key string to decoded next keys.
+// fieldSource is used to check if the field exists in the fieldSource
+func DecodeNextKeys(encodedString string, fieldSource interface{}) (domain.DecodedNextKeys, error) {
 	if encodedString == "" {
 		return nil, ErrEmptyEncodedString
 	}
@@ -71,9 +71,9 @@ func DecodeCursor(encodedString string, fieldSource interface{}) (domain.Decoded
 	return result, nil
 }
 
-// EncodeCursor encodes cursor from map to encoded string
-// fieldSource is used to get the field value from the source
-func EncodeCursor(decodedNextKeys domain.DecodedNextKeys, fieldSource interface{}) (string, error) {
+// EncodeNextKeys encodes decoded next keys to encoded string.
+// fieldSource is used to get the latest field value from the source
+func EncodeNextKeys(decodedNextKeys domain.DecodedNextKeys, fieldSource interface{}) (string, error) {
 	var pairs string
 
 	for _, key := range decodedNextKeys {

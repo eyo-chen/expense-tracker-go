@@ -109,7 +109,7 @@ func getAll_InitPageWithSize_ReturnCorrectCursor(s *TransactionSuite, desc strin
 	s.Require().Equal(1, cursor.Size, desc)
 
 	// check decoded next key
-	encodedNextKey, err := codeutil.DecodeCursor(cursor.NextKey, nil)
+	encodedNextKey, err := codeutil.DecodeNextKeys(cursor.NextKey, nil)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(domain.DecodedNextKey{"ID": "1"}, encodedNextKey, desc)
 }
@@ -131,7 +131,7 @@ func getAll_WithDecodedNextKey_ReturnCorrectCursor(s *TransactionSuite, desc str
 	s.Require().Equal(1, cursor.Size, desc)
 
 	// check encoded next key
-	encodedNextKey, err := codeutil.DecodeCursor(cursor.NextKey, nil)
+	encodedNextKey, err := codeutil.DecodeNextKeys(cursor.NextKey, nil)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(domain.DecodedNextKey{"ID": "2"}, encodedNextKey, desc)
 }

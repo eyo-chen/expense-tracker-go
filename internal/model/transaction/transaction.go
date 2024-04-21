@@ -53,7 +53,7 @@ func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, u
 	var decodedNextKeys domain.DecodedNextKeys
 	if opt.Cursor.NextKey != "" {
 		var err error
-		decodedNextKeys, err = codeutil.DecodeCursor(opt.Cursor.NextKey, Transaction{})
+		decodedNextKeys, err = codeutil.DecodeNextKeys(opt.Cursor.NextKey, Transaction{})
 		if err != nil {
 			logger.Error("codeutil.DecodeCursor failed", "package", PackageName, "err", err)
 			return nil, nil, err

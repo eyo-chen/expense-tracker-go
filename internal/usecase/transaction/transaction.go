@@ -84,7 +84,7 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 		// }
 
 		// encode the nextKey to string
-		encodedNextKey, err := codeutil.EncodeCursor(decodedNextKeys, trans[len(trans)-1])
+		encodedNextKey, err := codeutil.EncodeNextKeys(decodedNextKeys, trans[len(trans)-1])
 		if err != nil {
 			return nil, domain.Cursor{}, err
 		}
