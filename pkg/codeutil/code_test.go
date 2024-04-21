@@ -2,7 +2,6 @@ package codeutil_test
 
 import (
 	"encoding/base64"
-	"strings"
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -84,13 +83,13 @@ func decodeCursor_SourceFieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 
 func decodeCursor_ValidEncodedString_ReturnCursorMap(s *CodeUtilSuite, desc string) {
 	// prepare encoded string
-	cursorKey := "ID:123,MainCategID:456"
+	cursorKey := "MainCategID:456,ID:123"
 	encodedString := base64.StdEncoding.EncodeToString([]byte(cursorKey))
 
 	// prepare expected result
-	cursorMap := domain.DecodedNextKey{
-		"ID":          "123",
-		"MainCategID": "456",
+	cursorMap := domain.DecodedNextKeys{
+		{Field: "MainCategID", Value: "456"},
+		{Field: "ID", Value: "123"},
 	}
 
 	// action
@@ -101,7 +100,7 @@ func decodeCursor_ValidEncodedString_ReturnCursorMap(s *CodeUtilSuite, desc stri
 
 func decodeCursor_WithCorrectSourceField_ReturnCursorMap(s *CodeUtilSuite, desc string) {
 	// prepare encoded string
-	cursorKey := "ID:123,MainCategID:456"
+	cursorKey := "MainCategID:456,ID:123"
 	encodedString := base64.StdEncoding.EncodeToString([]byte(cursorKey))
 
 	// prepare field source
@@ -111,9 +110,9 @@ func decodeCursor_WithCorrectSourceField_ReturnCursorMap(s *CodeUtilSuite, desc 
 	}{}
 
 	// prepare expected result
-	cursorMap := domain.DecodedNextKey{
-		"ID":          "123",
-		"MainCategID": "456",
+	cursorMap := domain.DecodedNextKeys{
+		{Field: "MainCategID", Value: "456"},
+		{Field: "ID", Value: "123"},
 	}
 
 	// action
@@ -136,10 +135,10 @@ func (s *CodeUtilSuite) TestEncodeCursor() {
 }
 
 func encodeCursor_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
-	// prepare cursor map
-	cursorMap := domain.DecodedNextKey{
-		"ID":          "123",
-		"MainCategID": "456",
+	// prepare next keys
+	nextKeys := domain.DecodedNextKeys{
+		{Field: "ID", Value: "123"},
+		{Field: "MainCategID", Value: "456"},
 	}
 
 	// prepare field source
@@ -148,7 +147,7 @@ func encodeCursor_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 	}{}
 
 	// action
-	result, err := codeutil.EncodeCursor(cursorMap, fieldSource)
+	result, err := codeutil.EncodeCursor(nextKeys, fieldSource)
 	s.Require().Empty(result, desc)
 	s.Require().Equal(codeutil.ErrFieldNotFound, err, desc)
 }
@@ -160,47 +159,30 @@ func encodeCursor_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 // For example, the encoded string can be decoded to "ID:123,MainCategID:456" or "MainCategID:456,ID:123"
 // The only way we can check is to check the number of pairs and the value of the pairs respectively (using for loop)
 func encodeCursor_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc string) {
-	// prepare cursor map
-	cursorMap := domain.DecodedNextKey{
-		"ID":          "123",
-		"MainCategID": "456",
+	// prepare next keys
+	nextKeys := domain.DecodedNextKeys{
+		{Field: "ID", Value: "123"},
+		{Field: "MainCategID", Value: "456"},
 	}
 
 	// prepare expected result
-	expectedCursorMap := domain.DecodedNextKey{
-		"ID":          "123",
-		"MainCategID": "456",
-	}
+	expResult := "ID:123,MainCategID:456"
 
 	// action
-	result, err := codeutil.EncodeCursor(cursorMap, nil)
+	result, err := codeutil.EncodeCursor(nextKeys, nil)
 	s.Require().NoError(err, desc)
 
 	// check decoded string
 	decodedBytes, err := base64.StdEncoding.DecodeString(result)
 	s.Require().NoError(err, desc)
-
-	// using for loop to check the value of the pairs
-	decodedString := string(decodedBytes)
-	pairs := strings.Split(decodedString, ",")
-	s.Require().Equal(2, len(pairs), desc)
-	for _, pair := range pairs {
-		keyValue := strings.Split(pair, ":")
-		s.Require().Equal(2, len(keyValue), desc)
-
-		key := strings.TrimSpace(keyValue[0])
-		value := strings.TrimSpace(keyValue[1])
-		v, ok := expectedCursorMap[key]
-		s.Require().True(ok, desc)
-		s.Require().Equal(v, value, desc)
-	}
+	s.Require().Equal(expResult, string(decodedBytes), desc)
 }
 
 func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, desc string) {
-	// prepare cursor map
-	cursorMap := domain.DecodedNextKey{
-		"ID":          "123",
-		"MainCategID": "456",
+	// prepare next keys
+	nextKeys := domain.DecodedNextKeys{
+		{Field: "MainCategID", Value: "456"},
+		{Field: "ID", Value: "123"},
 	}
 
 	// prepare field source
@@ -213,31 +195,14 @@ func encodeCursor_WithCorrectFieldSource_ReturnEncodedString(s *CodeUtilSuite, d
 	}
 
 	// prepare expected result
-	expectedCursorMap := domain.DecodedNextKey{
-		"ID":          "123",
-		"MainCategID": "456new",
-	}
+	expResult := "MainCategID:456new,ID:123"
 
 	// action
-	result, err := codeutil.EncodeCursor(cursorMap, fieldSource)
+	result, err := codeutil.EncodeCursor(nextKeys, fieldSource)
 	s.Require().NoError(err, desc)
 
 	// check encoded string
 	decodedBytes, err := base64.StdEncoding.DecodeString(result)
 	s.Require().NoError(err, desc)
-
-	// using for loop to check the value of the pairs
-	decodedString := string(decodedBytes)
-	pairs := strings.Split(decodedString, ",")
-	s.Require().Equal(2, len(pairs), desc)
-	for _, pair := range pairs {
-		keyValue := strings.Split(pair, ":")
-		s.Require().Equal(2, len(keyValue), desc)
-
-		key := strings.TrimSpace(keyValue[0])
-		value := strings.TrimSpace(keyValue[1])
-		v, ok := expectedCursorMap[key]
-		s.Require().True(ok, desc)
-		s.Require().Equal(v, value, desc)
-	}
+	s.Require().Equal(expResult, string(decodedBytes), desc)
 }
