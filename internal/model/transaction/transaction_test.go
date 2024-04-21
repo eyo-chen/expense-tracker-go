@@ -436,7 +436,7 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	decodedNextKeyID := transactionList[6].ID
-	s.Require().Equal(domain.DecodedNextKey{"ID": fmt.Sprint(decodedNextKeyID)}, deencodedNextKey, desc)
+	s.Require().Equal(domain.DecodedNextKeys{{Field: "ID", Value: fmt.Sprint(decodedNextKeyID)}}, deencodedNextKey, desc)
 }
 
 func (s *TransactionSuite) TestUpdate() {
