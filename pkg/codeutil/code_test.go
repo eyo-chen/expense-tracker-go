@@ -152,12 +152,6 @@ func encodeNextKeys_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 	s.Require().Equal(codeutil.ErrFieldNotFound, err, desc)
 }
 
-// In the EncodeCursor function, the output is Base64 encoded string, and it's random
-// For example, the same input "ID:123,MainCategID:456" can be encoded to "SUQ6MTIzLE1haW5DYWdlZElEOjQ1Ng==" or "SUQ6MTIzLE1haW5DYWdlZElEOjewdwe==
-// So, we can't check the exact value of the encoded string
-// Also, the output of the decoded string is random too
-// For example, the encoded string can be decoded to "ID:123,MainCategID:456" or "MainCategID:456,ID:123"
-// The only way we can check is to check the number of pairs and the value of the pairs respectively (using for loop)
 func encodeNextKeys_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc string) {
 	// prepare next keys
 	nextKeys := domain.DecodedNextKeys{
