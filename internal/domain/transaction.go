@@ -55,6 +55,11 @@ type Filter struct {
 	SubCategIDs  []int64
 }
 
+// Search contains keyword for searching transactions
+type Search struct {
+	Keyword *string `json:"keyword"`
+}
+
 // Cursor contains next key for pagination
 type Cursor struct {
 	NextKey string `json:"next_key"`
@@ -68,6 +73,7 @@ type DecodedNextKey map[string]string
 // GetTransOpt contains options for getting transactions
 type GetTransOpt struct {
 	Filter Filter `json:"filter"`
+	Search Search `json:"search"`
 	Cursor Cursor `json:"cursor"`
 }
 

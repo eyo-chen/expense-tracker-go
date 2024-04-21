@@ -13,6 +13,11 @@ import (
 func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
 	var opt domain.GetTransOpt
 
+	rawKeyword := r.URL.Query().Get("keyword")
+	if rawKeyword != "" {
+		opt.Search.Keyword = &rawKeyword
+	}
+
 	rawStartDate := r.URL.Query().Get("start_date")
 	if rawStartDate != "" {
 		date, err := time.Parse(time.DateOnly, rawStartDate)

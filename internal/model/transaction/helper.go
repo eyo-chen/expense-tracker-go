@@ -20,6 +20,10 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, t
 						ON mc.icon_id = i.id
 						WHERE t.user_id = ?`
 
+	if opt.Search.Keyword != nil {
+		qStmt += " AND MATCH (note) AGAINST (? IN NATURAL LANGUAGE MODE)"
+	}
+
 	if opt.Filter.StartDate != nil && opt.Filter.EndDate != nil {
 		qStmt += " AND date BETWEEN ? AND ?"
 	}
@@ -112,6 +116,10 @@ func camelToSnake(input string) string {
 func getAllArgs(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, userID int64) []interface{} {
 	var args []interface{}
 	args = append(args, userID)
+
+	if opt.Search.Keyword != nil {
+		args = append(args, *opt.Search.Keyword)
+	}
 
 	if opt.Filter.StartDate != nil && opt.Filter.EndDate != nil {
 		args = append(args, *opt.Filter.StartDate, *opt.Filter.EndDate)
