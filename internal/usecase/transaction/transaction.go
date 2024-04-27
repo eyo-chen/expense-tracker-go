@@ -77,10 +77,22 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 		cursor.Size = opt.Cursor.Size
 
 		// if it's the first page, we need to initialize the nextKey
+		// note that the order of decodedNextKeys does matter
+		// the ultimate query is like "(t.field1, t.field2) > (?, ?)"
+		// the base field(ID) should be the last field
+		// so we need to make sure the ID is the last field in the decodedNextKeys
 		if opt.Cursor.NextKey == "" {
-			decodedNextKeys = domain.DecodedNextKeys{
-				{Field: "ID"},
+			decodedNextKeys = domain.DecodedNextKeys{}
+
+			if opt.Sort != nil && opt.Sort.By.IsValid() {
+				decodedNextKeys = append(decodedNextKeys, domain.DecodedNextKeyInfo{
+					Field: opt.Sort.By.GetField(),
+				})
 			}
+
+			decodedNextKeys = append(decodedNextKeys, domain.DecodedNextKeyInfo{
+				Field: "ID",
+			})
 		}
 
 		// encode the nextKey to string
