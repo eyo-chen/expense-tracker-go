@@ -73,7 +73,7 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 	}
 
 	var cursor domain.Cursor
-	if len(trans) == opt.Cursor.Size {
+	if opt.Cursor.Size != 0 && len(trans) == opt.Cursor.Size {
 		cursor.Size = opt.Cursor.Size
 
 		// if it's the first page, we need to initialize the nextKey

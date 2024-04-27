@@ -56,6 +56,7 @@ func (s *TransactionSuite) TestGetAll() {
 		"when get transactions fail, return error":                                  getAll_GetTransFail_ReturnError,
 		"when it's the first page with size, return correct cursor":                 getAll_InitPageWithSize_ReturnCorrectCursor,
 		"when it's not the first page with decoded next key, return correct cursor": getAll_WithDecodedNextKey_ReturnCorrectCursor,
+		"when size is empty value, return no cursor":                                getAll_SizeIsEmptyValue_ReturnNoCursor,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -132,6 +133,21 @@ func getAll_WithDecodedNextKey_ReturnCorrectCursor(s *TransactionSuite, desc str
 	encodedNextKey, err := codeutil.DecodeNextKeys(cursor.NextKey, nil)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(domain.DecodedNextKeys{{Field: "ID", Value: "2"}}, encodedNextKey, desc)
+}
+
+func getAll_SizeIsEmptyValue_ReturnNoCursor(s *TransactionSuite, desc string) {
+	mockDecodedNextKeys := domain.DecodedNextKeys{}
+	mockOpt := domain.GetTransOpt{}
+	mockUser := domain.User{ID: 1}
+	mockTrans := []domain.Transaction{}
+
+	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+		Return(mockTrans, mockDecodedNextKeys, nil).Once()
+
+	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(mockTrans, result, desc)
+	s.Require().Equal(domain.Cursor{}, cursor, desc)
 }
 
 func (s *TransactionSuite) TestUpdate() {
