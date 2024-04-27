@@ -55,6 +55,12 @@ type Filter struct {
 	SubCategIDs  []int64
 }
 
+// Sort contains sort by and sort direction
+type Sort struct {
+	By  SortByType  `json:"sort_by"`
+	Dir SortDirType `json:"sort_direction"`
+}
+
 // Search contains keyword for searching transactions
 type Search struct {
 	Keyword *string `json:"keyword"`
@@ -78,6 +84,7 @@ type DecodedNextKeyInfo struct {
 // GetTransOpt contains options for getting transactions
 type GetTransOpt struct {
 	Filter Filter `json:"filter"`
+	Sort   *Sort  `json:"sort"`
 	Search Search `json:"search"`
 	Cursor Cursor `json:"cursor"`
 }
