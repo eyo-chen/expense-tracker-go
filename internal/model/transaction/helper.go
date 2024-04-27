@@ -66,14 +66,22 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys,
 	// when it's 2, it means there's sorting(sort by id and other field)
 	if len(decodedNextKeys) != 0 {
 		if len(decodedNextKeys) == 1 {
-			qStmt += fmt.Sprintf(" AND t.%s < ?", genDBFieldNames(decodedNextKeys[0].Field, t))
+			qStmt += fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), opt.Sort.Dir.GetOperand())
 		}
 
 		if len(decodedNextKeys) == 2 {
 			// WHERE t.Column_1 > val_1
 			// OR ( t.Column_1 = val_1 AND t.Column_2 > val_2 )
-			qStmt += fmt.Sprintf(" WHERE t.%s < ?", genDBFieldNames(decodedNextKeys[0].Field, t))
-			qStmt += fmt.Sprintf(" OR (t.%s = ? AND t.%s < ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t))
+			qStmt += fmt.Sprintf(" WHERE t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), opt.Sort.Dir.GetOperand())
+			qStmt += fmt.Sprintf(" OR (t.%s = ? AND t.%s %s ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t), opt.Sort.Dir.GetOperand())
+		}
+	}
+
+	if opt.Sort != nil {
+		if opt.Sort.Dir != domain.SortDirTypeUnSpecified {
+			qStmt += fmt.Sprintf(" ORDER BY %s t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String())
+		} else {
+			qStmt += fmt.Sprintf(" ORDER BY t.id %s", opt.Sort.By.String())
 		}
 	}
 
