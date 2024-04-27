@@ -24,7 +24,9 @@ func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
 		if !sortBy.IsValid() {
 			return domain.GetTransOpt{}, domain.ErrSortByTypeNotValid
 		}
-		opt.Sort.By = sortBy
+		opt.Sort = &domain.Sort{
+			By: sortBy,
+		}
 	}
 
 	rawSortDir := r.URL.Query().Get("sort_direction")
@@ -33,7 +35,14 @@ func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
 		if !sortDir.IsValid() {
 			return domain.GetTransOpt{}, domain.ErrSortDirTypeNotValid
 		}
-		opt.Sort.Dir = sortDir
+
+		if opt.Sort == nil {
+			opt.Sort = &domain.Sort{
+				Dir: sortDir,
+			}
+		} else {
+			opt.Sort.Dir = sortDir
+		}
 	}
 
 	rawStartDate := r.URL.Query().Get("start_date")
