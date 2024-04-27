@@ -164,12 +164,8 @@ func getAllArgs(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, 
 	}
 
 	if len(decodedNextKeys) != 0 {
-		if len(decodedNextKeys) == 1 {
-			args = append(args, decodedNextKeys[0].Value)
-		}
-
-		if len(decodedNextKeys) == 2 {
-			args = append(args, decodedNextKeys[0].Value, decodedNextKeys[0].Value, decodedNextKeys[1].Value)
+		for _, k := range decodedNextKeys {
+			args = append(args, k.Value)
 		}
 	}
 
