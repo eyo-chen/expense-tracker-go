@@ -52,6 +52,19 @@ func (t SortByType) String() string {
 	return "unspecified"
 }
 
+// GetField returns the field name of the sort by type
+func (t SortByType) GetField() string {
+	switch t {
+	case SortByTypePrice:
+		return "Price"
+	case SortByTypeDate:
+		return "Date"
+	case SortByTypeTransType:
+		return "Type"
+	}
+	return ""
+}
+
 // SortDirType is an enumeration of sort direction types
 type SortDirType int8
 
@@ -97,9 +110,13 @@ func (t SortDirType) String() string {
 	return "unspecified"
 }
 
-// GetOperand returns the operand of the sort direction type
-func (t SortDirType) GetOperand() string {
-	switch t {
+// GetOperandFromSort returns the operand of the sort direction type
+func GetOperandFromSort(s *Sort) string {
+	if s == nil {
+		return ">"
+	}
+
+	switch s.Dir {
 	case SortDirTypeAsc:
 		return ">"
 	case SortDirTypeDesc:
