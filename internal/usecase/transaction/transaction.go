@@ -78,8 +78,10 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 
 		// if it's the first page, we need to initialize the nextKey
 		// note that the order of decodedNextKeys does matter
-		// the ultimate query is like "(t.field1, t.field2) > (?, ?)"
-		// the base field(ID) should be the last field
+		// the query will be like:
+		// AND col_1 < or > val_1
+		// OR (col_1 = val_1 AND col_2 < or > val_2)
+		// the base field(ID)(col_2) should be the last field
 		// so we need to make sure the ID is the last field in the decodedNextKeys
 		if opt.Cursor.NextKey == "" {
 			decodedNextKeys = domain.DecodedNextKeys{}
