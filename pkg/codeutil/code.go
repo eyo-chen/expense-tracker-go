@@ -42,6 +42,7 @@ func DecodeNextKeys(encodedString string, fieldSource interface{}) (domain.Decod
 	decodedString := string(decodedBytes)
 	pairs := strings.Split(decodedString, ",")
 	if len(pairs) == 0 {
+		logger.Error("empty pairs", "err", ErrInvalidFormatCursor, "pairs", pairs)
 		return nil, ErrInvalidFormatCursor
 	}
 
@@ -49,6 +50,7 @@ func DecodeNextKeys(encodedString string, fieldSource interface{}) (domain.Decod
 	for _, pair := range pairs {
 		keyValue := strings.Split(pair, ":")
 		if len(keyValue) != 2 {
+			logger.Error("invalid key and value", "err", ErrInvalidFormatCursor, "keyValue", keyValue)
 			return nil, ErrInvalidFormatCursor
 		}
 
@@ -124,7 +126,9 @@ func cvtToString(v interface{}) string {
 	case bool:
 		return fmt.Sprintf("%t", val)
 	case time.Time:
-		return val.Format(time.RFC3339)
+		return val.Format(time.DateOnly)
+	case domain.TransactionType:
+		return domain.TransactionType(val).ToModelValue()
 	default:
 		return ""
 	}
