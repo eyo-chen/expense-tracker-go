@@ -12,11 +12,11 @@ import (
 func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, t Transaction) string {
 	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
 						FROM transactions AS t
-						INNER JOIN main_categories AS mc 
+						LEFT JOIN main_categories AS mc 
 						ON t.main_category_id = mc.id
-						INNER JOIN sub_categories AS sc 
+						LEFT JOIN sub_categories AS sc 
 						ON t.sub_category_id = sc.id
-						INNER JOIN icons AS i
+						LEFT JOIN icons AS i
 						ON mc.icon_id = i.id
 						WHERE t.user_id = ?`
 
@@ -66,27 +66,25 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys,
 	// when it's 2, it means there's sorting(sort by id and other field)
 	if len(decodedNextKeys) != 0 {
 		if len(decodedNextKeys) == 1 {
-			qStmt += fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), opt.Sort.Dir.GetOperand())
+			qStmt += fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), domain.GetOperandFromSort(opt.Sort))
 		}
 
 		if len(decodedNextKeys) == 2 {
-			// WHERE t.Column_1 > val_1
-			// OR ( t.Column_1 = val_1 AND t.Column_2 > val_2 )
-			qStmt += fmt.Sprintf(" WHERE t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), opt.Sort.Dir.GetOperand())
-			qStmt += fmt.Sprintf(" OR (t.%s = ? AND t.%s %s ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t), opt.Sort.Dir.GetOperand())
+			qStmt += fmt.Sprintf(" AND (t.%s, t.%s) %s (?, ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t), domain.GetOperandFromSort(opt.Sort))
 		}
 	}
 
 	if opt.Sort != nil {
-		if opt.Sort.Dir != domain.SortDirTypeUnSpecified {
-			qStmt += fmt.Sprintf(" ORDER BY %s t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String())
+		// when there are 2 next keys, we need to sort by both fields
+		if len(decodedNextKeys) == 2 {
+			qStmt += fmt.Sprintf(" ORDER BY t.%s %s, t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String(), opt.Sort.Dir.String())
 		} else {
-			qStmt += fmt.Sprintf(" ORDER BY t.id %s", opt.Sort.By.String())
+			qStmt += fmt.Sprintf(" ORDER BY t.id %s", opt.Sort.Dir.String())
 		}
 	}
 
 	if opt.Cursor.Size != 0 {
-		qStmt += " ORDER BY t.id DESC LIMIT ?"
+		qStmt += " LIMIT ?"
 	}
 
 	return qStmt
