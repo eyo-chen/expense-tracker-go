@@ -9,7 +9,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 )
 
-func getAllQStmt(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, t Transaction) string {
+func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, t Transaction) string {
 	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
 						FROM transactions AS t
 						INNER JOIN main_categories AS mc 
@@ -60,10 +60,20 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, t
 		qStmt += ")"
 	}
 
-	if len(decodedNextKey) != 0 {
-		for key := range decodedNextKey {
-			s := fmt.Sprintf(" AND t.%s < ?", genDBFieldNames(key, t))
-			qStmt += s
+	// construct the next key query statement
+	// now, we only support 1 or 2 next keys
+	// when it's 1, it means there's no sorting(sort by id)
+	// when it's 2, it means there's sorting(sort by id and other field)
+	if len(decodedNextKeys) != 0 {
+		if len(decodedNextKeys) == 1 {
+			qStmt += fmt.Sprintf(" AND t.%s < ?", genDBFieldNames(decodedNextKeys[0].Field, t))
+		}
+
+		if len(decodedNextKeys) == 2 {
+			// WHERE t.Column_1 > val_1
+			// OR ( t.Column_1 = val_1 AND t.Column_2 > val_2 )
+			qStmt += fmt.Sprintf(" WHERE t.%s < ?", genDBFieldNames(decodedNextKeys[0].Field, t))
+			qStmt += fmt.Sprintf(" OR (t.%s = ? AND t.%s < ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t))
 		}
 	}
 
@@ -113,7 +123,7 @@ func camelToSnake(input string) string {
 	return buf.String()
 }
 
-func getAllArgs(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, userID int64) []interface{} {
+func getAllArgs(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, userID int64) []interface{} {
 	var args []interface{}
 	args = append(args, userID)
 
@@ -153,9 +163,9 @@ func getAllArgs(opt domain.GetTransOpt, decodedNextKey domain.DecodedNextKey, us
 		}
 	}
 
-	if len(decodedNextKey) != 0 {
-		for _, v := range decodedNextKey {
-			args = append(args, v)
+	if len(decodedNextKeys) != 0 {
+		for _, k := range decodedNextKeys {
+			args = append(args, k.Value)
 		}
 	}
 

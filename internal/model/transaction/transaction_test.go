@@ -415,7 +415,7 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	// prepare encodedNextKey
 	// Note that the order of the transactionList is based on the ID(default), and it's descending
 	// which means that this encodedNextKey will query the data from the 5th index
-	encodedNextKey, err := codeutil.EncodeCursor(domain.DecodedNextKey{"ID": "1"}, transactionList[6])
+	encodedNextKey, err := codeutil.EncodeNextKeys(domain.DecodedNextKeys{{Field: "ID", Value: "1"}}, transactionList[6])
 	s.Require().NoError(err, desc)
 
 	// prepare more users
@@ -436,7 +436,7 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	decodedNextKeyID := transactionList[6].ID
-	s.Require().Equal(domain.DecodedNextKey{"ID": fmt.Sprint(decodedNextKeyID)}, deencodedNextKey, desc)
+	s.Require().Equal(domain.DecodedNextKeys{{Field: "ID", Value: fmt.Sprint(decodedNextKeyID)}}, deencodedNextKey, desc)
 }
 
 func (s *TransactionSuite) TestUpdate() {

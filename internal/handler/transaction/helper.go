@@ -66,7 +66,10 @@ func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
 	}
 	opt.Filter.SubCategIDs = subCategIDs
 
-	opt.Cursor.NextKey = r.URL.Query().Get("next_key")
+	nextKey := r.URL.Query().Get("next_key")
+	if nextKey != "" {
+		opt.Cursor.NextKey = nextKey
+	}
 
 	rawSize := r.URL.Query().Get("size")
 	if rawSize != "" {

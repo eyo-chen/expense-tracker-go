@@ -67,24 +67,24 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 }
 
 func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, domain.Cursor, error) {
-	trans, decodedNextKey, err := t.Transaction.GetAll(ctx, opt, user.ID)
+	trans, decodedNextKeys, err := t.Transaction.GetAll(ctx, opt, user.ID)
 	if err != nil {
 		return nil, domain.Cursor{}, err
 	}
 
 	var cursor domain.Cursor
-	if len(trans) == opt.Cursor.Size {
+	if opt.Cursor.Size != 0 && len(trans) == opt.Cursor.Size {
 		cursor.Size = opt.Cursor.Size
 
 		// if it's the first page, we need to initialize the nextKey
 		if opt.Cursor.NextKey == "" {
-			decodedNextKey = domain.DecodedNextKey{
-				"ID": "0",
+			decodedNextKeys = domain.DecodedNextKeys{
+				{Field: "ID"},
 			}
 		}
 
 		// encode the nextKey to string
-		encodedNextKey, err := codeutil.EncodeCursor(decodedNextKey, trans[len(trans)-1])
+		encodedNextKey, err := codeutil.EncodeNextKeys(decodedNextKeys, trans[len(trans)-1])
 		if err != nil {
 			return nil, domain.Cursor{}, err
 		}
