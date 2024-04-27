@@ -44,4 +44,10 @@ var (
 
 	// transaction data not found error
 	ErrTransactionDataNotFound = errors.New("transaction data not found")
+
+	// sort by type not valid error
+	ErrSortByTypeNotValid = errors.New("sort by type not valid")
+
+	// sort direction type not valid error
+	ErrSortDirTypeNotValid = errors.New("sort direction type not valid")
 )
