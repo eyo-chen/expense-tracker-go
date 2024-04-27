@@ -79,7 +79,7 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys,
 		if len(decodedNextKeys) == 2 {
 			qStmt += fmt.Sprintf(" ORDER BY t.%s %s, t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String(), opt.Sort.Dir.String())
 		} else {
-			qStmt += fmt.Sprintf(" ORDER BY t.id %s", opt.Sort.Dir.String())
+			qStmt += fmt.Sprintf(" ORDER BY t.%s %s", opt.Sort.By.String(), opt.Sort.Dir.String())
 		}
 	}
 
