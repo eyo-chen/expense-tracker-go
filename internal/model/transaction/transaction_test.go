@@ -413,9 +413,8 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	s.Require().NoError(err, desc)
 
 	// prepare encodedNextKey
-	// Note that the order of the transactionList is based on the ID(default), and it's descending
-	// which means that this encodedNextKey will query the data from the 5th index
-	encodedNextKey, err := codeutil.EncodeNextKeys(domain.DecodedNextKeys{{Field: "ID", Value: "1"}}, transactionList[6])
+	// Note that the order of the transactionList is based on the ID(default), and it's ascending
+	encodedNextKey, err := codeutil.EncodeNextKeys(domain.DecodedNextKeys{{Field: "ID", Value: "1"}}, transactionList[4])
 	s.Require().NoError(err, desc)
 
 	// prepare more users
@@ -424,7 +423,7 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 5, 4, 3)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 5, 6, 7)
 
 	opt := domain.GetTransOpt{
 		Cursor: domain.Cursor{
@@ -435,7 +434,7 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
-	decodedNextKeyID := transactionList[6].ID
+	decodedNextKeyID := transactionList[4].ID
 	s.Require().Equal(domain.DecodedNextKeys{{Field: "ID", Value: fmt.Sprint(decodedNextKeyID)}}, deencodedNextKey, desc)
 }
 
