@@ -6,6 +6,7 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
 )
@@ -16,6 +17,10 @@ type CodeUtilSuite struct {
 
 func TestEncodeSuite(t *testing.T) {
 	suite.Run(t, new(CodeUtilSuite))
+}
+
+func (s *CodeUtilSuite) SetupSuite() {
+	logger.Register()
 }
 
 func (s *CodeUtilSuite) TestDecodeNextKeys() {

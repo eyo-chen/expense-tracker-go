@@ -18,6 +18,33 @@ func genGetTransOpt(r *http.Request) (domain.GetTransOpt, error) {
 		opt.Search.Keyword = &rawKeyword
 	}
 
+	rawSortBy := r.URL.Query().Get("sort_by")
+	if rawSortBy != "" {
+		sortBy := domain.CvtToSortByType(rawSortBy)
+		if !sortBy.IsValid() {
+			return domain.GetTransOpt{}, domain.ErrSortByTypeNotValid
+		}
+		opt.Sort = &domain.Sort{
+			By: sortBy,
+		}
+	}
+
+	rawSortDir := r.URL.Query().Get("sort_direction")
+	if rawSortDir != "" {
+		sortDir := domain.CvtToSortDirType(rawSortDir)
+		if !sortDir.IsValid() {
+			return domain.GetTransOpt{}, domain.ErrSortDirTypeNotValid
+		}
+
+		if opt.Sort == nil {
+			opt.Sort = &domain.Sort{
+				Dir: sortDir,
+			}
+		} else {
+			opt.Sort.Dir = sortDir
+		}
+	}
+
 	rawStartDate := r.URL.Query().Get("start_date")
 	if rawStartDate != "" {
 		date, err := time.Parse(time.DateOnly, rawStartDate)
