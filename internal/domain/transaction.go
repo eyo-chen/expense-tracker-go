@@ -66,12 +66,10 @@ type Cursor struct {
 	Size    int    `json:"size"`
 }
 
-// DecodedNextKey contains decoded next key.
-// e.g. {"date": "2021-01-01", "id": "1"}
-type DecodedNextKey map[string]string
-
+// DecodedNextKeys is a slice of DecodedNextKeyInfo
 type DecodedNextKeys []DecodedNextKeyInfo
 
+// DecodedNextKeyInfo contains field and value of next key
 type DecodedNextKeyInfo struct {
 	Field string
 	Value string
