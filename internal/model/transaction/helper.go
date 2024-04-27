@@ -70,17 +70,16 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys,
 		}
 
 		if len(decodedNextKeys) == 2 {
-			qStmt += fmt.Sprintf(" AND (t.%s, t.%s) %s (?, ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t), domain.GetOperandFromSort(opt.Sort))
+			// AND col_1 < or > val_1
+			// OR (col_1 = val_1 AND col_2 < or > val_2)
+			// the shorted version is: AND (col_1, col_2) < or > (val_1, val_2)
+			qStmt += fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), domain.GetOperandFromSort(opt.Sort))
+			qStmt += fmt.Sprintf(" OR (t.%s = ? AND t.%s %s ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t), domain.GetOperandFromSort(opt.Sort))
 		}
 	}
 
 	if opt.Sort != nil {
-		// when there are 2 next keys, we need to sort by both fields
-		if len(decodedNextKeys) == 2 {
-			qStmt += fmt.Sprintf(" ORDER BY t.%s %s, t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String(), opt.Sort.Dir.String())
-		} else {
-			qStmt += fmt.Sprintf(" ORDER BY t.%s %s", opt.Sort.By.String(), opt.Sort.Dir.String())
-		}
+		qStmt += fmt.Sprintf(" ORDER BY t.%s %s, t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String(), opt.Sort.Dir.String())
 	}
 
 	if opt.Cursor.Size != 0 {
@@ -170,8 +169,12 @@ func getAllArgs(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, 
 	}
 
 	if len(decodedNextKeys) != 0 {
-		for _, k := range decodedNextKeys {
-			args = append(args, k.Value)
+		if len(decodedNextKeys) == 1 {
+			args = append(args, decodedNextKeys[0].Value)
+		}
+
+		if len(decodedNextKeys) == 2 {
+			args = append(args, decodedNextKeys[0].Value, decodedNextKeys[0].Value, decodedNextKeys[1].Value)
 		}
 	}
 
