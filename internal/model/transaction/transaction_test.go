@@ -122,18 +122,28 @@ func (s *TransactionSuite) TestCreate() {
 
 func (s *TransactionSuite) TestGetAll() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when no error, return successfully":                             getAll_NoError_ReturnSuccessfully,
-		"when with multiple users, return successfully":                  getAll_WithMultipleUsers_ReturnSuccessfully,
-		"when with many transactions, return all transactions":           getAll_WithManyTransaction_ReturnSuccessfully,
-		"when with search keyword, return data with keyword":             getAll_WithSearchKeyword_ReturnDataWithKeyword,
-		"when query start date, return data after start date":            getAll_QueryStartDate_ReturnDataAfterStartDate,
-		"when query end date, return data before end date":               getAll_QueryEndDate_ReturnDataBeforeEndDate,
-		"when query start and end date, return data between them":        getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate,
-		"when query min price, return data greater than min price":       getAll_QueryMinPrice_ReturnDataGreaterThanMinPrice,
-		"when query max price, return data less than max price":          getAll_QueryMaxPrice_ReturnDataLessThanMinPrice,
-		"when query main category id, return data with main category id": getAll_QueryMainCategID_ReturnDataWithMainCategID,
-		"when query sub category id, return data with sub category id":   getAll_QuerySubCategID_ReturnDataWithSubCategID,
-		"when with next key cursor, return data after cursor key":        getAll_WithNextKeyCursor_ReturnDataAfterCursorKey,
+		"when no error, return successfully":                                          getAll_NoError_ReturnSuccessfully,
+		"when with multiple users, return successfully":                               getAll_WithMultipleUsers_ReturnSuccessfully,
+		"when with many transactions, return all transactions":                        getAll_WithManyTransaction_ReturnSuccessfully,
+		"when with search keyword, return data with keyword":                          getAll_WithSearchKeyword_ReturnDataWithKeyword,
+		"when filter by start date, return data after start date":                     getAll_FilterByStartDate_ReturnDataAfterStartDate,
+		"when filter by end date, return data before end date":                        getAll_FilterByEndDate_ReturnDataBeforeEndDate,
+		"when filter by start and end date, return data between them":                 getAll_FilterByStartAndEndDate_ReturnDataBetweenStartAndEndDate,
+		"when filter by min price, return data greater than min price":                getAll_FilterByMinPrice_ReturnDataGreaterThanMinPrice,
+		"when filter by max price, return data less than max price":                   getAll_FilterByMaxPrice_ReturnDataLessThanMinPrice,
+		"when filter by main category id, return data with main category id":          getAll_FilterByMainCategID_ReturnDataWithMainCategID,
+		"when filter by sub category id, return data with sub category id":            getAll_FilterBySubCategID_ReturnDataWithSubCategID,
+		"when filter by date, price and main category, return correct data":           getAll_FilterByDateAndPriceAndMainCateg_ReturnCorrectData,
+		"when sort by date asc, return correct order":                                 getAll_SortByDateAsc_ReturnCorrectOrder,
+		"when sort by date desc, return correct order":                                getAll_SortByDateDesc_ReturnCorrectOrder,
+		"when sort by price asc, return correct order":                                getAll_SortByPriceAsc_ReturnCorrectOrder,
+		"when sort by price desc, return correct order":                               getAll_SortByPriceDesc_ReturnCorrectOrder,
+		"when sort by type asc, return correct order":                                 getAll_SortByTypeAsc_ReturnCorrectOrder,
+		"when sort by type desc, return correct order":                                getAll_SortByTypeDesc_ReturnCorrectOrder,
+		"when with next key cursor, return data after cursor key":                     getAll_WithNextKeyCursor_ReturnDataAfterCursorKey,
+		"when with next key cursor and sort by date, return correct data":             getAll_WithNextKeyCursorAndSortByDate_ReturnCorrectData,
+		"when with next key cursor and sort by price, return correct data":            getAll_WithNextKeyCursorAndSortByPrice_ReturnCorrectData,
+		"when with next key cursor and sort by transaction type, return correct data": getAll_WithNextKeyCursorAndSortByTransType_ReturnCorrectData,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -219,7 +229,7 @@ func getAll_WithManyTransaction_ReturnSuccessfully(s *TransactionSuite, desc str
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc string) {
+func getAll_FilterByStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3)}
 	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
@@ -248,7 +258,7 @@ func getAll_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc st
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc string) {
+func getAll_FilterByEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3)}
 	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
@@ -276,7 +286,7 @@ func getAll_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc strin
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_QueryMinPrice_ReturnDataGreaterThanMinPrice(s *TransactionSuite, desc string) {
+func getAll_FilterByMinPrice_ReturnDataGreaterThanMinPrice(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{Price: 1000}
 	ow2 := transaction.Transaction{Price: 1500}
 	ow3 := transaction.Transaction{Price: 2000}
@@ -304,7 +314,7 @@ func getAll_QueryMinPrice_ReturnDataGreaterThanMinPrice(s *TransactionSuite, des
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_QueryMaxPrice_ReturnDataLessThanMinPrice(s *TransactionSuite, desc string) {
+func getAll_FilterByMaxPrice_ReturnDataLessThanMinPrice(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{Price: 1000}
 	ow2 := transaction.Transaction{Price: 1500}
 	ow3 := transaction.Transaction{Price: 2000}
@@ -332,7 +342,7 @@ func getAll_QueryMaxPrice_ReturnDataLessThanMinPrice(s *TransactionSuite, desc s
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *TransactionSuite, desc string) {
+func getAll_FilterByStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3)}
 	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
@@ -362,7 +372,7 @@ func getAll_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transaction
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_QueryMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc string) {
+func getAll_FilterByMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc string) {
 	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(4)
 	s.Require().NoError(err, desc)
 
@@ -385,7 +395,7 @@ func getAll_QueryMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc
 	s.Require().Empty(decodedNextKey, desc)
 }
 
-func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc string) {
+func getAll_FilterBySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc string) {
 	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(4)
 	s.Require().NoError(err, desc)
 
@@ -400,6 +410,225 @@ func getAll_QuerySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc s
 	opt := domain.GetTransOpt{
 		Filter: domain.Filter{
 			SubCategIDs: []int64{subList[1].ID, subList[3].ID},
+		},
+	}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_FilterByDateAndPriceAndMainCateg_ReturnCorrectData(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3), Price: 1000}
+	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2), Price: 2000}
+	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1), Price: 3000}
+	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0), Price: 4000}
+	ow5 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3), Price: 1000}
+	ow6 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2), Price: 2000}
+	ow7 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1), Price: 3000}
+	ow8 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0), Price: 4000}
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2)
+
+	startDate := mockTimeNow.AddDate(0, 0, -2)
+	endDate := mockTimeNow.AddDate(0, 0, 0)
+	minPrice := 2000.00
+	maxPrice := 3000.00
+	opt := domain.GetTransOpt{
+		Filter: domain.Filter{
+			StartDate:    &startDate,
+			EndDate:      &endDate,
+			MinPrice:     &minPrice,
+			MaxPrice:     &maxPrice,
+			MainCategIDs: []int64{mainList[1].ID, mainList[2].ID},
+		},
+	}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_SortByDateAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
+	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
+	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0)}
+	ow5 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
+
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(5, ow1, ow2, ow3, ow4, ow5)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 2, 4, 1, 3)
+
+	opt := domain.GetTransOpt{
+		Sort: &domain.Sort{
+			By:  domain.SortByTypeDate,
+			Dir: domain.SortDirTypeAsc,
+		},
+	}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_SortByDateDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
+	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
+	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0)}
+	ow5 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
+
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(5, ow1, ow2, ow3, ow4, ow5)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 3, 1, 4, 2, 0)
+
+	opt := domain.GetTransOpt{
+		Sort: &domain.Sort{
+			By:  domain.SortByTypeDate,
+			Dir: domain.SortDirTypeDesc,
+		},
+	}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_SortByPriceAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Price: 2500}
+	ow2 := transaction.Transaction{Price: 1500}
+	ow3 := transaction.Transaction{Price: 500}
+	ow4 := transaction.Transaction{Price: 2000}
+	ow5 := transaction.Transaction{Price: 500}
+
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(5, ow1, ow2, ow3, ow4, ow5)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 2, 4, 1, 3, 0)
+
+	opt := domain.GetTransOpt{
+		Sort: &domain.Sort{
+			By:  domain.SortByTypePrice,
+			Dir: domain.SortDirTypeAsc,
+		},
+	}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_SortByPriceDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Price: 2500}
+	ow2 := transaction.Transaction{Price: 1500}
+	ow3 := transaction.Transaction{Price: 500}
+	ow4 := transaction.Transaction{Price: 2000}
+	ow5 := transaction.Transaction{Price: 500}
+
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(5, ow1, ow2, ow3, ow4, ow5)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 3, 1, 4, 2)
+
+	opt := domain.GetTransOpt{
+		Sort: &domain.Sort{
+			By:  domain.SortByTypePrice,
+			Dir: domain.SortDirTypeDesc,
+		},
+	}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_SortByTypeAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow2 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
+	ow3 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow4 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow5 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
+
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(5, ow1, ow2, ow3, ow4, ow5)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 2, 3, 1, 4)
+
+	opt := domain.GetTransOpt{
+		Sort: &domain.Sort{
+			By:  domain.SortByTypeTransType,
+			Dir: domain.SortDirTypeAsc,
+		},
+	}
+	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Empty(decodedNextKey, desc)
+}
+
+func getAll_SortByTypeDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow2 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
+	ow3 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow4 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow5 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
+
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(5, ow1, ow2, ow3, ow4, ow5)
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 4, 1, 3, 2, 0)
+
+	opt := domain.GetTransOpt{
+		Sort: &domain.Sort{
+			By:  domain.SortByTypeTransType,
+			Dir: domain.SortDirTypeDesc,
 		},
 	}
 	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
@@ -436,6 +665,138 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	s.Require().Equal(expResult, trans, desc)
 	decodedNextKeyID := transactionList[4].ID
 	s.Require().Equal(domain.DecodedNextKeys{{Field: "ID", Value: fmt.Sprint(decodedNextKeyID)}}, deencodedNextKey, desc)
+}
+
+func getAll_WithNextKeyCursorAndSortByDate_ReturnCorrectData(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -5)}
+	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -4)}
+	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -4)}
+	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow5 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -3)}
+	ow6 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
+	ow7 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
+	ow8 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	s.Require().NoError(err, desc)
+
+	// prepare encodedNextKey
+	encodedNextKey, err := codeutil.EncodeNextKeys(domain.DecodedNextKeys{{Field: "Date"}, {Field: "ID"}}, transactionList[3])
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 2, 1, 0)
+	expDecodedNextKey := domain.DecodedNextKeys{
+		{Field: "Date", Value: transactionList[3].Date.Format("2006-01-02")},
+		{Field: "ID", Value: fmt.Sprint(transactionList[3].ID)},
+	}
+
+	opt := domain.GetTransOpt{
+		Cursor: domain.Cursor{
+			NextKey: encodedNextKey,
+			Size:    3,
+		},
+		Sort: &domain.Sort{
+			By:  domain.SortByTypeDate,
+			Dir: domain.SortDirTypeDesc,
+		},
+	}
+	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Equal(expDecodedNextKey, deencodedNextKey, desc)
+}
+
+func getAll_WithNextKeyCursorAndSortByPrice_ReturnCorrectData(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Price: 300}
+	ow2 := transaction.Transaction{Price: 300}
+	ow3 := transaction.Transaction{Price: 500}
+	ow4 := transaction.Transaction{Price: 1000}
+	ow5 := transaction.Transaction{Price: 1000}
+	ow6 := transaction.Transaction{Price: 2000}
+	ow7 := transaction.Transaction{Price: 2500}
+	ow8 := transaction.Transaction{Price: 3000}
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	s.Require().NoError(err, desc)
+
+	// prepare encodedNextKey
+	encodedNextKey, err := codeutil.EncodeNextKeys(domain.DecodedNextKeys{{Field: "Price"}, {Field: "ID"}}, transactionList[4])
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 3, 2, 1)
+	expDecodedNextKey := domain.DecodedNextKeys{
+		{Field: "Price", Value: fmt.Sprintf("%f", transactionList[4].Price)},
+		{Field: "ID", Value: fmt.Sprint(transactionList[4].ID)},
+	}
+
+	opt := domain.GetTransOpt{
+		Cursor: domain.Cursor{
+			NextKey: encodedNextKey,
+			Size:    3,
+		},
+		Sort: &domain.Sort{
+			By:  domain.SortByTypePrice,
+			Dir: domain.SortDirTypeDesc,
+		},
+	}
+	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Equal(expDecodedNextKey, deencodedNextKey, desc)
+}
+
+func getAll_WithNextKeyCursorAndSortByTransType_ReturnCorrectData(s *TransactionSuite, desc string) {
+	ow1 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow2 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
+	ow3 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow4 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow5 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
+	ow6 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow7 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
+	ow8 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
+	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	s.Require().NoError(err, desc)
+
+	// prepare encodedNextKey
+	encodedNextKey, err := codeutil.EncodeNextKeys(domain.DecodedNextKeys{{Field: "Type"}, {Field: "ID"}}, transactionList[4])
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow1, ow2)
+	s.Require().NoError(err, desc)
+	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(2, ow3, ow4)
+	s.Require().NoError(err, desc)
+
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 6, 5)
+	expDecodedNextKey := domain.DecodedNextKeys{
+		{Field: "Type", Value: transactionList[4].Type},
+		{Field: "ID", Value: fmt.Sprint(transactionList[4].ID)},
+	}
+
+	opt := domain.GetTransOpt{
+		Cursor: domain.Cursor{
+			NextKey: encodedNextKey,
+			Size:    3,
+		},
+		Sort: &domain.Sort{
+			By:  domain.SortByTypeTransType,
+			Dir: domain.SortDirTypeDesc,
+		},
+	}
+	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCtx, opt, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, trans, desc)
+	s.Require().Equal(expDecodedNextKey, deencodedNextKey, desc)
 }
 
 func (s *TransactionSuite) TestUpdate() {
