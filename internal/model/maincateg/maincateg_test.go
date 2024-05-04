@@ -372,3 +372,30 @@ func update_DuplicateIcon_ReturnError(s *MainCategSuite, desc string) {
 	err = s.mainCategModel.Update(domainMainCateg)
 	s.Require().EqualError(err, domain.ErrUniqueIconUser.Error(), desc)
 }
+
+func (s *MainCategSuite) TestDelete() {
+	for scenario, fn := range map[string]func(s *MainCategSuite, desc string){
+		"when no error, delete successfully": delete_NoError_DeleteSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func delete_NoError_DeleteSuccessfully(s *MainCategSuite, desc string) {
+	categ, _, _, err := s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	err = s.mainCategModel.Delete(categ.ID)
+	s.Require().NoError(err, desc)
+
+	checkStmt := `SELECT id
+							 FROM main_categories
+							 WHERE id = ?
+							 `
+	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&categ.ID)
+	s.Require().EqualError(err, sql.ErrNoRows.Error(), desc)
+}
