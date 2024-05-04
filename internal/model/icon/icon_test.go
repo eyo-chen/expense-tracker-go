@@ -9,8 +9,6 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
 )
@@ -20,7 +18,7 @@ type IconSuite struct {
 	db      *sql.DB
 	migrate *migrate.Migrate
 	model   interfaces.IconModel
-	f       *efactory.Factory[Icon]
+	f       *factory
 }
 
 func TestIconSuite(t *testing.T) {
@@ -34,9 +32,7 @@ func (s *IconSuite) SetupSuite() {
 	s.model = NewIconModel(db)
 	s.db = db
 	s.migrate = migrate
-	s.f = efactory.New(Icon{}).SetConfig(efactory.Config[Icon]{
-		DB: &esql.Config{DB: db},
-	})
+	s.f = NewFactory(db)
 }
 
 func (s *IconSuite) TearDownSuite() {
@@ -47,9 +43,7 @@ func (s *IconSuite) TearDownSuite() {
 
 func (s *IconSuite) SetupTest() {
 	s.model = NewIconModel(s.db)
-	s.f = efactory.New(Icon{}).SetConfig(efactory.Config[Icon]{
-		DB: &esql.Config{DB: s.db},
-	})
+	s.f = NewFactory(s.db)
 }
 
 func (s *IconSuite) TearDownTest() {
@@ -78,7 +72,7 @@ func (s *IconSuite) TestList() {
 }
 
 func list_WithIcons_ReturnAll(s *IconSuite, desc string) {
-	icons, err := s.f.BuildList(2).Insert()
+	icons, err := s.f.InsertMany(2)
 	s.Require().NoError(err, desc)
 
 	expRes := []domain.Icon{
@@ -117,7 +111,7 @@ func (s *IconSuite) TestGetByID() {
 }
 
 func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
-	icons, err := s.f.BuildList(2).Insert()
+	icons, err := s.f.InsertMany(2)
 	s.Require().NoError(err, desc)
 
 	expRes := domain.Icon{
@@ -131,7 +125,7 @@ func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
 }
 
 func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
-	_, err := s.f.BuildList(2).Insert()
+	_, err := s.f.InsertMany(2)
 	s.Require().NoError(err, desc)
 
 	expRes := domain.Icon{}
