@@ -10,7 +10,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
 )
 
-type MainCategFactory struct {
+type factory struct {
 	MainCateg *efactory.Factory[MainCateg]
 	User      *efactory.Factory[user.User]
 	Icon      *efactory.Factory[icon.Icon]
@@ -24,7 +24,7 @@ func setExpenseType(m *MainCateg) {
 	m.Type = domain.TransactionTypeExpense.ToModelValue()
 }
 
-func NewMainCategFactory(db *sql.DB) *MainCategFactory {
+func newFactory(db *sql.DB) *factory {
 	categConfig := efactory.Config[MainCateg]{
 		DB:          &esql.Config{DB: db},
 		StorageName: "main_categories",
@@ -39,7 +39,7 @@ func NewMainCategFactory(db *sql.DB) *MainCategFactory {
 		DB: &esql.Config{DB: db},
 	}
 
-	return &MainCategFactory{
+	return &factory{
 		MainCateg: efactory.New(MainCateg{}).SetConfig(categConfig).
 			SetTrait("income", setIncomeType).
 			SetTrait("expense", setExpenseType),
@@ -48,7 +48,8 @@ func NewMainCategFactory(db *sql.DB) *MainCategFactory {
 	}
 }
 
-func (mf *MainCategFactory) InsertUserAndIcon(userI int, iconI int) ([]user.User, []icon.Icon, error) {
+// InsertUsersAndIcons inserts many users and icons
+func (mf *factory) InsertUsersAndIcons(userI int, iconI int) ([]user.User, []icon.Icon, error) {
 	users, err := mf.User.BuildList(userI).Insert()
 	if err != nil {
 		return nil, nil, err
@@ -62,7 +63,8 @@ func (mf *MainCategFactory) InsertUserAndIcon(userI int, iconI int) ([]user.User
 	return users, icons, nil
 }
 
-func (mf *MainCategFactory) InsertMainCategWithAss(ow MainCateg) (MainCateg, user.User, icon.Icon, error) {
+// InsertMainCateg inserts a main category
+func (mf *factory) InsertMainCategWithAss(ow MainCateg) (MainCateg, user.User, icon.Icon, error) {
 	user := &user.User{}
 	icon := &icon.Icon{}
 
@@ -71,39 +73,42 @@ func (mf *MainCategFactory) InsertMainCategWithAss(ow MainCateg) (MainCateg, use
 	return maincateg, *user, *icon, err
 }
 
-func (mf *MainCategFactory) InsertMainCategListWithAss(i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, []icon.Icon, error) {
-	iconPtrList := make([]interface{}, 0, iconIdx)
+// InsertMainCategList inserts many main categories with associations and traits
+func (mf *factory) InsertMainCategListWithAss(i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, []icon.Icon, error) {
+	iconPtrList := make([]interface{}, iconIdx)
 	for k := 0; k < iconIdx; k++ {
-		iconPtrList = append(iconPtrList, &icon.Icon{})
+		iconPtrList[k] = &icon.Icon{}
 	}
 
-	userPtrList := make([]interface{}, 0, userIdx)
+	userPtrList := make([]interface{}, userIdx)
 	for k := 0; k < userIdx; k++ {
-		userPtrList = append(userPtrList, &user.User{})
+		userPtrList[k] = &user.User{}
 	}
 
 	maincategList, _, err := mf.MainCateg.BuildList(i).
 		WithTraits(traitName...).
-		WithMany(userPtrList...).WithMany(iconPtrList...).
+		WithMany(userPtrList...).
+		WithMany(iconPtrList...).
 		InsertWithAss()
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	icons := make([]icon.Icon, 0, i)
-	for _, v := range iconPtrList {
-		icons = append(icons, *v.(*icon.Icon))
+	icons := make([]icon.Icon, i)
+	for k, v := range iconPtrList {
+		icons[k] = *v.(*icon.Icon)
 	}
 
-	users := make([]user.User, 0, i)
-	for _, v := range userPtrList {
-		users = append(users, *v.(*user.User))
+	users := make([]user.User, i)
+	for k, v := range userPtrList {
+		users[k] = *v.(*user.User)
 	}
 
 	return maincategList, users, icons, nil
 }
 
-func (mf *MainCategFactory) Reset() {
+// Reset resets the factory
+func (mf *factory) Reset() {
 	mf.MainCateg.Reset()
 	mf.User.Reset()
 	mf.Icon.Reset()
