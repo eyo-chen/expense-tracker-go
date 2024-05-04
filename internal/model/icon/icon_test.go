@@ -32,7 +32,7 @@ func (s *IconSuite) SetupSuite() {
 	s.model = NewIconModel(db)
 	s.db = db
 	s.migrate = migrate
-	s.f = NewFactory(db)
+	s.f = newFactory(db)
 }
 
 func (s *IconSuite) TearDownSuite() {
@@ -43,7 +43,7 @@ func (s *IconSuite) TearDownSuite() {
 
 func (s *IconSuite) SetupTest() {
 	s.model = NewIconModel(s.db)
-	s.f = NewFactory(s.db)
+	s.f = newFactory(s.db)
 }
 
 func (s *IconSuite) TearDownTest() {

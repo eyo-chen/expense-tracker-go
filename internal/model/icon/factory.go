@@ -11,7 +11,7 @@ type factory struct {
 	i *efactory.Factory[Icon]
 }
 
-func NewFactory(db *sql.DB) *factory {
+func newFactory(db *sql.DB) *factory {
 	return &factory{
 		i: efactory.New(Icon{}).SetConfig(efactory.Config[Icon]{
 			DB: &esql.Config{DB: db},
