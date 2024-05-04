@@ -399,3 +399,55 @@ func delete_NoError_DeleteSuccessfully(s *MainCategSuite, desc string) {
 	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&categ.ID)
 	s.Require().EqualError(err, sql.ErrNoRows.Error(), desc)
 }
+
+func (s *MainCategSuite) TestGetByID() {
+	for scenario, fn := range map[string]func(s *MainCategSuite, desc string){
+		"when has data, return successfully":     getByID_NoError_ReturnSuccessfully,
+		"when find no data, return successfully": getByID_FindNoData_ReturnSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByID_NoError_ReturnSuccessfully(s *MainCategSuite, desc string) {
+	// prepare existing data
+	categ, user, _, err := s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	// prepare more user data
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	// prepare expected result
+	expResult := domain.MainCateg{
+		ID:   categ.ID,
+		Name: categ.Name,
+		Type: domain.CvtToTransactionType(categ.Type),
+	}
+
+	result, err := s.mainCategModel.GetByID(categ.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, *result, desc)
+}
+
+func getByID_FindNoData_ReturnSuccessfully(s *MainCategSuite, desc string) {
+	// prepare existing data
+	_, user, _, err := s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	// prepare more user data
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	result, err := s.mainCategModel.GetByID(0, user.ID)
+	s.Require().Equal(domain.ErrMainCategNotFound, err, desc)
+	s.Require().Nil(result, desc)
+}
