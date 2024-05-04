@@ -1,4 +1,4 @@
-package maincateg_test
+package maincateg
 
 import (
 	"database/sql"
@@ -7,7 +7,6 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
@@ -20,7 +19,7 @@ type MainCategSuite struct {
 	suite.Suite
 	db             *sql.DB
 	migrate        *migrate.Migrate
-	f              *maincateg.MainCategFactory
+	f              *factory
 	mainCategModel interfaces.MainCategModel
 	userModel      interfaces.UserModel
 	iconModel      interfaces.IconModel
@@ -36,11 +35,11 @@ func (s *MainCategSuite) SetupSuite() {
 	logger.Register()
 	s.db = db
 	s.migrate = migrate
-	s.mainCategModel = maincateg.NewMainCategModel(db)
+	s.mainCategModel = NewMainCategModel(db)
 	s.userModel = user.NewUserModel(db)
 	s.iconModel = icon.NewIconModel(db)
 
-	s.f = maincateg.NewMainCategFactory(db)
+	s.f = newFactory(db)
 }
 
 func (s *MainCategSuite) TearDownSuite() {
@@ -50,10 +49,10 @@ func (s *MainCategSuite) TearDownSuite() {
 }
 
 func (s *MainCategSuite) SetupTest() {
-	s.mainCategModel = maincateg.NewMainCategModel(s.db)
+	s.mainCategModel = NewMainCategModel(s.db)
 	s.userModel = user.NewUserModel(s.db)
 	s.iconModel = icon.NewIconModel(s.db)
-	s.f = maincateg.NewMainCategFactory(s.db)
+	s.f = newFactory(s.db)
 }
 
 func (s *MainCategSuite) TearDownTest() {
@@ -90,7 +89,7 @@ func (s *MainCategSuite) TestCreate() {
 }
 
 func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.InsertUserAndIcon(1, 1)
+	users, icons, err := s.f.InsertUsersAndIcons(1, 1)
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
@@ -109,7 +108,7 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 							 AND name = ?
 							 AND type = ?
 							 `
-	var result maincateg.MainCateg
+	var result MainCateg
 	err = s.db.QueryRow(checkStmt, users[0].ID, "test", domain.TransactionTypeExpense.ToModelValue()).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categ.Name, result.Name, desc)
@@ -118,7 +117,7 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 }
 
 func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
-	createdMainCateg, user, _, err := s.f.InsertMainCategWithAss(maincateg.MainCateg{})
+	createdMainCateg, user, _, err := s.f.InsertMainCategWithAss(MainCateg{})
 	s.Require().NoError(err, desc)
 
 	icon, err := s.f.Icon.Build().Insert()
@@ -136,7 +135,7 @@ func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 }
 
 func create_DuplicateIcon_ReturnError(s *MainCategSuite, desc string) {
-	createdMainCateg, user, icon, err := s.f.InsertMainCategWithAss(maincateg.MainCateg{})
+	createdMainCateg, user, icon, err := s.f.InsertMainCategWithAss(MainCateg{})
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
@@ -283,7 +282,7 @@ func (s *MainCategSuite) TestUpdate() {
 }
 
 func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
-	categ, _, _, err := s.f.InsertMainCategWithAss(maincateg.MainCateg{})
+	categ, _, _, err := s.f.InsertMainCategWithAss(MainCateg{})
 	s.Require().NoError(err, desc)
 
 	inputCateg := &domain.MainCateg{
@@ -301,7 +300,7 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 							 FROM main_categories
 							 WHERE id = ?
 							 `
-	var result maincateg.MainCateg
+	var result MainCateg
 	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
@@ -328,14 +327,14 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 							 WHERE id = ?
 							 `
 	// check if the data is updated
-	var result maincateg.MainCateg
+	var result MainCateg
 	err = s.db.QueryRow(checkStmt, categs[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
 	s.Require().Equal(inputCateg.Type.ToModelValue(), result.Type, desc)
 
 	// check if the other data is not updated
-	var result2 maincateg.MainCateg
+	var result2 MainCateg
 	err = s.db.QueryRow(checkStmt, categs[1].ID).Scan(&result2.ID, &result2.Name, &result2.Type, &result2.IconID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categs[1].Name, result2.Name, desc)
@@ -372,4 +371,83 @@ func update_DuplicateIcon_ReturnError(s *MainCategSuite, desc string) {
 	}
 	err = s.mainCategModel.Update(domainMainCateg)
 	s.Require().EqualError(err, domain.ErrUniqueIconUser.Error(), desc)
+}
+
+func (s *MainCategSuite) TestDelete() {
+	for scenario, fn := range map[string]func(s *MainCategSuite, desc string){
+		"when no error, delete successfully": delete_NoError_DeleteSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func delete_NoError_DeleteSuccessfully(s *MainCategSuite, desc string) {
+	categ, _, _, err := s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	err = s.mainCategModel.Delete(categ.ID)
+	s.Require().NoError(err, desc)
+
+	checkStmt := `SELECT id
+							 FROM main_categories
+							 WHERE id = ?
+							 `
+	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&categ.ID)
+	s.Require().EqualError(err, sql.ErrNoRows.Error(), desc)
+}
+
+func (s *MainCategSuite) TestGetByID() {
+	for scenario, fn := range map[string]func(s *MainCategSuite, desc string){
+		"when has data, return successfully":     getByID_NoError_ReturnSuccessfully,
+		"when find no data, return successfully": getByID_FindNoData_ReturnSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByID_NoError_ReturnSuccessfully(s *MainCategSuite, desc string) {
+	// prepare existing data
+	categ, user, _, err := s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	// prepare more user data
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	// prepare expected result
+	expResult := domain.MainCateg{
+		ID:   categ.ID,
+		Name: categ.Name,
+		Type: domain.CvtToTransactionType(categ.Type),
+	}
+
+	result, err := s.mainCategModel.GetByID(categ.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, *result, desc)
+}
+
+func getByID_FindNoData_ReturnSuccessfully(s *MainCategSuite, desc string) {
+	// prepare existing data
+	_, user, _, err := s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	// prepare more user data
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	result, err := s.mainCategModel.GetByID(0, user.ID)
+	s.Require().Equal(domain.ErrMainCategNotFound, err, desc)
+	s.Require().Nil(result, desc)
 }
