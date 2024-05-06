@@ -11,13 +11,13 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
 )
 
-type Factory struct {
+type factory struct {
 	subCateg  *efactory.Factory[SubCateg]
 	maincateg *efactory.Factory[maincateg.MainCateg]
 	user      *efactory.Factory[user.User]
 }
 
-func NewFactory(db *sql.DB) *Factory {
+func newFactory(db *sql.DB) *factory {
 	subcategConfig := efactory.Config[SubCateg]{
 		DB:          &esql.Config{DB: db},
 		StorageName: "sub_categories",
@@ -32,14 +32,14 @@ func NewFactory(db *sql.DB) *Factory {
 		DB: &esql.Config{DB: db},
 	}
 
-	return &Factory{
+	return &factory{
 		subCateg:  efactory.New(SubCateg{}).SetConfig(subcategConfig),
 		maincateg: efactory.New(maincateg.MainCateg{}).SetConfig(maincategConfig),
 		user:      efactory.New(user.User{}).SetConfig(userConfig),
 	}
 }
 
-func (f *Factory) InsertUserAndMaincateg() (user.User, maincateg.MainCateg, error) {
+func (f *factory) InsertUserAndMaincateg() (user.User, maincateg.MainCateg, error) {
 	u := user.User{}
 	ow := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue()}
 
@@ -51,7 +51,7 @@ func (f *Factory) InsertUserAndMaincateg() (user.User, maincateg.MainCateg, erro
 	return u, m, nil
 }
 
-func (f *Factory) InsertSubcategs(n int, ows ...SubCateg) ([]SubCateg, user.User, maincateg.MainCateg, error) {
+func (f *factory) InsertSubcategs(n int, ows ...SubCateg) ([]SubCateg, user.User, maincateg.MainCateg, error) {
 	u := user.User{}
 	ow := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue()}
 	m, _, err := f.maincateg.Build().WithOne(&u).WithOne(&icon.Icon{}).Overwrite(ow).InsertWithAss()
@@ -76,7 +76,7 @@ func (f *Factory) InsertSubcategs(n int, ows ...SubCateg) ([]SubCateg, user.User
 	return ss, u, m, nil
 }
 
-func (f *Factory) Reset() {
+func (f *factory) Reset() {
 	f.subCateg.Reset()
 	f.user.Reset()
 	f.maincateg.Reset()

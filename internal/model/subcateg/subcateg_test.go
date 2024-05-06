@@ -1,4 +1,4 @@
-package subcateg_test
+package subcateg
 
 import (
 	"database/sql"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
@@ -20,7 +19,7 @@ type SubCategSuite struct {
 	subCategModel interfaces.SubCategModel
 	db            *sql.DB
 	migrate       *migrate.Migrate
-	f             *subcateg.Factory
+	f             *factory
 }
 
 func TestSubCategSuite(t *testing.T) {
@@ -32,9 +31,9 @@ func (s *SubCategSuite) SetupSuite() {
 	db, migrate := testutil.ConnToDB(port)
 	logger.Register()
 	s.db = db
-	s.subCategModel = subcateg.NewSubCategModel(db)
+	s.subCategModel = NewSubCategModel(db)
 	s.migrate = migrate
-	s.f = subcateg.NewFactory(db)
+	s.f = newFactory(db)
 }
 
 func (s *SubCategSuite) TearDownSuite() {
@@ -44,8 +43,8 @@ func (s *SubCategSuite) TearDownSuite() {
 }
 
 func (s *SubCategSuite) SetupTest() {
-	s.subCategModel = subcateg.NewSubCategModel(s.db)
-	s.f = subcateg.NewFactory(s.db)
+	s.subCategModel = NewSubCategModel(s.db)
+	s.f = newFactory(s.db)
 }
 
 func (s *SubCategSuite) TearDownTest() {
@@ -103,7 +102,7 @@ func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// check
-	var result subcateg.SubCateg
+	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
 	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID, subCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
@@ -158,7 +157,7 @@ func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// check
-	var result subcateg.SubCateg
+	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
 	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
@@ -183,7 +182,7 @@ func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc stri
 	s.Require().NoError(err, desc)
 
 	// check
-	var result subcateg.SubCateg
+	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
 	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
@@ -191,7 +190,7 @@ func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc stri
 	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
 
 	// check the other main category
-	var result2 subcateg.SubCateg
+	var result2 SubCateg
 	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
 	err = s.db.QueryRow(checkStmt, user.ID, subcategs[1].MainCategID, subcategs[1].Name).Scan(&result2.ID, &result2.Name, &result2.MainCategID)
 	s.Require().NoError(err, desc)
