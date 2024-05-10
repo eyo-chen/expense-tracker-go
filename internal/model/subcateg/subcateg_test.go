@@ -126,6 +126,109 @@ func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 }
 
+func (s *SubCategSuite) TestGetByMainCategID() {
+	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
+		"when find no data, return empty":                              getByMainCategID_FindNoData_ReturnEmpty,
+		"when with one main category, return correct subcategories":    getByMainCategID_WithOneMainCateg_ReturnCorrectSubCategs,
+		"when with many main categories, return correct subcategories": getByMainCategID_WithManyMainCategs_ReturnCorrectSubCategs,
+		"when with many users, return correct subcategories":           getByMainCategID_WithManyUsers_ReturnCorrectSubCategs,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByMainCategID_FindNoData_ReturnEmpty(s *SubCategSuite, desc string) {
+	// prepare data
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[0]
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID+9999)
+	s.Require().NoError(err, desc)
+	s.Require().Nil(result, desc)
+}
+
+func getByMainCategID_WithOneMainCateg_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[0]
+	expResult := []*domain.SubCateg{
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][0].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][0].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][0].MainCategID,
+		},
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][1].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][1].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][1].MainCategID,
+		},
+	}
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByMainCategID_WithManyMainCategs_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[2] // choose the third main category
+	expResult := []*domain.SubCateg{
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][0].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][0].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][0].MainCategID,
+		},
+	}
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByMainCategID_WithManyUsers_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// prepare more data with different user
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[2] // choose the third main category
+	expResult := []*domain.SubCateg{
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][0].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][0].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][0].MainCategID,
+		},
+	}
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
 func (s *SubCategSuite) TestUpdate() {
 	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
 		"when no duplicate data, update successfully":                  update_NoDuplicateData_UpdateSuccessfully,
