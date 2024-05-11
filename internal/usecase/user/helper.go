@@ -23,7 +23,7 @@ func genJWTToken(user domain.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	s, err := token.SignedString(key)
 	if err != nil {
-		logger.Error("token.SignedString failed", "package", "usecase", "err", err)
+		logger.Error("token.SignedString failed", "err", err)
 		return "", err
 	}
 
