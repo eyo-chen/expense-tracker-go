@@ -33,24 +33,24 @@ func (m *UserModel) Create(name, email, passwordHash string) error {
 	return nil
 }
 
-func (m *UserModel) FindByEmail(email string) (*domain.User, error) {
+func (m *UserModel) FindByEmail(email string) (domain.User, error) {
 	stmt := `SELECT id, name, email, password_hash FROM users WHERE email = ?`
 
 	var user User
 	if err := m.DB.QueryRow(stmt, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password_hash); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return domain.User{}, domain.ErrEmailNotFound
 		}
 
 		logger.Error("users SELECT m.DB.QueryRow", "err", err)
-		return nil, err
+		return domain.User{}, err
 	}
 
-	return cvtToDomainUser(&user), nil
+	return cvtToDomainUser(user), nil
 }
 
-func cvtToDomainUser(u *User) *domain.User {
-	return &domain.User{
+func cvtToDomainUser(u User) domain.User {
+	return domain.User{
 		ID:            u.ID,
 		Name:          u.Name,
 		Email:         u.Email,

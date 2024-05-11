@@ -49,10 +49,10 @@ func (s *UserSuite) TestSignup() {
 }
 
 func singup_EmailNotExists_SignupSuccessfully(s *UserSuite, desc string) {
-	s.mockUser.On("FindByEmail", "email.com").Return(nil, nil).Once()
+	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
 	s.mockUser.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
 	s.mockUser.On("FindByEmail", "email.com").
-		Return(&domain.User{
+		Return(domain.User{
 			ID:       1,
 			Name:     "username",
 			Email:    "email.com",
@@ -70,7 +70,7 @@ func singup_EmailNotExists_SignupSuccessfully(s *UserSuite, desc string) {
 }
 
 func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
-	userByEmail := &domain.User{
+	userByEmail := domain.User{
 		ID:    1,
 		Name:  "username",
 		Email: "email.com",
@@ -83,7 +83,7 @@ func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
 		Password: "password",
 	}
 	token, err := s.userUC.Signup(input)
-	s.Require().Equal(domain.ErrDataAlreadyExists, err, desc)
+	s.Require().Equal(domain.ErrEmailAlreadyExists, err, desc)
 	s.Require().Empty(token, desc)
 }
 
@@ -105,7 +105,7 @@ func login_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 	hashedPassword, err := auth.GenerateHashPassword("password")
 	s.Require().NoError(err)
 
-	userByEmail := &domain.User{
+	userByEmail := domain.User{
 		ID:            1,
 		Name:          "username",
 		Email:         "email.com",
@@ -124,7 +124,7 @@ func login_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 }
 
 func login_EmailNotExists_ReturnError(s *UserSuite, desc string) {
-	s.mockUser.On("FindByEmail", "email.com").Return(nil, nil).Once()
+	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
 
 	input := domain.User{
 		Email:    "email.com",
@@ -139,7 +139,7 @@ func login_PasswordNotMatch_ReturnError(s *UserSuite, desc string) {
 	hashedPassword, err := auth.GenerateHashPassword("password")
 	s.Require().NoError(err)
 
-	userByEmail := &domain.User{
+	userByEmail := domain.User{
 		ID:            1,
 		Name:          "username",
 		Email:         "email.com",

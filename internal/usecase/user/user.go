@@ -28,13 +28,12 @@ type Claims struct {
 }
 
 func (u *UserUC) Signup(user domain.User) (string, error) {
-	userByEmail, err := u.User.FindByEmail(user.Email)
-	if err != nil {
+	_, err := u.User.FindByEmail(user.Email)
+	if err != nil && err != domain.ErrEmailNotFound {
 		return "", err
 	}
-
-	if userByEmail != nil {
-		return "", domain.ErrDataAlreadyExists
+	if err == nil {
+		return "", domain.ErrEmailAlreadyExists
 	}
 
 	passwordHash, err := auth.GenerateHashPassword(user.Password)
@@ -52,7 +51,7 @@ func (u *UserUC) Signup(user domain.User) (string, error) {
 		return "", err
 	}
 
-	token, err := genJWTToken(*userWithID)
+	token, err := genJWTToken(userWithID)
 	if err != nil {
 		return "", err
 	}
@@ -63,18 +62,18 @@ func (u *UserUC) Signup(user domain.User) (string, error) {
 func (u *UserUC) Login(user domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
-		return "", err
-	}
+		if err == domain.ErrEmailNotFound {
+			return "", domain.ErrAuthentication
+		}
 
-	if userByEmail == nil {
-		return "", domain.ErrAuthentication
+		return "", err
 	}
 
 	if !auth.CompareHashPassword(user.Password, userByEmail.Password_hash) {
 		return "", domain.ErrAuthentication
 	}
 
-	token, err := genJWTToken(*userByEmail)
+	token, err := genJWTToken(userByEmail)
 	if err != nil {
 		return "", err
 	}

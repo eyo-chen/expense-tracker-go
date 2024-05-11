@@ -12,7 +12,7 @@ type UserModel interface {
 	Create(name, email, passwordHash string) error
 
 	// FindByEmail returns a user by email.
-	FindByEmail(email string) (*domain.User, error)
+	FindByEmail(email string) (domain.User, error)
 }
 
 // MainCategModel is the interface that wraps the basic methods for main category model.

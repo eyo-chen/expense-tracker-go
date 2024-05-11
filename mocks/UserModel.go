@@ -32,24 +32,22 @@ func (_m *UserModel) Create(name string, email string, passwordHash string) erro
 }
 
 // FindByEmail provides a mock function with given fields: email
-func (_m *UserModel) FindByEmail(email string) (*domain.User, error) {
+func (_m *UserModel) FindByEmail(email string) (domain.User, error) {
 	ret := _m.Called(email)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindByEmail")
 	}
 
-	var r0 *domain.User
+	var r0 domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*domain.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (domain.User, error)); ok {
 		return rf(email)
 	}
-	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
+	if rf, ok := ret.Get(0).(func(string) domain.User); ok {
 		r0 = rf(email)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*domain.User)
-		}
+		r0 = ret.Get(0).(domain.User)
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
