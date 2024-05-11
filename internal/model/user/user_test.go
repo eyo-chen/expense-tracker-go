@@ -140,7 +140,7 @@ func (s *UserSuite) TestFindByEmail() {
 				return
 			}
 
-			if test.Expected != nil && user == nil {
+			if test.Expected != nil {
 				s.Require().FailNow("Expected is not nil but user is nil", test.Desc)
 			}
 

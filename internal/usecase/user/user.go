@@ -51,7 +51,7 @@ func (u *UserUC) Signup(user domain.User) (string, error) {
 		return "", err
 	}
 
-	token, err := genJWTToken(*userWithID)
+	token, err := genJWTToken(userWithID)
 	if err != nil {
 		return "", err
 	}
@@ -62,18 +62,18 @@ func (u *UserUC) Signup(user domain.User) (string, error) {
 func (u *UserUC) Login(user domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
-		return "", err
-	}
+		if err == domain.ErrEmailNotFound {
+			return "", domain.ErrAuthentication
+		}
 
-	if userByEmail == nil {
-		return "", domain.ErrAuthentication
+		return "", err
 	}
 
 	if !auth.CompareHashPassword(user.Password, userByEmail.Password_hash) {
 		return "", domain.ErrAuthentication
 	}
 
-	token, err := genJWTToken(*userByEmail)
+	token, err := genJWTToken(userByEmail)
 	if err != nil {
 		return "", err
 	}
