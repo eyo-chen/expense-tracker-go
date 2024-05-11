@@ -39,7 +39,7 @@ func (m *UserModel) FindByEmail(email string) (*domain.User, error) {
 	var user User
 	if err := m.DB.QueryRow(stmt, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password_hash); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, domain.ErrEmailNotFound
 		}
 
 		logger.Error("users SELECT m.DB.QueryRow", "err", err)

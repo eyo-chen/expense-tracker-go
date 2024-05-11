@@ -28,13 +28,12 @@ type Claims struct {
 }
 
 func (u *UserUC) Signup(user domain.User) (string, error) {
-	userByEmail, err := u.User.FindByEmail(user.Email)
-	if err != nil {
+	_, err := u.User.FindByEmail(user.Email)
+	if err != nil && err != domain.ErrEmailNotFound {
 		return "", err
 	}
-
-	if userByEmail != nil {
-		return "", domain.ErrDataAlreadyExists
+	if err == nil {
+		return "", domain.ErrEmailAlreadyExists
 	}
 
 	passwordHash, err := auth.GenerateHashPassword(user.Password)

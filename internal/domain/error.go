@@ -3,6 +3,12 @@ package domain
 import "errors"
 
 var (
+	// email not found error
+	ErrEmailNotFound = errors.New("email not found")
+
+	// email already exists error
+	ErrEmailAlreadyExists = errors.New("email already exists")
+
 	// data already exists error
 	ErrDataAlreadyExists = errors.New("data already exists")
 
