@@ -40,6 +40,7 @@ func newFactory(db *sql.DB) *factory {
 	}
 }
 
+// InsertUserAndMaincateg inserts one user and one main category.
 func (f *factory) InsertUserAndMaincateg() (user.User, maincateg.MainCateg, error) {
 	u := user.User{}
 	ow := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue()}
@@ -50,31 +51,6 @@ func (f *factory) InsertUserAndMaincateg() (user.User, maincateg.MainCateg, erro
 	}
 
 	return u, m, nil
-}
-
-func (f *factory) InsertSubcategs(n int, ows ...SubCateg) ([]SubCateg, user.User, maincateg.MainCateg, error) {
-	u := user.User{}
-	ow := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue()}
-	m, _, err := f.maincateg.Build().WithOne(&u).WithOne(&icon.Icon{}).Overwrite(ow).InsertWithAss()
-	if err != nil {
-		return nil, user.User{}, maincateg.MainCateg{}, err
-	}
-
-	subcategOWs := make([]SubCateg, n)
-	for i := 0; i < n; i++ {
-		if ows != nil {
-			subcategOWs[i] = ows[i]
-		}
-		subcategOWs[i].MainCategID = m.ID
-		subcategOWs[i].UserID = u.ID
-	}
-
-	ss, err := f.subCateg.BuildList(n).Overwrites(subcategOWs...).Insert()
-	if err != nil {
-		return nil, user.User{}, maincateg.MainCateg{}, err
-	}
-
-	return ss, u, m, nil
 }
 
 // InsertSubcategsWithOneOrManyMainCateg inserts n subcategories with one or many main categories and one user.

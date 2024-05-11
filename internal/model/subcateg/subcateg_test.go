@@ -2,7 +2,6 @@ package subcateg
 
 import (
 	"database/sql"
-	"fmt"
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -112,13 +111,15 @@ func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
 
 func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string) {
 	// prepare data
-	subcategs, user, maincateg, err := s.f.InsertSubcategs(1)
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{2, 2})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][1]
 	inputSubCateg := &domain.SubCateg{
-		Name:        subcategs[0].Name,
-		MainCategID: maincateg.ID,
+		Name:        subCateg.Name,
+		MainCategID: mainCateg.ID,
 	}
 
 	// action and check
@@ -245,14 +246,16 @@ func (s *SubCategSuite) TestUpdate() {
 
 func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	subcategs, user, maincateg, err := s.f.InsertSubcategs(1)
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
 	inputSubCateg := &domain.SubCateg{
-		ID:          subcategs[0].ID,
+		ID:          subCateg.ID,
 		Name:        "updated test",
-		MainCategID: maincateg.ID,
+		MainCategID: mainCateg.ID,
 	}
 
 	// action
@@ -262,7 +265,7 @@ func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// check
 	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
-	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
+	err = s.db.QueryRow(checkStmt, user.ID, mainCateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputSubCateg.Name, result.Name, desc)
 	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
@@ -270,14 +273,16 @@ func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 
 func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	subcategs, user, maincateg, err := s.f.InsertSubcategs(2)
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{1, 1})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
 	inputSubCateg := &domain.SubCateg{
-		ID:          subcategs[0].ID,
+		ID:          subCateg.ID,
 		Name:        "updated test",
-		MainCategID: maincateg.ID,
+		MainCategID: mainCateg.ID,
 	}
 
 	// action
@@ -287,32 +292,34 @@ func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc stri
 	// check
 	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
-	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
+	err = s.db.QueryRow(checkStmt, user.ID, mainCateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputSubCateg.Name, result.Name, desc)
 	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
 
 	// check the other main category
 	var result2 SubCateg
+	subCateg1 := mainCategIDToSubCategs[mainCategs[1].ID][0]
 	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
-	err = s.db.QueryRow(checkStmt, user.ID, subcategs[1].MainCategID, subcategs[1].Name).Scan(&result2.ID, &result2.Name, &result2.MainCategID)
+	err = s.db.QueryRow(checkStmt, user.ID, subCateg1.MainCategID, subCateg1.Name).Scan(&result2.ID, &result2.Name, &result2.MainCategID)
 	s.Require().NoError(err, desc)
-	s.Require().Equal(subcategs[1].Name, result2.Name, desc)
-	s.Require().Equal(subcategs[1].MainCategID, result2.MainCategID, desc)
+	s.Require().Equal(subCateg1.Name, result2.Name, desc)
+	s.Require().Equal(subCateg1.MainCategID, result2.MainCategID, desc)
 }
 
 func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 	// prepare existing data
-	subcategs, _, maincateg, err := s.f.InsertSubcategs(2)
+	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{2, 2})
 	s.Require().NoError(err, desc)
 
-	fmt.Println("subcategs", subcategs)
-
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
+	subCateg1 := mainCategIDToSubCategs[mainCateg.ID][1]
 	inputSubCateg := &domain.SubCateg{
-		ID:          subcategs[0].ID,
-		Name:        subcategs[1].Name, // update to duplicate name
-		MainCategID: maincateg.ID,
+		ID:          subCateg.ID,
+		Name:        subCateg1.Name, // update to duplicate name
+		MainCategID: mainCateg.ID,
 	}
 
 	// action and check
