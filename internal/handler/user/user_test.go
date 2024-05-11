@@ -72,7 +72,7 @@ func signup_NoError_CreateSuccessfully(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Signup", user).Return("token", nil)
+	s.mockUserUC.On("Signup", user).Return("token", nil).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{
@@ -211,7 +211,7 @@ func signup_EmailExists_CreateSuccessfully(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Signup", user).Return("", domain.ErrEmailAlreadyExists)
+	s.mockUserUC.On("Signup", user).Return("", domain.ErrEmailAlreadyExists).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{
