@@ -10,6 +10,7 @@ import (
 
 const (
 	UniqueNameUserMainCategory = "sub_categories.unique_name_user_maincategory"
+	packageName                = "model/subcateg"
 )
 
 type SubCategModel struct {
@@ -36,7 +37,7 @@ func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 			return domain.ErrUniqueNameUserMainCateg
 		}
 
-		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		logger.Error("m.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -48,7 +49,7 @@ func (m *SubCategModel) GetAll(userID int64) ([]*domain.SubCateg, error) {
 
 	rows, err := m.DB.Query(stmt, userID)
 	if err != nil {
-		logger.Error("m.DB.Query failed", "package", "model", "err", err)
+		logger.Error("m.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -57,7 +58,7 @@ func (m *SubCategModel) GetAll(userID int64) ([]*domain.SubCateg, error) {
 	for rows.Next() {
 		var categ SubCateg
 		if err := rows.Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
-			logger.Error("rows.Scan failed", "package", "model", "err", err)
+			logger.Error("rows.Scan failed", "package", packageName, "err", err)
 			return nil, err
 		}
 
@@ -73,7 +74,7 @@ func (m *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.S
 
 	rows, err := m.DB.Query(stmt, userID, mainCategID)
 	if err != nil {
-		logger.Error("m.DB.Query failed", "package", "model", "err", err)
+		logger.Error("m.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -82,7 +83,7 @@ func (m *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.S
 	for rows.Next() {
 		var categ SubCateg
 		if err := rows.Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
-			logger.Error("rows.Scan failed", "package", "model", "err", err)
+			logger.Error("rows.Scan failed", "package", packageName, "err", err)
 			return nil, err
 		}
 
@@ -102,7 +103,7 @@ func (m *SubCategModel) Update(categ *domain.SubCateg) error {
 			return domain.ErrUniqueNameUserMainCateg
 		}
 
-		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		logger.Error("m.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -113,7 +114,7 @@ func (m *SubCategModel) Delete(id int64) error {
 	stmt := `DELETE FROM sub_categories WHERE id = ?`
 
 	if _, err := m.DB.Exec(stmt, id); err != nil {
-		logger.Error("m.DB.Exec failed", "package", "model", "err", err)
+		logger.Error("m.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -129,7 +130,7 @@ func (m *SubCategModel) GetByID(id, userID int64) (*domain.SubCateg, error) {
 			return nil, domain.ErrSubCategNotFound
 		}
 
-		logger.Error("m.DB.QueryRow failed", "package", "model", "err", err)
+		logger.Error("m.DB.QueryRow failed", "package", packageName, "err", err)
 		return nil, err
 	}
 

@@ -1,13 +1,11 @@
-package subcateg_test
+package subcateg
 
 import (
 	"database/sql"
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
@@ -17,10 +15,10 @@ import (
 
 type SubCategSuite struct {
 	suite.Suite
+	subCategModel interfaces.SubCategModel
 	db            *sql.DB
 	migrate       *migrate.Migrate
-	f             *model.Factory
-	subCategModel interfaces.SubCategModel
+	f             *factory
 }
 
 func TestSubCategSuite(t *testing.T) {
@@ -32,9 +30,9 @@ func (s *SubCategSuite) SetupSuite() {
 	db, migrate := testutil.ConnToDB(port)
 	logger.Register()
 	s.db = db
-	s.subCategModel = subcateg.NewSubCategModel(db)
-	s.f = model.NewFactory(db)
+	s.subCategModel = NewSubCategModel(db)
 	s.migrate = migrate
+	s.f = newFactory(db)
 }
 
 func (s *SubCategSuite) TearDownSuite() {
@@ -44,8 +42,8 @@ func (s *SubCategSuite) TearDownSuite() {
 }
 
 func (s *SubCategSuite) SetupTest() {
-	s.subCategModel = subcateg.NewSubCategModel(s.db)
-	s.f = model.NewFactory(s.db)
+	s.subCategModel = NewSubCategModel(s.db)
+	s.f = newFactory(s.db)
 }
 
 func (s *SubCategSuite) TearDownTest() {
@@ -88,16 +86,14 @@ func (s *SubCategSuite) TestCreate() {
 }
 
 func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
-	// prepare data
-	user, err := s.f.NewUser()
-	s.Require().NoError(err, desc)
-	mainCateg, err := s.f.NewMainCateg(user)
+	// prepare existing data
+	user, maincateg, err := s.f.InsertUserAndMaincateg()
 	s.Require().NoError(err, desc)
 
 	// prepare input data
 	subCateg := &domain.SubCateg{
 		Name:        "test",
-		MainCategID: mainCateg.ID,
+		MainCategID: maincateg.ID,
 	}
 
 	// action
@@ -105,9 +101,9 @@ func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// check
-	var result subcateg.SubCateg
+	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
-	err = s.db.QueryRow(checkStmt, user.ID, mainCateg.ID, subCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
+	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID, subCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(subCateg.Name, result.Name, desc)
 	s.Require().Equal(subCateg.MainCategID, result.MainCategID, desc)
@@ -115,16 +111,12 @@ func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
 
 func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string) {
 	// prepare data
-	user, err := s.f.NewUser()
-	s.Require().NoError(err, desc)
-	mainCateg, err := s.f.NewMainCateg(user)
-	s.Require().NoError(err, desc)
-
-	// prepare existing data
-	subCateg, err := s.f.NewSubCateg(user, mainCateg)
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{2, 2})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][1]
 	inputSubCateg := &domain.SubCateg{
 		Name:        subCateg.Name,
 		MainCategID: mainCateg.ID,
@@ -133,6 +125,109 @@ func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string
 	// action and check
 	err = s.subCategModel.Create(inputSubCateg, user.ID)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+}
+
+func (s *SubCategSuite) TestGetByMainCategID() {
+	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
+		"when find no data, return empty":                              getByMainCategID_FindNoData_ReturnEmpty,
+		"when with one main category, return correct subcategories":    getByMainCategID_WithOneMainCateg_ReturnCorrectSubCategs,
+		"when with many main categories, return correct subcategories": getByMainCategID_WithManyMainCategs_ReturnCorrectSubCategs,
+		"when with many users, return correct subcategories":           getByMainCategID_WithManyUsers_ReturnCorrectSubCategs,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByMainCategID_FindNoData_ReturnEmpty(s *SubCategSuite, desc string) {
+	// prepare data
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[0]
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID+9999)
+	s.Require().NoError(err, desc)
+	s.Require().Nil(result, desc)
+}
+
+func getByMainCategID_WithOneMainCateg_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[0]
+	expResult := []*domain.SubCateg{
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][0].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][0].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][0].MainCategID,
+		},
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][1].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][1].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][1].MainCategID,
+		},
+	}
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByMainCategID_WithManyMainCategs_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[2] // choose the third main category
+	expResult := []*domain.SubCateg{
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][0].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][0].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][0].MainCategID,
+		},
+	}
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByMainCategID_WithManyUsers_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// prepare more data with different user
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+
+	// expected result
+	mainCateg := mainCategs[2] // choose the third main category
+	expResult := []*domain.SubCateg{
+		{
+			ID:          mainCategIDToSubCategs[mainCateg.ID][0].ID,
+			Name:        mainCategIDToSubCategs[mainCateg.ID][0].Name,
+			MainCategID: mainCategIDToSubCategs[mainCateg.ID][0].MainCategID,
+		},
+	}
+
+	// action
+	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
 }
 
 func (s *SubCategSuite) TestUpdate() {
@@ -150,15 +245,13 @@ func (s *SubCategSuite) TestUpdate() {
 }
 
 func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
-	// prepare data
-	user, err := s.f.NewUser()
-	s.Require().NoError(err, desc)
-	mainCateg, err := s.f.NewMainCateg(user)
-	s.Require().NoError(err, desc)
-	subCateg, err := s.f.NewSubCateg(user, mainCateg)
+	// prepare existing data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
 	inputSubCateg := &domain.SubCateg{
 		ID:          subCateg.ID,
 		Name:        "updated test",
@@ -170,7 +263,7 @@ func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// check
-	var result subcateg.SubCateg
+	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
 	err = s.db.QueryRow(checkStmt, user.ID, mainCateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
@@ -180,25 +273,12 @@ func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 
 func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	// user
-	user1, err := s.f.NewUser()
-	s.Require().NoError(err, desc)
-
-	// main category1
-	overwrite := map[string]interface{}{"Name": "test1"}
-	mainCateg, err := s.f.NewMainCateg(user1, overwrite)
-	s.Require().NoError(err, desc)
-
-	// main category2
-	overwrite = map[string]interface{}{"Name": "test2"}
-	_, err = s.f.NewMainCateg(user1, overwrite)
-	s.Require().NoError(err, desc)
-
-	// sub category
-	subCateg, err := s.f.NewSubCateg(user1, mainCateg)
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{1, 1})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
 	inputSubCateg := &domain.SubCateg{
 		ID:          subCateg.ID,
 		Name:        "updated test",
@@ -210,37 +290,198 @@ func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc stri
 	s.Require().NoError(err, desc)
 
 	// check
-	var result subcateg.SubCateg
+	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
-	err = s.db.QueryRow(checkStmt, user1.ID, mainCateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
+	err = s.db.QueryRow(checkStmt, user.ID, mainCateg.ID, inputSubCateg.Name).Scan(&result.ID, &result.Name, &result.MainCategID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputSubCateg.Name, result.Name, desc)
 	s.Require().Equal(inputSubCateg.MainCategID, result.MainCategID, desc)
+
+	// check the other main category
+	var result2 SubCateg
+	subCateg1 := mainCategIDToSubCategs[mainCategs[1].ID][0]
+	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ? AND name = ?`
+	err = s.db.QueryRow(checkStmt, user.ID, subCateg1.MainCategID, subCateg1.Name).Scan(&result2.ID, &result2.Name, &result2.MainCategID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(subCateg1.Name, result2.Name, desc)
+	s.Require().Equal(subCateg1.MainCategID, result2.MainCategID, desc)
 }
 
 func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 	// prepare existing data
-	user, err := s.f.NewUser()
-	s.Require().NoError(err, desc)
-	mainCateg, err := s.f.NewMainCateg(user)
-	s.Require().NoError(err, desc)
-
-	overwrite := map[string]interface{}{"Name": "test1"}
-	subCateg1, err := s.f.NewSubCateg(user, mainCateg, overwrite)
-	s.Require().NoError(err, desc)
-
-	overwrite = map[string]interface{}{"Name": "test2"}
-	subCateg2, err := s.f.NewSubCateg(user, mainCateg, overwrite)
+	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{2, 2})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
+	subCateg1 := mainCategIDToSubCategs[mainCateg.ID][1]
 	inputSubCateg := &domain.SubCateg{
-		ID:          subCateg1.ID,
-		Name:        subCateg2.Name,
+		ID:          subCateg.ID,
+		Name:        subCateg1.Name, // update to duplicate name
 		MainCategID: mainCateg.ID,
 	}
 
 	// action and check
 	err = s.subCategModel.Update(inputSubCateg)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+}
+
+func (s *SubCategSuite) TestDelete() {
+	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, "test delete")
+
+	// prepare more data with different user
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, "test delete")
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, "test delete")
+
+	mainCateg := mainCategs[0] // choose the first main category
+
+	// action
+	err = s.subCategModel.Delete(mainCategIDToSubCategs[mainCateg.ID][0].ID)
+	s.Require().NoError(err, "test delete")
+
+	// check to see if the sub category is deleted
+	var result SubCateg
+	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ?`
+	err = s.db.QueryRow(checkStmt, mainCategIDToSubCategs[mainCateg.ID][0].ID).Scan(&result.ID, &result.Name, &result.MainCategID)
+	s.Require().Equal(sql.ErrNoRows, err, "test delete")
+
+	// check to see if the first main category still has the other sub categories
+	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
+	rows, err := s.db.Query(checkStmt, mainCateg.ID)
+	s.Require().NoError(err, "test delete")
+	defer rows.Close()
+	var subCategs []SubCateg
+	for rows.Next() {
+		var subCateg SubCateg
+		err := rows.Scan(&subCateg.ID, &subCateg.Name, &subCateg.MainCategID)
+		s.Require().NoError(err, "test delete")
+		subCategs = append(subCategs, subCateg)
+	}
+	s.Require().Len(subCategs, 2, "test delete")
+
+	// check to see if the second main category still has the sub category
+	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
+	rows, err = s.db.Query(checkStmt, mainCategs[1].ID)
+	s.Require().NoError(err, "test delete")
+	defer rows.Close()
+	var subCategs2 []SubCateg
+	for rows.Next() {
+		var subCateg SubCateg
+		err := rows.Scan(&subCateg.ID, &subCateg.Name, &subCateg.MainCategID)
+		s.Require().NoError(err, "test delete")
+		subCategs2 = append(subCategs2, subCateg)
+	}
+	s.Require().Len(subCategs2, 2, "test delete")
+
+	// check to see if the third main category still has the sub category
+	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
+	rows, err = s.db.Query(checkStmt, mainCategs[2].ID)
+	s.Require().NoError(err, "test delete")
+	defer rows.Close()
+	var subCategs3 []SubCateg
+	for rows.Next() {
+		var subCateg SubCateg
+		err := rows.Scan(&subCateg.ID, &subCateg.Name, &subCateg.MainCategID)
+		s.Require().NoError(err, "test delete")
+		subCategs3 = append(subCategs3, subCateg)
+	}
+	s.Require().Len(subCategs3, 1, "test delete")
+}
+
+func (s *SubCategSuite) TestGetByID() {
+	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
+		"when find no data, return error":           getByID_FindNoData_ReturnError,
+		"when with one data, return correct data":   getByID_WithOneData_ReturnCorrectData,
+		"when with many data, return correct data":  getByID_WithManyData_ReturnCorrectData,
+		"when with many users, return correct data": getByID_WithManyUsers_ReturnCorrectData,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByID_FindNoData_ReturnError(s *SubCategSuite, desc string) {
+	// prepare data
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	mainCateg := mainCategs[0]
+
+	// action
+	result, err := s.subCategModel.GetByID(mainCateg.ID+999, user.ID)
+	s.Require().Equal(domain.ErrSubCategNotFound, err, desc)
+	s.Require().Nil(result, desc)
+}
+
+func getByID_WithOneData_ReturnCorrectData(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
+	// prepare expected result
+	expResult := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        subCateg.Name,
+		MainCategID: subCateg.MainCategID,
+	}
+
+	// action
+	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByID_WithManyData_ReturnCorrectData(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// prepare expected result
+	mainCateg := mainCategs[1]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][1]
+	expResult := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        subCateg.Name,
+		MainCategID: subCateg.MainCategID,
+	}
+
+	// action
+	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByID_WithManyUsers_ReturnCorrectData(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+
+	mainCateg := mainCategs[2]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
+	// prepare expected result
+	expResult := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        subCateg.Name,
+		MainCategID: subCateg.MainCategID,
+	}
+
+	// action
+	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
 }
