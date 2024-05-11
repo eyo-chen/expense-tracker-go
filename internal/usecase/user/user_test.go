@@ -49,7 +49,7 @@ func (s *UserSuite) TestSignup() {
 }
 
 func singup_EmailNotExists_SignupSuccessfully(s *UserSuite, desc string) {
-	s.mockUser.On("FindByEmail", "email.com").Return(nil, nil).Once()
+	s.mockUser.On("FindByEmail", "email.com").Return(nil, domain.ErrEmailNotFound).Once()
 	s.mockUser.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
 	s.mockUser.On("FindByEmail", "email.com").
 		Return(&domain.User{
@@ -83,7 +83,7 @@ func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
 		Password: "password",
 	}
 	token, err := s.userUC.Signup(input)
-	s.Require().Equal(domain.ErrDataAlreadyExists, err, desc)
+	s.Require().Equal(domain.ErrEmailAlreadyExists, err, desc)
 	s.Require().Empty(token, desc)
 }
 
