@@ -319,3 +319,68 @@ func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 	err = s.subCategModel.Update(inputSubCateg)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 }
+
+func (s *SubCategSuite) TestDelete() {
+	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, "test delete")
+
+	// prepare more data with different user
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, "test delete")
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, "test delete")
+
+	mainCateg := mainCategs[0] // choose the first main category
+
+	// action
+	err = s.subCategModel.Delete(mainCategIDToSubCategs[mainCateg.ID][0].ID)
+	s.Require().NoError(err, "test delete")
+
+	// check to see if the sub category is deleted
+	var result SubCateg
+	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ?`
+	err = s.db.QueryRow(checkStmt, mainCategIDToSubCategs[mainCateg.ID][0].ID).Scan(&result.ID, &result.Name, &result.MainCategID)
+	s.Require().Equal(sql.ErrNoRows, err, "test delete")
+
+	// check to see if the first main category still has the other sub categories
+	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
+	rows, err := s.db.Query(checkStmt, mainCateg.ID)
+	s.Require().NoError(err, "test delete")
+	defer rows.Close()
+	var subCategs []SubCateg
+	for rows.Next() {
+		var subCateg SubCateg
+		err := rows.Scan(&subCateg.ID, &subCateg.Name, &subCateg.MainCategID)
+		s.Require().NoError(err, "test delete")
+		subCategs = append(subCategs, subCateg)
+	}
+	s.Require().Len(subCategs, 2, "test delete")
+
+	// check to see if the second main category still has the sub category
+	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
+	rows, err = s.db.Query(checkStmt, mainCategs[1].ID)
+	s.Require().NoError(err, "test delete")
+	defer rows.Close()
+	var subCategs2 []SubCateg
+	for rows.Next() {
+		var subCateg SubCateg
+		err := rows.Scan(&subCateg.ID, &subCateg.Name, &subCateg.MainCategID)
+		s.Require().NoError(err, "test delete")
+		subCategs2 = append(subCategs2, subCateg)
+	}
+	s.Require().Len(subCategs2, 2, "test delete")
+
+	// check to see if the third main category still has the sub category
+	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
+	rows, err = s.db.Query(checkStmt, mainCategs[2].ID)
+	s.Require().NoError(err, "test delete")
+	defer rows.Close()
+	var subCategs3 []SubCateg
+	for rows.Next() {
+		var subCateg SubCateg
+		err := rows.Scan(&subCateg.ID, &subCateg.Name, &subCateg.MainCategID)
+		s.Require().NoError(err, "test delete")
+		subCategs3 = append(subCategs3, subCateg)
+	}
+	s.Require().Len(subCategs3, 1, "test delete")
+}
