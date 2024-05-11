@@ -1,14 +1,15 @@
 package user
 
 import (
-	"os"
-	"time"
-
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/auth"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/golang-jwt/jwt/v5"
+)
+
+const (
+	packageName = "usecase/user"
 )
 
 type UserUC struct {
@@ -26,35 +27,42 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (u *UserUC) Signup(user *domain.User) error {
+func (u *UserUC) Signup(user domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
-		logger.Error("u.User.FindByEmail failed", "package", "usecase", "err", err)
-		return err
+		return "", err
 	}
 
 	if userByEmail != nil {
-		return domain.ErrDataAlreadyExists
+		return "", domain.ErrDataAlreadyExists
 	}
 
 	passwordHash, err := auth.GenerateHashPassword(user.Password)
 	if err != nil {
-		logger.Error("auth.GenerateHashPassword failed", "package", "usecase", "err", err)
-		return err
+		logger.Error("auth.GenerateHashPassword failed", "package", packageName, "err", err)
+		return "", err
 	}
 
 	if err := u.User.Create(user.Name, user.Email, passwordHash); err != nil {
-		logger.Error("u.User.Insert failed", "package", "usecase", "err", err)
-		return err
+		return "", err
 	}
 
-	return nil
+	userWithID, err := u.User.FindByEmail(user.Email)
+	if err != nil {
+		return "", err
+	}
+
+	token, err := genJWTToken(*userWithID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
-func (u *UserUC) Login(user *domain.User) (string, error) {
+func (u *UserUC) Login(user domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
-		logger.Error("u.User.FindByEmail failed", "package", "usecase", "err", err)
 		return "", err
 	}
 
@@ -66,22 +74,10 @@ func (u *UserUC) Login(user *domain.User) (string, error) {
 		return "", domain.ErrAuthentication
 	}
 
-	key := []byte(os.Getenv("JWT_SECRET_KEY"))
-	claims := Claims{
-		UserID:    userByEmail.ID,
-		UserName:  userByEmail.Name,
-		UserEmail: userByEmail.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	s, err := token.SignedString(key)
+	token, err := genJWTToken(*userByEmail)
 	if err != nil {
-		logger.Error("token.SignedString failed", "package", "usecase", "err", err)
 		return "", err
 	}
 
-	return s, nil
+	return token, nil
 }
