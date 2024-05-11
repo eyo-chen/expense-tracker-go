@@ -8,6 +8,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	packageName = "usecase/user"
+)
+
 type UserUC struct {
 	User interfaces.UserModel
 }
@@ -26,7 +30,7 @@ type Claims struct {
 func (u *UserUC) Signup(user *domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
-		logger.Error("u.User.FindByEmail failed", "package", "usecase", "err", err)
+		logger.Error("u.User.FindByEmail failed", "package", packageName, "err", err)
 		return "", err
 	}
 
@@ -36,18 +40,18 @@ func (u *UserUC) Signup(user *domain.User) (string, error) {
 
 	passwordHash, err := auth.GenerateHashPassword(user.Password)
 	if err != nil {
-		logger.Error("auth.GenerateHashPassword failed", "package", "usecase", "err", err)
+		logger.Error("auth.GenerateHashPassword failed", "package", packageName, "err", err)
 		return "", err
 	}
 
 	if err := u.User.Create(user.Name, user.Email, passwordHash); err != nil {
-		logger.Error("u.User.Insert failed", "package", "usecase", "err", err)
+		logger.Error("u.User.Insert failed", "package", packageName, "err", err)
 		return "", err
 	}
 
 	userWithID, err := u.User.FindByEmail(user.Email)
 	if err != nil {
-		logger.Error("u.User.FindByEmail failed", "package", "usecase", "err", err)
+		logger.Error("u.User.FindByEmail failed", "package", packageName, "err", err)
 		return "", err
 	}
 
@@ -62,7 +66,7 @@ func (u *UserUC) Signup(user *domain.User) (string, error) {
 func (u *UserUC) Login(user *domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
-		logger.Error("u.User.FindByEmail failed", "package", "usecase", "err", err)
+		logger.Error("u.User.FindByEmail failed", "package", packageName, "err", err)
 		return "", err
 	}
 
