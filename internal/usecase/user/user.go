@@ -27,7 +27,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (u *UserUC) Signup(user *domain.User) (string, error) {
+func (u *UserUC) Signup(user domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
 		return "", err
@@ -60,7 +60,7 @@ func (u *UserUC) Signup(user *domain.User) (string, error) {
 	return token, nil
 }
 
-func (u *UserUC) Login(user *domain.User) (string, error) {
+func (u *UserUC) Login(user domain.User) (string, error) {
 	userByEmail, err := u.User.FindByEmail(user.Email)
 	if err != nil {
 		return "", err

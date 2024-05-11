@@ -9,10 +9,10 @@ import (
 // UserUC is the interface that wraps the basic methods for user usecase.
 type UserUC interface {
 	// Signup registers a user.
-	Signup(user *domain.User) error
+	Signup(user domain.User) (string, error)
 
 	// Login logs in a user.
-	Login(user *domain.User) (string, error)
+	Login(user domain.User) (string, error)
 }
 
 // MainCategUC is the interface that wraps the basic methods for main category usecase.

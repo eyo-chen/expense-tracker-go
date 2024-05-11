@@ -42,18 +42,21 @@ func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		Email:    input.Email,
 		Password: input.Password,
 	}
-	if err := u.User.Signup(&user); err != nil {
+	token, err := u.User.Signup(user)
+	if err != nil {
 		if err == domain.ErrDataAlreadyExists {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
 
-		logger.Error("u.User.Signup failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 
-	if err := jsonutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
+	resp := map[string]interface{}{
+		"token": token,
+	}
+	if err := jsonutil.WriteJSON(w, http.StatusCreated, resp, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -82,7 +85,7 @@ func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Password: input.Password,
 	}
 
-	token, err := u.User.Login(&user)
+	token, err := u.User.Login(user)
 	if err != nil {
 		if err == domain.ErrAuthentication {
 			errutil.AuthenticationErrorResponse(w, r, err)
