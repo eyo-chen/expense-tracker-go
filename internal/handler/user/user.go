@@ -44,7 +44,7 @@ func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	token, err := u.User.Signup(user)
 	if err != nil {
-		if err == domain.ErrDataAlreadyExists {
+		if err == domain.ErrEmailAlreadyExists {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
