@@ -384,3 +384,97 @@ func (s *SubCategSuite) TestDelete() {
 	}
 	s.Require().Len(subCategs3, 1, "test delete")
 }
+
+func (s *SubCategSuite) TestGetByID() {
+	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
+		"when find no data, return error":           getByID_FindNoData_ReturnError,
+		"when with one data, return correct data":   getByID_WithOneData_ReturnCorrectData,
+		"when with many data, return correct data":  getByID_WithManyData_ReturnCorrectData,
+		"when with many users, return correct data": getByID_WithManyUsers_ReturnCorrectData,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByID_FindNoData_ReturnError(s *SubCategSuite, desc string) {
+	// prepare data
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	mainCateg := mainCategs[0]
+
+	// action
+	result, err := s.subCategModel.GetByID(mainCateg.ID+999, user.ID)
+	s.Require().Equal(domain.ErrSubCategNotFound, err, desc)
+	s.Require().Nil(result, desc)
+}
+
+func getByID_WithOneData_ReturnCorrectData(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+
+	mainCateg := mainCategs[0]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
+	// prepare expected result
+	expResult := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        subCateg.Name,
+		MainCategID: subCateg.MainCategID,
+	}
+
+	// action
+	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByID_WithManyData_ReturnCorrectData(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// prepare expected result
+	mainCateg := mainCategs[1]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][1]
+	expResult := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        subCateg.Name,
+		MainCategID: subCateg.MainCategID,
+	}
+
+	// action
+	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getByID_WithManyUsers_ReturnCorrectData(s *SubCategSuite, desc string) {
+	// prepare data
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	s.Require().NoError(err, desc)
+
+	// prepare more users
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	s.Require().NoError(err, desc)
+
+	mainCateg := mainCategs[2]
+	subCateg := mainCategIDToSubCategs[mainCateg.ID][0]
+	// prepare expected result
+	expResult := &domain.SubCateg{
+		ID:          subCateg.ID,
+		Name:        subCateg.Name,
+		MainCategID: subCateg.MainCategID,
+	}
+
+	// action
+	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
