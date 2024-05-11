@@ -15,7 +15,6 @@ import (
 type factory struct {
 	subCateg  *efactory.Factory[SubCateg]
 	maincateg *efactory.Factory[maincateg.MainCateg]
-	user      *efactory.Factory[user.User]
 }
 
 func newFactory(db *sql.DB) *factory {
@@ -29,14 +28,9 @@ func newFactory(db *sql.DB) *factory {
 		StorageName: "main_categories",
 	}
 
-	userConfig := efactory.Config[user.User]{
-		DB: &esql.Config{DB: db},
-	}
-
 	return &factory{
 		subCateg:  efactory.New(SubCateg{}).SetConfig(subcategConfig),
 		maincateg: efactory.New(maincateg.MainCateg{}).SetConfig(maincategConfig),
-		user:      efactory.New(user.User{}).SetConfig(userConfig),
 	}
 }
 
@@ -118,6 +112,5 @@ func (f *factory) InsertSubcategsWithOneOrManyMainCateg(maincategIndex int, subc
 
 func (f *factory) Reset() {
 	f.subCateg.Reset()
-	f.user.Reset()
 	f.maincateg.Reset()
 }
