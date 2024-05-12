@@ -44,7 +44,7 @@ func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	token, err := u.User.Signup(user)
 	if err != nil {
-		if err == domain.ErrDataAlreadyExists {
+		if err == domain.ErrEmailAlreadyExists {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
@@ -92,7 +92,6 @@ func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		logger.Error("u.User.Login failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
