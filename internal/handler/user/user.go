@@ -92,7 +92,6 @@ func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		logger.Error("u.User.Login failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
