@@ -65,10 +65,26 @@ func (m *IconModel) GetByID(id int64) (domain.Icon, error) {
 }
 
 func (m *IconModel) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
-	stmt := `SELECT id, url FROM icons WHERE id IN (?)`
+	stmt := `SELECT id, url FROM icons WHERE id IN (`
+	for i := range ids {
+		if i == 0 {
+			stmt += "?"
+		} else {
+			stmt += ", ?"
+		}
+
+		if i == len(ids)-1 {
+			stmt += ")"
+		}
+	}
+
+	idsInterface := make([]interface{}, len(ids))
+	for i, id := range ids {
+		idsInterface[i] = id
+	}
 
 	var icons []Icon
-	rows, err := m.DB.Query(stmt, ids)
+	rows, err := m.DB.Query(stmt, idsInterface...)
 	if err != nil {
 		return nil, err
 	}
