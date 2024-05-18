@@ -83,3 +83,9 @@ type IconUC interface {
 	// List returns all icons.
 	List() ([]domain.Icon, error)
 }
+
+// InitDataUC is the interface that wraps the basic methods for init data usecase.
+type InitDataUC interface {
+	// List returns the initial data.
+	List() (domain.InitData, error)
+}
