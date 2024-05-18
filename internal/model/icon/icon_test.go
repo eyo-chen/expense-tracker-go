@@ -134,3 +134,47 @@ func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 	s.Require().Equal(expRes, res, desc)
 	s.Require().Equal(domain.ErrIconNotFound, err, desc)
 }
+
+func (s *IconSuite) TestGetByIDs() {
+	for scenario, fn := range map[string]func(s *IconSuite, desc string){
+		"when has icon, return icon":   getByIDs_WithIcon_ReturnIcons,
+		"when has no icon, return err": getByIDs_WithoutIcon_ReturnErr,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByIDs_WithIcon_ReturnIcons(s *IconSuite, desc string) {
+	icons, err := s.f.InsertMany(5)
+	s.Require().NoError(err, desc)
+
+	expRes := map[int64]domain.Icon{
+		icons[0].ID: {
+			ID:  icons[0].ID,
+			URL: icons[0].URL,
+		},
+		icons[1].ID: {
+			ID:  icons[1].ID,
+			URL: icons[1].URL,
+		},
+	}
+
+	ids := []int64{icons[0].ID, icons[1].ID, 999}
+	res, err := s.model.GetByIDs(ids)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, res, desc)
+}
+
+func getByIDs_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
+	_, err := s.f.InsertMany(5)
+	s.Require().NoError(err, desc)
+
+	ids := []int64{999}
+	res, err := s.model.GetByIDs(ids)
+	s.Require().Nil(res, desc)
+	s.Require().Equal(domain.ErrIconNotFound, err, desc)
+}
