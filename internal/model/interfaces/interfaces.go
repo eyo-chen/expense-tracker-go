@@ -61,6 +61,9 @@ type IconModel interface {
 
 	// List returns all icons.
 	List() ([]domain.Icon, error)
+
+	// GetByIDs returns icons by ids.
+	GetByIDs(ids []int64) (map[int64]domain.Icon, error)
 }
 
 // TransactionModel is the interface that wraps the basic methods for transaction model.

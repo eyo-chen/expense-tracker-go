@@ -41,6 +41,36 @@ func (_m *IconModel) GetByID(id int64) (domain.Icon, error) {
 	return r0, r1
 }
 
+// GetByIDs provides a mock function with given fields: ids
+func (_m *IconModel) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
+	ret := _m.Called(ids)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByIDs")
+	}
+
+	var r0 map[int64]domain.Icon
+	var r1 error
+	if rf, ok := ret.Get(0).(func([]int64) (map[int64]domain.Icon, error)); ok {
+		return rf(ids)
+	}
+	if rf, ok := ret.Get(0).(func([]int64) map[int64]domain.Icon); ok {
+		r0 = rf(ids)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[int64]domain.Icon)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func([]int64) error); ok {
+		r1 = rf(ids)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // List provides a mock function with given fields:
 func (_m *IconModel) List() ([]domain.Icon, error) {
 	ret := _m.Called()
