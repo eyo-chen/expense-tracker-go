@@ -46,6 +46,9 @@ func New(handler *hd.Handler) http.Handler {
 	r.Handle("/v1/transaction/line-chart", auth.ThenFunc(handler.Transaction.GetLineChartData)).Methods(http.MethodGet)
 	r.Handle("/v1/transaction/monthly-data", auth.ThenFunc(handler.Transaction.GetMonthlyData)).Methods(http.MethodGet)
 
+	// init data
+	r.Handle("/v1/init-data", auth.ThenFunc(handler.InitData.List)).Methods(http.MethodGet)
+
 	regular := alice.New(middleware.LogRequest, middleware.EnableCORS)
 
 	return regular.Then(r)
