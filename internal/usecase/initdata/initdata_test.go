@@ -68,7 +68,7 @@ func list_NoError_ReturnInitData(s *InitDataSuite, desc string) {
 	expRes := domain.InitData{
 		Expense: []domain.InitDataMainCateg{
 			{
-				Name: "Food",
+				Name: "food",
 				Icon: mockIDToIcon[1],
 				SubCategs: []string{
 					"breakfast", "brunch", "lunch", "dinner", "groceries", "drink", "snak",

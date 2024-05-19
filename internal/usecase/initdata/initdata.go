@@ -27,7 +27,7 @@ func (i *InitDataUC) List() (domain.InitData, error) {
 	return domain.InitData{
 		Expense: []domain.InitDataMainCateg{
 			{
-				Name: "Food",
+				Name: "food",
 				Icon: idToIcon[1],
 				SubCategs: []string{
 					"breakfast", "brunch", "lunch", "dinner", "groceries", "drink", "snak",
