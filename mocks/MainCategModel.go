@@ -31,6 +31,24 @@ func (_m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	return r0
 }
 
+// CreateBatch provides a mock function with given fields: categs, userID
+func (_m *MainCategModel) CreateBatch(categs []domain.MainCateg, userID int64) error {
+	ret := _m.Called(categs, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateBatch")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func([]domain.MainCateg, int64) error); ok {
+		r0 = rf(categs, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Delete provides a mock function with given fields: id
 func (_m *MainCategModel) Delete(id int64) error {
 	ret := _m.Called(id)
