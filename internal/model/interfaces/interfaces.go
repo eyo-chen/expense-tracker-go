@@ -31,6 +31,9 @@ type MainCategModel interface {
 
 	// GetByID returns a main category by id and user id.
 	GetByID(id, userID int64) (*domain.MainCateg, error)
+
+	// CreateBatch inserts multiple main categories into the database.
+	CreateBatch(categs []domain.MainCateg, userID int64) error
 }
 
 // SubCategModel is the interface that wraps the basic methods for sub category model.

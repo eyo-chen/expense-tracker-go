@@ -451,3 +451,155 @@ func getByID_FindNoData_ReturnSuccessfully(s *MainCategSuite, desc string) {
 	s.Require().Equal(domain.ErrMainCategNotFound, err, desc)
 	s.Require().Nil(result, desc)
 }
+
+func (s *MainCategSuite) TestCreateBatch() {
+	for scenario, fn := range map[string]func(s *MainCategSuite, desc string){
+		"when insert one data, insert successfully":            createBatch_InsertOneData_InsertSuccessfully,
+		"when insert many data, insert successfully":           createBatch_InsertManyData_InsertSuccessfully,
+		"when insert duplicate name data, return error":        createBatch_InsertDuplicateNameData_ReturnError,
+		"when already exist data with same name, return error": createBatch_AlreadyExistData_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func createBatch_InsertOneData_InsertSuccessfully(s *MainCategSuite, desc string) {
+	users, icons, err := s.f.InsertUsersAndIcons(1, 1)
+	s.Require().NoError(err, desc)
+
+	categs := []domain.MainCateg{
+		{
+			Name: "test1",
+			Type: domain.TransactionTypeExpense,
+			Icon: domain.Icon{
+				ID: icons[0].ID,
+			},
+		},
+	}
+
+	err = s.mainCategModel.CreateBatch(categs, users[0].ID)
+	s.Require().NoError(err, desc)
+
+	checkStmt := `SELECT id, name, type, icon_id
+							 FROM main_categories
+							 WHERE user_id = ?
+							 `
+	var result MainCateg
+	err = s.db.QueryRow(checkStmt, users[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(categs[0].Name, result.Name, desc)
+	s.Require().Equal(categs[0].Type.ToModelValue(), result.Type, desc)
+	s.Require().Equal(icons[0].ID, result.IconID, desc)
+}
+
+func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc string) {
+	users, icons, err := s.f.InsertUsersAndIcons(1, 3)
+	s.Require().NoError(err, desc)
+
+	categs := []domain.MainCateg{
+		{
+			Name: "test1",
+			Type: domain.TransactionTypeExpense,
+			Icon: domain.Icon{ID: icons[0].ID},
+		},
+		{
+			Name: "test2",
+			Type: domain.TransactionTypeIncome,
+			Icon: domain.Icon{ID: icons[1].ID},
+		},
+		{
+			Name: "test3",
+			Type: domain.TransactionTypeIncome,
+			Icon: domain.Icon{ID: icons[2].ID},
+		},
+	}
+
+	err = s.mainCategModel.CreateBatch(categs, users[0].ID)
+	s.Require().NoError(err, desc)
+
+	checkStmt := `SELECT id, name, type, icon_id
+							 FROM main_categories
+							 WHERE user_id = ?
+							 ORDER BY id
+							 `
+	rows, err := s.db.Query(checkStmt, users[0].ID)
+	s.Require().NoError(err, desc)
+	defer rows.Close()
+
+	var result MainCateg
+	for i := 0; rows.Next(); i++ {
+		err = rows.Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+		s.Require().NoError(err, desc)
+		s.Require().Equal(categs[i].Name, result.Name, desc)
+		s.Require().Equal(categs[i].Type.ToModelValue(), result.Type, desc)
+		s.Require().Equal(icons[i].ID, result.IconID, desc)
+	}
+}
+
+func createBatch_InsertDuplicateNameData_ReturnError(s *MainCategSuite, desc string) {
+	users, icons, err := s.f.InsertUsersAndIcons(1, 2)
+	s.Require().NoError(err, desc)
+
+	categs := []domain.MainCateg{
+		{
+			Name: "test1",
+			Type: domain.TransactionTypeExpense,
+			Icon: domain.Icon{ID: icons[0].ID},
+		},
+		{
+			Name: "test1",
+			Type: domain.TransactionTypeExpense,
+			Icon: domain.Icon{ID: icons[1].ID},
+		},
+	}
+
+	err = s.mainCategModel.CreateBatch(categs, users[0].ID)
+	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
+
+	// check if the data is not inserted
+	stms := `SELECT COUNT(*)
+						FROM main_categories
+						WHERE user_id = ?
+						`
+	var count int
+	err = s.db.QueryRow(stms, users[0].ID).Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(0, count, desc)
+}
+
+func createBatch_AlreadyExistData_ReturnError(s *MainCategSuite, desc string) {
+	maincateg, user, _, err := s.f.InsertMainCategWithAss(MainCateg{})
+	s.Require().NoError(err, desc)
+
+	icons, err := s.f.Icon.BuildList(2).Insert()
+	s.Require().NoError(err, desc)
+
+	categs := []domain.MainCateg{
+		{
+			Name: "test1",
+			Type: domain.TransactionTypeExpense,
+			Icon: domain.Icon{ID: icons[0].ID},
+		},
+		{
+			Name: maincateg.Name,
+			Type: domain.CvtToTransactionType(maincateg.Type),
+			Icon: domain.Icon{ID: icons[1].ID},
+		},
+	}
+
+	err = s.mainCategModel.CreateBatch(categs, user.ID)
+	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
+
+	// check if the data is not inserted
+	stms := `SELECT COUNT(*)
+						FROM main_categories
+						WHERE user_id = ?
+						`
+	var count int
+	err = s.db.QueryRow(stms, user.ID).Scan(&count)
+	s.Require().NoError(err, desc)
+}

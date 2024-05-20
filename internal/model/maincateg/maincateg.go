@@ -131,3 +131,31 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 
 	return cvtToDomainMainCateg(&categ, nil), nil
 }
+
+func (m *MainCategModel) CreateBatch(categs []domain.MainCateg, userID int64) error {
+	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES `
+	args := make([]interface{}, 0, len(categs)*4)
+	for i, c := range categs {
+		stmt += "(?, ?, ?, ?)"
+		if i < len(categs)-1 {
+			stmt += ", "
+		}
+
+		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.Icon.ID)
+	}
+
+	if _, err := m.DB.Exec(stmt, args...); err != nil {
+		if errorutil.ParseError(err, uniqueNameUserType) {
+			return domain.ErrUniqueNameUserType
+		}
+
+		if errorutil.ParseError(err, uniqueIconUser) {
+			return domain.ErrUniqueIconUser
+		}
+
+		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
+		return err
+	}
+
+	return nil
+}
