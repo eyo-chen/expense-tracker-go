@@ -17,10 +17,13 @@ func New(handler *hd.Handler) http.Handler {
 	r.HandleFunc("/v1/user/signup", handler.User.Signup).Methods(http.MethodPost)
 	r.HandleFunc("/v1/user/login", handler.User.Login).Methods(http.MethodPost)
 
-	auth := alice.New(middleware.Authenticate)
+	// init data
+	r.Handle("/v1/init-data", http.HandlerFunc(handler.InitData.List)).Methods(http.MethodGet)
 
 	// icon
-	r.Handle("/v1/icon", auth.ThenFunc(handler.Icon.List)).Methods(http.MethodGet)
+	r.Handle("/v1/icon", http.HandlerFunc(handler.Icon.List)).Methods(http.MethodGet)
+
+	auth := alice.New(middleware.Authenticate)
 
 	// main category
 	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.CreateMainCateg)).Methods(http.MethodPost)
@@ -45,9 +48,6 @@ func New(handler *hd.Handler) http.Handler {
 	r.Handle("/v1/transaction/pie-chart", auth.ThenFunc(handler.Transaction.GetPieChartData)).Methods(http.MethodGet)
 	r.Handle("/v1/transaction/line-chart", auth.ThenFunc(handler.Transaction.GetLineChartData)).Methods(http.MethodGet)
 	r.Handle("/v1/transaction/monthly-data", auth.ThenFunc(handler.Transaction.GetMonthlyData)).Methods(http.MethodGet)
-
-	// init data
-	r.Handle("/v1/init-data", auth.ThenFunc(handler.InitData.List)).Methods(http.MethodGet)
 
 	regular := alice.New(middleware.LogRequest, middleware.EnableCORS)
 
