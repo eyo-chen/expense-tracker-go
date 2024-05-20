@@ -141,7 +141,7 @@ func (m *MainCategModel) CreateBatch(categs []domain.MainCateg, userID int64) er
 			stmt += ", "
 		}
 
-		args = append(args, c.Name, c.Type, userID, c.Icon.ID)
+		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.Icon.ID)
 	}
 
 	if _, err := m.DB.Exec(stmt, args...); err != nil {
