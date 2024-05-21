@@ -1,6 +1,7 @@
 package subcateg
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -135,4 +136,28 @@ func (s *SubCategModel) GetByID(id, userID int64) (*domain.SubCateg, error) {
 	}
 
 	return cvtToDomainSubCateg(&categ), nil
+}
+
+func (s *SubCategModel) CreateBatch(ctx context.Context, categs []domain.SubCateg, userID int64) error {
+	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES `
+	args := make([]interface{}, 0, len(categs)*3)
+	for i, c := range categs {
+		stmt += "(?, ?, ?)"
+		if i < len(categs)-1 {
+			stmt += ", "
+		}
+
+		args = append(args, c.Name, userID, c.MainCategID)
+	}
+
+	if _, err := s.DB.ExecContext(ctx, stmt, args...); err != nil {
+		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
+			return domain.ErrUniqueNameUserMainCateg
+		}
+
+		logger.Error("m.DB.ExecContext CreateBatch failed", "package", packageName, "err", err)
+		return err
+	}
+
+	return nil
 }

@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/OYE0303/expense-tracker-go/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
@@ -24,6 +26,24 @@ func (_m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*domain.SubCateg, int64) error); ok {
 		r0 = rf(categ, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CreateBatch provides a mock function with given fields: ctx, categs, userID
+func (_m *SubCategModel) CreateBatch(ctx context.Context, categs []domain.SubCateg, userID int64) error {
+	ret := _m.Called(ctx, categs, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateBatch")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []domain.SubCateg, int64) error); ok {
+		r0 = rf(ctx, categs, userID)
 	} else {
 		r0 = ret.Error(0)
 	}

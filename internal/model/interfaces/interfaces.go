@@ -55,6 +55,9 @@ type SubCategModel interface {
 
 	// GetByID returns a sub category by id and user id.
 	GetByID(id, userID int64) (*domain.SubCateg, error)
+
+	// CreateBatch inserts multiple sub categories into the database.
+	CreateBatch(ctx context.Context, categs []domain.SubCateg, userID int64) error
 }
 
 // IconModel is the interface that wraps the basic methods for icon model.
