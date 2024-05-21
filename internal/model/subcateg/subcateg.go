@@ -28,11 +28,11 @@ type SubCateg struct {
 	MainCategID int64  `json:"main_category_id" efactory:"MainCateg,main_categories" esql:"main_category_id"`
 }
 
-func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
+func (s *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES (?, ?, ?)`
 
 	c := cvtToSubCateg(categ, userID)
-	if _, err := m.DB.Exec(stmt, c.Name, c.UserID, c.MainCategID); err != nil {
+	if _, err := s.DB.Exec(stmt, c.Name, c.UserID, c.MainCategID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
@@ -44,10 +44,10 @@ func (m *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	return nil
 }
 
-func (m *SubCategModel) GetAll(userID int64) ([]*domain.SubCateg, error) {
+func (s *SubCategModel) GetAll(userID int64) ([]*domain.SubCateg, error) {
 	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ?`
 
-	rows, err := m.DB.Query(stmt, userID)
+	rows, err := s.DB.Query(stmt, userID)
 	if err != nil {
 		logger.Error("m.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
@@ -69,10 +69,10 @@ func (m *SubCategModel) GetAll(userID int64) ([]*domain.SubCateg, error) {
 	return categs, nil
 }
 
-func (m *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
+func (s *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
 	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ?`
 
-	rows, err := m.DB.Query(stmt, userID, mainCategID)
+	rows, err := s.DB.Query(stmt, userID, mainCategID)
 	if err != nil {
 		logger.Error("m.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
@@ -94,11 +94,11 @@ func (m *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.S
 	return categs, nil
 }
 
-func (m *SubCategModel) Update(categ *domain.SubCateg) error {
+func (s *SubCategModel) Update(categ *domain.SubCateg) error {
 	stmt := `UPDATE sub_categories SET name = ? WHERE id = ?`
 
 	c := cvtToSubCateg(categ, 0)
-	if _, err := m.DB.Exec(stmt, c.Name, c.ID); err != nil {
+	if _, err := s.DB.Exec(stmt, c.Name, c.ID); err != nil {
 		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
@@ -110,10 +110,10 @@ func (m *SubCategModel) Update(categ *domain.SubCateg) error {
 	return nil
 }
 
-func (m *SubCategModel) Delete(id int64) error {
+func (s *SubCategModel) Delete(id int64) error {
 	stmt := `DELETE FROM sub_categories WHERE id = ?`
 
-	if _, err := m.DB.Exec(stmt, id); err != nil {
+	if _, err := s.DB.Exec(stmt, id); err != nil {
 		logger.Error("m.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
@@ -121,11 +121,11 @@ func (m *SubCategModel) Delete(id int64) error {
 	return nil
 }
 
-func (m *SubCategModel) GetByID(id, userID int64) (*domain.SubCateg, error) {
+func (s *SubCategModel) GetByID(id, userID int64) (*domain.SubCateg, error) {
 	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ? AND user_id = ?`
 
 	var categ SubCateg
-	if err := m.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
+	if err := s.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrSubCategNotFound
 		}
