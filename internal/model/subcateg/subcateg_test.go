@@ -1,6 +1,7 @@
 package subcateg
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -11,6 +12,10 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
+)
+
+var (
+	mockCTX = context.Background()
 )
 
 type SubCategSuite struct {
@@ -484,4 +489,126 @@ func getByID_WithManyUsers_ReturnCorrectData(s *SubCategSuite, desc string) {
 	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
+}
+
+func (s *SubCategSuite) TestCreateBatch() {
+	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
+		"when insert one data, insert successfully":            createBatch_InsertOneData_InsertSuccessfully,
+		"when insert many data, insert successfully":           createBatch_InsertManyData_InsertSuccessfully,
+		"when insert duplicate name data, return error":        createBatch_InsertDuplicateNameData_ReturnError,
+		"when already exist data with same name, return error": createBatch_AlreadyExistData_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func createBatch_InsertOneData_InsertSuccessfully(s *SubCategSuite, desc string) {
+	// prepare existing data
+	user, maincateg, err := s.f.InsertUserAndMaincateg()
+	s.Require().NoError(err, desc)
+
+	// prepare input data
+	subCategs := []domain.SubCateg{
+		{Name: "test1", MainCategID: maincateg.ID},
+	}
+
+	// action
+	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	s.Require().NoError(err, desc)
+
+	// check
+	var result SubCateg
+	checkStmt := `SELECT id, name, main_category_id 
+								FROM sub_categories 
+								WHERE user_id = ? AND main_category_id = ?`
+	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID).Scan(&result.ID, &result.Name, &result.MainCategID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(subCategs[0].Name, result.Name, desc)
+	s.Require().Equal(subCategs[0].MainCategID, result.MainCategID, desc)
+}
+
+func createBatch_InsertManyData_InsertSuccessfully(s *SubCategSuite, desc string) {
+	// prepare existing data
+	user, maincateg, err := s.f.InsertUserAndMaincateg()
+	s.Require().NoError(err, desc)
+
+	// prepare input data
+	subCategs := []domain.SubCateg{
+		{Name: "test1", MainCategID: maincateg.ID},
+		{Name: "test2", MainCategID: maincateg.ID},
+		{Name: "test3", MainCategID: maincateg.ID},
+	}
+
+	// action
+	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	s.Require().NoError(err, desc)
+
+	// check
+	checkStmt := `SELECT id, name, main_category_id 
+	FROM sub_categories 
+	WHERE user_id = ? AND main_category_id = ?`
+	rows, err := s.db.Query(checkStmt, user.ID, maincateg.ID)
+	s.Require().NoError(err, desc)
+	defer rows.Close()
+
+	var result SubCateg
+	for i := 0; rows.Next(); i++ {
+		err := rows.Scan(&result.ID, &result.Name, &result.MainCategID)
+		s.Require().NoError(err, desc)
+		s.Require().Equal(subCategs[i].Name, result.Name, desc)
+		s.Require().Equal(subCategs[i].MainCategID, result.MainCategID, desc)
+	}
+}
+
+func createBatch_InsertDuplicateNameData_ReturnError(s *SubCategSuite, desc string) {
+	// prepare existing data
+	user, maincateg, err := s.f.InsertUserAndMaincateg()
+	s.Require().NoError(err, desc)
+
+	// prepare input data
+	subCategs := []domain.SubCateg{
+		{Name: "test1", MainCategID: maincateg.ID},
+		{Name: "test1", MainCategID: maincateg.ID},
+	}
+
+	// action
+	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+
+	// check
+	checkStmt := `SELECT COUNT(*)
+								FROM sub_categories
+								WHERE user_id = ? AND main_category_id = ?`
+	var count int
+	err = s.db.QueryRow(checkStmt, user.ID, maincateg.ID).Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(0, count, desc)
+}
+
+func createBatch_AlreadyExistData_ReturnError(s *SubCategSuite, desc string) {
+	// prepare existing data
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	s.Require().NoError(err, desc)
+
+	// prepare input data
+	subCategs := []domain.SubCateg{
+		{Name: mainCategs[0].Name, MainCategID: mainCategs[0].ID},
+	}
+
+	// action
+	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+
+	// check
+	checkStmt := `SELECT COUNT(*)
+								FROM sub_categories
+								WHERE user_id = ? AND main_category_id = ?`
+	var count int
+	err = s.db.QueryRow(checkStmt, user.ID, mainCategs[0].ID).Scan(&count)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(2, count, desc)
 }
