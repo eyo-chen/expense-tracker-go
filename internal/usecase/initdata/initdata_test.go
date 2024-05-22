@@ -13,8 +13,10 @@ import (
 
 type InitDataSuite struct {
 	suite.Suite
-	uc       interfaces.InitDataUC
-	mockIcon *mocks.IconModel
+	uc            interfaces.InitDataUC
+	mockIcon      *mocks.IconModel
+	mockMainCateg *mocks.MainCategModel
+	mockSubCateg  *mocks.SubCategModel
 }
 
 func TestInitDataSuite(t *testing.T) {
@@ -23,7 +25,10 @@ func TestInitDataSuite(t *testing.T) {
 
 func (s *InitDataSuite) SetupTest() {
 	s.mockIcon = mocks.NewIconModel(s.T())
-	s.uc = NewInitDataUC(s.mockIcon)
+	s.mockMainCateg = mocks.NewMainCategModel(s.T())
+	s.mockSubCateg = mocks.NewSubCategModel(s.T())
+
+	s.uc = NewInitDataUC(s.mockIcon, s.mockMainCateg, s.mockSubCateg)
 }
 
 func (s *InitDataSuite) TearDownTest() {

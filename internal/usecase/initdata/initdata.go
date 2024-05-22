@@ -1,15 +1,23 @@
 package initdata
 
 import (
+	"context"
+
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
 )
 
 type InitDataUC struct {
-	Icon interfaces.IconModel
+	Icon      interfaces.IconModel
+	MainCateg interfaces.MainCategModel
+	SubCateg  interfaces.SubCategModel
 }
 
-func NewInitDataUC(i interfaces.IconModel) *InitDataUC {
+func NewInitDataUC(
+	i interfaces.IconModel,
+	m interfaces.MainCategModel,
+	s interfaces.SubCategModel,
+) *InitDataUC {
 	return &InitDataUC{
 		Icon: i,
 	}
@@ -135,4 +143,19 @@ func (i *InitDataUC) List() (domain.InitData, error) {
 			},
 		},
 	}, nil
+}
+
+func (i *InitDataUC) Create(ctx context.Context, data domain.InitData, userID int64) error {
+	mainCategs := genAllMainCategs(data)
+	if err := i.MainCateg.CreateBatch(mainCategs, userID); err != nil {
+		return err
+	}
+
+	allCategs, err := i.MainCateg.GetAll(userID, domain.TransactionTypeUnSpecified)
+	if err != nil {
+		return err
+	}
+
+	subCategs := genAllSubCategs(data, allCategs)
+	return i.SubCateg.CreateBatch(ctx, subCategs, userID)
 }
