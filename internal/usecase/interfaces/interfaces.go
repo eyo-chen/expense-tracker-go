@@ -88,4 +88,7 @@ type IconUC interface {
 type InitDataUC interface {
 	// List returns the initial data.
 	List() (domain.InitData, error)
+
+	// Create creates the initial data.
+	Create(ctx context.Context, data domain.InitData, userID int64) error
 }

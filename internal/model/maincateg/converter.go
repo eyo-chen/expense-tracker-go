@@ -5,23 +5,15 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
 )
 
-func getAllCvtToDomainMainCateg(categ MainCateg, i icon.Icon) domain.MainCateg {
+func cvtToDomainMainCateg(c MainCateg, i icon.Icon) domain.MainCateg {
 	return domain.MainCateg{
-		ID:   categ.ID,
-		Name: categ.Name,
-		Type: domain.CvtToTransactionType(categ.Type),
+		ID:   c.ID,
+		Name: c.Name,
+		Type: domain.CvtToTransactionType(c.Type),
 		Icon: domain.Icon{
 			ID:  i.ID,
 			URL: i.URL,
 		},
-	}
-}
-
-func cvtToDomainMainCateg(c *MainCateg, i *icon.Icon) *domain.MainCateg {
-	return &domain.MainCateg{
-		ID:   c.ID,
-		Name: c.Name,
-		Type: domain.CvtToTransactionType(c.Type),
 	}
 }
 

@@ -31,6 +31,6 @@ func New(u interfaces.UserModel,
 		SubCateg:    *subcateg.NewSubCategUC(s, m),
 		Transaction: *transaction.NewTransactionUC(t, m, s),
 		Icon:        *icon.NewIconUC(i),
-		InitData:    *initdata.NewInitDataUC(i),
+		InitData:    *initdata.NewInitDataUC(i, m, s),
 	}
 }

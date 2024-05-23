@@ -78,7 +78,7 @@ func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) 
 			return nil, err
 		}
 
-		categs = append(categs, getAllCvtToDomainMainCateg(categ, icon))
+		categs = append(categs, cvtToDomainMainCateg(categ, icon))
 	}
 	defer rows.Close()
 
@@ -129,7 +129,8 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 		return nil, err
 	}
 
-	return cvtToDomainMainCateg(&categ, nil), nil
+	domainCateg := cvtToDomainMainCateg(categ, icon.Icon{})
+	return &domainCateg, nil
 }
 
 func (m *MainCategModel) CreateBatch(categs []domain.MainCateg, userID int64) error {
