@@ -19,7 +19,9 @@ func NewInitDataUC(
 	s interfaces.SubCategModel,
 ) *InitDataUC {
 	return &InitDataUC{
-		Icon: i,
+		Icon:      i,
+		MainCateg: m,
+		SubCateg:  s,
 	}
 }
 
