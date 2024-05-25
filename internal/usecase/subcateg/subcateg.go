@@ -24,11 +24,7 @@ func (s *SubCategUC) Create(categ *domain.SubCateg, userID int64) error {
 		return err
 	}
 
-	if err := s.SubCateg.Create(categ, userID); err != nil {
-		return err
-	}
-
-	return nil
+	return s.SubCateg.Create(categ, userID)
 }
 
 func (s *SubCategUC) GetAll(userID int64) ([]*domain.SubCateg, error) {
