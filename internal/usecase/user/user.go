@@ -80,3 +80,7 @@ func (u *UserUC) Login(user domain.User) (string, error) {
 
 	return token, nil
 }
+
+func (u *UserUC) GetInfo(userID int64) (domain.User, error) {
+	return u.User.GetInfo(userID)
+}
