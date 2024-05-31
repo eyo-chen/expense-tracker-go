@@ -13,6 +13,9 @@ type UserModel interface {
 
 	// FindByEmail returns a user by email.
 	FindByEmail(email string) (domain.User, error)
+
+	// GetInfo returns a user by id.
+	GetInfo(userID int64) (domain.User, error)
 }
 
 // MainCategModel is the interface that wraps the basic methods for main category model.
