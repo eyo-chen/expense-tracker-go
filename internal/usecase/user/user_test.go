@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/OYE0303/expense-tracker-go/mocks"
 	"github.com/OYE0303/expense-tracker-go/pkg/auth"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
@@ -14,7 +15,7 @@ import (
 
 type UserSuite struct {
 	suite.Suite
-	userUC   *UserUC
+	userUC   interfaces.UserUC
 	mockUser *mocks.UserModel
 }
 
