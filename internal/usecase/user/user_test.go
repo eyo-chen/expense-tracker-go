@@ -156,3 +156,37 @@ func login_PasswordNotMatch_ReturnError(s *UserSuite, desc string) {
 	s.Require().Equal(domain.ErrAuthentication, err, desc)
 	s.Require().Empty(token, desc)
 }
+
+func (s *UserSuite) TestGetInfo() {
+	for scenario, fn := range map[string]func(s *UserSuite, desc string){
+		"when no error, return successfully": getInfo_NoError_ReturnSuccessfully,
+		"when get fail, return error":        getInfo_GetFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getInfo_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
+	userByID := domain.User{
+		ID:    1,
+		Name:  "username",
+		Email: "email.com",
+	}
+	s.mockUser.On("GetInfo", int64(1)).Return(userByID, nil).Once()
+
+	user, err := s.userUC.GetInfo(1)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(userByID, user, desc)
+}
+
+func getInfo_GetFail_ReturnError(s *UserSuite, desc string) {
+	s.mockUser.On("GetInfo", int64(1)).Return(domain.User{}, domain.ErrUserIDNotFound).Once()
+
+	user, err := s.userUC.GetInfo(1)
+	s.Require().Equal(domain.ErrUserIDNotFound, err, desc)
+	s.Require().Empty(user, desc)
+}
