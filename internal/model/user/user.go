@@ -54,6 +54,10 @@ func (m *UserModel) GetInfo(userID int64) (domain.User, error) {
 
 	var user User
 	if err := m.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email, &user.Password_hash); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.User{}, domain.ErrUserIDNotFound
+		}
+
 		logger.Error("users SELECT m.DB.QueryRow", "err", err)
 		return domain.User{}, err
 	}
