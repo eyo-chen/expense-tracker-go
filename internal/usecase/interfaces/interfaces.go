@@ -13,6 +13,9 @@ type UserUC interface {
 
 	// Login logs in a user.
 	Login(user domain.User) (string, error)
+
+	// GetInfo returns the user information by user id.
+	GetInfo(userID int64) (domain.User, error)
 }
 
 // MainCategUC is the interface that wraps the basic methods for main category usecase.

@@ -13,6 +13,34 @@ type UserUC struct {
 	mock.Mock
 }
 
+// GetInfo provides a mock function with given fields: userID
+func (_m *UserUC) GetInfo(userID int64) (domain.User, error) {
+	ret := _m.Called(userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInfo")
+	}
+
+	var r0 domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64) (domain.User, error)); ok {
+		return rf(userID)
+	}
+	if rf, ok := ret.Get(0).(func(int64) domain.User); ok {
+		r0 = rf(userID)
+	} else {
+		r0 = ret.Get(0).(domain.User)
+	}
+
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Login provides a mock function with given fields: user
 func (_m *UserUC) Login(user domain.User) (string, error) {
 	ret := _m.Called(user)
