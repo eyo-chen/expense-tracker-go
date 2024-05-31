@@ -6,6 +6,9 @@ var (
 	// email not found error
 	ErrEmailNotFound = errors.New("email not found")
 
+	// user id not found error
+	ErrUserIDNotFound = errors.New("user id not found")
+
 	// email already exists error
 	ErrEmailAlreadyExists = errors.New("email already exists")
 

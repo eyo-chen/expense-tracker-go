@@ -59,6 +59,34 @@ func (_m *UserModel) FindByEmail(email string) (domain.User, error) {
 	return r0, r1
 }
 
+// GetInfo provides a mock function with given fields: userID
+func (_m *UserModel) GetInfo(userID int64) (domain.User, error) {
+	ret := _m.Called(userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInfo")
+	}
+
+	var r0 domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64) (domain.User, error)); ok {
+		return rf(userID)
+	}
+	if rf, ok := ret.Get(0).(func(int64) domain.User); ok {
+		r0 = rf(userID)
+	} else {
+		r0 = ret.Get(0).(domain.User)
+	}
+
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewUserModel creates a new instance of UserModel. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewUserModel(t interface {

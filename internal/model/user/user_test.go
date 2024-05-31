@@ -7,6 +7,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
+	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
@@ -30,6 +31,7 @@ func (s *UserSuite) SetupSuite() {
 	port := dockerutil.RunDocker()
 	db, migrate := testutil.ConnToDB(port)
 	s.model = NewUserModel(db)
+	logger.Register()
 	s.db = db
 	s.migrate = migrate
 	s.f = efactory.New(User{}).SetConfig(efactory.Config[User]{
@@ -113,4 +115,41 @@ func findByEmail_NotFound_ReturnError(s *UserSuite, desc string) {
 	_, err = s.model.FindByEmail("notfound")
 	s.Require().Error(err, desc)
 	s.Require().Equal(domain.ErrEmailNotFound, err, desc)
+}
+
+func (s *UserSuite) TestGetInfo() {
+	for scenario, fn := range map[string]func(s *UserSuite, desc string){
+		"when user is found, return successfully": getInfo_FoundUser_ReturnSuccessfully,
+		"when user is not found, return error":    getInfo_NotFound_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getInfo_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
+	users, err := s.f.BuildList(2).Insert()
+	s.Require().NoError(err, desc)
+
+	expResult := domain.User{
+		ID:    users[0].ID,
+		Name:  users[0].Name,
+		Email: users[0].Email,
+	}
+
+	user, err := s.model.GetInfo(users[0].ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, user, desc)
+}
+
+func getInfo_NotFound_ReturnError(s *UserSuite, desc string) {
+	_, err := s.f.BuildList(2).Insert()
+	s.Require().NoError(err, desc)
+
+	user, err := s.model.GetInfo(999)
+	s.Require().Empty(user, desc)
+	s.Require().EqualError(err, domain.ErrUserIDNotFound.Error(), desc)
 }

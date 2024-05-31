@@ -49,6 +49,22 @@ func (m *UserModel) FindByEmail(email string) (domain.User, error) {
 	return cvtToDomainUser(user), nil
 }
 
+func (m *UserModel) GetInfo(userID int64) (domain.User, error) {
+	stmt := `SELECT id, name, email FROM users WHERE id = ?`
+
+	var user User
+	if err := m.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.User{}, domain.ErrUserIDNotFound
+		}
+
+		logger.Error("users SELECT m.DB.QueryRow", "err", err)
+		return domain.User{}, err
+	}
+
+	return cvtToDomainUser(user), nil
+}
+
 func cvtToDomainUser(u User) domain.User {
 	return domain.User{
 		ID:            u.ID,
