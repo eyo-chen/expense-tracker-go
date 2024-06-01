@@ -20,7 +20,7 @@ func NewUserHandler(user interfaces.UserUC) *UserHandler {
 	return &UserHandler{User: user}
 }
 
-func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
@@ -64,7 +64,7 @@ func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -107,7 +107,7 @@ func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	userCtx := ctxutil.GetUser(r)
 	user, err := u.User.GetInfo(userCtx.ID)
 	if err != nil {
