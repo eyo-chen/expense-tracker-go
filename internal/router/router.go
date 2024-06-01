@@ -28,6 +28,9 @@ func New(handler *hd.Handler) http.Handler {
 	// user with auth
 	r.Handle("/v1/user", auth.ThenFunc(handler.User.GetInfo)).Methods(http.MethodGet)
 
+	// init data with auth
+	r.Handle("/v1/init-data", auth.ThenFunc(handler.InitData.Create)).Methods(http.MethodPost)
+
 	// main category
 	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.CreateMainCateg)).Methods(http.MethodPost)
 	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.GetAllMainCateg)).Methods(http.MethodGet)
