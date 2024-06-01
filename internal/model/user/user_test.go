@@ -135,9 +135,10 @@ func getInfo_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	expResult := domain.User{
-		ID:    users[0].ID,
-		Name:  users[0].Name,
-		Email: users[0].Email,
+		ID:                users[0].ID,
+		Name:              users[0].Name,
+		Email:             users[0].Email,
+		IsSetInitCategory: users[0].IsSetInitCategory,
 	}
 
 	user, err := s.model.GetInfo(users[0].ID)
