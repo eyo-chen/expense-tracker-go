@@ -51,10 +51,10 @@ func (m *UserModel) FindByEmail(email string) (domain.User, error) {
 }
 
 func (m *UserModel) GetInfo(userID int64) (domain.User, error) {
-	stmt := `SELECT id, name, email FROM users WHERE id = ?`
+	stmt := `SELECT id, name, email, is_set_init_category FROM users WHERE id = ?`
 
 	var user User
-	if err := m.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email); err != nil {
+	if err := m.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email, &user.IsSetInitCategory); err != nil {
 		if err == sql.ErrNoRows {
 			return domain.User{}, domain.ErrUserIDNotFound
 		}
@@ -68,9 +68,10 @@ func (m *UserModel) GetInfo(userID int64) (domain.User, error) {
 
 func cvtToDomainUser(u User) domain.User {
 	return domain.User{
-		ID:            u.ID,
-		Name:          u.Name,
-		Email:         u.Email,
-		Password_hash: u.Password_hash,
+		ID:                u.ID,
+		Name:              u.Name,
+		Email:             u.Email,
+		IsSetInitCategory: u.IsSetInitCategory,
+		Password_hash:     u.Password_hash,
 	}
 }
