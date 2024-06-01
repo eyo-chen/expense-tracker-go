@@ -17,7 +17,7 @@ import (
 
 type UserSuite struct {
 	suite.Suite
-	userHlr    *UserHandler
+	hlr        *Hlr
 	mockUserUC *mocks.UserUC
 }
 
@@ -31,7 +31,7 @@ func (s *UserSuite) SetupSuite() {
 
 func (s *UserSuite) SetupTest() {
 	s.mockUserUC = mocks.NewUserUC(s.T())
-	s.userHlr = NewUserHandler(s.mockUserUC)
+	s.hlr = NewUserHandler(s.mockUserUC)
 }
 
 func (s *UserSuite) TearDownTest() {
@@ -66,7 +66,7 @@ func signup_NoError_CreateSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -82,7 +82,7 @@ func signup_NoError_CreateSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -103,7 +103,7 @@ func signup_EmptyName_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -116,7 +116,7 @@ func signup_EmptyName_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -137,7 +137,7 @@ func signup_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -150,7 +150,7 @@ func signup_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -171,7 +171,7 @@ func signup_InvalidPasswordReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -184,7 +184,7 @@ func signup_InvalidPasswordReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -205,7 +205,7 @@ func signup_EmailExists_CreateSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -221,7 +221,7 @@ func signup_EmailExists_CreateSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -242,7 +242,7 @@ func signup_SignupFail_CreateSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -258,7 +258,7 @@ func signup_SignupFail_CreateSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -294,7 +294,7 @@ func login_NoError_LoginSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -310,7 +310,7 @@ func login_NoError_LoginSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -330,7 +330,7 @@ func login_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -343,7 +343,7 @@ func login_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -363,7 +363,7 @@ func login_InvalidPassword_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -376,7 +376,7 @@ func login_InvalidPassword_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -396,7 +396,7 @@ func login_AuthError_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -412,7 +412,7 @@ func login_AuthError_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -432,7 +432,7 @@ func login_LoginFail_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -448,7 +448,7 @@ func login_LoginFail_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
