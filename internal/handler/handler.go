@@ -11,7 +11,7 @@ import (
 )
 
 type Handler struct {
-	User        user.UserHandler
+	User        user.Hlr
 	MainCateg   maincateg.MainCategHandler
 	SubCateg    subcateg.SubCategHandler
 	Transaction transaction.TransactionHandler

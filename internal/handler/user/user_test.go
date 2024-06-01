@@ -10,6 +10,7 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/mocks"
+	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -17,7 +18,7 @@ import (
 
 type UserSuite struct {
 	suite.Suite
-	userHlr    *UserHandler
+	hlr        *Hlr
 	mockUserUC *mocks.UserUC
 }
 
@@ -31,7 +32,7 @@ func (s *UserSuite) SetupSuite() {
 
 func (s *UserSuite) SetupTest() {
 	s.mockUserUC = mocks.NewUserUC(s.T())
-	s.userHlr = NewUserHandler(s.mockUserUC)
+	s.hlr = NewUserHandler(s.mockUserUC)
 }
 
 func (s *UserSuite) TearDownTest() {
@@ -66,7 +67,7 @@ func signup_NoError_CreateSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -82,7 +83,7 @@ func signup_NoError_CreateSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -103,7 +104,7 @@ func signup_EmptyName_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -116,7 +117,7 @@ func signup_EmptyName_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -137,7 +138,7 @@ func signup_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -150,7 +151,7 @@ func signup_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -171,7 +172,7 @@ func signup_InvalidPasswordReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -184,7 +185,7 @@ func signup_InvalidPasswordReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -205,7 +206,7 @@ func signup_EmailExists_CreateSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -221,7 +222,7 @@ func signup_EmailExists_CreateSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -242,7 +243,7 @@ func signup_SignupFail_CreateSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/signup", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -258,7 +259,7 @@ func signup_SignupFail_CreateSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Signup(res, req)
+	s.hlr.Signup(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -294,7 +295,7 @@ func login_NoError_LoginSuccessfully(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -310,7 +311,7 @@ func login_NoError_LoginSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -330,7 +331,7 @@ func login_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -343,7 +344,7 @@ func login_InvalidEmail_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -363,7 +364,7 @@ func login_InvalidPassword_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -376,7 +377,7 @@ func login_InvalidPassword_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -396,7 +397,7 @@ func login_AuthError_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -412,7 +413,7 @@ func login_AuthError_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
@@ -432,7 +433,7 @@ func login_LoginFail_ReturnError(s *UserSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	// prepare request, and response recorder
-	srv := httptest.NewServer(http.HandlerFunc(s.userHlr.Signup))
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
 	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/login", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()
 	defer srv.Close()
@@ -448,11 +449,134 @@ func login_LoginFail_ReturnError(s *UserSuite, desc string) {
 	}
 
 	// action
-	s.userHlr.Login(res, req)
+	s.hlr.Login(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
 	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)
+}
+
+func (s *UserSuite) TestGetInfo() {
+	for scenario, fn := range map[string]func(s *UserSuite, desc string){
+		"when no error, get info successfully":          getInfo_NoError_GetInfoSuccessfully,
+		"when user not found, return bad request error": getInfo_UserNotFound_ReturnBadRequest,
+		"when get info fail, return error":              getInfo_GetInfoFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getInfo_NoError_GetInfoSuccessfully(s *UserSuite, desc string) {
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.GetInfo))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/user/info", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// prepare service
+	user := domain.User{
+		ID:    1,
+		Name:  "username",
+		Email: "aaa@gmail.com",
+	}
+
+	s.mockUserUC.On("GetInfo", user.ID).Return(user, nil).Once()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// prepare expected response
+	expResp := map[string]interface{}{
+		"id":    float64(1),
+		"name":  "username",
+		"email": "aaa@gmail.com",
+	}
+
+	// action
+	s.hlr.GetInfo(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusOK, res.Code, desc)
+}
+
+func getInfo_UserNotFound_ReturnBadRequest(s *UserSuite, desc string) {
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.GetInfo))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/user/info", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// prepare service
+	user := domain.User{
+		ID:    1,
+		Name:  "username",
+		Email: "aaa@gmail.com",
+	}
+
+	s.mockUserUC.On("GetInfo", user.ID).Return(domain.User{}, domain.ErrUserIDNotFound).Once()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// prepare expected response
+	expResp := map[string]interface{}{
+		"error": domain.ErrUserIDNotFound.Error(),
+	}
+
+	// action
+	s.hlr.GetInfo(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func getInfo_GetInfoFail_ReturnError(s *UserSuite, desc string) {
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.GetInfo))
+	req := httptest.NewRequest(http.MethodGet, srv.URL+"/v1/user/info", nil)
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// prepare service
+	user := domain.User{}
+
+	s.mockUserUC.On("GetInfo", user.ID).Return(domain.User{}, errors.New("error")).Once()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &user)
+
+	// prepare expected response
+	expResp := map[string]interface{}{
+		"error": "error",
+	}
+
+	// action
+	s.hlr.GetInfo(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)

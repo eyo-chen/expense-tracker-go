@@ -5,21 +5,22 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/validator"
 )
 
-type UserHandler struct {
+type Hlr struct {
 	User interfaces.UserUC
 }
 
-func NewUserHandler(user interfaces.UserUC) *UserHandler {
-	return &UserHandler{User: user}
+func NewUserHandler(user interfaces.UserUC) *Hlr {
+	return &Hlr{User: user}
 }
 
-func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) Signup(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
@@ -42,7 +43,7 @@ func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		Email:    input.Email,
 		Password: input.Password,
 	}
-	token, err := u.User.Signup(user)
+	token, err := h.User.Signup(user)
 	if err != nil {
 		if err == domain.ErrEmailAlreadyExists {
 			errutil.BadRequestResponse(w, r, err)
@@ -63,7 +64,7 @@ func (u UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) Login(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -85,7 +86,7 @@ func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Password: input.Password,
 	}
 
-	token, err := u.User.Login(user)
+	token, err := h.User.Login(user)
 	if err != nil {
 		if err == domain.ErrAuthentication {
 			errutil.AuthenticationErrorResponse(w, r, err)
@@ -98,6 +99,31 @@ func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	resp := map[string]interface{}{
 		"token": token,
+	}
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
+
+func (h *Hlr) GetInfo(w http.ResponseWriter, r *http.Request) {
+	userCtx := ctxutil.GetUser(r)
+	user, err := h.User.GetInfo(userCtx.ID)
+	if err != nil {
+		if err == domain.ErrUserIDNotFound {
+			errutil.BadRequestResponse(w, r, err)
+			return
+		}
+
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"id":    user.ID,
+		"name":  user.Name,
+		"email": user.Email,
 	}
 	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)

@@ -25,6 +25,9 @@ func New(handler *hd.Handler) http.Handler {
 
 	auth := alice.New(middleware.Authenticate)
 
+	// user with auth
+	r.Handle("/v1/user", auth.ThenFunc(handler.User.GetInfo)).Methods(http.MethodGet)
+
 	// main category
 	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.CreateMainCateg)).Methods(http.MethodPost)
 	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.GetAllMainCateg)).Methods(http.MethodGet)
