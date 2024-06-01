@@ -16,10 +16,11 @@ func NewUserModel(db *sql.DB) *UserModel {
 }
 
 type User struct {
-	ID            int64  `json:"id"`
-	Name          string `json:"name"`
-	Email         string `json:"email"`
-	Password_hash string `json:"password_hash"`
+	ID                int64  `json:"id"`
+	Name              string `json:"name"`
+	Email             string `json:"email"`
+	IsSetInitCategory bool   `json:"is_set_init_category"`
+	Password_hash     string `json:"password_hash"`
 }
 
 func (m *UserModel) Create(name, email, passwordHash string) error {
