@@ -484,9 +484,10 @@ func getInfo_NoError_GetInfoSuccessfully(s *UserSuite, desc string) {
 
 	// prepare service
 	user := domain.User{
-		ID:    1,
-		Name:  "username",
-		Email: "aaa@gmail.com",
+		ID:                1,
+		Name:              "username",
+		Email:             "aaa@gmail.com",
+		IsSetInitCategory: true,
 	}
 
 	s.mockUserUC.On("GetInfo", user.ID).Return(user, nil).Once()
@@ -496,9 +497,10 @@ func getInfo_NoError_GetInfoSuccessfully(s *UserSuite, desc string) {
 
 	// prepare expected response
 	expResp := map[string]interface{}{
-		"id":    float64(1),
-		"name":  "username",
-		"email": "aaa@gmail.com",
+		"id":                   float64(1),
+		"name":                 "username",
+		"email":                "aaa@gmail.com",
+		"is_set_init_category": true,
 	}
 
 	// action

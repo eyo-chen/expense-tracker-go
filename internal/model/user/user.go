@@ -16,10 +16,11 @@ func NewUserModel(db *sql.DB) *UserModel {
 }
 
 type User struct {
-	ID            int64  `json:"id"`
-	Name          string `json:"name"`
-	Email         string `json:"email"`
-	Password_hash string `json:"password_hash"`
+	ID                int64  `json:"id"`
+	Name              string `json:"name"`
+	Email             string `json:"email"`
+	IsSetInitCategory bool   `json:"is_set_init_category"`
+	Password_hash     string `json:"password_hash"`
 }
 
 func (m *UserModel) Create(name, email, passwordHash string) error {
@@ -50,10 +51,10 @@ func (m *UserModel) FindByEmail(email string) (domain.User, error) {
 }
 
 func (m *UserModel) GetInfo(userID int64) (domain.User, error) {
-	stmt := `SELECT id, name, email FROM users WHERE id = ?`
+	stmt := `SELECT id, name, email, is_set_init_category FROM users WHERE id = ?`
 
 	var user User
-	if err := m.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email); err != nil {
+	if err := m.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email, &user.IsSetInitCategory); err != nil {
 		if err == sql.ErrNoRows {
 			return domain.User{}, domain.ErrUserIDNotFound
 		}
@@ -67,9 +68,10 @@ func (m *UserModel) GetInfo(userID int64) (domain.User, error) {
 
 func cvtToDomainUser(u User) domain.User {
 	return domain.User{
-		ID:            u.ID,
-		Name:          u.Name,
-		Email:         u.Email,
-		Password_hash: u.Password_hash,
+		ID:                u.ID,
+		Name:              u.Name,
+		Email:             u.Email,
+		IsSetInitCategory: u.IsSetInitCategory,
+		Password_hash:     u.Password_hash,
 	}
 }
