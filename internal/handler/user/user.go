@@ -121,9 +121,10 @@ func (h *Hlr) GetInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]interface{}{
-		"id":    user.ID,
-		"name":  user.Name,
-		"email": user.Email,
+		"id":                   user.ID,
+		"name":                 user.Name,
+		"email":                user.Email,
+		"is_set_init_category": user.IsSetInitCategory,
 	}
 	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
