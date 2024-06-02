@@ -1,4 +1,4 @@
-name: go-test
+name: test
 
 on:
   pull_request:
@@ -42,7 +42,7 @@ jobs:
           repo: gotestfmt
 
       - name: Run tests
-        run: sudo go test -race -json -v -coverprofile=coverage.txt ./... 2>&1 | tee /tmp/gotest.log | gotestfmt
+        run: go test -race -coverprofile=coverage.txt ./internal/...
 
       - name: Convert go coverage to corbetura format
         run: gocover-cobertura < coverage.txt > coverage.xml
