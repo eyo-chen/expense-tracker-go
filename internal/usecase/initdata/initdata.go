@@ -149,7 +149,7 @@ func (i *InitDataUC) List() (domain.InitData, error) {
 
 func (i *InitDataUC) Create(ctx context.Context, data domain.InitData, userID int64) error {
 	mainCategs := genAllMainCategs(data)
-	if err := i.MainCateg.CreateBatch(ctx, mainCategs, userID); err != nil {
+	if err := i.MainCateg.BatchCreate(ctx, mainCategs, userID); err != nil {
 		return err
 	}
 
@@ -159,5 +159,5 @@ func (i *InitDataUC) Create(ctx context.Context, data domain.InitData, userID in
 	}
 
 	subCategs := genAllSubCategs(data, allCategs)
-	return i.SubCateg.CreateBatch(ctx, subCategs, userID)
+	return i.SubCateg.BatchCreate(ctx, subCategs, userID)
 }

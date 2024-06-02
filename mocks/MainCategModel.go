@@ -15,6 +15,24 @@ type MainCategModel struct {
 	mock.Mock
 }
 
+// BatchCreate provides a mock function with given fields: ctx, categs, userID
+func (_m *MainCategModel) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
+	ret := _m.Called(ctx, categs, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for BatchCreate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []domain.MainCateg, int64) error); ok {
+		r0 = rf(ctx, categs, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Create provides a mock function with given fields: categ, userID
 func (_m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	ret := _m.Called(categ, userID)
@@ -26,24 +44,6 @@ func (_m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*domain.MainCateg, int64) error); ok {
 		r0 = rf(categ, userID)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// CreateBatch provides a mock function with given fields: ctx, categs, userID
-func (_m *MainCategModel) CreateBatch(ctx context.Context, categs []domain.MainCateg, userID int64) error {
-	ret := _m.Called(ctx, categs, userID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CreateBatch")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, []domain.MainCateg, int64) error); ok {
-		r0 = rf(ctx, categs, userID)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -125,7 +125,7 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 	return &domainCateg, nil
 }
 
-func (m *MainCategModel) CreateBatch(ctx context.Context, categs []domain.MainCateg, userID int64) error {
+func (m *MainCategModel) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES `
 	args := make([]interface{}, 0, len(categs)*4)
 	for i, c := range categs {
