@@ -1,6 +1,7 @@
 package initdata
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/mocks"
+	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -139,5 +141,117 @@ func list_ListFail_ReturnError(s *InitDataSuite, desc string) {
 	s.hlr.List(res, req)
 
 	// assertion
+	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)
+}
+
+func (s *InitDataSuite) TestCreate() {
+	for scenario, fn := range map[string]func(s *InitDataSuite, desc string){
+		"when no error, return successfully": create_NoError_ReturnSuccessfully,
+		"when create failed, return error":   create_CreateFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func create_NoError_ReturnSuccessfully(s *InitDataSuite, desc string) {
+	// prepare mock data
+	mockData := domain.InitData{
+		Expense: []domain.InitDataMainCateg{
+			{
+				Name:      "Food",
+				Icon:      domain.Icon{ID: 1, URL: "http://example.com/icon/1"},
+				SubCategs: []string{"breakfast", "brunch", "lunch", "dinner", "groceries", "drink", "snak"},
+			},
+		},
+		Income: []domain.InitDataMainCateg{
+			{
+				Name:      "salary",
+				Icon:      domain.Icon{ID: 12, URL: "http://example.com/icon/12"},
+				SubCategs: []string{"salary", "bonus", "commission", "tips"},
+			},
+		},
+	}
+	body, err := json.Marshal(mockData)
+	s.Require().NoError(err, desc)
+
+	mockUser := domain.User{ID: 1}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Create))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/init-data", bytes.NewBuffer(body))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &mockUser)
+
+	// mock service
+	s.mockInitDataUC.On("Create", req.Context(), mockData, int64(1)).Return(nil)
+
+	// action
+	s.hlr.Create(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Nil(responseBody, desc)
+	s.Require().Equal(http.StatusCreated, res.Code, desc)
+}
+
+func create_CreateFail_ReturnError(s *InitDataSuite, desc string) {
+	// prepare mock data
+	mockData := domain.InitData{
+		Expense: []domain.InitDataMainCateg{
+			{
+				Name:      "Food",
+				Icon:      domain.Icon{ID: 1, URL: "http://example.com/icon/1"},
+				SubCategs: []string{"breakfast", "brunch", "lunch", "dinner", "groceries", "drink", "snak"},
+			},
+		},
+		Income: []domain.InitDataMainCateg{
+			{
+				Name:      "salary",
+				Icon:      domain.Icon{ID: 12, URL: "http://example.com/icon/12"},
+				SubCategs: []string{"salary", "bonus", "commission", "tips"},
+			},
+		},
+	}
+	body, err := json.Marshal(mockData)
+	s.Require().NoError(err, desc)
+
+	mockUser := domain.User{ID: 1}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Create))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/init-data", bytes.NewBuffer(body))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &mockUser)
+
+	// mock service
+	s.mockInitDataUC.On("Create", req.Context(), mockData, int64(1)).Return(errors.New("create failed"))
+
+	// action
+	s.hlr.Create(res, req)
+
+	// expected response
+	expResp := map[string]interface{}{"error": "create failed"}
+
+	// assertion
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)
 }
