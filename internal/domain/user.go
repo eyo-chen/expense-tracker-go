@@ -9,3 +9,8 @@ type User struct {
 	Password          string
 	Password_hash     string
 }
+
+// UpdateUserOpt contains option to update user
+type UpdateUserOpt struct {
+	IsSetInitCategory *bool
+}
