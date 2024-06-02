@@ -11,17 +11,20 @@ type InitDataUC struct {
 	Icon      interfaces.IconModel
 	MainCateg interfaces.MainCategModel
 	SubCateg  interfaces.SubCategModel
+	user      interfaces.UserModel
 }
 
 func NewInitDataUC(
 	i interfaces.IconModel,
 	m interfaces.MainCategModel,
 	s interfaces.SubCategModel,
+	u interfaces.UserModel,
 ) *InitDataUC {
 	return &InitDataUC{
 		Icon:      i,
 		MainCateg: m,
 		SubCateg:  s,
+		user:      u,
 	}
 }
 
@@ -159,5 +162,11 @@ func (i *InitDataUC) Create(ctx context.Context, data domain.InitData, userID in
 	}
 
 	subCategs := genAllSubCategs(data, allCategs)
-	return i.SubCateg.BatchCreate(ctx, subCategs, userID)
+	if err := i.SubCateg.BatchCreate(ctx, subCategs, userID); err != nil {
+		return err
+	}
+
+	t := true
+	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
+	return i.user.Update(ctx, userID, opt)
 }
