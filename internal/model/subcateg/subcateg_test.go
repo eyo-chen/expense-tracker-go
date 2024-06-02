@@ -517,7 +517,7 @@ func createBatch_InsertOneData_InsertSuccessfully(s *SubCategSuite, desc string)
 	}
 
 	// action
-	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().NoError(err, desc)
 
 	// check
@@ -544,7 +544,7 @@ func createBatch_InsertManyData_InsertSuccessfully(s *SubCategSuite, desc string
 	}
 
 	// action
-	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().NoError(err, desc)
 
 	// check
@@ -576,7 +576,7 @@ func createBatch_InsertDuplicateNameData_ReturnError(s *SubCategSuite, desc stri
 	}
 
 	// action
-	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 
 	// check
@@ -600,7 +600,7 @@ func createBatch_AlreadyExistData_ReturnError(s *SubCategSuite, desc string) {
 	}
 
 	// action
-	err = s.subCategModel.CreateBatch(mockCTX, subCategs, user.ID)
+	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 
 	// check

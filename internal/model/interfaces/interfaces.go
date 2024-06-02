@@ -24,7 +24,7 @@ type MainCategModel interface {
 	Create(categ *domain.MainCateg, userID int64) error
 
 	// GetAll returns all main categories by user id.
-	GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)
+	GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)
 
 	// Update updates a main category.
 	Update(categ *domain.MainCateg) error
@@ -35,8 +35,8 @@ type MainCategModel interface {
 	// GetByID returns a main category by id and user id.
 	GetByID(id, userID int64) (*domain.MainCateg, error)
 
-	// CreateBatch inserts multiple main categories into the database.
-	CreateBatch(categs []domain.MainCateg, userID int64) error
+	// BatchCreate inserts multiple main categories into the database.
+	BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error
 }
 
 // SubCategModel is the interface that wraps the basic methods for sub category model.
@@ -59,8 +59,8 @@ type SubCategModel interface {
 	// GetByID returns a sub category by id and user id.
 	GetByID(id, userID int64) (*domain.SubCateg, error)
 
-	// CreateBatch inserts multiple sub categories into the database.
-	CreateBatch(ctx context.Context, categs []domain.SubCateg, userID int64) error
+	// BatchCreate inserts multiple sub categories into the database.
+	BatchCreate(ctx context.Context, categs []domain.SubCateg, userID int64) error
 }
 
 // IconModel is the interface that wraps the basic methods for icon model.

@@ -1,6 +1,8 @@
 package maincateg
 
 import (
+	"context"
+
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
 	"github.com/OYE0303/expense-tracker-go/pkg/logger"
@@ -33,7 +35,7 @@ func (m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 }
 
 func (m *MainCategUC) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
-	categs, err := m.MainCateg.GetAll(userID, transType)
+	categs, err := m.MainCateg.GetAll(context.Background(), userID, transType)
 	if err != nil {
 		return nil, err
 	}

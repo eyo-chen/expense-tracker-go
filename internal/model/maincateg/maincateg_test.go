@@ -1,6 +1,7 @@
 package maincateg
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -13,6 +14,10 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
+)
+
+var (
+	mockCtx = context.Background()
 )
 
 type MainCategSuite struct {
@@ -164,7 +169,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeIncome)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[0].ID, domain.TransactionTypeIncome)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -185,7 +190,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeExpense)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[0].ID, domain.TransactionTypeExpense)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -215,7 +220,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeUnSpecified)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[0].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -245,7 +250,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[1].ID, domain.TransactionTypeUnSpecified)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[1].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err)
 	s.Require().Equal(expResult, categs)
 }
@@ -448,7 +453,7 @@ func createBatch_InsertOneData_InsertSuccessfully(s *MainCategSuite, desc string
 		},
 	}
 
-	err = s.mainCategModel.CreateBatch(categs, users[0].ID)
+	err = s.mainCategModel.BatchCreate(mockCtx, categs, users[0].ID)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_id
@@ -485,7 +490,7 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 		},
 	}
 
-	err = s.mainCategModel.CreateBatch(categs, users[0].ID)
+	err = s.mainCategModel.BatchCreate(mockCtx, categs, users[0].ID)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_id
@@ -524,7 +529,7 @@ func createBatch_InsertDuplicateNameData_ReturnError(s *MainCategSuite, desc str
 		},
 	}
 
-	err = s.mainCategModel.CreateBatch(categs, users[0].ID)
+	err = s.mainCategModel.BatchCreate(mockCtx, categs, users[0].ID)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 
 	// check if the data is not inserted
@@ -558,7 +563,7 @@ func createBatch_AlreadyExistData_ReturnError(s *MainCategSuite, desc string) {
 		},
 	}
 
-	err = s.mainCategModel.CreateBatch(categs, user.ID)
+	err = s.mainCategModel.BatchCreate(mockCtx, categs, user.ID)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 
 	// check if the data is not inserted

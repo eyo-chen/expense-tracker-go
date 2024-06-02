@@ -138,7 +138,7 @@ func (s *SubCategModel) GetByID(id, userID int64) (*domain.SubCateg, error) {
 	return cvtToDomainSubCateg(&categ), nil
 }
 
-func (s *SubCategModel) CreateBatch(ctx context.Context, categs []domain.SubCateg, userID int64) error {
+func (s *SubCategModel) BatchCreate(ctx context.Context, categs []domain.SubCateg, userID int64) error {
 	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES `
 	args := make([]interface{}, 0, len(categs)*3)
 	for i, c := range categs {

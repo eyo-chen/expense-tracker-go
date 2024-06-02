@@ -1,6 +1,7 @@
 package maincateg
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -46,7 +47,7 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
+func (m *MainCategModel) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
 	stmt := `SELECT mc.id, mc.name, mc.type, i.id, i.url
 					 FROM main_categories AS mc
 					 LEFT JOIN icons AS i 
@@ -57,7 +58,7 @@ func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) 
 		stmt += ` AND type = ` + transType.ToModelValue()
 	}
 
-	rows, err := m.DB.Query(stmt, userID)
+	rows, err := m.DB.QueryContext(ctx, stmt, userID)
 	if err != nil {
 		logger.Error("m.DB.Query failed", "package", packagename, "err", err)
 		return nil, err
@@ -124,7 +125,7 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 	return &domainCateg, nil
 }
 
-func (m *MainCategModel) CreateBatch(categs []domain.MainCateg, userID int64) error {
+func (m *MainCategModel) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES `
 	args := make([]interface{}, 0, len(categs)*4)
 	for i, c := range categs {
@@ -136,7 +137,7 @@ func (m *MainCategModel) CreateBatch(categs []domain.MainCateg, userID int64) er
 		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.Icon.ID)
 	}
 
-	if _, err := m.DB.Exec(stmt, args...); err != nil {
+	if _, err := m.DB.ExecContext(ctx, stmt, args...); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}

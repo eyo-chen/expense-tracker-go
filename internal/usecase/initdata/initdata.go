@@ -149,15 +149,15 @@ func (i *InitDataUC) List() (domain.InitData, error) {
 
 func (i *InitDataUC) Create(ctx context.Context, data domain.InitData, userID int64) error {
 	mainCategs := genAllMainCategs(data)
-	if err := i.MainCateg.CreateBatch(mainCategs, userID); err != nil {
+	if err := i.MainCateg.BatchCreate(ctx, mainCategs, userID); err != nil {
 		return err
 	}
 
-	allCategs, err := i.MainCateg.GetAll(userID, domain.TransactionTypeUnSpecified)
+	allCategs, err := i.MainCateg.GetAll(ctx, userID, domain.TransactionTypeUnSpecified)
 	if err != nil {
 		return err
 	}
 
 	subCategs := genAllSubCategs(data, allCategs)
-	return i.SubCateg.CreateBatch(ctx, subCategs, userID)
+	return i.SubCateg.BatchCreate(ctx, subCategs, userID)
 }
