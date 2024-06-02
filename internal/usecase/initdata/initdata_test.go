@@ -452,9 +452,9 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 	}
 
 	// mock service
-	s.mockMainCateg.On("BatchCreate", mockMainCategs, mockUserID).Return(nil).Once()
+	s.mockMainCateg.On("BatchCreate", mockCtx, mockMainCategs, mockUserID).Return(nil).Once()
 
-	s.mockMainCateg.On("GetAll", mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
+	s.mockMainCateg.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
 
 	s.mockSubCateg.On("BatchCreate", mockCtx, mockSubCategs, mockUserID).Return(nil).Once()
 
