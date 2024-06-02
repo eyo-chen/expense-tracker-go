@@ -460,6 +460,10 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 
 	s.mockSubCateg.On("BatchCreate", mockCtx, mockSubCategs, mockUserID).Return(nil).Once()
 
+	t := true
+	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
+	s.mockUser.On("Update", mockCtx, mockUserID, opt).Return(nil).Once()
+
 	err := s.uc.Create(mockCtx, mockData, mockUserID)
 	s.Require().NoError(err, desc)
 }
