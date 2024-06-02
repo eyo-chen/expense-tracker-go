@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	uniqueIconUser     = "main_categories.unique_icon_user"
 	uniqueNameUserType = "main_categories.unique_name_user_type"
 	packagename        = "model/maincateg"
 )
@@ -38,10 +37,6 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	if _, err := m.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
-		}
-
-		if errorutil.ParseError(err, uniqueIconUser) {
-			return domain.ErrUniqueIconUser
 		}
 
 		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
@@ -94,10 +89,6 @@ func (m *MainCategModel) Update(categ *domain.MainCateg) error {
 			return domain.ErrUniqueNameUserType
 		}
 
-		if errorutil.ParseError(err, uniqueIconUser) {
-			return domain.ErrUniqueIconUser
-		}
-
 		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
 		return err
 	}
@@ -148,10 +139,6 @@ func (m *MainCategModel) CreateBatch(categs []domain.MainCateg, userID int64) er
 	if _, err := m.DB.Exec(stmt, args...); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
-		}
-
-		if errorutil.ParseError(err, uniqueIconUser) {
-			return domain.ErrUniqueIconUser
 		}
 
 		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
