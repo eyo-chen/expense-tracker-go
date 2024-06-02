@@ -10,7 +10,7 @@ type User struct {
 	Password_hash     string
 }
 
-// UserOpt contains option to update user
+// UpdateUserOpt contains option to update user
 type UpdateUserOpt struct {
 	IsSetInitCategory *bool
 }
