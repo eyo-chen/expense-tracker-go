@@ -153,7 +153,7 @@ func (i *InitDataUC) Create(ctx context.Context, data domain.InitData, userID in
 		return err
 	}
 
-	allCategs, err := i.MainCateg.GetAll(userID, domain.TransactionTypeUnSpecified)
+	allCategs, err := i.MainCateg.GetAll(ctx, userID, domain.TransactionTypeUnSpecified)
 	if err != nil {
 		return err
 	}

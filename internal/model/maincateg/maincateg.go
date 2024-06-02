@@ -47,7 +47,7 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
+func (m *MainCategModel) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
 	stmt := `SELECT mc.id, mc.name, mc.type, i.id, i.url
 					 FROM main_categories AS mc
 					 LEFT JOIN icons AS i 
@@ -58,7 +58,7 @@ func (m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) 
 		stmt += ` AND type = ` + transType.ToModelValue()
 	}
 
-	rows, err := m.DB.Query(stmt, userID)
+	rows, err := m.DB.QueryContext(ctx, stmt, userID)
 	if err != nil {
 		logger.Error("m.DB.Query failed", "package", packagename, "err", err)
 		return nil, err

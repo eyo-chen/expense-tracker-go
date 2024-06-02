@@ -69,9 +69,9 @@ func (_m *MainCategModel) Delete(id int64) error {
 	return r0
 }
 
-// GetAll provides a mock function with given fields: userID, transType
-func (_m *MainCategModel) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
-	ret := _m.Called(userID, transType)
+// GetAll provides a mock function with given fields: ctx, userID, transType
+func (_m *MainCategModel) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
+	ret := _m.Called(ctx, userID, transType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
@@ -79,19 +79,19 @@ func (_m *MainCategModel) GetAll(userID int64, transType domain.TransactionType)
 
 	var r0 []domain.MainCateg
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64, domain.TransactionType) ([]domain.MainCateg, error)); ok {
-		return rf(userID, transType)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, domain.TransactionType) ([]domain.MainCateg, error)); ok {
+		return rf(ctx, userID, transType)
 	}
-	if rf, ok := ret.Get(0).(func(int64, domain.TransactionType) []domain.MainCateg); ok {
-		r0 = rf(userID, transType)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, domain.TransactionType) []domain.MainCateg); ok {
+		r0 = rf(ctx, userID, transType)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.MainCateg)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64, domain.TransactionType) error); ok {
-		r1 = rf(userID, transType)
+	if rf, ok := ret.Get(1).(func(context.Context, int64, domain.TransactionType) error); ok {
+		r1 = rf(ctx, userID, transType)
 	} else {
 		r1 = ret.Error(1)
 	}

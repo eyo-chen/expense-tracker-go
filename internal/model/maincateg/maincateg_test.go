@@ -169,7 +169,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeIncome)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[0].ID, domain.TransactionTypeIncome)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -190,7 +190,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeExpense)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[0].ID, domain.TransactionTypeExpense)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -220,7 +220,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[0].ID, domain.TransactionTypeUnSpecified)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[0].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -250,7 +250,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(users[1].ID, domain.TransactionTypeUnSpecified)
+	categs, err := s.mainCategModel.GetAll(mockCtx, users[1].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err)
 	s.Require().Equal(expResult, categs)
 }
