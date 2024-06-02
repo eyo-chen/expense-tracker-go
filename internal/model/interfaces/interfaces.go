@@ -16,6 +16,9 @@ type UserModel interface {
 
 	// GetInfo returns a user by id.
 	GetInfo(userID int64) (domain.User, error)
+
+	// Update updates a user.
+	Update(ctx context.Context, userID int64, opt domain.UpdateUserOpt) error
 }
 
 // MainCategModel is the interface that wraps the basic methods for main category model.

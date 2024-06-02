@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/OYE0303/expense-tracker-go/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
@@ -85,6 +87,24 @@ func (_m *UserModel) GetInfo(userID int64) (domain.User, error) {
 	}
 
 	return r0, r1
+}
+
+// Update provides a mock function with given fields: ctx, userID, opt
+func (_m *UserModel) Update(ctx context.Context, userID int64, opt domain.UpdateUserOpt) error {
+	ret := _m.Called(ctx, userID, opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, domain.UpdateUserOpt) error); ok {
+		r0 = rf(ctx, userID, opt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // NewUserModel creates a new instance of UserModel. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
