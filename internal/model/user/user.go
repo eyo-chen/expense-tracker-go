@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
@@ -64,6 +65,16 @@ func (m *UserModel) GetInfo(userID int64) (domain.User, error) {
 	}
 
 	return cvtToDomainUser(user), nil
+}
+
+func (m *UserModel) Update(ctx context.Context, userID int64, opt domain.UpdateUserOpt) error {
+	stmt, vals := genUpdateStmtAndVal(opt, userID)
+	if _, err := m.DB.ExecContext(ctx, stmt, vals...); err != nil {
+		logger.Error("users UPDATE m.DB.Exec", "err", err)
+		return err
+	}
+
+	return nil
 }
 
 func cvtToDomainUser(u User) domain.User {
