@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -13,6 +14,10 @@ import (
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
+)
+
+var (
+	mockCtx = context.Background()
 )
 
 type UserSuite struct {
@@ -38,6 +43,7 @@ func (s *UserSuite) SetupSuite() {
 		DB: &esql.Config{
 			DB: db,
 		},
+		BluePrint: userBluePrint,
 	})
 }
 
@@ -153,4 +159,49 @@ func getInfo_NotFound_ReturnError(s *UserSuite, desc string) {
 	user, err := s.model.GetInfo(999)
 	s.Require().Empty(user, desc)
 	s.Require().EqualError(err, domain.ErrUserIDNotFound.Error(), desc)
+}
+
+func (s *UserSuite) TestUpdate() {
+	for scenario, fn := range map[string]func(s *UserSuite, desc string){
+		"when is_set_init_category is set, update successfully": update_IsSetInitCategory_UpdateSuccessfully,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func update_IsSetInitCategory_UpdateSuccessfully(s *UserSuite, desc string) {
+	// prepare mock data
+	ow1 := User{IsSetInitCategory: false}
+	ow2 := User{IsSetInitCategory: false}
+	users, err := s.f.BuildList(2).Overwrites(ow1, ow2).Insert()
+	s.Require().NoError(err, desc)
+
+	// prepare update option
+	t := true
+	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
+
+	// action
+	err = s.model.Update(mockCtx, users[0].ID, opt)
+	s.Require().NoError(err, desc)
+
+	// check if user is updated
+	checkStmt := "SELECT name, email, is_set_init_category FROM users WHERE id = ?"
+	var checkedUser User
+	err = s.db.QueryRow(checkStmt, users[0].ID).Scan(&checkedUser.Name, &checkedUser.Email, &checkedUser.IsSetInitCategory)
+	s.Require().NoError(err, desc)
+	s.Require().True(checkedUser.IsSetInitCategory, desc)
+	s.Require().Equal(users[0].Name, checkedUser.Name, desc)
+	s.Require().Equal(users[0].Email, checkedUser.Email, desc)
+
+	// check if other user is not updated
+	var checkedUser2 User
+	err = s.db.QueryRow(checkStmt, users[1].ID).Scan(&checkedUser2.Name, &checkedUser2.Email, &checkedUser2.IsSetInitCategory)
+	s.Require().NoError(err, desc)
+	s.Require().False(checkedUser2.IsSetInitCategory, desc)
+	s.Require().Equal(users[1].Name, checkedUser2.Name, desc)
+	s.Require().Equal(users[1].Email, checkedUser2.Email, desc)
 }
