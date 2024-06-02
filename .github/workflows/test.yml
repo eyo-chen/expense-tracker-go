@@ -33,26 +33,12 @@ jobs:
       - name: Install gocover-cobertura
         run: |
           go get github.com/boumenot/gocover-cobertura && go install github.com/boumenot/gocover-cobertura
-      # Install gotestfmt on the VM running the action.
-      - name: Set up gotestfmt
-        uses: GoTestTools/gotestfmt-action@v2
-        with:
-          version: v2.0.0
-          org: GoTestTools
-          repo: gotestfmt
 
       - name: Run tests
         run: go test -race -coverprofile=coverage.txt ./internal/...
 
       - name: Convert go coverage to corbetura format
         run: gocover-cobertura < coverage.txt > coverage.xml
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          files: ./coverage.xml
 
       - name: Generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
