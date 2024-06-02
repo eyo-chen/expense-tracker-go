@@ -8,9 +8,9 @@ import (
 )
 
 type InitDataUC struct {
-	Icon      interfaces.IconModel
-	MainCateg interfaces.MainCategModel
-	SubCateg  interfaces.SubCategModel
+	icon      interfaces.IconModel
+	mainCateg interfaces.MainCategModel
+	subCateg  interfaces.SubCategModel
 	user      interfaces.UserModel
 }
 
@@ -21,9 +21,9 @@ func NewInitDataUC(
 	u interfaces.UserModel,
 ) *InitDataUC {
 	return &InitDataUC{
-		Icon:      i,
-		MainCateg: m,
-		SubCateg:  s,
+		icon:      i,
+		mainCateg: m,
+		subCateg:  s,
 		user:      u,
 	}
 }
@@ -32,7 +32,7 @@ func NewInitDataUC(
 // [salary 12], [investment 15], [others 14]
 func (i *InitDataUC) List() (domain.InitData, error) {
 	iconIDs := []int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15}
-	idToIcon, err := i.Icon.GetByIDs(iconIDs)
+	idToIcon, err := i.icon.GetByIDs(iconIDs)
 	if err != nil {
 		return domain.InitData{}, err
 	}
@@ -152,17 +152,17 @@ func (i *InitDataUC) List() (domain.InitData, error) {
 
 func (i *InitDataUC) Create(ctx context.Context, data domain.InitData, userID int64) error {
 	mainCategs := genAllMainCategs(data)
-	if err := i.MainCateg.BatchCreate(ctx, mainCategs, userID); err != nil {
+	if err := i.mainCateg.BatchCreate(ctx, mainCategs, userID); err != nil {
 		return err
 	}
 
-	allCategs, err := i.MainCateg.GetAll(ctx, userID, domain.TransactionTypeUnSpecified)
+	allCategs, err := i.mainCateg.GetAll(ctx, userID, domain.TransactionTypeUnSpecified)
 	if err != nil {
 		return err
 	}
 
 	subCategs := genAllSubCategs(data, allCategs)
-	if err := i.SubCateg.BatchCreate(ctx, subCategs, userID); err != nil {
+	if err := i.subCateg.BatchCreate(ctx, subCategs, userID); err != nil {
 		return err
 	}
 
