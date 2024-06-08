@@ -74,8 +74,9 @@ func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 	qType := r.URL.Query().Get("type")
 	categType := domain.CvtToTransactionType(qType)
 	user := ctxutil.GetUser(r)
+	ctx := r.Context()
 
-	categs, err := m.MainCateg.GetAll(user.ID, categType)
+	categs, err := m.MainCateg.GetAll(ctx, user.ID, categType)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
