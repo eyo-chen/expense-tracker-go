@@ -5,7 +5,6 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
 type MainCategUC struct {
@@ -48,10 +47,5 @@ func (m *MainCategUC) Update(categ domain.MainCateg, userID int64) error {
 }
 
 func (m *MainCategUC) Delete(id int64) error {
-	if err := m.MainCateg.Delete(id); err != nil {
-		logger.Error("m.MainCateg.Delete failed", "package", "usecase", "err", err)
-		return err
-	}
-
-	return nil
+	return m.MainCateg.Delete(id)
 }
