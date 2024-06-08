@@ -22,6 +22,7 @@ type InitDataSuite struct {
 	mockIcon      *mocks.IconModel
 	mockMainCateg *mocks.MainCategModel
 	mockSubCateg  *mocks.SubCategModel
+	mockUser      *mocks.UserModel
 }
 
 func TestInitDataSuite(t *testing.T) {
@@ -32,8 +33,9 @@ func (s *InitDataSuite) SetupTest() {
 	s.mockIcon = mocks.NewIconModel(s.T())
 	s.mockMainCateg = mocks.NewMainCategModel(s.T())
 	s.mockSubCateg = mocks.NewSubCategModel(s.T())
+	s.mockUser = mocks.NewUserModel(s.T())
 
-	s.uc = NewInitDataUC(s.mockIcon, s.mockMainCateg, s.mockSubCateg)
+	s.uc = NewInitDataUC(s.mockIcon, s.mockMainCateg, s.mockSubCateg, s.mockUser)
 }
 
 func (s *InitDataSuite) TearDownTest() {
@@ -457,6 +459,10 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 	s.mockMainCateg.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
 
 	s.mockSubCateg.On("BatchCreate", mockCtx, mockSubCategs, mockUserID).Return(nil).Once()
+
+	t := true
+	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
+	s.mockUser.On("Update", mockCtx, mockUserID, opt).Return(nil).Once()
 
 	err := s.uc.Create(mockCtx, mockData, mockUserID)
 	s.Require().NoError(err, desc)
