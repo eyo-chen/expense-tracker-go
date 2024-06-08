@@ -209,6 +209,7 @@ func list_GetIconFail_ReturnError(s *InitDataSuite, desc string) {
 func (s *InitDataSuite) TestCreate() {
 	for scenario, fn := range map[string]func(s *InitDataSuite, desc string){
 		"when no error, create successfully": create_NoError_CreateSuccessfully,
+		"when no main category, do nothing":  create_NoMainCategory_DoNothing,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -463,6 +464,14 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 	t := true
 	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
 	s.mockUser.On("Update", mockCtx, mockUserID, opt).Return(nil).Once()
+
+	err := s.uc.Create(mockCtx, mockData, mockUserID)
+	s.Require().NoError(err, desc)
+}
+
+func create_NoMainCategory_DoNothing(s *InitDataSuite, desc string) {
+	mockUserID := int64(1)
+	mockData := domain.InitData{}
 
 	err := s.uc.Create(mockCtx, mockData, mockUserID)
 	s.Require().NoError(err, desc)
