@@ -208,7 +208,9 @@ func list_GetIconFail_ReturnError(s *InitDataSuite, desc string) {
 
 func (s *InitDataSuite) TestCreate() {
 	for scenario, fn := range map[string]func(s *InitDataSuite, desc string){
-		"when no error, create successfully": create_NoError_CreateSuccessfully,
+		"when no error, create successfully":               create_NoError_CreateSuccessfully,
+		"when no main category, do nothing":                create_NoMainCategory_DoNothing,
+		"when no sub category, do not create sub category": create_NoSubCategory_DoNotCreateSubCategory,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -463,6 +465,42 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 	t := true
 	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
 	s.mockUser.On("Update", mockCtx, mockUserID, opt).Return(nil).Once()
+
+	err := s.uc.Create(mockCtx, mockData, mockUserID)
+	s.Require().NoError(err, desc)
+}
+
+func create_NoMainCategory_DoNothing(s *InitDataSuite, desc string) {
+	mockUserID := int64(1)
+	mockData := domain.InitData{}
+
+	err := s.uc.Create(mockCtx, mockData, mockUserID)
+	s.Require().NoError(err, desc)
+}
+
+func create_NoSubCategory_DoNotCreateSubCategory(s *InitDataSuite, desc string) {
+	mockUserID := int64(1)
+	mockData := domain.InitData{
+		Expense: []domain.InitDataMainCateg{
+			{
+				Name:      "food",
+				Icon:      domain.Icon{ID: 1, URL: "url1"},
+				SubCategs: []string{},
+			},
+		},
+		Income: []domain.InitDataMainCateg{},
+	}
+	mockMainCategs := []domain.MainCateg{
+		{Name: "food", Icon: domain.Icon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
+	}
+	mockMainCategsWithID := []domain.MainCateg{
+		{ID: 1, Name: "food", Icon: domain.Icon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
+	}
+
+	// mock service
+	s.mockMainCateg.On("BatchCreate", mockCtx, mockMainCategs, mockUserID).Return(nil).Once()
+
+	s.mockMainCateg.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
 
 	err := s.uc.Create(mockCtx, mockData, mockUserID)
 	s.Require().NoError(err, desc)
