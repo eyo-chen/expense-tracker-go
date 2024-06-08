@@ -33,7 +33,7 @@ func (m *MainCategUC) GetAll(ctx context.Context, userID int64, transType domain
 	return m.MainCateg.GetAll(ctx, userID, transType)
 }
 
-func (m *MainCategUC) Update(categ *domain.MainCateg, userID int64) error {
+func (m *MainCategUC) Update(categ domain.MainCateg, userID int64) error {
 	// check if the main category exists
 	if _, err := m.MainCateg.GetByID(categ.ID, userID); err != nil {
 		return err
@@ -44,11 +44,7 @@ func (m *MainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 		return err
 	}
 
-	if err := m.MainCateg.Update(categ); err != nil {
-		return err
-	}
-
-	return nil
+	return m.MainCateg.Update(&categ)
 }
 
 func (m *MainCategUC) Delete(id int64) error {

@@ -27,7 +27,7 @@ type MainCategUC interface {
 	GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)
 
 	// Update updates a main category.
-	Update(categ *domain.MainCateg, userID int64) error
+	Update(categ domain.MainCateg, userID int64) error
 
 	// Delete deletes a main category.
 	Delete(id int64) error

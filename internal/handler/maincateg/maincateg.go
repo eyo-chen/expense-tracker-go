@@ -128,7 +128,7 @@ func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Update(&categ, user.ID); err != nil {
+	if err := m.MainCateg.Update(categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrUniqueNameUserType,
 			domain.ErrUniqueIconUser,
