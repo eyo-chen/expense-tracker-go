@@ -20,18 +20,13 @@ func NewMainCategUC(m interfaces.MainCategModel, i interfaces.IconModel) *MainCa
 	}
 }
 
-func (m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
+func (m *MainCategUC) Create(categ domain.MainCateg, userID int64) error {
 	// check if the icon exists
-	_, err := m.Icon.GetByID(categ.Icon.ID)
-	if err != nil {
+	if _, err := m.Icon.GetByID(categ.Icon.ID); err != nil {
 		return err
 	}
 
-	if err := m.MainCateg.Create(categ, userID); err != nil {
-		return err
-	}
-
-	return nil
+	return m.MainCateg.Create(&categ, userID)
 }
 
 func (m *MainCategUC) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {

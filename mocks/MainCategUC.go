@@ -14,7 +14,7 @@ type MainCategUC struct {
 }
 
 // Create provides a mock function with given fields: categ, userID
-func (_m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
+func (_m *MainCategUC) Create(categ domain.MainCateg, userID int64) error {
 	ret := _m.Called(categ, userID)
 
 	if len(ret) == 0 {
@@ -22,7 +22,7 @@ func (_m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*domain.MainCateg, int64) error); ok {
+	if rf, ok := ret.Get(0).(func(domain.MainCateg, int64) error); ok {
 		r0 = rf(categ, userID)
 	} else {
 		r0 = ret.Error(0)

@@ -21,7 +21,7 @@ type UserUC interface {
 // MainCategUC is the interface that wraps the basic methods for main category usecase.
 type MainCategUC interface {
 	// Create creates a main category.
-	Create(categ *domain.MainCateg, userID int64) error
+	Create(categ domain.MainCateg, userID int64) error
 
 	// GetAll returns all main categories by user id.
 	GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)

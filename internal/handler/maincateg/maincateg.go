@@ -48,7 +48,7 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Create(&categ, user.ID); err != nil {
+	if err := m.MainCateg.Create(categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrIconNotFound,
 			domain.ErrUniqueNameUserType,
