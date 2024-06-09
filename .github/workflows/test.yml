@@ -11,24 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout
+      - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: setup go
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.21.x'
 
       - name: Clean up previous builds
         run: |
-            if [ -d "./bin" ]; then
-              rm -rf ./bin
-            fi
-      
-      - name: install dependencies
+          if [ -d "./bin" ]; then
+            rm -rf ./bin
+          fi
+
+      - name: Install Dependencies
         run: go mod download
       
-      - name: build
+      - name: Build
         run: go build -v -o ./bin/myapp ./cmd
 
       - name: Clean up build files
@@ -39,16 +39,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout
+      - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: setup go
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.21.x'
 
-      - name: install dependencies
+      - name: Install Dependencies
         run: go mod download
 
-      - name: test
-        run: go test -v ./internal/...
+      - name: Run Tests with Coverage
+        run: |
+          go test -race -coverprofile=profile.out ./internal/...
+          cat profile.out | grep -v "_enum.go" > coverage.out
+
+      - name: Calculate Coverage
+        id: coverage
+        run: |
+          total_coverage=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "total_coverage=$total_coverage" >> $GITHUB_ENV
+
+      - name: Post Coverage Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const totalCoverage = process.env.total_coverage;
+            const commentBody = `**Total Test Coverage:** ${totalCoverage}%`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
