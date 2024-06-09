@@ -1,4 +1,4 @@
-name: Test
+name: Build and Test
 
 on:
   push:
@@ -7,20 +7,33 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: checkout
+        uses: actions/checkout@v2
 
-      - name: Install Go
-        uses: actions/setup-go@v2
+      - name: setup go
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.21.4
+          go-version: '1.21.x'
 
-      - name: Change to code directory
-        run: cd ${{ github.workspace }}
-
-      - name: Run tests
+      - name: Clean up previous builds
         run: |
-          go test -v ./...
+            if [ -d "./bin" ]; then
+              rm -rf ./bin
+            fi
+      
+      - name: install dependencies
+        run: go mod download
+      
+      - name: build
+        run: go build -v -o ./bin/myapp ./cmd
+      
+      - name: test
+        run: go test -v ./internal/...
+
+      - name: Clean up build files
+        if: always()
+        run: rm -rf ./bin
