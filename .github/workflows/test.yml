@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  go-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,26 +35,7 @@ jobs:
         if: always()
         run: rm -rf ./bin
 
-  linter:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: read
-      statuses: write
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Super-linter
-        uses: super-linter/super-linter@v6.6.0 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  test:
+  go-test:
     runs-on: ubuntu-latest
 
     steps:
