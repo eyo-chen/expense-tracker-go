@@ -1,4 +1,4 @@
-name: Test
+name: Build and Test
 
 on:
   push:
@@ -7,20 +7,75 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  go-build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Source
+        uses: actions/checkout@v4
 
-      - name: Install Go
-        uses: actions/setup-go@v2
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.21.4
+          go-version: '1.21.x'
 
-      - name: Change to code directory
-        run: cd ${{ github.workspace }}
-
-      - name: Run tests
+      - name: Clean up previous builds
         run: |
-          go test -v ./...
+          if [ -d "./bin" ]; then
+            rm -rf ./bin
+          fi
+
+      - name: Install Dependencies
+        run: go mod download
+      
+      - name: Build
+        run: go build -v -o ./bin/myapp ./cmd
+
+      - name: Clean up build files
+        if: always()
+        run: rm -rf ./bin
+
+  go-test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Run Tests with Coverage
+        run: |
+          go test -race -coverprofile=profile.out ./internal/...
+          cat profile.out | grep -v "_enum.go" > coverage.out
+
+      - name: Calculate Coverage
+        id: coverage
+        run: |
+          total_coverage=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "total_coverage=$total_coverage" >> $GITHUB_ENV
+
+      - name: Post Coverage Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const totalCoverage = process.env.total_coverage;
+            const commentBody = `**Total Test Coverage:** ${totalCoverage}%`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
