@@ -10,7 +10,6 @@ type IconUC struct {
 }
 
 func NewIconUC(i interfaces.IconModel) *IconUC {
-	a := 0
 	return &IconUC{
 		Icon: i,
 	}
