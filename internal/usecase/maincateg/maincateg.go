@@ -5,7 +5,6 @@ import (
 
 	"github.com/OYE0303/expense-tracker-go/internal/domain"
 	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
 )
 
 type MainCategUC struct {
@@ -20,30 +19,20 @@ func NewMainCategUC(m interfaces.MainCategModel, i interfaces.IconModel) *MainCa
 	}
 }
 
-func (m *MainCategUC) Create(categ *domain.MainCateg, userID int64) error {
+func (m *MainCategUC) Create(categ domain.MainCateg, userID int64) error {
 	// check if the icon exists
-	_, err := m.Icon.GetByID(categ.Icon.ID)
-	if err != nil {
+	if _, err := m.Icon.GetByID(categ.Icon.ID); err != nil {
 		return err
 	}
 
-	if err := m.MainCateg.Create(categ, userID); err != nil {
-		return err
-	}
-
-	return nil
+	return m.MainCateg.Create(&categ, userID)
 }
 
-func (m *MainCategUC) GetAll(userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
-	categs, err := m.MainCateg.GetAll(context.Background(), userID, transType)
-	if err != nil {
-		return nil, err
-	}
-
-	return categs, nil
+func (m *MainCategUC) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
+	return m.MainCateg.GetAll(ctx, userID, transType)
 }
 
-func (m *MainCategUC) Update(categ *domain.MainCateg, userID int64) error {
+func (m *MainCategUC) Update(categ domain.MainCateg, userID int64) error {
 	// check if the main category exists
 	if _, err := m.MainCateg.GetByID(categ.ID, userID); err != nil {
 		return err
@@ -54,18 +43,9 @@ func (m *MainCategUC) Update(categ *domain.MainCateg, userID int64) error {
 		return err
 	}
 
-	if err := m.MainCateg.Update(categ); err != nil {
-		return err
-	}
-
-	return nil
+	return m.MainCateg.Update(&categ)
 }
 
 func (m *MainCategUC) Delete(id int64) error {
-	if err := m.MainCateg.Delete(id); err != nil {
-		logger.Error("m.MainCateg.Delete failed", "package", "usecase", "err", err)
-		return err
-	}
-
-	return nil
+	return m.MainCateg.Delete(id)
 }

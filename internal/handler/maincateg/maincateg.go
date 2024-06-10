@@ -48,7 +48,7 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Create(&categ, user.ID); err != nil {
+	if err := m.MainCateg.Create(categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrIconNotFound,
 			domain.ErrUniqueNameUserType,
@@ -74,8 +74,9 @@ func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 	qType := r.URL.Query().Get("type")
 	categType := domain.CvtToTransactionType(qType)
 	user := ctxutil.GetUser(r)
+	ctx := r.Context()
 
-	categs, err := m.MainCateg.GetAll(user.ID, categType)
+	categs, err := m.MainCateg.GetAll(ctx, user.ID, categType)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -127,7 +128,7 @@ func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Update(&categ, user.ID); err != nil {
+	if err := m.MainCateg.Update(categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrUniqueNameUserType,
 			domain.ErrUniqueIconUser,
