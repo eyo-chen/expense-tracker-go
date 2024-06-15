@@ -49,36 +49,6 @@ func (_m *SubCategUC) Delete(id int64) error {
 	return r0
 }
 
-// GetAll provides a mock function with given fields: userID
-func (_m *SubCategUC) GetAll(userID int64) ([]*domain.SubCateg, error) {
-	ret := _m.Called(userID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetAll")
-	}
-
-	var r0 []*domain.SubCateg
-	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) ([]*domain.SubCateg, error)); ok {
-		return rf(userID)
-	}
-	if rf, ok := ret.Get(0).(func(int64) []*domain.SubCateg); ok {
-		r0 = rf(userID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*domain.SubCateg)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(userID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetByMainCategID provides a mock function with given fields: userID, mainCategID
 func (_m *SubCategUC) GetByMainCategID(userID int64, mainCategID int64) ([]*domain.SubCateg, error) {
 	ret := _m.Called(userID, mainCategID)

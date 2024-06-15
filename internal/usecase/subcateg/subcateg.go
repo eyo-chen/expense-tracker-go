@@ -26,10 +26,6 @@ func (s *SubCategUC) Create(categ *domain.SubCateg, userID int64) error {
 	return s.SubCateg.Create(categ, userID)
 }
 
-func (s *SubCategUC) GetAll(userID int64) ([]*domain.SubCateg, error) {
-	return s.SubCateg.GetAll(userID)
-}
-
 func (s *SubCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
 	return s.SubCateg.GetByMainCategID(userID, mainCategID)
 }

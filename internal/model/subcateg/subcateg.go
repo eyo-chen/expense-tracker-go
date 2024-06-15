@@ -45,31 +45,6 @@ func (s *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {
 	return nil
 }
 
-func (s *SubCategModel) GetAll(userID int64) ([]*domain.SubCateg, error) {
-	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ?`
-
-	rows, err := s.DB.Query(stmt, userID)
-	if err != nil {
-		logger.Error("m.DB.Query failed", "package", packageName, "err", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	var categs []*domain.SubCateg
-	for rows.Next() {
-		var categ SubCateg
-		if err := rows.Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
-			logger.Error("rows.Scan failed", "package", packageName, "err", err)
-			return nil, err
-		}
-
-		categs = append(categs, cvtToDomainSubCateg(&categ))
-	}
-	defer rows.Close()
-
-	return categs, nil
-}
-
 func (s *SubCategModel) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
 	stmt := `SELECT id, name, main_category_id FROM sub_categories WHERE user_id = ? AND main_category_id = ?`
 
