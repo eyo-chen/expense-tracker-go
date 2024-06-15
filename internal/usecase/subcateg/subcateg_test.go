@@ -80,49 +80,6 @@ func create_MainCategNotExist_ReturnError(s *SubCategSuite, desc string) {
 	s.Require().EqualError(err, domain.ErrMainCategNotFound.Error(), desc)
 }
 
-func (s *SubCategSuite) TestGetAll() {
-	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
-		"when no error, return data":      getAll_NoError_ReturnData,
-		"when get all fail, return error": getAll_GetAllFail_ReturnError,
-	} {
-		s.Run(testutil.GetFunName(fn), func() {
-			s.SetupTest()
-			fn(s, scenario)
-			s.TearDownTest()
-		})
-	}
-}
-
-func getAll_NoError_ReturnData(s *SubCategSuite, desc string) {
-	// prepare mock data
-	mockUserID := int64(1)
-	mockSubCategs := []*domain.SubCateg{
-		{ID: 1, MainCategID: 1, Name: "Test 1"},
-		{ID: 2, MainCategID: 1, Name: "Test 2"},
-	}
-
-	// prepare mock service
-	s.mockSubCategModel.On("GetAll", mockUserID).Return(mockSubCategs, nil)
-
-	// action, assertion
-	subCategs, err := s.subCategUC.GetAll(mockUserID)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(mockSubCategs, subCategs, desc)
-}
-
-func getAll_GetAllFail_ReturnError(s *SubCategSuite, desc string) {
-	// prepare mock data
-	mockUserID := int64(1)
-
-	// prepare mock service
-	s.mockSubCategModel.On("GetAll", mockUserID).Return(nil, errors.New("getAll error"))
-
-	// action, assertion
-	subCategs, err := s.subCategUC.GetAll(mockUserID)
-	s.Require().EqualError(err, "getAll error", desc)
-	s.Require().Nil(subCategs, desc)
-}
-
 func (s *SubCategSuite) TestGetByMainCategID() {
 	for scenario, fn := range map[string]func(s *SubCategSuite, desc string){
 		"when no error, return data":                      getByMainCategID_NoError_ReturnData,

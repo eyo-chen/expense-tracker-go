@@ -57,25 +57,6 @@ func (s *SubCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (s *SubCategHandler) GetAllSubCateg(w http.ResponseWriter, r *http.Request) {
-	user := ctxutil.GetUser(r)
-	categs, err := s.SubCateg.GetAll(user.ID)
-	if err != nil {
-		logger.Error("s.SubCateg.GetAll failed", "package", "handler", "err", err)
-		errutil.ServerErrorResponse(w, r, err)
-		return
-	}
-
-	respData := map[string]interface{}{
-		"sub_categories": categs,
-	}
-	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
-		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
-		errutil.ServerErrorResponse(w, r, err)
-		return
-	}
-}
-
 func (s *SubCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {

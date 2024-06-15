@@ -38,9 +38,6 @@ type SubCategUC interface {
 	// Create creates a sub category.
 	Create(categ *domain.SubCateg, userID int64) error
 
-	// GetAll returns all sub categories by user id.
-	GetAll(userID int64) ([]*domain.SubCateg, error)
-
 	// GetByMainCategID returns all sub categories by user id and main category id.
 	GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error)
 
