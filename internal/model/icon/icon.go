@@ -49,6 +49,7 @@ func (m *IconModel) List() ([]domain.Icon, error) {
 	return icons, nil
 }
 
+// TODO: delete this function
 func (m *IconModel) GetByID(id int64) (domain.Icon, error) {
 	stmt := `SELECT id, url FROM icons WHERE id = ?`
 
