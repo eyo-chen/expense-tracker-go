@@ -50,6 +50,167 @@ func (s *TransactionSuite) TearDownTest() {
 	s.mockSubCateg.AssertExpectations(s.T())
 }
 
+func (s *TransactionSuite) TestCreate() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, create successfully":                                                      create_NoError_CreateSuccessfully,
+		"when get main category fail, return error":                                               create_GetMainCategFail_ReturnError,
+		"when type of main category not match transaction type, return error":                     create_TypeNotMatch_ReturnError,
+		"when get sub category fail, return error":                                                create_GetSubCategFail_ReturnError,
+		"when main category of sub category not match main category of transaction, return error": create_MainCategNotMatch_ReturnError,
+		"when create fail, return error":                                                          create_CreateFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func create_NoError_CreateSuccessfully(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 1}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+	s.mockTransaction.Mock.On("Create", mockCtx, transInput).Return(nil).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().NoError(err, desc)
+}
+
+func create_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(nil, errors.New("get main category fail")).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().Equal(errors.New("get main category fail"), err, desc)
+}
+
+func create_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeIncome}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, domain.ErrTypeNotConsistent.Error(), desc)
+}
+
+func create_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(nil, errors.New("get subcategory fail")).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, "get subcategory fail", desc)
+}
+
+func create_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 2}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, domain.ErrMainCategNotConsistent.Error(), desc)
+}
+
+func create_CreateFail_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 1}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+	s.mockTransaction.Mock.On("Create", mockCtx, transInput).Return(errors.New("create fail")).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, "create fail", desc)
+}
+
 func (s *TransactionSuite) TestGetAll() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
 		"when no error, return transactions":                                        getAll_NoError_ReturnTransactions,
