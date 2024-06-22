@@ -34,16 +34,22 @@ type Config[T any] struct {
 	// it is optional
 	// if not provided, it will be true
 	OmitID bool
+
+	// isSetZeroValue is to determine if the zero value should be set
+	// it is optional
+	// if not provided, it will be true
+	IsSetZeroValue *bool
 }
 
 type Factory[T any] struct {
-	db          db.Database
-	bluePrint   bluePrintFunc[T]
-	storageName string
-	dataType    reflect.Type
-	empty       T
-	index       int
-	omitID      bool
+	db             db.Database
+	bluePrint      bluePrintFunc[T]
+	storageName    string
+	dataType       reflect.Type
+	empty          T
+	index          int
+	omitID         bool
+	isSetZeroValue bool
 
 	// map from name to trait function
 	traits map[string]setTraiter[T]
@@ -87,11 +93,12 @@ func New[T any](v T) *Factory[T] {
 	dataType := reflect.TypeOf(v)
 
 	return &Factory[T]{
-		dataType:     dataType,
-		empty:        reflect.New(dataType).Elem().Interface().(T),
-		associations: map[string][]interface{}{},
-		tagToInfo:    map[string]tagInfo{},
-		index:        1,
+		dataType:       dataType,
+		empty:          reflect.New(dataType).Elem().Interface().(T),
+		associations:   map[string][]interface{}{},
+		tagToInfo:      map[string]tagInfo{},
+		index:          1,
+		isSetZeroValue: true,
 	}
 }
 
@@ -105,6 +112,10 @@ func (f *Factory[T]) SetConfig(c Config[T]) *Factory[T] {
 		f.storageName = fmt.Sprintf("%ss", CamelToSnake(f.dataType.Name()))
 	} else {
 		f.storageName = c.StorageName
+	}
+
+	if c.IsSetZeroValue != nil {
+		f.isSetZeroValue = *c.IsSetZeroValue
 	}
 
 	return f
@@ -128,10 +139,12 @@ func (f *Factory[T]) Reset() {
 // Build builds a value
 func (f *Factory[T]) Build() *builder[T] {
 	var v T
-	if f.bluePrint == nil {
-		setNonZeroValues(f.index, &v)
-	} else {
+	if f.bluePrint != nil {
 		v = f.bluePrint(f.index, v)
+	}
+
+	if f.isSetZeroValue {
+		setNonZeroValues(f.index, &v)
 	}
 
 	if !f.omitID {
@@ -160,10 +173,12 @@ func (f *Factory[T]) BuildList(n int) *builderList[T] {
 
 	for i := 0; i < n; i++ {
 		var v T
-		if f.bluePrint == nil {
-			setNonZeroValues(f.index, &v)
-		} else {
+		if f.bluePrint != nil {
 			v = f.bluePrint(f.index, v)
+		}
+
+		if f.isSetZeroValue {
+			setNonZeroValues(f.index, &v)
 		}
 
 		if !f.omitID {

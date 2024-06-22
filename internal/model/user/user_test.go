@@ -43,7 +43,8 @@ func (s *UserSuite) SetupSuite() {
 		DB: &esql.Config{
 			DB: db,
 		},
-		BluePrint: userBluePrint,
+		BluePrint:      userBluePrint,
+		IsSetZeroValue: efactory.Bool(false),
 	})
 }
 
