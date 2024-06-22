@@ -538,6 +538,52 @@ func (b *builderList[T]) InsertWithAss() ([]T, []interface{}, error) {
 	return v, assVals, nil
 }
 
+// SetZero sets the fields to zero value
+func (b *builder[T]) SetZero(fields ...string) *builder[T] {
+	for _, field := range fields {
+		curField := reflect.ValueOf(b.v).Elem().FieldByName(field)
+		if !curField.IsValid() {
+			b.errors = append(b.errors, fmt.Errorf("SetZero: field %s is not found", field))
+			return b
+		}
+
+		if !curField.CanSet() {
+			b.errors = append(b.errors, fmt.Errorf("SetZero: field %s can not be set", field))
+			return b
+		}
+
+		curField.Set(reflect.Zero(curField.Type()))
+	}
+
+	return b
+}
+
+// SetZero sets the fields to zero value for the given index
+// i is the index of the list
+func (b *builderList[T]) SetZero(i int, fields ...string) *builderList[T] {
+	if i >= len(b.list) {
+		b.errors = append(b.errors, fmt.Errorf("SetZero: index %d is out of range", i))
+		return b
+	}
+
+	for _, field := range fields {
+		curField := reflect.ValueOf(b.list[i]).Elem().FieldByName(field)
+		if !curField.IsValid() {
+			b.errors = append(b.errors, fmt.Errorf("SetZero: field %s is not found", field))
+			return b
+		}
+
+		if !curField.CanSet() {
+			b.errors = append(b.errors, fmt.Errorf("SetZero: field %s can not be set", field))
+			return b
+		}
+
+		curField.Set(reflect.Zero(curField.Type()))
+	}
+
+	return b
+}
+
 // setField sets the value to the name field of the target
 func setField(target interface{}, name string, source interface{}, sourceFn string) error {
 	targetField := reflect.ValueOf(target).Elem().FieldByName(name)
