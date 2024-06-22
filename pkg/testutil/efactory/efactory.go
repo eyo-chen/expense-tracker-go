@@ -312,6 +312,22 @@ func (b *builderList[T]) Overwrites(ows ...T) *builderList[T] {
 	return b
 }
 
+// Overwrite overwrites the values with the given one value
+func (b *builderList[T]) Overwrite(ow T) *builderList[T] {
+	if len(b.errors) > 0 {
+		return b
+	}
+
+	for i := 0; i < len(b.list); i++ {
+		if err := copyValues(b.list[i], ow); err != nil {
+			b.errors = append(b.errors, err)
+			return b
+		}
+	}
+
+	return b
+}
+
 // WithTrait invokes the traiter based on given name
 func (b *builder[T]) WithTrait(name string) *builder[T] {
 	if len(b.errors) > 0 {

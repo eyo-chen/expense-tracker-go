@@ -177,8 +177,7 @@ func (s *UserSuite) TestUpdate() {
 func update_IsSetInitCategory_UpdateSuccessfully(s *UserSuite, desc string) {
 	// prepare mock data
 	ow1 := User{IsSetInitCategory: false}
-	ow2 := User{IsSetInitCategory: false}
-	users, err := s.f.BuildList(2).Overwrites(ow1, ow2).Insert()
+	users, err := s.f.BuildList(2).Overwrite(ow1).Insert()
 	s.Require().NoError(err, desc)
 
 	// prepare update option
