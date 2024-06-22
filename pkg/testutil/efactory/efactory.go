@@ -34,16 +34,22 @@ type Config[T any] struct {
 	// it is optional
 	// if not provided, it will be true
 	OmitID bool
+
+	// SetZeroValue is to determine if the zero value should be set
+	// it is optional
+	// if not provided, it will be true
+	SetZeroValue *bool
 }
 
 type Factory[T any] struct {
-	db          db.Database
-	bluePrint   bluePrintFunc[T]
-	storageName string
-	dataType    reflect.Type
-	empty       T
-	index       int
-	omitID      bool
+	db           db.Database
+	bluePrint    bluePrintFunc[T]
+	storageName  string
+	dataType     reflect.Type
+	empty        T
+	index        int
+	omitID       bool
+	setZeroValue bool
 
 	// map from name to trait function
 	traits map[string]setTraiter[T]
@@ -92,6 +98,7 @@ func New[T any](v T) *Factory[T] {
 		associations: map[string][]interface{}{},
 		tagToInfo:    map[string]tagInfo{},
 		index:        1,
+		setZeroValue: true,
 	}
 }
 
@@ -105,6 +112,10 @@ func (f *Factory[T]) SetConfig(c Config[T]) *Factory[T] {
 		f.storageName = fmt.Sprintf("%ss", CamelToSnake(f.dataType.Name()))
 	} else {
 		f.storageName = c.StorageName
+	}
+
+	if c.SetZeroValue != nil {
+		f.setZeroValue = *c.SetZeroValue
 	}
 
 	return f
@@ -128,10 +139,12 @@ func (f *Factory[T]) Reset() {
 // Build builds a value
 func (f *Factory[T]) Build() *builder[T] {
 	var v T
-	if f.bluePrint == nil {
-		setNonZeroValues(f.index, &v)
-	} else {
+	if f.bluePrint != nil {
 		v = f.bluePrint(f.index, v)
+	}
+
+	if f.setZeroValue {
+		setNonZeroValues(f.index, &v)
 	}
 
 	if !f.omitID {
@@ -160,10 +173,12 @@ func (f *Factory[T]) BuildList(n int) *builderList[T] {
 
 	for i := 0; i < n; i++ {
 		var v T
-		if f.bluePrint == nil {
-			setNonZeroValues(f.index, &v)
-		} else {
+		if f.bluePrint != nil {
 			v = f.bluePrint(f.index, v)
+		}
+
+		if f.setZeroValue {
+			setNonZeroValues(f.index, &v)
 		}
 
 		if !f.omitID {

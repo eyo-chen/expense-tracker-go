@@ -223,3 +223,8 @@ func CamelToSnake(input string) string {
 
 	return buf.String()
 }
+
+// Bool returns a pointer to the given bool value
+func Bool(b bool) *bool {
+	return &b
+}
