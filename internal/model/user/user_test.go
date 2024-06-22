@@ -43,8 +43,6 @@ func (s *UserSuite) SetupSuite() {
 		DB: &esql.Config{
 			DB: db,
 		},
-		BluePrint:      userBluePrint,
-		IsSetZeroValue: efactory.Bool(false),
 	})
 }
 
@@ -176,8 +174,7 @@ func (s *UserSuite) TestUpdate() {
 
 func update_IsSetInitCategory_UpdateSuccessfully(s *UserSuite, desc string) {
 	// prepare mock data
-	ow1 := User{IsSetInitCategory: false}
-	users, err := s.f.BuildList(2).Overwrite(ow1).Insert()
+	users, err := s.f.BuildList(2).SetZero(0, "IsSetInitCategory").SetZero(1, "IsSetInitCategory").Insert()
 	s.Require().NoError(err, desc)
 
 	// prepare update option
