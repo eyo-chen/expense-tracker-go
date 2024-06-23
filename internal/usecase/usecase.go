@@ -1,13 +1,13 @@
 package usecase
 
 import (
-	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/icon"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/initdata"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/maincateg"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/subcateg"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/transaction"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/user"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/icon"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/initdata"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/maincateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/subcateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/transaction"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/user"
 )
 
 type Usecase struct {

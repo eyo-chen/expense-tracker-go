@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	domain "github.com/OYE0303/expense-tracker-go/internal/domain"
+	domain "github.com/eyo-chen/expense-tracker-go/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
 )

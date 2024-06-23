@@ -3,8 +3,8 @@ package errutil
 import (
 	"net/http"
 
-	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
 
 // ServerErrorResponse is a helper function for returning a 500 Internal Server Error response

@@ -1,10 +1,10 @@
 package user
 
 import (
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/pkg/auth"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/pkg/auth"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/golang-jwt/jwt/v5"
 )
 

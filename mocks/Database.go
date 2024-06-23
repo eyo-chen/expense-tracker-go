@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	db "github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db"
+	db "github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db"
 	mock "github.com/stretchr/testify/mock"
 )
 

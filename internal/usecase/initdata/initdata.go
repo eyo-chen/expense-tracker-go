@@ -3,8 +3,8 @@ package initdata
 import (
 	"context"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
 )
 
 type InitDataUC struct {

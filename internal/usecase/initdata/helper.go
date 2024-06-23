@@ -3,7 +3,7 @@ package initdata
 import (
 	"fmt"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
 // genAllMainCategs generates all types of main categories.

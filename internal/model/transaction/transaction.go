@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
-	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
-	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
-	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/subcateg"
+	"github.com/eyo-chen/expense-tracker-go/pkg/codeutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
 
 const (

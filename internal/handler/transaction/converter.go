@@ -1,6 +1,6 @@
 package transaction
 
-import "github.com/OYE0303/expense-tracker-go/internal/domain"
+import "github.com/eyo-chen/expense-tracker-go/internal/domain"
 
 func cvtToGetTransactionResp(trans []domain.Transaction) getTransactionResp {
 	resp := make([]transaction, 0, len(trans))

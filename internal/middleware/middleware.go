@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/pkg/ctxutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/errutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/golang-jwt/jwt/v5"
 )
 

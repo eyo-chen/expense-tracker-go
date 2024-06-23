@@ -3,11 +3,11 @@ package model
 import (
 	"database/sql"
 
-	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
-	"github.com/OYE0303/expense-tracker-go/internal/model/maincateg"
-	"github.com/OYE0303/expense-tracker-go/internal/model/subcateg"
-	"github.com/OYE0303/expense-tracker-go/internal/model/transaction"
-	"github.com/OYE0303/expense-tracker-go/internal/model/user"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/subcateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/transaction"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
 )
 
 type Model struct {

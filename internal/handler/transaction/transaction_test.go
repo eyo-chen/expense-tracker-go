@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/handler/transaction"
-	"github.com/OYE0303/expense-tracker-go/mocks"
-	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/transaction"
+	"github.com/eyo-chen/expense-tracker-go/mocks"
+	"github.com/eyo-chen/expense-tracker-go/pkg/ctxutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
 )

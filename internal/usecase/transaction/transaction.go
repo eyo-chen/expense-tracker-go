@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/pkg/codeutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/pkg/codeutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
 
 const (

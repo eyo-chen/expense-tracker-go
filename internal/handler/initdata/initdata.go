@@ -3,11 +3,11 @@ package initdata
 import (
 	"net/http"
 
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
-	"github.com/OYE0303/expense-tracker-go/pkg/ctxutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/errutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/jsonutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/pkg/ctxutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/errutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
 
 const (

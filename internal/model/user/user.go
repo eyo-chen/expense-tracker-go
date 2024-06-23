@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
 
 type UserModel struct {
