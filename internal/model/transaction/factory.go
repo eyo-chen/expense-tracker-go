@@ -9,6 +9,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
+	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/utils"
 )
 
 type TransactionFactory struct {
@@ -59,10 +60,7 @@ func (tf *TransactionFactory) PrepareUserMainAndSubCateg() (user.User, maincateg
 func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, []icon.Icon, error) {
 	u := user.User{}
 
-	iconPtrList := make([]interface{}, 0, i)
-	for k := 0; k < i; k++ {
-		iconPtrList = append(iconPtrList, &icon.Icon{})
-	}
+	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](i, nil)
 
 	maincategList, _, err := tf.maincateg.BuildList(i).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
 	if err != nil {
@@ -93,11 +91,7 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}
 
-	iconList := make([]icon.Icon, 0, i)
-	for _, v := range iconPtrList {
-		iconList = append(iconList, *v.(*icon.Icon))
-	}
-
+	iconList := utils.CvtToT[icon.Icon](iconPtrList)
 	return transList, u, maincategList, subcategList, iconList, nil
 }
 
@@ -105,21 +99,13 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 func (tf *TransactionFactory) InsertMainCategList(i int, ow ...maincateg.MainCateg) ([]maincateg.MainCateg, user.User, []icon.Icon, error) {
 	u := user.User{}
 
-	iconPtrList := make([]interface{}, 0, i)
-	for k := 0; k < i; k++ {
-		iconPtrList = append(iconPtrList, &icon.Icon{})
-	}
-
+	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](i, nil)
 	maincategList, _, err := tf.maincateg.BuildList(i).Overwrites(ow...).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
 	if err != nil {
 		return nil, user.User{}, []icon.Icon{}, err
 	}
 
-	iconList := make([]icon.Icon, 0, i)
-	for _, v := range iconPtrList {
-		iconList = append(iconList, *v.(*icon.Icon))
-	}
-
+	iconList := utils.CvtToT[icon.Icon](iconPtrList)
 	return maincategList, u, iconList, nil
 }
 

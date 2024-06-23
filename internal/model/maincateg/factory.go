@@ -8,6 +8,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
+	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/utils"
 )
 
 type factory struct {
@@ -75,15 +76,8 @@ func (mf *factory) InsertMainCategWithAss(ow MainCateg) (MainCateg, user.User, i
 
 // InsertMainCategList inserts many main categories with associations and traits
 func (mf *factory) InsertMainCategListWithAss(i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, []icon.Icon, error) {
-	iconPtrList := make([]interface{}, iconIdx)
-	for k := 0; k < iconIdx; k++ {
-		iconPtrList[k] = &icon.Icon{}
-	}
-
-	userPtrList := make([]interface{}, userIdx)
-	for k := 0; k < userIdx; k++ {
-		userPtrList[k] = &user.User{}
-	}
+	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](iconIdx, nil)
+	userPtrList := utils.CvtToAnysWithOW[user.User](userIdx, nil)
 
 	maincategList, _, err := mf.MainCateg.BuildList(i).
 		WithTraits(traitName...).
@@ -94,16 +88,8 @@ func (mf *factory) InsertMainCategListWithAss(i int, userIdx int, iconIdx int, t
 		return nil, nil, nil, err
 	}
 
-	icons := make([]icon.Icon, i)
-	for k, v := range iconPtrList {
-		icons[k] = *v.(*icon.Icon)
-	}
-
-	users := make([]user.User, i)
-	for k, v := range userPtrList {
-		users[k] = *v.(*user.User)
-	}
-
+	icons := utils.CvtToT[icon.Icon](iconPtrList)
+	users := utils.CvtToT[user.User](userPtrList)
 	return maincategList, users, icons, nil
 }
 
