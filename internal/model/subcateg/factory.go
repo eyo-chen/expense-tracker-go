@@ -10,6 +10,7 @@ import (
 	"github.com/OYE0303/expense-tracker-go/internal/model/user"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
 	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
+	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/utils"
 )
 
 type factory struct {
@@ -73,10 +74,7 @@ func (f *factory) InsertSubcategsWithOneOrManyMainCateg(maincategIndex int, subc
 
 	// prepare associations data
 	u := user.User{}
-	iconPtrList := make([]interface{}, maincategIndex)
-	for i := 0; i < maincategIndex; i++ {
-		iconPtrList[i] = &icon.Icon{}
-	}
+	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](maincategIndex, nil)
 
 	// insert main categories
 	ms, _, err := f.maincateg.BuildList(maincategIndex).Overwrites(maincategOWs...).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
