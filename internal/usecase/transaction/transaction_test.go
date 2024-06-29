@@ -1286,133 +1286,150 @@ func getLineChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc str
 }
 
 func (s *TransactionSuite) TestGetMonthlyData() {
-	tests := []struct {
-		desc     string
-		setupFun func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType)
-		user     domain.User
-		expErr   error
-	}{
-		{
-			desc: "when it's 31 day in a month, return monthly data",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-03-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-03-31")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				monthlyData := domain.MonthDayToTransactionType{
-					5:  domain.TransactionTypeExpense,
-					10: domain.TransactionTypeIncome,
-					20: domain.TransactionTypeBoth,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(monthlyData, nil).Once()
-
-				return dateRange, monthlyData
-			},
-			user: domain.User{
-				ID: 1,
-			},
-		},
-		{
-			desc: "when it's 30 day in a month, return monthly data",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-04-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-04-30")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				monthlyData := domain.MonthDayToTransactionType{
-					3:  domain.TransactionTypeExpense,
-					8:  domain.TransactionTypeIncome,
-					10: domain.TransactionTypeBoth,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(monthlyData, nil).Once()
-
-				return dateRange, monthlyData
-			},
-			user: domain.User{
-				ID: 1,
-			},
-		},
-		{
-			desc: "when it's 29 day in a month, return monthly data",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-02-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-02-29")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				monthlyData := domain.MonthDayToTransactionType{
-					3:  domain.TransactionTypeExpense,
-					8:  domain.TransactionTypeIncome,
-					10: domain.TransactionTypeBoth,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(monthlyData, nil).Once()
-
-				return dateRange, monthlyData
-			},
-			user: domain.User{
-				ID: 1,
-			},
-		},
-		{
-			desc: "when get monthly data fail, return error",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-05-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-05-31")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(nil, errors.New("error")).Once()
-
-				return dateRange, nil
-
-			},
-			user: domain.User{
-				ID: 1,
-			},
-			expErr: errors.New("error"),
-		},
-	}
-
-	for _, t := range tests {
-		s.Run(t.desc, func() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when 31 days in a month, return monthly data": getMonthlyData_31DaysInAMonth_ReturnMonthlyData,
+		"when 30 days in a month, return monthly data": getMonthlyData_30DaysInAMonth_ReturnMonthlyData,
+		"when 29 days in a month, return monthly data": getMonthlyData_29DaysInAMonth_ReturnMonthlyData,
+		"when get monthly data fail, return error":     getMonthlyData_GetMonthlyDataFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
-			dateRange, monthlyData := t.setupFun()
-
-			result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, t.user)
-			expResult := transaction.GetMonthlyData_GenExpResult(monthlyData, dateRange.EndDate.Day(), err)
-			s.Require().Equal(t.expErr, err, t.desc)
-			s.Require().Equal(expResult, result, t.desc)
-
+			fn(s, scenario)
 			s.TearDownTest()
 		})
 	}
+}
+
+func getMonthlyData_31DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-03-31")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	monthlyData := domain.MonthDayToTransactionType{
+		5:  domain.TransactionTypeExpense,
+		10: domain.TransactionTypeIncome,
+		20: domain.TransactionTypeBoth,
+	}
+
+	expResult := []domain.TransactionType{
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeExpense, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeIncome, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeBoth, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(monthlyData, nil).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getMonthlyData_30DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-04-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-04-30")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	monthlyData := domain.MonthDayToTransactionType{
+		3:  domain.TransactionTypeExpense,
+		8:  domain.TransactionTypeIncome,
+		10: domain.TransactionTypeBoth,
+	}
+
+	expResult := []domain.TransactionType{
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeExpense,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeIncome, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeBoth, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(monthlyData, nil).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getMonthlyData_29DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-02-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-02-29")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	monthlyData := domain.MonthDayToTransactionType{
+		3:  domain.TransactionTypeExpense,
+		8:  domain.TransactionTypeIncome,
+		10: domain.TransactionTypeBoth,
+	}
+
+	expResult := []domain.TransactionType{
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeExpense,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeIncome, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeBoth, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(monthlyData, nil).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getMonthlyData_GetMonthlyDataFail_ReturnError(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-05-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-05-31")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(nil, errors.New("error")).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().Equal([]domain.TransactionType{}, result, desc)
 }
