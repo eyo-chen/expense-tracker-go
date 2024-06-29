@@ -1,4 +1,4 @@
-package transaction_test
+package transaction
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/transaction"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/codeutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -23,7 +22,7 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
-	transactionUC   *transaction.TransactionUC
+	transactionUC   *TransactionUC
 	mockTransaction *mocks.TransactionModel
 	mockMainCateg   *mocks.MainCategModel
 	mockSubCateg    *mocks.SubCategModel
@@ -41,7 +40,7 @@ func (s *TransactionSuite) SetupTest() {
 	s.mockTransaction = mocks.NewTransactionModel(s.T())
 	s.mockMainCateg = mocks.NewMainCategModel(s.T())
 	s.mockSubCateg = mocks.NewSubCategModel(s.T())
-	s.transactionUC = transaction.NewTransactionUC(s.mockTransaction, s.mockMainCateg, s.mockSubCateg)
+	s.transactionUC = NewTransactionUC(s.mockTransaction, s.mockMainCateg, s.mockSubCateg)
 }
 
 func (s *TransactionSuite) TearDownTest() {
