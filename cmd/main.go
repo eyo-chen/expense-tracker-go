@@ -73,7 +73,7 @@ func newMysqlDB() (*sql.DB, error) {
 
 func initServe(handler *handler.Handler) error {
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", 4000),
+		Addr:         fmt.Sprintf(":%d", 4040),
 		Handler:      router.New(handler),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,

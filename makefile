@@ -12,7 +12,7 @@ remove-image:
 	docker rmi $(IMAGE_NAME) || true
 
 build:
-	docker-compose build
+	docker-compose build --force-rm
 
 start:
 	docker-compose up -d

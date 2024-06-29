@@ -18,7 +18,7 @@ services:
     image: mysql:8.0
     container_name: mysql
     ports:
-      - "54321:3306"
+      - 3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: testtest
       MYSQL_DATABASE: expense-tracker
@@ -26,9 +26,20 @@ services:
       - expense-tracker-volumes:/var/lib/mysql
     networks:
       - expense-tracker-network
+  
+  expense-tracker:
+    image: expense-tracker-image
+    container_name: expense-tracker
+    ports:
+      - "3000:3000"
+    networks:
+      - expense-tracker-network
+    depends_on:
+      - expense-tracker-go
 
 volumes:
   expense-tracker-volumes:
 
 networks:
   expense-tracker-network:
+    driver: bridge
