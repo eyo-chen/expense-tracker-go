@@ -932,86 +932,59 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 }
 
 func (s *TransactionSuite) TestGetPieChartData() {
-	tests := []struct {
-		desc            string
-		setupFun        func() domain.ChartDateRange
-		transactionType domain.TransactionType
-		user            domain.User
-		expResult       domain.ChartData
-		expErr          error
-	}{
-		{
-			desc: "when no error, return chart data",
-			setupFun: func() domain.ChartDateRange {
-				start, err := time.Parse(time.DateOnly, "2024-03-17")
-				s.Require().NoError(err)
-				end, err := time.Parse(time.DateOnly, "2024-03-23")
-				s.Require().NoError(err)
-
-				chartDataRange := domain.ChartDateRange{
-					Start: start,
-					End:   end,
-				}
-
-				chartData := domain.ChartData{
-					Labels:   []string{"label1", "label2"},
-					Datasets: []float64{100, 200},
-				}
-
-				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
-					Return(chartData, nil).Once()
-
-				return chartDataRange
-			},
-			transactionType: domain.TransactionTypeExpense,
-			user: domain.User{
-				ID: 1,
-			},
-			expResult: domain.ChartData{
-				Labels:   []string{"label1", "label2"},
-				Datasets: []float64{100, 200},
-			},
-			expErr: nil,
-		},
-		{
-			desc: "when get chart data fail, return error",
-			setupFun: func() domain.ChartDateRange {
-				start, err := time.Parse(time.DateOnly, "2024-03-17")
-				s.Require().NoError(err)
-				end, err := time.Parse(time.DateOnly, "2024-03-23")
-				s.Require().NoError(err)
-
-				chartDataRange := domain.ChartDateRange{
-					Start: start,
-					End:   end,
-				}
-
-				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
-					Return(domain.ChartData{}, errors.New("error")).Once()
-
-				return chartDataRange
-			},
-			transactionType: domain.TransactionTypeExpense,
-			user: domain.User{
-				ID: 1,
-			},
-			expResult: domain.ChartData{},
-			expErr:    errors.New("error"),
-		},
-	}
-
-	for _, t := range tests {
-		s.Run(t.desc, func() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, return chart data":       getPieChartData_NoError_ReturnChartData,
+		"when get chart data fail, return error": getPieChartData_GetChartDataFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
-			dateRange := t.setupFun()
-
-			result, err := s.transactionUC.GetPieChartData(mockCtx, dateRange, t.transactionType, t.user)
-			s.Require().Equal(t.expResult, result)
-			s.Require().Equal(t.expErr, err)
-
+			fn(s, scenario)
 			s.TearDownTest()
 		})
 	}
+}
+
+func getPieChartData_NoError_ReturnChartData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-23")
+	s.Require().NoError(err)
+
+	chartDataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	chartData := domain.ChartData{
+		Labels:   []string{"label1", "label2"},
+		Datasets: []float64{100, 200},
+	}
+
+	s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+		Return(chartData, nil).Once()
+
+	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(chartData, result, desc)
+}
+
+func getPieChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-23")
+	s.Require().NoError(err)
+
+	chartDataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+		Return(domain.ChartData{}, errors.New("error")).Once()
+
+	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
+	s.Require().EqualError(err, "error", desc)
+	s.Require().Equal(domain.ChartData{}, result, desc)
 }
 
 func (s *TransactionSuite) TestGetLineChartData() {
