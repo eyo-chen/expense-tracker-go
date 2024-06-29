@@ -143,7 +143,6 @@ func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) 
 	return t.Transaction.Delete(ctx, id)
 }
 
-// TODO: add tests
 func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
 	return t.Transaction.GetAccInfo(ctx, query, user.ID)
 }

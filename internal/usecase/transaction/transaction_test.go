@@ -573,6 +573,52 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
+func (s *TransactionSuite) TestGetAccInfo() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, return acc info":       getAccInfo_NoError_ReturnAccInfo,
+		"when get acc info fail, return error": getAccInfo_GetAccInfoFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getAccInfo_NoError_ReturnAccInfo(s *TransactionSuite, desc string) {
+	startDate := "2024-03-01"
+	endDate := "2024-03-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	accInfo := domain.AccInfo{
+		TotalIncome:  100,
+		TotalExpense: 200,
+		TotalBalance: -100,
+	}
+
+	s.mockTransaction.On("GetAccInfo", mockCtx, query, user.ID).
+		Return(accInfo, nil).Once()
+
+	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(accInfo, result, desc)
+}
+
+func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
+	startDate := "2024-03-01"
+	endDate := "2024-03-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+
+	s.mockTransaction.On("GetAccInfo", mockCtx, query, user.ID).
+		Return(domain.AccInfo{}, errors.New("get acc info fail")).Once()
+
+	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
+	s.Require().EqualError(err, "get acc info fail", desc)
+	s.Require().Equal(domain.AccInfo{}, result, desc)
+}
+
 func (s *TransactionSuite) TestGetBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
 		"when time range type is one week day, return week day data":         getBarChartData_WithOneWeekDay_ReturnWeekDayData,
