@@ -27,7 +27,6 @@ func NewTransactionUC(t interfaces.TransactionModel, m interfaces.MainCategModel
 	}
 }
 
-// TODO: add tests
 func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
 	// check if the main category exists
 	mainCateg, err := t.MainCateg.GetByID(trans.MainCategID, trans.UserID)
