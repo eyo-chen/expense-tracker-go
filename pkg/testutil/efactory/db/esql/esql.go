@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db"
 )
 
 // Config is for raw SQL database operations

@@ -1,6 +1,6 @@
 package validator
 
-import "github.com/OYE0303/expense-tracker-go/internal/domain"
+import "github.com/eyo-chen/expense-tracker-go/internal/domain"
 
 func (v *Validator) CreateMainCateg(categ *domain.MainCateg) bool {
 	v.Check(len(categ.Name) > 0, "name", "Name can't be empty")

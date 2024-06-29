@@ -3,12 +3,12 @@ package user
 import (
 	"testing"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/usecase/interfaces"
-	"github.com/OYE0303/expense-tracker-go/mocks"
-	"github.com/OYE0303/expense-tracker-go/pkg/auth"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/mocks"
+	"github.com/eyo-chen/expense-tracker-go/pkg/auth"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )

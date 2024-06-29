@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model/interfaces"
-	"github.com/OYE0303/expense-tracker-go/pkg/dockerutil"
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
 )

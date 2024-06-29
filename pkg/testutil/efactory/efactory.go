@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db"
 )
 
 // Config is the configuration for the factory

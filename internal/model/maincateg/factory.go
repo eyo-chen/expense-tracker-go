@@ -3,12 +3,12 @@ package maincateg
 import (
 	"database/sql"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
-	"github.com/OYE0303/expense-tracker-go/internal/model/icon"
-	"github.com/OYE0303/expense-tracker-go/internal/model/user"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/utils"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
+	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db/esql"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/utils"
 )
 
 type factory struct {

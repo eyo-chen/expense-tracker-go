@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
 // UserUC is the interface that wraps the basic methods for user usecase.

@@ -3,7 +3,7 @@ package maincateg
 import (
 	"fmt"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
 func BluePrint(i int, last MainCateg) MainCateg {

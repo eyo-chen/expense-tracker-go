@@ -3,8 +3,8 @@ package icon
 import (
 	"database/sql"
 
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/OYE0303/expense-tracker-go/pkg/testutil/efactory/db/esql"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
+	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db/esql"
 )
 
 type factory struct {

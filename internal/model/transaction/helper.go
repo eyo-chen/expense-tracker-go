@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"unicode"
 
-	"github.com/OYE0303/expense-tracker-go/internal/domain"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
 func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, t Transaction) string {

@@ -3,8 +3,8 @@ package router
 import (
 	"net/http"
 
-	hd "github.com/OYE0303/expense-tracker-go/internal/handler"
-	"github.com/OYE0303/expense-tracker-go/internal/middleware"
+	hd "github.com/eyo-chen/expense-tracker-go/internal/handler"
+	"github.com/eyo-chen/expense-tracker-go/internal/middleware"
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
 )

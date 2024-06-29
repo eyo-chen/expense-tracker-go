@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/OYE0303/expense-tracker-go/pkg/logger"
+	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/gorilla/mux"
 )
 
