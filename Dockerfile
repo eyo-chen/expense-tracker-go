@@ -1,0 +1,26 @@
+FROM golang:1.22.2-alpine AS build-stage
+
+WORKDIR /app
+
+COPY go.mod ./
+RUN go mod tidy
+
+COPY . .
+
+COPY wait-for-it.sh ./wait-for-it.sh
+RUN chmod +x ./wait-for-it.sh
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o expense-tracker-go ./cmd/main.go
+
+FROM gcr.io/distroless/base-debian11 AS build-release-stage
+
+WORKDIR /
+
+COPY --from=build-stage /app/expense-tracker-go ./expense-tracker-go
+COPY --from=build-stage /app/.env ./.env
+COPY --from=build-stage /app/migrations ./migrations/
+COPY --from=build-stage /app/wait-for-it.sh ./wait-for-it.sh
+
+USER nonroot:nonroot
+
+CMD ["./expense-tracker-go"]

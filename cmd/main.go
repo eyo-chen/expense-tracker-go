@@ -58,7 +58,7 @@ func newMysqlDB() (*sql.DB, error) {
 		"password": os.Getenv("DB_PASSWORD"),
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:54321)/%s?parseTime=true", config["user"], config["password"], config["name"])
+	dsn := fmt.Sprintf("%s:%s@tcp(mysql:3306)/%s?parseTime=true", config["user"], config["password"], config["name"])
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err

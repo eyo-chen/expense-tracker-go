@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  expense-tracker-go:
+    build:
+      context: .
+    image: expense-tracker-go-image
+    container_name: expense-tracker-go
+    ports:
+      - "4040:4040"
+    depends_on:
+      - mysql
+    networks:
+      - expense-tracker-network
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "54321:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: testtest
+      MYSQL_DATABASE: expense-tracker
+    volumes:
+      - expense-tracker-volumes:/var/lib/mysql
+    networks:
+      - expense-tracker-network
+
+volumes:
+  expense-tracker-volumes:
+
+networks:
+  expense-tracker-network:
