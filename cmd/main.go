@@ -49,6 +49,7 @@ func main() {
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}
+
 }
 
 func newMysqlDB() (*sql.DB, error) {

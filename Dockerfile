@@ -10,7 +10,7 @@ COPY . .
 COPY wait-for-it.sh ./wait-for-it.sh
 RUN chmod +x ./wait-for-it.sh
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o expense-tracker-go ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o expense-tracker-go ./cmd/main.go
 
 FROM gcr.io/distroless/base-debian11 AS build-release-stage
 
