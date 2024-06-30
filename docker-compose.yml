@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  expense-tracker-go:
+  expense-tracker-backend:
     build:
       context: .
-    image: expense-tracker-go-image
-    container_name: expense-tracker-go
+    image: expense-tracker-backend-image
+    container_name: expense-tracker-backend
     ports:
       - "4040:4040"
     depends_on:
@@ -27,9 +27,9 @@ services:
     networks:
       - expense-tracker-network
   
-  expense-tracker:
-    image: expense-tracker-image
-    container_name: expense-tracker
+  expense-tracker-frontend:
+    image: expense-tracker-frontend-image
+    container_name: expense-tracker-frontend
     ports:
       - "3000:3000"
     networks:
@@ -42,4 +42,3 @@ volumes:
 
 networks:
   expense-tracker-network:
-    driver: bridge
