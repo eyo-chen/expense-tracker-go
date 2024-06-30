@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"context"
-	"errors"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
@@ -31,9 +30,6 @@ func NewTransactionUC(t interfaces.TransactionModel, m interfaces.MainCategModel
 func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
 	// check if the main category exists
 	mainCateg, err := t.MainCateg.GetByID(trans.MainCategID, trans.UserID)
-	if errors.Is(err, domain.ErrDataNotFound) {
-		return domain.ErrDataNotFound
-	}
 	if err != nil {
 		return err
 	}
@@ -46,9 +42,6 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 
 	// check if the sub category exists
 	subCateg, err := t.SubCateg.GetByID(trans.SubCategID, trans.UserID)
-	if errors.Is(err, domain.ErrDataNotFound) {
-		return domain.ErrDataNotFound
-	}
 	if err != nil {
 		return err
 	}
@@ -59,11 +52,7 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 		return domain.ErrMainCategNotConsistent
 	}
 
-	if err := t.Transaction.Create(ctx, trans); err != nil {
-		return err
-	}
-
-	return nil
+	return t.Transaction.Create(ctx, trans)
 }
 
 func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, domain.Cursor, error) {

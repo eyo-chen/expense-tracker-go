@@ -1,4 +1,4 @@
-package transaction_test
+package transaction
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/transaction"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/codeutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -23,7 +22,7 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
-	transactionUC   *transaction.TransactionUC
+	transactionUC   *TransactionUC
 	mockTransaction *mocks.TransactionModel
 	mockMainCateg   *mocks.MainCategModel
 	mockSubCateg    *mocks.SubCategModel
@@ -41,13 +40,174 @@ func (s *TransactionSuite) SetupTest() {
 	s.mockTransaction = mocks.NewTransactionModel(s.T())
 	s.mockMainCateg = mocks.NewMainCategModel(s.T())
 	s.mockSubCateg = mocks.NewSubCategModel(s.T())
-	s.transactionUC = transaction.NewTransactionUC(s.mockTransaction, s.mockMainCateg, s.mockSubCateg)
+	s.transactionUC = NewTransactionUC(s.mockTransaction, s.mockMainCateg, s.mockSubCateg)
 }
 
 func (s *TransactionSuite) TearDownTest() {
 	s.mockTransaction.AssertExpectations(s.T())
 	s.mockMainCateg.AssertExpectations(s.T())
 	s.mockSubCateg.AssertExpectations(s.T())
+}
+
+func (s *TransactionSuite) TestCreate() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, create successfully":                                                      create_NoError_CreateSuccessfully,
+		"when get main category fail, return error":                                               create_GetMainCategFail_ReturnError,
+		"when type of main category not match transaction type, return error":                     create_TypeNotMatch_ReturnError,
+		"when get sub category fail, return error":                                                create_GetSubCategFail_ReturnError,
+		"when main category of sub category not match main category of transaction, return error": create_MainCategNotMatch_ReturnError,
+		"when create fail, return error":                                                          create_CreateFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func create_NoError_CreateSuccessfully(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 1}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+	s.mockTransaction.Mock.On("Create", mockCtx, transInput).Return(nil).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().NoError(err, desc)
+}
+
+func create_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(nil, errors.New("get main category fail")).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().Equal(errors.New("get main category fail"), err, desc)
+}
+
+func create_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeIncome}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, domain.ErrTypeNotConsistent.Error(), desc)
+}
+
+func create_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(nil, errors.New("get subcategory fail")).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, "get subcategory fail", desc)
+}
+
+func create_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 2}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, domain.ErrMainCategNotConsistent.Error(), desc)
+}
+
+func create_CreateFail_ReturnError(s *TransactionSuite, desc string) {
+	// prepare mock data
+	mainCateg := domain.MainCateg{ID: 1, Type: domain.TransactionTypeExpense}
+	subCateg := domain.SubCateg{ID: 1, MainCategID: 1}
+
+	// prepare input
+	transInput := domain.CreateTransactionInput{
+		UserID:      1,
+		Type:        domain.TransactionTypeExpense,
+		MainCategID: 1,
+		SubCategID:  1,
+		Price:       100,
+		Date:        mockTimeNow,
+		Note:        "note",
+	}
+
+	// prepare mock services
+	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+	s.mockTransaction.Mock.On("Create", mockCtx, transInput).Return(errors.New("create fail")).Once()
+
+	// action, assertion
+	err := s.transactionUC.Create(mockCtx, transInput)
+	s.Require().EqualError(err, "create fail", desc)
 }
 
 func (s *TransactionSuite) TestGetAll() {
@@ -412,6 +572,52 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
+func (s *TransactionSuite) TestGetAccInfo() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, return acc info":       getAccInfo_NoError_ReturnAccInfo,
+		"when get acc info fail, return error": getAccInfo_GetAccInfoFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getAccInfo_NoError_ReturnAccInfo(s *TransactionSuite, desc string) {
+	startDate := "2024-03-01"
+	endDate := "2024-03-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	accInfo := domain.AccInfo{
+		TotalIncome:  100,
+		TotalExpense: 200,
+		TotalBalance: -100,
+	}
+
+	s.mockTransaction.On("GetAccInfo", mockCtx, query, user.ID).
+		Return(accInfo, nil).Once()
+
+	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(accInfo, result, desc)
+}
+
+func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
+	startDate := "2024-03-01"
+	endDate := "2024-03-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+
+	s.mockTransaction.On("GetAccInfo", mockCtx, query, user.ID).
+		Return(domain.AccInfo{}, errors.New("get acc info fail")).Once()
+
+	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
+	s.Require().EqualError(err, "get acc info fail", desc)
+	s.Require().Equal(domain.AccInfo{}, result, desc)
+}
+
 func (s *TransactionSuite) TestGetBarChartData() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
 		"when time range type is one week day, return week day data":         getBarChartData_WithOneWeekDay_ReturnWeekDayData,
@@ -725,86 +931,59 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 }
 
 func (s *TransactionSuite) TestGetPieChartData() {
-	tests := []struct {
-		desc            string
-		setupFun        func() domain.ChartDateRange
-		transactionType domain.TransactionType
-		user            domain.User
-		expResult       domain.ChartData
-		expErr          error
-	}{
-		{
-			desc: "when no error, return chart data",
-			setupFun: func() domain.ChartDateRange {
-				start, err := time.Parse(time.DateOnly, "2024-03-17")
-				s.Require().NoError(err)
-				end, err := time.Parse(time.DateOnly, "2024-03-23")
-				s.Require().NoError(err)
-
-				chartDataRange := domain.ChartDateRange{
-					Start: start,
-					End:   end,
-				}
-
-				chartData := domain.ChartData{
-					Labels:   []string{"label1", "label2"},
-					Datasets: []float64{100, 200},
-				}
-
-				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
-					Return(chartData, nil).Once()
-
-				return chartDataRange
-			},
-			transactionType: domain.TransactionTypeExpense,
-			user: domain.User{
-				ID: 1,
-			},
-			expResult: domain.ChartData{
-				Labels:   []string{"label1", "label2"},
-				Datasets: []float64{100, 200},
-			},
-			expErr: nil,
-		},
-		{
-			desc: "when get chart data fail, return error",
-			setupFun: func() domain.ChartDateRange {
-				start, err := time.Parse(time.DateOnly, "2024-03-17")
-				s.Require().NoError(err)
-				end, err := time.Parse(time.DateOnly, "2024-03-23")
-				s.Require().NoError(err)
-
-				chartDataRange := domain.ChartDateRange{
-					Start: start,
-					End:   end,
-				}
-
-				s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
-					Return(domain.ChartData{}, errors.New("error")).Once()
-
-				return chartDataRange
-			},
-			transactionType: domain.TransactionTypeExpense,
-			user: domain.User{
-				ID: 1,
-			},
-			expResult: domain.ChartData{},
-			expErr:    errors.New("error"),
-		},
-	}
-
-	for _, t := range tests {
-		s.Run(t.desc, func() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when no error, return chart data":       getPieChartData_NoError_ReturnChartData,
+		"when get chart data fail, return error": getPieChartData_GetChartDataFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
-			dateRange := t.setupFun()
-
-			result, err := s.transactionUC.GetPieChartData(mockCtx, dateRange, t.transactionType, t.user)
-			s.Require().Equal(t.expResult, result)
-			s.Require().Equal(t.expErr, err)
-
+			fn(s, scenario)
 			s.TearDownTest()
 		})
 	}
+}
+
+func getPieChartData_NoError_ReturnChartData(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-23")
+	s.Require().NoError(err)
+
+	chartDataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	chartData := domain.ChartData{
+		Labels:   []string{"label1", "label2"},
+		Datasets: []float64{100, 200},
+	}
+
+	s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+		Return(chartData, nil).Once()
+
+	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(chartData, result, desc)
+}
+
+func getPieChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc string) {
+	start, err := time.Parse(time.DateOnly, "2024-03-17")
+	s.Require().NoError(err)
+	end, err := time.Parse(time.DateOnly, "2024-03-23")
+	s.Require().NoError(err)
+
+	chartDataRange := domain.ChartDateRange{
+		Start: start,
+		End:   end,
+	}
+
+	s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+		Return(domain.ChartData{}, errors.New("error")).Once()
+
+	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
+	s.Require().EqualError(err, "error", desc)
+	s.Require().Equal(domain.ChartData{}, result, desc)
 }
 
 func (s *TransactionSuite) TestGetLineChartData() {
@@ -1106,133 +1285,150 @@ func getLineChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc str
 }
 
 func (s *TransactionSuite) TestGetMonthlyData() {
-	tests := []struct {
-		desc     string
-		setupFun func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType)
-		user     domain.User
-		expErr   error
-	}{
-		{
-			desc: "when it's 31 day in a month, return monthly data",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-03-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-03-31")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				monthlyData := domain.MonthDayToTransactionType{
-					5:  domain.TransactionTypeExpense,
-					10: domain.TransactionTypeIncome,
-					20: domain.TransactionTypeBoth,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(monthlyData, nil).Once()
-
-				return dateRange, monthlyData
-			},
-			user: domain.User{
-				ID: 1,
-			},
-		},
-		{
-			desc: "when it's 30 day in a month, return monthly data",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-04-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-04-30")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				monthlyData := domain.MonthDayToTransactionType{
-					3:  domain.TransactionTypeExpense,
-					8:  domain.TransactionTypeIncome,
-					10: domain.TransactionTypeBoth,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(monthlyData, nil).Once()
-
-				return dateRange, monthlyData
-			},
-			user: domain.User{
-				ID: 1,
-			},
-		},
-		{
-			desc: "when it's 29 day in a month, return monthly data",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-02-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-02-29")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				monthlyData := domain.MonthDayToTransactionType{
-					3:  domain.TransactionTypeExpense,
-					8:  domain.TransactionTypeIncome,
-					10: domain.TransactionTypeBoth,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(monthlyData, nil).Once()
-
-				return dateRange, monthlyData
-			},
-			user: domain.User{
-				ID: 1,
-			},
-		},
-		{
-			desc: "when get monthly data fail, return error",
-			setupFun: func() (domain.GetMonthlyDateRange, domain.MonthDayToTransactionType) {
-				startDate, err := time.Parse(time.DateOnly, "2024-05-01")
-				s.Require().NoError(err)
-				endDate, err := time.Parse(time.DateOnly, "2024-05-31")
-				s.Require().NoError(err)
-
-				dateRange := domain.GetMonthlyDateRange{
-					StartDate: startDate,
-					EndDate:   endDate,
-				}
-
-				s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
-					Return(nil, errors.New("error")).Once()
-
-				return dateRange, nil
-
-			},
-			user: domain.User{
-				ID: 1,
-			},
-			expErr: errors.New("error"),
-		},
-	}
-
-	for _, t := range tests {
-		s.Run(t.desc, func() {
+	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
+		"when 31 days in a month, return monthly data": getMonthlyData_31DaysInAMonth_ReturnMonthlyData,
+		"when 30 days in a month, return monthly data": getMonthlyData_30DaysInAMonth_ReturnMonthlyData,
+		"when 29 days in a month, return monthly data": getMonthlyData_29DaysInAMonth_ReturnMonthlyData,
+		"when get monthly data fail, return error":     getMonthlyData_GetMonthlyDataFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
-			dateRange, monthlyData := t.setupFun()
-
-			result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, t.user)
-			expResult := transaction.GetMonthlyData_GenExpResult(monthlyData, dateRange.EndDate.Day(), err)
-			s.Require().Equal(t.expErr, err, t.desc)
-			s.Require().Equal(expResult, result, t.desc)
-
+			fn(s, scenario)
 			s.TearDownTest()
 		})
 	}
+}
+
+func getMonthlyData_31DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-03-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-03-31")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	monthlyData := domain.MonthDayToTransactionType{
+		5:  domain.TransactionTypeExpense,
+		10: domain.TransactionTypeIncome,
+		20: domain.TransactionTypeBoth,
+	}
+
+	expResult := []domain.TransactionType{
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeExpense, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeIncome, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeBoth, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(monthlyData, nil).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getMonthlyData_30DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-04-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-04-30")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	monthlyData := domain.MonthDayToTransactionType{
+		3:  domain.TransactionTypeExpense,
+		8:  domain.TransactionTypeIncome,
+		10: domain.TransactionTypeBoth,
+	}
+
+	expResult := []domain.TransactionType{
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeExpense,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeIncome, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeBoth, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(monthlyData, nil).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getMonthlyData_29DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-02-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-02-29")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	monthlyData := domain.MonthDayToTransactionType{
+		3:  domain.TransactionTypeExpense,
+		8:  domain.TransactionTypeIncome,
+		10: domain.TransactionTypeBoth,
+	}
+
+	expResult := []domain.TransactionType{
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeExpense,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeIncome, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeBoth, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(monthlyData, nil).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResult, result, desc)
+}
+
+func getMonthlyData_GetMonthlyDataFail_ReturnError(s *TransactionSuite, desc string) {
+	startDate, err := time.Parse(time.DateOnly, "2024-05-01")
+	s.Require().NoError(err)
+	endDate, err := time.Parse(time.DateOnly, "2024-05-31")
+	s.Require().NoError(err)
+
+	dateRange := domain.GetMonthlyDateRange{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+		Return(nil, errors.New("error")).Once()
+
+	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().Equal([]domain.TransactionType{}, result, desc)
 }
