@@ -2,6 +2,8 @@ FROM golang:1.22.2-alpine AS build-stage
 
 WORKDIR /app
 
+# NOTE: download dependencies before copying the source code to take advantage of Docker's layer caching
+# ref: https://docs.docker.com/build/guide/layers/#cached-layers
 COPY go.mod ./
 RUN go mod tidy
 

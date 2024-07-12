@@ -29,12 +29,14 @@ services:
   
   expense-tracker-frontend:
     build: 
-      context: ${FRONTEND_IMAGE_PATH}
+      context: ../expense-tracker
       dockerfile: Dockerfile
     image: expense-tracker-frontend-image
     container_name: expense-tracker-frontend
     ports:
       - "3000:3000"
+    volumes:
+      - ../expense-tracker:/app
     networks:
       - expense-tracker-network
     depends_on:

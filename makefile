@@ -1,20 +1,30 @@
 PWD = $(shell pwd)
 
-IMAGE_NAME = expense-tracker-go-image
+FRONTEND_IMAGE_NAME = expense-tracker-frontend-image
+BACKEND_IMAGE_NAME = expense-tracker-backend-image
+DOCKER_COMPOSE_FILES = docker-compose.yml
+
+# Function to add frontend compose file if needed
+ifeq ($(with_frontend),true)
+    DOCKER_COMPOSE_FILES = docker-compose.with.frontend.yml
+endif
 
 mock:
 	docker run --rm -v "$(PWD)":/src -w /src vektra/mockery --all
 
 clean:
-	docker-compose down
+	docker-compose -f $(DOCKER_COMPOSE_FILES) down
 
 remove-image:
-	docker rmi $(IMAGE_NAME) || true
+	docker rmi $(FRONTEND_IMAGE_NAME) $(BACKEND_IMAGE_NAME) || true
 
 build:
-	docker-compose build --force-rm
+	docker-compose -f $(DOCKER_COMPOSE_FILES) build --force-rm
 
 start:
-	docker-compose up -d
+	docker-compose -f $(DOCKER_COMPOSE_FILES) up -d
 
-rebuild: clean remove-image build start
+run: clean remove-image build start
+
+run-with-frontend:
+	make run with_frontend=true

@@ -54,12 +54,14 @@ func main() {
 
 func newMysqlDB() (*sql.DB, error) {
 	config := map[string]string{
+		"host":     os.Getenv("DB_HOST"),
+		"port":     os.Getenv("DB_PORT"),
 		"name":     os.Getenv("DB_NAME"),
 		"user":     os.Getenv("DB_USER"),
 		"password": os.Getenv("DB_PASSWORD"),
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(mysql:3306)/%s?parseTime=true", config["user"], config["password"], config["name"])
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", config["user"], config["password"], config["host"], config["port"], config["name"])
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
