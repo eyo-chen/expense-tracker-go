@@ -56,7 +56,7 @@ func (s *SubCategSuite) TearDownTest() {
 	if err != nil {
 		s.Require().NoError(err)
 	}
-	defer tx.Rollback()
+	defer s.Require().NoError(tx.Rollback())
 
 	if _, err := tx.Exec("DELETE FROM sub_categories"); err != nil {
 		s.Require().NoError(err)

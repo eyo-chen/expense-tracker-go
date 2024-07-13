@@ -63,7 +63,7 @@ func (s *MainCategSuite) SetupTest() {
 func (s *MainCategSuite) TearDownTest() {
 	tx, err := s.db.Begin()
 	s.Require().NoError(err)
-	defer tx.Rollback()
+	defer s.Require().NoError(tx.Rollback())
 
 	_, err = tx.Exec("DELETE FROM main_categories")
 	s.Require().NoError(err)

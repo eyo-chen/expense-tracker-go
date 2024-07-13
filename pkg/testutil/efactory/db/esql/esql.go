@@ -22,7 +22,7 @@ type Config struct {
 	Ctx context.Context
 }
 
-func (s *Config) Insert(params db.InserParams) (interface{}, error) {
+func (s *Config) Insert(params db.InserParams) (result interface{}, err error) {
 	rawStmt, vals := prepareStmtAndVals(params.StorageName, params.Value)
 
 	// Prepare the insert statement
@@ -36,7 +36,11 @@ func (s *Config) Insert(params db.InserParams) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && err == nil {
+			err = rollbackErr
+		}
+	}()
 
 	id, err := insertToDB(s.Ctx, tx, stmt, vals[0])
 	if err != nil {
@@ -64,7 +68,11 @@ func (s *Config) InsertList(params db.InserListParams) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && err == nil {
+			err = rollbackErr
+		}
+	}()
 
 	result := make([]interface{}, len(fieldValues))
 	for i, vals := range fieldValues {

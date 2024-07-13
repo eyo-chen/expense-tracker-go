@@ -49,7 +49,7 @@ func (s *IconSuite) SetupTest() {
 func (s *IconSuite) TearDownTest() {
 	tx, err := s.db.Begin()
 	s.Require().NoError(err)
-	defer tx.Rollback()
+	defer s.Require().NoError(tx.Rollback())
 
 	_, err = tx.Exec("DELETE FROM icons")
 	s.Require().NoError(err)

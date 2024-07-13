@@ -29,7 +29,10 @@ func WriteJSON(w http.ResponseWriter, status int, data map[string]interface{}, h
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	w.Write(js)
+	if _, err := w.Write(js); err != nil {
+		logger.Error("w.Write failed", "package", "jsutil", "err", err)
+		return err
+	}
 
 	return nil
 }
