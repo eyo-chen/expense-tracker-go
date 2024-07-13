@@ -24,7 +24,6 @@ func GetUser(r *http.Request) *domain.User {
 	if !ok {
 		logger.Panic("missing user value in request context")
 	}
-	// !!!
 
 	return user
 }
