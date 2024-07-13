@@ -23,7 +23,7 @@ type Config struct {
 	Ctx context.Context
 }
 
-func (s *Config) Insert(params db.InserParams) (result interface{}, err error) {
+func (s *Config) Insert(params db.InserParams) (interface{}, error) {
 	rawStmt, vals := prepareStmtAndVals(params.StorageName, params.Value)
 
 	// Prepare the insert statement
