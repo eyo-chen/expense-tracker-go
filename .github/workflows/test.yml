@@ -71,11 +71,27 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment => comment.user.type === 'Bot' && comment.body.includes('**Total Test Coverage:**'));
             const totalCoverage = process.env.total_coverage;
             const commentBody = `**Total Test Coverage:** ${totalCoverage}%`;
-            github.rest.issues.createComment({
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+              });
+            }
+
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: commentBody
-            })
+              body: commentBody,
+            });
