@@ -3,6 +3,7 @@ package transaction_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -63,7 +64,11 @@ func (s *TransactionSuite) TearDownTest() {
 	if err != nil {
 		s.Require().NoError(err)
 	}
-	defer s.Require().NoError(tx.Rollback())
+	defer func() {
+		if err := tx.Rollback(); err != nil && !errors.Is(err, sql.ErrTxDone) {
+			s.Require().NoError(err)
+		}
+	}()
 
 	if _, err := tx.Exec("DELETE FROM transactions"); err != nil {
 		s.Require().NoError(err)

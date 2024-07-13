@@ -3,6 +3,7 @@ package esql
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -37,7 +38,7 @@ func (s *Config) Insert(params db.InserParams) (result interface{}, err error) {
 		return nil, err
 	}
 	defer func() {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil && err == nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) && err == nil {
 			err = rollbackErr
 		}
 	}()
@@ -69,7 +70,7 @@ func (s *Config) InsertList(params db.InserListParams) ([]interface{}, error) {
 		return nil, err
 	}
 	defer func() {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil && err == nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) && err == nil {
 			err = rollbackErr
 		}
 	}()
