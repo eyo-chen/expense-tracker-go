@@ -3,6 +3,7 @@ package maincateg
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -63,7 +64,11 @@ func (s *MainCategSuite) SetupTest() {
 func (s *MainCategSuite) TearDownTest() {
 	tx, err := s.db.Begin()
 	s.Require().NoError(err)
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil && !errors.Is(err, sql.ErrTxDone) {
+			s.Require().NoError(err)
+		}
+	}()
 
 	_, err = tx.Exec("DELETE FROM main_categories")
 	s.Require().NoError(err)

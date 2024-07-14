@@ -3,6 +3,7 @@ package subcateg
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -56,7 +57,11 @@ func (s *SubCategSuite) TearDownTest() {
 	if err != nil {
 		s.Require().NoError(err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil && !errors.Is(err, sql.ErrTxDone) {
+			s.Require().NoError(err)
+		}
+	}()
 
 	if _, err := tx.Exec("DELETE FROM sub_categories"); err != nil {
 		s.Require().NoError(err)

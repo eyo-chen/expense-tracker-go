@@ -2,6 +2,7 @@ package icon
 
 import (
 	"database/sql"
+	"errors"
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -49,7 +50,11 @@ func (s *IconSuite) SetupTest() {
 func (s *IconSuite) TearDownTest() {
 	tx, err := s.db.Begin()
 	s.Require().NoError(err)
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil && !errors.Is(err, sql.ErrTxDone) {
+			s.Require().NoError(err)
+		}
+	}()
 
 	_, err = tx.Exec("DELETE FROM icons")
 	s.Require().NoError(err)
