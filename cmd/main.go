@@ -53,12 +53,14 @@ func main() {
 
 func newMysqlDB() (*sql.DB, error) {
 	config := map[string]string{
+		"host":     os.Getenv("DB_HOST"),
+		"port":     os.Getenv("DB_PORT"),
 		"name":     os.Getenv("DB_NAME"),
 		"user":     os.Getenv("DB_USER"),
 		"password": os.Getenv("DB_PASSWORD"),
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:54321)/%s?parseTime=true", config["user"], config["password"], config["name"])
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", config["user"], config["password"], config["host"], config["port"], config["name"])
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
@@ -72,8 +74,13 @@ func newMysqlDB() (*sql.DB, error) {
 }
 
 func initServe(handler *handler.Handler) error {
+	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	if port == "" {
+		port = fmt.Sprintf(":%d", 8000)
+	}
+
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", 4000),
+		Addr:         port,
 		Handler:      router.New(handler),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
