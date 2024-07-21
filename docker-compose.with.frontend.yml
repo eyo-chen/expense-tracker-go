@@ -9,13 +9,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_NAME=expense-tracker
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - PORT=8000
-      - JWT_SECRET_KEY=key
+      - GO_ENV=development-docker
+    env_file:
+      - .env
     depends_on:
       - mysql
     networks:

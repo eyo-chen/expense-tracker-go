@@ -21,9 +21,8 @@ import (
 
 func main() {
 	logger.Register()
-	if err := godotenv.Load(); err != nil {
-		logger.Fatal("Error loading .env file", "error", err)
-	}
+
+	initEnv()
 
 	logger.Info("Connecting to database...")
 	mysqlDB, err := newMysqlDB()
@@ -48,6 +47,17 @@ func main() {
 	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction, &usecase.Icon, &usecase.InitData)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
+	}
+}
+
+func initEnv() {
+	env := os.Getenv("GO_ENV")
+	if env == "development-docker" || env == "production" {
+		return
+	}
+
+	if err := godotenv.Load(); err != nil {
+		logger.Fatal("Error loading .env file", "error", err)
 	}
 }
 
