@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  expense-tracker-backend:
+    build:
+      context: .
+    image: expense-tracker-backend-image
+    container_name: expense-tracker-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GO_ENV=development-docker
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    networks:
+      - expense-tracker-network
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: expense-tracker
+    volumes:
+      - expense-tracker-volumes:/var/lib/mysql
+    networks:
+      - expense-tracker-network
+  
+  expense-tracker-frontend:
+    build: 
+      context: https://github.com/eyo-chen/expense-tracker.git#main
+      dockerfile: Dockerfile
+    image: expense-tracker-frontend-image
+    container_name: expense-tracker-frontend
+    environment:
+      - REACT_APP_API_PORT=8000
+    ports:
+      - "3000:3000"
+    networks:
+      - expense-tracker-network
+    depends_on:
+      - expense-tracker-backend
+
+volumes:
+  expense-tracker-volumes:
+
+networks:
+  expense-tracker-network:
