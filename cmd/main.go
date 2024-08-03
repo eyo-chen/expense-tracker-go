@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -12,11 +13,13 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/router"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -40,6 +43,13 @@ func main() {
 	if err := applyDataMigrations(mysqlDB); err != nil {
 		logger.Fatal("Unable to apply data migrations", "error", err)
 	}
+
+	logger.Info("Connecting to redis...")
+	redisClient, err := newRedisClient()
+	if err != nil {
+		logger.Fatal("Unable to connect to redis", "error", err)
+	}
+	defer redisClient.Close()
 
 	// Setup model, usecase, and handler
 	model := model.New(mysqlDB)
@@ -81,6 +91,23 @@ func newMysqlDB() (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func newRedisClient() (*redis.Client, error) {
+	config := map[string]string{
+		"host": os.Getenv("REDIS_HOST"),
+		"port": os.Getenv("REDIS_PORT"),
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", config["host"], config["port"]),
+	})
+
+	if _, err := client.Ping(context.Background()).Result(); err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
 
 func initServe(handler *handler.Handler) error {
