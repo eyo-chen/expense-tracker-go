@@ -23,6 +23,7 @@ var (
 
 type MainCategSuite struct {
 	suite.Suite
+	dk             *dockerutil.DockerUtil
 	db             *sql.DB
 	migrate        *migrate.Migrate
 	f              *factory
@@ -36,9 +37,11 @@ func TestMainCategSuite(t *testing.T) {
 }
 
 func (s *MainCategSuite) SetupSuite() {
-	port := dockerutil.RunDocker()
-	db, migrate := testutil.ConnToDB(port)
+	dk := dockerutil.RunDocker(dockerutil.ImageMySQL)
+	db, migrate := testutil.ConnToDB(dk.Port)
 	logger.Register()
+
+	s.dk = dk
 	s.db = db
 	s.migrate = migrate
 	s.mainCategModel = NewMainCategModel(db)
@@ -51,7 +54,7 @@ func (s *MainCategSuite) SetupSuite() {
 func (s *MainCategSuite) TearDownSuite() {
 	s.db.Close()
 	s.migrate.Close()
-	dockerutil.PurgeDocker()
+	s.dk.PurgeDocker()
 }
 
 func (s *MainCategSuite) SetupTest() {

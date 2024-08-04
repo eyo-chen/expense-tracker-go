@@ -16,6 +16,7 @@ import (
 
 type IconSuite struct {
 	suite.Suite
+	dk      *dockerutil.DockerUtil
 	db      *sql.DB
 	migrate *migrate.Migrate
 	model   interfaces.IconModel
@@ -27,9 +28,11 @@ func TestIconSuite(t *testing.T) {
 }
 
 func (s *IconSuite) SetupSuite() {
-	port := dockerutil.RunDocker()
-	db, migrate := testutil.ConnToDB(port)
+	dk := dockerutil.RunDocker(dockerutil.ImageMySQL)
+	db, migrate := testutil.ConnToDB(dk.Port)
 	logger.Register()
+
+	s.dk = dk
 	s.model = NewIconModel(db)
 	s.db = db
 	s.migrate = migrate
@@ -39,7 +42,7 @@ func (s *IconSuite) SetupSuite() {
 func (s *IconSuite) TearDownSuite() {
 	s.db.Close()
 	s.migrate.Close()
-	dockerutil.PurgeDocker()
+	s.dk.PurgeDocker()
 }
 
 func (s *IconSuite) SetupTest() {

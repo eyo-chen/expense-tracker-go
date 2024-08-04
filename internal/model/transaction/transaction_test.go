@@ -27,6 +27,7 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
+	dk               *dockerutil.DockerUtil
 	db               *sql.DB
 	migrate          *migrate.Migrate
 	transactionModel *transaction.TransactionModel
@@ -38,10 +39,11 @@ func TestTransactionSuite(t *testing.T) {
 }
 
 func (s *TransactionSuite) SetupSuite() {
-	port := dockerutil.RunDocker()
-	db, migrate := testutil.ConnToDB(port)
+	dk := dockerutil.RunDocker(dockerutil.ImageMySQL)
+	db, migrate := testutil.ConnToDB(dk.Port)
 	logger.Register()
 
+	s.dk = dk
 	s.db = db
 	s.migrate = migrate
 	s.transactionModel = transaction.NewTransactionModel(s.db)
@@ -51,7 +53,7 @@ func (s *TransactionSuite) SetupSuite() {
 func (s *TransactionSuite) TearDownSuite() {
 	s.db.Close()
 	s.migrate.Close()
-	dockerutil.PurgeDocker()
+	s.dk.PurgeDocker()
 }
 
 func (s *TransactionSuite) SetupTest() {

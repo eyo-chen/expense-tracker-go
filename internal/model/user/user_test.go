@@ -22,6 +22,7 @@ var (
 
 type UserSuite struct {
 	suite.Suite
+	dk      *dockerutil.DockerUtil
 	db      *sql.DB
 	migrate *migrate.Migrate
 	f       *efactory.Factory[User]
@@ -33,11 +34,13 @@ func TestUserSuite(t *testing.T) {
 }
 
 func (s *UserSuite) SetupSuite() {
-	port := dockerutil.RunDocker()
-	db, migrate := testutil.ConnToDB(port)
-	s.model = NewUserModel(db)
+	dk := dockerutil.RunDocker(dockerutil.ImageMySQL)
+	db, migrate := testutil.ConnToDB(dk.Port)
 	logger.Register()
+
+	s.dk = dk
 	s.db = db
+	s.model = NewUserModel(db)
 	s.migrate = migrate
 	s.f = efactory.New(User{}).SetConfig(efactory.Config[User]{
 		DB: &esql.Config{
@@ -49,7 +52,7 @@ func (s *UserSuite) SetupSuite() {
 func (s *UserSuite) TearDownSuite() {
 	s.db.Close()
 	s.migrate.Close()
-	dockerutil.PurgeDocker()
+	s.dk.PurgeDocker()
 }
 
 func (s *UserSuite) SetupTest() {
