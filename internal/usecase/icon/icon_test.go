@@ -22,7 +22,7 @@ func TestIconSuite(t *testing.T) {
 
 func (s *IconSuite) SetupTest() {
 	s.mockIconModel = mocks.NewIconModel(s.T())
-	s.iconUC = NewIconUC(s.mockIconModel)
+	s.iconUC = NewIconUC(s.mockIconModel, nil)
 }
 
 func (s *IconSuite) TearDownTest() {
