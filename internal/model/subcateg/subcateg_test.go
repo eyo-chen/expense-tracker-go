@@ -21,6 +21,7 @@ var (
 
 type SubCategSuite struct {
 	suite.Suite
+	dk            *dockerutil.Container
 	subCategModel interfaces.SubCategModel
 	db            *sql.DB
 	migrate       *migrate.Migrate
@@ -32,8 +33,8 @@ func TestSubCategSuite(t *testing.T) {
 }
 
 func (s *SubCategSuite) SetupSuite() {
-	port := dockerutil.RunDocker()
-	db, migrate := testutil.ConnToDB(port)
+	s.dk = dockerutil.RunDocker(dockerutil.ImageMySQL)
+	db, migrate := testutil.ConnToDB(s.dk.Port)
 	logger.Register()
 	s.db = db
 	s.subCategModel = NewSubCategModel(db)
@@ -44,7 +45,7 @@ func (s *SubCategSuite) SetupSuite() {
 func (s *SubCategSuite) TearDownSuite() {
 	s.db.Close()
 	s.migrate.Close()
-	dockerutil.PurgeDocker()
+	s.dk.PurgeDocker()
 }
 
 func (s *SubCategSuite) SetupTest() {
