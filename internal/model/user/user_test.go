@@ -10,21 +10,21 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db/esql"
+	"github.com/eyo-chen/gofacto"
+	"github.com/eyo-chen/gofacto/db/mysqlf"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
 )
 
 var (
-	mockCtx = context.Background()
+	mockCTX = context.Background()
 )
 
 type UserSuite struct {
 	suite.Suite
 	db      *sql.DB
 	migrate *migrate.Migrate
-	f       *efactory.Factory[User]
+	f       *gofacto.Factory[User]
 	model   interfaces.UserModel
 }
 
@@ -39,11 +39,7 @@ func (s *UserSuite) SetupSuite() {
 	logger.Register()
 	s.db = db
 	s.migrate = migrate
-	s.f = efactory.New(User{}).SetConfig(efactory.Config[User]{
-		DB: &esql.Config{
-			DB: db,
-		},
-	})
+	s.f = gofacto.New(User{}).WithDB(mysqlf.NewConfig(db))
 }
 
 func (s *UserSuite) TearDownSuite() {
@@ -98,7 +94,7 @@ func (s *UserSuite) TestFindByEmail() {
 }
 
 func findByEmail_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
-	users, err := s.f.BuildList(2).Insert()
+	users, err := s.f.BuildList(mockCTX, 2).Insert()
 	s.Require().NoError(err, desc)
 
 	expResult := domain.User{
@@ -114,7 +110,7 @@ func findByEmail_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
 }
 
 func findByEmail_NotFound_ReturnError(s *UserSuite, desc string) {
-	_, err := s.f.BuildList(2).Insert()
+	_, err := s.f.BuildList(mockCTX, 2).Insert()
 	s.Require().NoError(err, desc)
 
 	_, err = s.model.FindByEmail("notfound")
@@ -136,7 +132,7 @@ func (s *UserSuite) TestGetInfo() {
 }
 
 func getInfo_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
-	users, err := s.f.BuildList(2).Insert()
+	users, err := s.f.BuildList(mockCTX, 2).Insert()
 	s.Require().NoError(err, desc)
 
 	expResult := domain.User{
@@ -152,7 +148,7 @@ func getInfo_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
 }
 
 func getInfo_NotFound_ReturnError(s *UserSuite, desc string) {
-	_, err := s.f.BuildList(2).Insert()
+	_, err := s.f.BuildList(mockCTX, 2).Insert()
 	s.Require().NoError(err, desc)
 
 	user, err := s.model.GetInfo(999)
@@ -174,7 +170,7 @@ func (s *UserSuite) TestUpdate() {
 
 func update_IsSetInitCategory_UpdateSuccessfully(s *UserSuite, desc string) {
 	// prepare mock data
-	users, err := s.f.BuildList(2).SetZero(0, "IsSetInitCategory").SetZero(1, "IsSetInitCategory").Insert()
+	users, err := s.f.BuildList(mockCTX, 2).SetZero(0, "IsSetInitCategory").SetZero(1, "IsSetInitCategory").Insert()
 	s.Require().NoError(err, desc)
 
 	// prepare update option
@@ -182,7 +178,7 @@ func update_IsSetInitCategory_UpdateSuccessfully(s *UserSuite, desc string) {
 	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
 
 	// action
-	err = s.model.Update(mockCtx, users[0].ID, opt)
+	err = s.model.Update(mockCTX, users[0].ID, opt)
 	s.Require().NoError(err, desc)
 
 	// check if user is updated
