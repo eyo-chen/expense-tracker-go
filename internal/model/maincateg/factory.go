@@ -1,20 +1,22 @@
 package maincateg
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db/esql"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/utils"
+	"github.com/eyo-chen/gofacto"
+	"github.com/eyo-chen/gofacto/db/mysqlf"
+	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type factory struct {
-	MainCateg *efactory.Factory[MainCateg]
-	User      *efactory.Factory[user.User]
-	Icon      *efactory.Factory[icon.Icon]
+	MainCateg *gofacto.Factory[MainCateg]
+	User      *gofacto.Factory[user.User]
+	Icon      *gofacto.Factory[icon.Icon]
 }
 
 func setIncomeType(m *MainCateg) {
@@ -26,37 +28,24 @@ func setExpenseType(m *MainCateg) {
 }
 
 func newFactory(db *sql.DB) *factory {
-	categConfig := efactory.Config[MainCateg]{
-		DB:          &esql.Config{DB: db},
-		StorageName: "main_categories",
-		BluePrint:   BluePrint,
-	}
-
-	userConfig := efactory.Config[user.User]{
-		DB: &esql.Config{DB: db},
-	}
-
-	iconConfig := efactory.Config[icon.Icon]{
-		DB: &esql.Config{DB: db},
-	}
-
 	return &factory{
-		MainCateg: efactory.New(MainCateg{}).SetConfig(categConfig).
-			SetTrait("income", setIncomeType).
-			SetTrait("expense", setExpenseType),
-		User: efactory.New(user.User{}).SetConfig(userConfig),
-		Icon: efactory.New(icon.Icon{}).SetConfig(iconConfig),
+		MainCateg: gofacto.New(MainCateg{}).WithDB(mysqlf.NewConfig(db)).
+			WithStorageName("main_categories").
+			WithTrait("income", setIncomeType).
+			WithTrait("expense", setExpenseType),
+		User: gofacto.New(user.User{}).WithDB(mysqlf.NewConfig(db)),
+		Icon: gofacto.New(icon.Icon{}).WithDB(mysqlf.NewConfig(db)),
 	}
 }
 
 // InsertUsersAndIcons inserts many users and icons
-func (mf *factory) InsertUsersAndIcons(userI int, iconI int) ([]user.User, []icon.Icon, error) {
-	users, err := mf.User.BuildList(userI).Insert()
+func (mf *factory) InsertUsersAndIcons(ctx context.Context, userI int, iconI int) ([]user.User, []icon.Icon, error) {
+	users, err := mf.User.BuildList(ctx, userI).Insert()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	icons, err := mf.Icon.BuildList(iconI).Insert()
+	icons, err := mf.Icon.BuildList(ctx, iconI).Insert()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -65,25 +54,31 @@ func (mf *factory) InsertUsersAndIcons(userI int, iconI int) ([]user.User, []ico
 }
 
 // InsertMainCateg inserts a main category
-func (mf *factory) InsertMainCategWithAss(ow MainCateg) (MainCateg, user.User, icon.Icon, error) {
+func (mf *factory) InsertMainCategWithAss(ctx context.Context, ow MainCateg) (MainCateg, user.User, icon.Icon, error) {
 	user := &user.User{}
 	icon := &icon.Icon{}
 
-	maincateg, _, err := mf.MainCateg.Build().Overwrite(ow).WithOne(user).WithOne(icon).InsertWithAss()
+	maincateg, err := mf.MainCateg.Build(ctx).
+		Overwrite(MainCateg{Type: domain.TransactionTypeIncome.ToModelValue()}). // set default type to income
+		Overwrite(ow).
+		WithOne(user).
+		WithOne(icon).
+		Insert()
 
 	return maincateg, *user, *icon, err
 }
 
 // InsertMainCategList inserts many main categories with associations and traits
-func (mf *factory) InsertMainCategListWithAss(i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, []icon.Icon, error) {
-	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](iconIdx, nil)
-	userPtrList := utils.CvtToAnysWithOW[user.User](userIdx, nil)
+func (mf *factory) InsertMainCategListWithAss(ctx context.Context, i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, []icon.Icon, error) {
+	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](iconIdx, nil)
+	userPtrList := typeconv.ToAnysWithOW[user.User](userIdx, nil)
 
-	maincategList, _, err := mf.MainCateg.BuildList(i).
-		WithTraits(traitName...).
-		WithMany(userPtrList...).
-		WithMany(iconPtrList...).
-		InsertWithAss()
+	maincategList, err := mf.MainCateg.BuildList(ctx, i).
+		Overwrite(MainCateg{Type: domain.TransactionTypeIncome.ToModelValue()}). // set default type to income
+		SetTraits(traitName...).
+		WithMany(userPtrList).
+		WithMany(iconPtrList).
+		Insert()
 	if err != nil {
 		return nil, nil, nil, err
 	}
