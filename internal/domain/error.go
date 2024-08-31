@@ -59,4 +59,7 @@ var (
 
 	// sort direction type not valid error
 	ErrSortDirTypeNotValid = errors.New("sort direction type not valid")
+
+	// cache miss error
+	ErrCacheMiss = errors.New("cache miss")
 )
