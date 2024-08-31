@@ -97,7 +97,7 @@ func (s *SubCategSuite) TestCreate() {
 
 func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	user, maincateg, err := s.f.InsertUserAndMaincateg()
+	user, maincateg, err := s.f.InsertUserAndMaincateg(mockCTX)
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -121,7 +121,7 @@ func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
 
 func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string) {
 	// prepare data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{2, 2})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 2, []int{2, 2})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -154,7 +154,7 @@ func (s *SubCategSuite) TestGetByMainCategID() {
 
 func getByMainCategID_FindNoData_ReturnEmpty(s *SubCategSuite, desc string) {
 	// prepare data
-	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{2})
 	s.Require().NoError(err, desc)
 
 	// expected result
@@ -168,7 +168,7 @@ func getByMainCategID_FindNoData_ReturnEmpty(s *SubCategSuite, desc string) {
 
 func getByMainCategID_WithOneMainCateg_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
 	// prepare data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{2})
 	s.Require().NoError(err, desc)
 
 	// expected result
@@ -194,7 +194,7 @@ func getByMainCategID_WithOneMainCateg_ReturnCorrectSubCategs(s *SubCategSuite, 
 
 func getByMainCategID_WithManyMainCategs_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
 	// prepare data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 3, []int{3, 2, 1})
 	s.Require().NoError(err, desc)
 
 	// expected result
@@ -215,13 +215,13 @@ func getByMainCategID_WithManyMainCategs_ReturnCorrectSubCategs(s *SubCategSuite
 
 func getByMainCategID_WithManyUsers_ReturnCorrectSubCategs(s *SubCategSuite, desc string) {
 	// prepare data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 3, []int{3, 2, 1})
 	s.Require().NoError(err, desc)
 
 	// prepare more data with different user
-	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, desc)
-	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, desc)
 
 	// expected result
@@ -256,7 +256,7 @@ func (s *SubCategSuite) TestUpdate() {
 
 func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -283,7 +283,7 @@ func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 
 func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{1, 1})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 2, []int{1, 1})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -319,7 +319,7 @@ func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc stri
 
 func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 	// prepare existing data
-	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(2, []int{2, 2})
+	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 2, []int{2, 2})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -338,13 +338,13 @@ func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 }
 
 func (s *SubCategSuite) TestDelete() {
-	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	mainCategIDToSubCategs, mainCategs, _, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 3, []int{3, 2, 1})
 	s.Require().NoError(err, "test delete")
 
 	// prepare more data with different user
-	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, "test delete")
-	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, "test delete")
 
 	mainCateg := mainCategs[0] // choose the first main category
@@ -419,7 +419,7 @@ func (s *SubCategSuite) TestGetByID() {
 
 func getByID_FindNoData_ReturnError(s *SubCategSuite, desc string) {
 	// prepare data
-	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 3, []int{3, 2, 1})
 	s.Require().NoError(err, desc)
 
 	mainCateg := mainCategs[0]
@@ -432,7 +432,7 @@ func getByID_FindNoData_ReturnError(s *SubCategSuite, desc string) {
 
 func getByID_WithOneData_ReturnCorrectData(s *SubCategSuite, desc string) {
 	// prepare data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, desc)
 
 	mainCateg := mainCategs[0]
@@ -452,7 +452,7 @@ func getByID_WithOneData_ReturnCorrectData(s *SubCategSuite, desc string) {
 
 func getByID_WithManyData_ReturnCorrectData(s *SubCategSuite, desc string) {
 	// prepare data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 3, []int{3, 2, 1})
 	s.Require().NoError(err, desc)
 
 	// prepare expected result
@@ -472,13 +472,13 @@ func getByID_WithManyData_ReturnCorrectData(s *SubCategSuite, desc string) {
 
 func getByID_WithManyUsers_ReturnCorrectData(s *SubCategSuite, desc string) {
 	// prepare data
-	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(3, []int{3, 2, 1})
+	mainCategIDToSubCategs, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 3, []int{3, 2, 1})
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, desc)
-	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{1})
+	_, _, _, err = s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{1})
 	s.Require().NoError(err, desc)
 
 	mainCateg := mainCategs[2]
@@ -513,7 +513,7 @@ func (s *SubCategSuite) TestCreateBatch() {
 
 func createBatch_InsertOneData_InsertSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	user, maincateg, err := s.f.InsertUserAndMaincateg()
+	user, maincateg, err := s.f.InsertUserAndMaincateg(mockCTX)
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -538,7 +538,7 @@ func createBatch_InsertOneData_InsertSuccessfully(s *SubCategSuite, desc string)
 
 func createBatch_InsertManyData_InsertSuccessfully(s *SubCategSuite, desc string) {
 	// prepare existing data
-	user, maincateg, err := s.f.InsertUserAndMaincateg()
+	user, maincateg, err := s.f.InsertUserAndMaincateg(mockCTX)
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -571,7 +571,7 @@ func createBatch_InsertManyData_InsertSuccessfully(s *SubCategSuite, desc string
 
 func createBatch_InsertDuplicateNameData_ReturnError(s *SubCategSuite, desc string) {
 	// prepare existing data
-	user, maincateg, err := s.f.InsertUserAndMaincateg()
+	user, maincateg, err := s.f.InsertUserAndMaincateg(mockCTX)
 	s.Require().NoError(err, desc)
 
 	// prepare input data
@@ -596,7 +596,7 @@ func createBatch_InsertDuplicateNameData_ReturnError(s *SubCategSuite, desc stri
 
 func createBatch_AlreadyExistData_ReturnError(s *SubCategSuite, desc string) {
 	// prepare existing data
-	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(1, []int{2})
+	_, mainCategs, user, err := s.f.InsertSubcategsWithOneOrManyMainCateg(mockCTX, 1, []int{2})
 	s.Require().NoError(err, desc)
 
 	// prepare input data
