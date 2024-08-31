@@ -1,6 +1,7 @@
 package icon
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"testing"
@@ -12,6 +13,10 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/golang-migrate/migrate"
 	"github.com/stretchr/testify/suite"
+)
+
+var (
+	mockCTX = context.Background()
 )
 
 type IconSuite struct {
@@ -77,7 +82,7 @@ func (s *IconSuite) TestList() {
 }
 
 func list_WithIcons_ReturnAll(s *IconSuite, desc string) {
-	icons, err := s.f.InsertMany(2)
+	icons, err := s.f.InsertMany(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
 	expRes := []domain.Icon{
@@ -116,7 +121,7 @@ func (s *IconSuite) TestGetByID() {
 }
 
 func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
-	icons, err := s.f.InsertMany(2)
+	icons, err := s.f.InsertMany(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
 	expRes := domain.Icon{
@@ -130,7 +135,7 @@ func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
 }
 
 func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
-	_, err := s.f.InsertMany(2)
+	_, err := s.f.InsertMany(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
 	expRes := domain.Icon{}
@@ -154,7 +159,7 @@ func (s *IconSuite) TestGetByIDs() {
 }
 
 func getByIDs_WithIcon_ReturnIcons(s *IconSuite, desc string) {
-	icons, err := s.f.InsertMany(5)
+	icons, err := s.f.InsertMany(mockCTX, 5)
 	s.Require().NoError(err, desc)
 
 	expRes := map[int64]domain.Icon{
@@ -175,7 +180,7 @@ func getByIDs_WithIcon_ReturnIcons(s *IconSuite, desc string) {
 }
 
 func getByIDs_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
-	_, err := s.f.InsertMany(5)
+	_, err := s.f.InsertMany(mockCTX, 5)
 	s.Require().NoError(err, desc)
 
 	ids := []int64{999}
