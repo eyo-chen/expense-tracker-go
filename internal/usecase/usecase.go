@@ -24,13 +24,14 @@ func New(u interfaces.UserModel,
 	s interfaces.SubCategModel,
 	i interfaces.IconModel,
 	t interfaces.TransactionModel,
+	r interfaces.RedisService,
 ) *Usecase {
 	return &Usecase{
 		User:        *user.NewUserUC(u),
 		MainCateg:   *maincateg.NewMainCategUC(m, i),
 		SubCateg:    *subcateg.NewSubCategUC(s, m),
 		Transaction: *transaction.NewTransactionUC(t, m, s),
-		Icon:        *icon.NewIconUC(i),
+		Icon:        *icon.NewIconUC(i, r),
 		InitData:    *initdata.NewInitDataUC(i, m, s, u),
 	}
 }

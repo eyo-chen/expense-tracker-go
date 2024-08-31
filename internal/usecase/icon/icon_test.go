@@ -12,8 +12,9 @@ import (
 
 type IconSuite struct {
 	suite.Suite
-	iconUC        interfaces.IconUC
-	mockIconModel *mocks.IconModel
+	iconUC           interfaces.IconUC
+	mockIconModel    *mocks.IconModel
+	mockRedisService *mocks.RedisService
 }
 
 func TestIconSuite(t *testing.T) {
@@ -22,7 +23,8 @@ func TestIconSuite(t *testing.T) {
 
 func (s *IconSuite) SetupTest() {
 	s.mockIconModel = mocks.NewIconModel(s.T())
-	s.iconUC = NewIconUC(s.mockIconModel)
+	s.mockRedisService = mocks.NewRedisService(s.T())
+	s.iconUC = NewIconUC(s.mockIconModel, s.mockRedisService)
 }
 
 func (s *IconSuite) TearDownTest() {
