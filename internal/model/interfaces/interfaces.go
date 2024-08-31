@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"context"
+	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
@@ -112,4 +113,16 @@ type TransactionModel interface {
 
 	// GetMonthlyData returns monthly data.
 	GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error)
+}
+
+// RedisService is the interface that wraps the basic methods for redis service.
+type RedisService interface {
+	// GetByFunc returns a value by key. If the value is not found, it will call the function to get the value and cache it.
+	GetByFunc(ctx context.Context, key string, ttl time.Duration, f func() (string, error)) (string, error)
+
+	// GetDel returns a value by key and delete it.
+	GetDel(ctx context.Context, key string) (string, error)
+
+	// Set sets a value by key.
+	Set(ctx context.Context, key string, value string, ttl time.Duration) error
 }
