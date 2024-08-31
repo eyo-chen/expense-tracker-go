@@ -8,7 +8,6 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/utils"
 	"github.com/eyo-chen/gofacto"
 	"github.com/eyo-chen/gofacto/db/mysqlf"
 	"github.com/eyo-chen/gofacto/typeconv"
@@ -90,8 +89,8 @@ func (mf *factory) InsertMainCategListWithAss(ctx context.Context, i int, userId
 		return nil, nil, nil, err
 	}
 
-	icons := utils.CvtToT[icon.Icon](iconPtrList)
-	users := utils.CvtToT[user.User](userPtrList)
+	icons := typeconv.ToT[icon.Icon](iconPtrList)
+	users := typeconv.ToT[user.User](userPtrList)
 	return maincategList, users, icons, nil
 }
 
