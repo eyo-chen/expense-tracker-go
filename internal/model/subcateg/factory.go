@@ -9,9 +9,9 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/utils"
 	"github.com/eyo-chen/gofacto"
 	"github.com/eyo-chen/gofacto/db/mysqlf"
+	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type factory struct {
@@ -65,7 +65,7 @@ func (f *factory) InsertSubcategsWithOneOrManyMainCateg(ctx context.Context, mai
 
 	// prepare associations data
 	u := user.User{}
-	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](maincategIndex, nil)
+	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](maincategIndex, nil)
 
 	// insert main categories
 	ms, err := f.maincateg.BuildList(ctx, maincategIndex).Overwrites(maincategOWs...).WithOne(&u).WithMany(iconPtrList).Insert()

@@ -8,9 +8,9 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/utils"
 	"github.com/eyo-chen/gofacto"
 	"github.com/eyo-chen/gofacto/db/mysqlf"
+	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type TransactionFactory struct {
@@ -54,7 +54,7 @@ func (tf *TransactionFactory) PrepareUserMainAndSubCateg(ctx context.Context) (u
 func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context, i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, []icon.Icon, error) {
 	u := user.User{}
 
-	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](i, nil)
+	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](i, nil)
 
 	maincategList, err := tf.maincateg.BuildList(ctx, i).WithOne(&u).WithMany(iconPtrList).Insert()
 	if err != nil {
@@ -85,7 +85,7 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context,
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}
 
-	iconList := utils.CvtToT[icon.Icon](iconPtrList)
+	iconList := typeconv.ToT[icon.Icon](iconPtrList)
 	return transList, u, maincategList, subcategList, iconList, nil
 }
 
@@ -93,13 +93,13 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context,
 func (tf *TransactionFactory) InsertMainCategList(ctx context.Context, i int, ow ...maincateg.MainCateg) ([]maincateg.MainCateg, user.User, []icon.Icon, error) {
 	u := user.User{}
 
-	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](i, nil)
+	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](i, nil)
 	maincategList, err := tf.maincateg.BuildList(ctx, i).Overwrites(ow...).WithOne(&u).WithMany(iconPtrList).Insert()
 	if err != nil {
 		return nil, user.User{}, []icon.Icon{}, err
 	}
 
-	iconList := utils.CvtToT[icon.Icon](iconPtrList)
+	iconList := typeconv.ToT[icon.Icon](iconPtrList)
 	return maincategList, u, iconList, nil
 }
 
