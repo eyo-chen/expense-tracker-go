@@ -3,6 +3,7 @@ package maincateg
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
@@ -27,12 +28,20 @@ func setExpenseType(m *MainCateg) {
 	m.Type = domain.TransactionTypeExpense.ToModelValue()
 }
 
+func Blueprint(i int) MainCateg {
+	return MainCateg{
+		Name: fmt.Sprintf("test%d", i),
+		Type: domain.TransactionTypeIncome.ToModelValue(),
+	}
+}
+
 func newFactory(db *sql.DB) *factory {
 	return &factory{
 		MainCateg: gofacto.New(MainCateg{}).WithDB(mysqlf.NewConfig(db)).
 			WithStorageName("main_categories").
 			WithTrait("income", setIncomeType).
-			WithTrait("expense", setExpenseType),
+			WithTrait("expense", setExpenseType).
+			WithBlueprint(Blueprint),
 		User: gofacto.New(user.User{}).WithDB(mysqlf.NewConfig(db)),
 		Icon: gofacto.New(icon.Icon{}).WithDB(mysqlf.NewConfig(db)),
 	}
@@ -59,7 +68,6 @@ func (mf *factory) InsertMainCategWithAss(ctx context.Context, ow MainCateg) (Ma
 	icon := &icon.Icon{}
 
 	maincateg, err := mf.MainCateg.Build(ctx).
-		Overwrite(MainCateg{Type: domain.TransactionTypeIncome.ToModelValue()}). // set default type to income
 		Overwrite(ow).
 		WithOne(user).
 		WithOne(icon).
@@ -74,7 +82,6 @@ func (mf *factory) InsertMainCategListWithAss(ctx context.Context, i int, userId
 	userPtrList := typeconv.ToAnysWithOW[user.User](userIdx, nil)
 
 	maincategList, err := mf.MainCateg.BuildList(ctx, i).
-		Overwrite(MainCateg{Type: domain.TransactionTypeIncome.ToModelValue()}). // set default type to income
 		SetTraits(traitName...).
 		WithMany(userPtrList).
 		WithMany(iconPtrList).

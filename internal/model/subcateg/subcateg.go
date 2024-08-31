@@ -25,8 +25,8 @@ func NewSubCategModel(db *sql.DB) *SubCategModel {
 type SubCateg struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
-	UserID      int64  `json:"user_id" efactory:"User"`
-	MainCategID int64  `json:"main_category_id" efactory:"MainCateg,main_categories" esql:"main_category_id"`
+	UserID      int64  `json:"user_id" gofacto:"foreignKey,struct:User"`
+	MainCategID int64  `json:"main_category_id" gofacto:"foreignKey,struct:MainCateg,table:main_categories" mysqlf:"main_category_id"`
 }
 
 func (s *SubCategModel) Create(categ *domain.SubCateg, userID int64) error {

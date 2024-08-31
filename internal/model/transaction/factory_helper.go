@@ -1,7 +1,6 @@
 package transaction
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -17,7 +16,7 @@ var (
 	mockTimeNow = time.Unix(1629446406, 0).Truncate(24 * time.Hour).In(mockLoc)
 )
 
-func BluePrint(i int, last Transaction) Transaction {
+func BluePrint(i int) Transaction {
 	return Transaction{
 		Type:  domain.TransactionTypeIncome.ToModelValue(),
 		Price: float64(i*10.0 + 1.0),
@@ -26,22 +25,7 @@ func BluePrint(i int, last Transaction) Transaction {
 	}
 }
 
-func Inserter(db *sql.DB, t Transaction) (Transaction, error) {
-	stmt := `INSERT INTO transactions (user_id, type, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?, ?)`
-
-	res, err := db.Exec(stmt, t.UserID, t.Type, t.MainCategID, t.SubCategID, t.Price, t.Note, t.Date)
-	if err != nil {
-		return Transaction{}, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return Transaction{}, err
-	}
-
-	t.ID = id
-	return t, nil
-}
+// GetAll_GenExpResult generates expected transactions
 
 func GetAll_GenExpResult(ts []Transaction, u user.User, ms []maincateg.MainCateg, ss []subcateg.SubCateg, is []icon.Icon, indexList ...int) []domain.Transaction {
 	expResult := make([]domain.Transaction, 0, len(indexList))

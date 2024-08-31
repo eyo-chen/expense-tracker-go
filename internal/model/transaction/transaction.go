@@ -25,9 +25,9 @@ type TransactionModel struct {
 type Transaction struct {
 	ID          int64
 	Type        string
-	UserID      int64 `efactory:"User"`
-	MainCategID int64 `efactory:"MainCateg,main_categories" esql:"main_category_id"`
-	SubCategID  int64 `efactory:"SubCateg,sub_categories" esql:"sub_category_id"`
+	UserID      int64 `gofacto:"foreignKey,struct:User"`
+	MainCategID int64 `gofacto:"foreignKey,struct:MainCateg,table:main_categories" mysqlf:"main_category_id"`
+	SubCategID  int64 `gofacto:"foreignKey,struct:SubCateg,table:sub_categories" mysqlf:"sub_category_id"`
 	Price       float64
 	Note        string
 	Date        time.Time
