@@ -1,6 +1,7 @@
 package subcateg
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
@@ -8,39 +9,29 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db/esql"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/utils"
+	"github.com/eyo-chen/gofacto"
+	"github.com/eyo-chen/gofacto/db/mysqlf"
+	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type factory struct {
-	subCateg  *efactory.Factory[SubCateg]
-	maincateg *efactory.Factory[maincateg.MainCateg]
+	subCateg  *gofacto.Factory[SubCateg]
+	maincateg *gofacto.Factory[maincateg.MainCateg]
 }
 
 func newFactory(db *sql.DB) *factory {
-	subcategConfig := efactory.Config[SubCateg]{
-		DB:          &esql.Config{DB: db},
-		StorageName: "sub_categories",
-	}
-
-	maincategConfig := efactory.Config[maincateg.MainCateg]{
-		DB:          &esql.Config{DB: db},
-		StorageName: "main_categories",
-	}
-
 	return &factory{
-		subCateg:  efactory.New(SubCateg{}).SetConfig(subcategConfig),
-		maincateg: efactory.New(maincateg.MainCateg{}).SetConfig(maincategConfig),
+		subCateg:  gofacto.New(SubCateg{}).WithDB(mysqlf.NewConfig(db)).WithStorageName("sub_categories"),
+		maincateg: gofacto.New(maincateg.MainCateg{}).WithDB(mysqlf.NewConfig(db)).WithStorageName("main_categories"),
 	}
 }
 
 // InsertUserAndMaincateg inserts one user and one main category.
-func (f *factory) InsertUserAndMaincateg() (user.User, maincateg.MainCateg, error) {
+func (f *factory) InsertUserAndMaincateg(ctx context.Context) (user.User, maincateg.MainCateg, error) {
 	u := user.User{}
 	ow := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue()}
 
-	m, _, err := f.maincateg.Build().WithOne(&u).WithOne(&icon.Icon{}).Overwrite(ow).InsertWithAss()
+	m, err := f.maincateg.Build(ctx).WithOne(&u).WithOne(&icon.Icon{}).Overwrite(ow).Insert()
 	if err != nil {
 		return user.User{}, maincateg.MainCateg{}, err
 	}
@@ -51,7 +42,7 @@ func (f *factory) InsertUserAndMaincateg() (user.User, maincateg.MainCateg, erro
 // InsertSubcategsWithOneOrManyMainCateg inserts n subcategories with one or many main categories and one user.
 // The maincategIndex is the number of main categories to insert.
 // The subcategIndexes is the number of subcategories to insert for each main category.
-func (f *factory) InsertSubcategsWithOneOrManyMainCateg(maincategIndex int, subcategIndexes []int, ows ...maincateg.MainCateg) (map[int64][]SubCateg, []maincateg.MainCateg, user.User, error) {
+func (f *factory) InsertSubcategsWithOneOrManyMainCateg(ctx context.Context, maincategIndex int, subcategIndexes []int, ows ...maincateg.MainCateg) (map[int64][]SubCateg, []maincateg.MainCateg, user.User, error) {
 	// validate input
 	// maincategIndex and subcategIndexes must have the same length
 	// because the value of subcategIndexes[i] is the number of subcategories to insert for the main category with index i.
@@ -74,10 +65,10 @@ func (f *factory) InsertSubcategsWithOneOrManyMainCateg(maincategIndex int, subc
 
 	// prepare associations data
 	u := user.User{}
-	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](maincategIndex, nil)
+	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](maincategIndex, nil)
 
 	// insert main categories
-	ms, _, err := f.maincateg.BuildList(maincategIndex).Overwrites(maincategOWs...).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
+	ms, err := f.maincateg.BuildList(ctx, maincategIndex).Overwrites(maincategOWs...).WithOne(&u).WithMany(iconPtrList).Insert()
 	if err != nil {
 		return nil, nil, user.User{}, err
 	}
@@ -96,7 +87,7 @@ func (f *factory) InsertSubcategsWithOneOrManyMainCateg(maincategIndex int, subc
 	result := map[int64][]SubCateg{}
 	for index, amount := range subcategIndexes {
 		ows := subcategOWs[index]
-		ss, err := f.subCateg.BuildList(amount).Overwrites(ows...).Insert()
+		ss, err := f.subCateg.BuildList(ctx, amount).Overwrites(ows...).Insert()
 		if err != nil {
 			return nil, nil, user.User{}, err
 		}

@@ -1,26 +1,25 @@
 package icon
 
 import (
+	"context"
 	"database/sql"
 
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db/esql"
+	"github.com/eyo-chen/gofacto"
+	"github.com/eyo-chen/gofacto/db/mysqlf"
 )
 
 type factory struct {
-	i *efactory.Factory[Icon]
+	i *gofacto.Factory[Icon]
 }
 
 func newFactory(db *sql.DB) *factory {
 	return &factory{
-		i: efactory.New(Icon{}).SetConfig(efactory.Config[Icon]{
-			DB: &esql.Config{DB: db},
-		}),
+		i: gofacto.New(Icon{}).WithDB(mysqlf.NewConfig(db)),
 	}
 }
 
-func (f *factory) InsertMany(i int, ow ...Icon) ([]Icon, error) {
-	return f.i.BuildList(i).Overwrites(ow...).Insert()
+func (f *factory) InsertMany(ctx context.Context, i int, ow ...Icon) ([]Icon, error) {
+	return f.i.BuildList(ctx, i).Overwrites(ow...).Insert()
 }
 
 func (f *factory) Reset() {

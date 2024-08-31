@@ -10,7 +10,7 @@ ifeq ($(with_frontend),true)
 endif
 
 mock:
-	docker run --rm -v "$(PWD)":/src -w /src vektra/mockery --all
+	docker run --rm -v "$(PWD)":/src -w /src vektra/mockery:v2.40.1 --all
 
 clean:
 	docker-compose -f $(DOCKER_COMPOSE_FILES) down

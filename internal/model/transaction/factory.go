@@ -1,55 +1,49 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/db/esql"
-	"github.com/eyo-chen/expense-tracker-go/pkg/testutil/efactory/utils"
+	"github.com/eyo-chen/gofacto"
+	"github.com/eyo-chen/gofacto/db/mysqlf"
+	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type TransactionFactory struct {
-	transaction *efactory.Factory[Transaction]
-	user        *efactory.Factory[user.User]
-	maincateg   *efactory.Factory[maincateg.MainCateg]
-	subcateg    *efactory.Factory[subcateg.SubCateg]
+	transaction *gofacto.Factory[Transaction]
+	user        *gofacto.Factory[user.User]
+	maincateg   *gofacto.Factory[maincateg.MainCateg]
+	subcateg    *gofacto.Factory[subcateg.SubCateg]
 }
 
 func NewTransactionFactory(db *sql.DB) *TransactionFactory {
 	return &TransactionFactory{
-		transaction: efactory.New(Transaction{}).SetConfig(efactory.Config[Transaction]{
-			DB:        &esql.Config{DB: db},
-			BluePrint: BluePrint,
-		}),
-		user: efactory.New(user.User{}).SetConfig(efactory.Config[user.User]{
-			DB: &esql.Config{DB: db},
-		}),
-		maincateg: efactory.New(maincateg.MainCateg{}).SetConfig(efactory.Config[maincateg.MainCateg]{
-			DB:          &esql.Config{DB: db},
-			StorageName: "main_categories",
-			BluePrint:   maincateg.BluePrint,
-		}),
-		subcateg: efactory.New(subcateg.SubCateg{}).SetConfig(efactory.Config[subcateg.SubCateg]{
-			DB:          &esql.Config{DB: db},
-			StorageName: "sub_categories",
-		}),
+		transaction: gofacto.New(Transaction{}).WithDB(mysqlf.NewConfig(db)).WithBlueprint(BluePrint),
+		user:        gofacto.New(user.User{}).WithDB(mysqlf.NewConfig(db)),
+		maincateg: gofacto.New(maincateg.MainCateg{}).
+			WithDB(mysqlf.NewConfig(db)).
+			WithStorageName("main_categories").
+			WithBlueprint(maincateg.Blueprint),
+		subcateg: gofacto.New(subcateg.SubCateg{}).
+			WithDB(mysqlf.NewConfig(db)).
+			WithStorageName("sub_categories"),
 	}
 }
 
-func (tf *TransactionFactory) PrepareUserMainAndSubCateg() (user.User, maincateg.MainCateg, subcateg.SubCateg, icon.Icon, error) {
+func (tf *TransactionFactory) PrepareUserMainAndSubCateg(ctx context.Context) (user.User, maincateg.MainCateg, subcateg.SubCateg, icon.Icon, error) {
 	u := user.User{}
 	i := icon.Icon{}
-	m, _, err := tf.maincateg.Build().WithOne(&u).WithOne(&i).InsertWithAss()
+	m, err := tf.maincateg.Build(ctx).WithOne(&u).WithOne(&i).Insert()
 	if err != nil {
 		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, icon.Icon{}, err
 	}
 
 	ow := subcateg.SubCateg{UserID: u.ID, MainCategID: m.ID}
-	s, err := tf.subcateg.Build().Overwrite(ow).Insert()
+	s, err := tf.subcateg.Build(ctx).Overwrite(ow).Insert()
 	if err != nil {
 		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, icon.Icon{}, err
 	}
@@ -57,12 +51,12 @@ func (tf *TransactionFactory) PrepareUserMainAndSubCateg() (user.User, maincateg
 	return u, m, s, i, nil
 }
 
-func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, []icon.Icon, error) {
+func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context, i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, []icon.Icon, error) {
 	u := user.User{}
 
-	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](i, nil)
+	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](i, nil)
 
-	maincategList, _, err := tf.maincateg.BuildList(i).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
+	maincategList, err := tf.maincateg.BuildList(ctx, i).WithOne(&u).WithMany(iconPtrList).Insert()
 	if err != nil {
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}
@@ -72,7 +66,7 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 		owSub = append(owSub, subcateg.SubCateg{UserID: m.UserID, MainCategID: m.ID})
 	}
 
-	subcategList, err := tf.subcateg.BuildList(i).Overwrites(owSub...).Insert()
+	subcategList, err := tf.subcateg.BuildList(ctx, i).Overwrites(owSub...).Insert()
 	if err != nil {
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}
@@ -86,35 +80,35 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(i int, ow ...Transac
 		})
 	}
 
-	transList, err := tf.transaction.BuildList(i).Overwrites(owTrans...).Overwrites(ow...).Insert()
+	transList, err := tf.transaction.BuildList(ctx, i).Overwrites(owTrans...).Overwrites(ow...).Insert()
 	if err != nil {
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
 	}
 
-	iconList := utils.CvtToT[icon.Icon](iconPtrList)
+	iconList := typeconv.ToT[icon.Icon](iconPtrList)
 	return transList, u, maincategList, subcategList, iconList, nil
 }
 
 // InsertMainCategList inserts a list of main categories
-func (tf *TransactionFactory) InsertMainCategList(i int, ow ...maincateg.MainCateg) ([]maincateg.MainCateg, user.User, []icon.Icon, error) {
+func (tf *TransactionFactory) InsertMainCategList(ctx context.Context, i int, ow ...maincateg.MainCateg) ([]maincateg.MainCateg, user.User, []icon.Icon, error) {
 	u := user.User{}
 
-	iconPtrList := utils.CvtToAnysWithOW[icon.Icon](i, nil)
-	maincategList, _, err := tf.maincateg.BuildList(i).Overwrites(ow...).WithOne(&u).WithMany(iconPtrList...).InsertWithAss()
+	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](i, nil)
+	maincategList, err := tf.maincateg.BuildList(ctx, i).Overwrites(ow...).WithOne(&u).WithMany(iconPtrList).Insert()
 	if err != nil {
 		return nil, user.User{}, []icon.Icon{}, err
 	}
 
-	iconList := utils.CvtToT[icon.Icon](iconPtrList)
+	iconList := typeconv.ToT[icon.Icon](iconPtrList)
 	return maincategList, u, iconList, nil
 }
 
 // InsertTransactionWithGivenUser inserts a transaction with a given user
 // it assumes that the user has main category
-func (tf *TransactionFactory) InsertTransactionWithGivenUser(i int, u user.User, ow ...Transaction) ([]Transaction, subcateg.SubCateg, error) {
+func (tf *TransactionFactory) InsertTransactionWithGivenUser(ctx context.Context, i int, u user.User, ow ...Transaction) ([]Transaction, subcateg.SubCateg, error) {
 	// create only one sub category
 	owSub := subcateg.SubCateg{UserID: u.ID, MainCategID: ow[0].MainCategID}
-	s, err := tf.subcateg.Build().Overwrite(owSub).Insert()
+	s, err := tf.subcateg.Build(ctx).Overwrite(owSub).Insert()
 	if err != nil {
 		return []Transaction{}, subcateg.SubCateg{}, err
 	}
@@ -127,7 +121,7 @@ func (tf *TransactionFactory) InsertTransactionWithGivenUser(i int, u user.User,
 		}
 	}
 
-	transList, err := tf.transaction.BuildList(i).Overwrites(owTrans...).Overwrites(ow...).Insert()
+	transList, err := tf.transaction.BuildList(ctx, i).Overwrites(owTrans...).Overwrites(ow...).Insert()
 	if err != nil {
 		return []Transaction{}, subcateg.SubCateg{}, err
 	}
