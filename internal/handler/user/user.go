@@ -107,6 +107,39 @@ func (h *Hlr) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Hlr) Token(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+	if err := jsonutil.ReadJson(w, r, &input); err != nil {
+		logger.Error("jsonutil.ReadJson failed", "package", "handler", "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+	if !v.Token(input.RefreshToken) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	token, err := h.User.Token(r.Context(), input.RefreshToken)
+	if err != nil {
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"access_token":  token.Access,
+		"refresh_token": token.Refresh,
+	}
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
+
 func (h *Hlr) GetInfo(w http.ResponseWriter, r *http.Request) {
 	userCtx := ctxutil.GetUser(r)
 	user, err := h.User.GetInfo(userCtx.ID)
