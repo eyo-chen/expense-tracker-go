@@ -16,7 +16,7 @@ type Hlr struct {
 	User interfaces.UserUC
 }
 
-func NewUserHandler(user interfaces.UserUC) *Hlr {
+func New(user interfaces.UserUC) *Hlr {
 	return &Hlr{User: user}
 }
 

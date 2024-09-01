@@ -37,7 +37,7 @@ func (s *UserSuite) SetupSuite() {
 
 func (s *UserSuite) SetupTest() {
 	s.mockUserUC = mocks.NewUserUC(s.T())
-	s.hlr = NewUserHandler(s.mockUserUC)
+	s.hlr = New(s.mockUserUC)
 }
 
 func (s *UserSuite) TearDownTest() {

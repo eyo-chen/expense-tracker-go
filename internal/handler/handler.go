@@ -27,7 +27,7 @@ func New(u interfaces.UserUC,
 	in interfaces.InitDataUC,
 ) *Handler {
 	return &Handler{
-		User:        *user.NewUserHandler(u),
+		User:        *user.New(u),
 		MainCateg:   *maincateg.NewMainCategHandler(m),
 		SubCateg:    *subcateg.NewSubCategHandler(s),
 		Transaction: *transaction.NewTransactionHandler(t),
