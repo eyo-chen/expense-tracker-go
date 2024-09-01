@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/eyo-chen/expense-tracker-go/internal/handler"
 	"github.com/eyo-chen/expense-tracker-go/internal/model"
+	redisservice "github.com/eyo-chen/expense-tracker-go/internal/model/redis"
 	"github.com/eyo-chen/expense-tracker-go/internal/router"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -17,6 +19,7 @@ import (
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -41,9 +44,17 @@ func main() {
 		logger.Fatal("Unable to apply data migrations", "error", err)
 	}
 
+	logger.Info("Connecting to redis...")
+	redisClient, err := newRedisClient()
+	if err != nil {
+		logger.Fatal("Unable to connect to redis", "error", err)
+	}
+	defer redisClient.Close()
+
 	// Setup model, usecase, and handler
 	model := model.New(mysqlDB)
-	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon, &model.Transaction)
+	redis := redisservice.New(redisClient)
+	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon, &model.Transaction, redis)
 	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction, &usecase.Icon, &usecase.InitData)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
@@ -149,4 +160,21 @@ func applyDataMigrations(db *sql.DB) error {
 	}
 
 	return nil
+}
+
+func newRedisClient() (*redis.Client, error) {
+	config := map[string]string{
+		"host": os.Getenv("REDIS_HOST"),
+		"port": os.Getenv("REDIS_PORT"),
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", config["host"], config["port"]),
+	})
+
+	if _, err := client.Ping(context.Background()).Result(); err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }

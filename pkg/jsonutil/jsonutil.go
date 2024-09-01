@@ -103,3 +103,24 @@ func ReadID(r *http.Request) (int64, error) {
 
 	return id, nil
 }
+
+// CvtToJSON converts any type to JSON string
+func CvtToJSON[T any](data T) (string, error) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonData), nil
+}
+
+// CvtFromJSON converts JSON string to any type
+func CvtFromJSON[T any](jsonStr string) (T, error) {
+	var data T
+	err := json.Unmarshal([]byte(jsonStr), &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
