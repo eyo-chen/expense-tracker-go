@@ -14,16 +14,16 @@ const (
 	packageName = "usecase/user"
 )
 
-type UserUC struct {
+type UC struct {
 	user  interfaces.UserModel
 	redis interfaces.RedisService
 }
 
-func New(u interfaces.UserModel, r interfaces.RedisService) *UserUC {
-	return &UserUC{user: u, redis: r}
+func New(u interfaces.UserModel, r interfaces.RedisService) *UC {
+	return &UC{user: u, redis: r}
 }
 
-func (u *UserUC) Signup(user domain.User) (string, error) {
+func (u *UC) Signup(user domain.User) (string, error) {
 	_, err := u.user.FindByEmail(user.Email)
 	if err != nil && err != domain.ErrEmailNotFound {
 		return "", err
@@ -55,7 +55,7 @@ func (u *UserUC) Signup(user domain.User) (string, error) {
 	return token, nil
 }
 
-func (u *UserUC) Login(user domain.User) (string, error) {
+func (u *UC) Login(user domain.User) (string, error) {
 	userByEmail, err := u.user.FindByEmail(user.Email)
 	if err != nil {
 		if err == domain.ErrEmailNotFound {
@@ -77,7 +77,7 @@ func (u *UserUC) Login(user domain.User) (string, error) {
 	return token, nil
 }
 
-func (u *UserUC) Token(ctx context.Context, refreshToken string) (domain.Token, error) {
+func (u *UC) Token(ctx context.Context, refreshToken string) (domain.Token, error) {
 	hashedToken := hashToken(refreshToken)
 	userEmail, err := u.redis.GetDel(ctx, hashedToken)
 	if err != nil {
@@ -108,6 +108,6 @@ func (u *UserUC) Token(ctx context.Context, refreshToken string) (domain.Token, 
 	}, nil
 }
 
-func (u *UserUC) GetInfo(userID int64) (domain.User, error) {
+func (u *UC) GetInfo(userID int64) (domain.User, error) {
 	return u.user.GetInfo(userID)
 }

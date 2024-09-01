@@ -11,7 +11,7 @@ import (
 )
 
 type Usecase struct {
-	User        user.UserUC
+	User        user.UC
 	MainCateg   maincateg.MainCategUC
 	SubCateg    subcateg.SubCategUC
 	Transaction transaction.TransactionUC
