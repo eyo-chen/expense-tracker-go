@@ -15,6 +15,16 @@ func (v *Validator) Login(email, password string) bool {
 	return v.Valid()
 }
 
+// Token validates refresh token for token
+func (v *Validator) Token(refreshToken string) bool {
+	v.checkRefreshToken(refreshToken)
+	return v.Valid()
+}
+
+func (v *Validator) checkRefreshToken(refreshToken string) {
+	v.Check(len(refreshToken) > 0, "refresh_token", "Refresh token can't be empty")
+}
+
 func (v *Validator) checkEmail(email string) {
 	v.Check(Matches(email, EmailRX), "email", "Invalid email address")
 }
