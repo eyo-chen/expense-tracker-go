@@ -9,15 +9,15 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisService struct {
+type redisService struct {
 	redis *redis.Client
 }
 
-func New(redis *redis.Client) *RedisService {
-	return &RedisService{redis: redis}
+func New(redis *redis.Client) *redisService {
+	return &redisService{redis: redis}
 }
 
-func (r *RedisService) GetByFunc(ctx context.Context, key string, ttl time.Duration, f func() (string, error)) (string, error) {
+func (r *redisService) GetByFunc(ctx context.Context, key string, ttl time.Duration, f func() (string, error)) (string, error) {
 	v, err := r.redis.Get(ctx, key).Result()
 	if err == nil { // cache hit
 		return v, nil
@@ -39,7 +39,7 @@ func (r *RedisService) GetByFunc(ctx context.Context, key string, ttl time.Durat
 	return res, nil
 }
 
-func (r *RedisService) GetDel(ctx context.Context, key string) (string, error) {
+func (r *redisService) GetDel(ctx context.Context, key string) (string, error) {
 	v, err := r.redis.GetDel(ctx, key).Result()
 	if err == redis.Nil {
 		return "", domain.ErrCacheMiss
@@ -51,6 +51,6 @@ func (r *RedisService) GetDel(ctx context.Context, key string) (string, error) {
 	return v, nil
 }
 
-func (r *RedisService) Set(ctx context.Context, key string, value string, ttl time.Duration) error {
+func (r *redisService) Set(ctx context.Context, key string, value string, ttl time.Duration) error {
 	return r.redis.Set(ctx, key, value, ttl).Err()
 }

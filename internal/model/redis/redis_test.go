@@ -157,22 +157,22 @@ func (s *redisServiceSuite) TestGetDel() {
 }
 
 func testGetDel_KeyExists_ReturnValueAndDelete(s *redisServiceSuite, desc string) {
-	// Prepare mock data
+	// prepare mock data
 	mockKey := "test_key"
 	mockValue := "test_value"
 
-	// Set value in Redis
+	// set value in redis
 	err := s.redis.Set(mockCTX, mockKey, mockValue, 0).Err()
 	s.Require().NoError(err, desc)
 
-	// Action
+	// action
 	value, err := s.redisService.GetDel(mockCTX, mockKey)
 
-	// Assertion
+	// assertion
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockValue, value, desc)
 
-	// Check if key was deleted
+	// check if key was deleted
 	_, err = s.redis.Get(mockCTX, mockKey).Result()
 	s.Require().ErrorIs(err, redis.Nil, desc)
 }
@@ -180,10 +180,10 @@ func testGetDel_KeyExists_ReturnValueAndDelete(s *redisServiceSuite, desc string
 func testGetDel_KeyNotExists_ReturnErrCacheMiss(s *redisServiceSuite, desc string) {
 	mockKey := "non_existent_key"
 
-	// Action
+	// action
 	value, err := s.redisService.GetDel(mockCTX, mockKey)
 
-	// Assertion
+	// assertion
 	s.Require().ErrorIs(err, domain.ErrCacheMiss, desc)
 	s.Require().Empty(value, desc)
 }
