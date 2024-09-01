@@ -43,7 +43,7 @@ func (h *Hlr) Signup(w http.ResponseWriter, r *http.Request) {
 		Email:    input.Email,
 		Password: input.Password,
 	}
-	token, err := h.User.Signup(user)
+	token, err := h.User.Signup(r.Context(), user)
 	if err != nil {
 		if err == domain.ErrEmailAlreadyExists {
 			errutil.BadRequestResponse(w, r, err)
@@ -86,7 +86,7 @@ func (h *Hlr) Login(w http.ResponseWriter, r *http.Request) {
 		Password: input.Password,
 	}
 
-	token, err := h.User.Login(user)
+	token, err := h.User.Login(r.Context(), user)
 	if err != nil {
 		if err == domain.ErrAuthentication {
 			errutil.AuthenticationErrorResponse(w, r, err)

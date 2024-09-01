@@ -43,27 +43,27 @@ func (_m *UserUC) GetInfo(userID int64) (domain.User, error) {
 	return r0, r1
 }
 
-// Login provides a mock function with given fields: user
-func (_m *UserUC) Login(user domain.User) (string, error) {
-	ret := _m.Called(user)
+// Login provides a mock function with given fields: ctx, user
+func (_m *UserUC) Login(ctx context.Context, user domain.User) (domain.Token, error) {
+	ret := _m.Called(ctx, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Login")
 	}
 
-	var r0 string
+	var r0 domain.Token
 	var r1 error
-	if rf, ok := ret.Get(0).(func(domain.User) (string, error)); ok {
-		return rf(user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.User) (domain.Token, error)); ok {
+		return rf(ctx, user)
 	}
-	if rf, ok := ret.Get(0).(func(domain.User) string); ok {
-		r0 = rf(user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.User) domain.Token); ok {
+		r0 = rf(ctx, user)
 	} else {
-		r0 = ret.Get(0).(string)
+		r0 = ret.Get(0).(domain.Token)
 	}
 
-	if rf, ok := ret.Get(1).(func(domain.User) error); ok {
-		r1 = rf(user)
+	if rf, ok := ret.Get(1).(func(context.Context, domain.User) error); ok {
+		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -71,27 +71,27 @@ func (_m *UserUC) Login(user domain.User) (string, error) {
 	return r0, r1
 }
 
-// Signup provides a mock function with given fields: user
-func (_m *UserUC) Signup(user domain.User) (string, error) {
-	ret := _m.Called(user)
+// Signup provides a mock function with given fields: ctx, user
+func (_m *UserUC) Signup(ctx context.Context, user domain.User) (domain.Token, error) {
+	ret := _m.Called(ctx, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Signup")
 	}
 
-	var r0 string
+	var r0 domain.Token
 	var r1 error
-	if rf, ok := ret.Get(0).(func(domain.User) (string, error)); ok {
-		return rf(user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.User) (domain.Token, error)); ok {
+		return rf(ctx, user)
 	}
-	if rf, ok := ret.Get(0).(func(domain.User) string); ok {
-		r0 = rf(user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.User) domain.Token); ok {
+		r0 = rf(ctx, user)
 	} else {
-		r0 = ret.Get(0).(string)
+		r0 = ret.Get(0).(domain.Token)
 	}
 
-	if rf, ok := ret.Get(1).(func(domain.User) error); ok {
-		r1 = rf(user)
+	if rf, ok := ret.Get(1).(func(context.Context, domain.User) error); ok {
+		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}

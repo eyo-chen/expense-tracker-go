@@ -9,10 +9,10 @@ import (
 // UserUC is the interface that wraps the basic methods for user usecase.
 type UserUC interface {
 	// Signup registers a user.
-	Signup(user domain.User) (string, error)
+	Signup(ctx context.Context, user domain.User) (domain.Token, error)
 
 	// Login logs in a user.
-	Login(user domain.User) (string, error)
+	Login(ctx context.Context, user domain.User) (domain.Token, error)
 
 	// GetInfo returns the user information by user id.
 	GetInfo(userID int64) (domain.User, error)
