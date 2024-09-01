@@ -27,7 +27,7 @@ func New(u interfaces.UserModel,
 	r interfaces.RedisService,
 ) *Usecase {
 	return &Usecase{
-		User:        *user.NewUserUC(u),
+		User:        *user.New(u, r),
 		MainCateg:   *maincateg.NewMainCategUC(m, i),
 		SubCateg:    *subcateg.NewSubCategUC(s, m),
 		Transaction: *transaction.NewTransactionUC(t, m, s),
