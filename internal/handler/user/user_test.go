@@ -2,6 +2,7 @@ package user
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -14,6 +15,10 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
+)
+
+var (
+	mockCTX = context.Background()
 )
 
 type UserSuite struct {
@@ -450,6 +455,127 @@ func login_LoginFail_ReturnError(s *UserSuite, desc string) {
 
 	// action
 	s.hlr.Login(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)
+}
+
+func (s *UserSuite) TestToken() {
+	for scenario, fn := range map[string]func(s *UserSuite, desc string){
+		"when no error, token successfully": token_NoError_TokenSuccessfully,
+		"when invalid token, return error":  token_InvalidToken_ReturnError,
+		"when get token fail, return error": token_GetTokenFail_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func token_NoError_TokenSuccessfully(s *UserSuite, desc string) {
+	// prepare data
+	input := map[string]interface{}{
+		"refresh_token": "refresh_token",
+	}
+	body, err := json.Marshal(input)
+	s.Require().NoError(err, desc)
+	mockToken := domain.Token{
+		Access:  "new access_token",
+		Refresh: "new refresh_token",
+	}
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token", bytes.NewBuffer(body))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// prepare service
+	s.mockUserUC.On("Token", mockCTX, "refresh_token").Return(mockToken, nil).Once()
+
+	// prepare expected response
+	expResp := map[string]interface{}{
+		"access_token":  mockToken.Access,
+		"refresh_token": mockToken.Refresh,
+	}
+
+	// action
+	s.hlr.Token(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusOK, res.Code, desc)
+}
+
+func token_InvalidToken_ReturnError(s *UserSuite, desc string) {
+	// prepare data
+	input := map[string]interface{}{
+		"refresh_token": "",
+	}
+	body, err := json.Marshal(input)
+	s.Require().NoError(err, desc)
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token", bytes.NewBuffer(body))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// prepare expected response
+	expResp := map[string]interface{}{
+		"refresh_token": "Refresh token can't be empty",
+	}
+
+	// action
+	s.hlr.Token(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+}
+
+func token_GetTokenFail_ReturnError(s *UserSuite, desc string) {
+	// prepare data
+	input := map[string]interface{}{
+		"refresh_token": "refresh_token",
+	}
+	body, err := json.Marshal(input)
+	s.Require().NoError(err, desc)
+
+	// prepare request, and response recorder
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token", bytes.NewBuffer(body))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// prepare service
+	s.mockUserUC.On("Token", mockCTX, "refresh_token").Return(domain.Token{}, errors.New("error")).Once()
+
+	// prepare expected response
+	expResp := map[string]interface{}{
+		"error": "error",
+	}
+
+	// action
+	s.hlr.Token(res, req)
 
 	// assertion
 	var responseBody map[string]interface{}
