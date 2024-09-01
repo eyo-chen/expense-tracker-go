@@ -55,7 +55,8 @@ func (h *Hlr) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]interface{}{
-		"token": token,
+		"access_token":  token.Access,
+		"refresh_token": token.Refresh,
 	}
 	if err := jsonutil.WriteJSON(w, http.StatusCreated, resp, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
@@ -98,7 +99,8 @@ func (h *Hlr) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]interface{}{
-		"token": token,
+		"access_token":  token.Access,
+		"refresh_token": token.Refresh,
 	}
 	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
