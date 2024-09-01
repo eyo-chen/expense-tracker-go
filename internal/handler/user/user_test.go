@@ -480,11 +480,6 @@ func (s *UserSuite) TestToken() {
 
 func token_NoError_TokenSuccessfully(s *UserSuite, desc string) {
 	// prepare data
-	input := map[string]interface{}{
-		"refresh_token": "refresh_token",
-	}
-	body, err := json.Marshal(input)
-	s.Require().NoError(err, desc)
 	mockToken := domain.Token{
 		Access:  "new access_token",
 		Refresh: "new refresh_token",
@@ -492,7 +487,7 @@ func token_NoError_TokenSuccessfully(s *UserSuite, desc string) {
 
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
-	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token", bytes.NewBuffer(body))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token?refresh_token=refresh_token", nil)
 	res := httptest.NewRecorder()
 	defer srv.Close()
 	defer req.Body.Close()
@@ -512,23 +507,16 @@ func token_NoError_TokenSuccessfully(s *UserSuite, desc string) {
 
 	// assertion
 	var responseBody map[string]interface{}
-	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusOK, res.Code, desc)
 }
 
 func token_InvalidToken_ReturnError(s *UserSuite, desc string) {
-	// prepare data
-	input := map[string]interface{}{
-		"refresh_token": "",
-	}
-	body, err := json.Marshal(input)
-	s.Require().NoError(err, desc)
-
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
-	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token", bytes.NewBuffer(body))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token", nil)
 	res := httptest.NewRecorder()
 	defer srv.Close()
 	defer req.Body.Close()
@@ -544,23 +532,16 @@ func token_InvalidToken_ReturnError(s *UserSuite, desc string) {
 
 	// assertion
 	var responseBody map[string]interface{}
-	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
 }
 
 func token_GetTokenFail_ReturnError(s *UserSuite, desc string) {
-	// prepare data
-	input := map[string]interface{}{
-		"refresh_token": "refresh_token",
-	}
-	body, err := json.Marshal(input)
-	s.Require().NoError(err, desc)
-
 	// prepare request, and response recorder
 	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Signup))
-	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token", bytes.NewBuffer(body))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user/token?refresh_token=refresh_token", nil)
 	res := httptest.NewRecorder()
 	defer srv.Close()
 	defer req.Body.Close()
@@ -579,7 +560,7 @@ func token_GetTokenFail_ReturnError(s *UserSuite, desc string) {
 
 	// assertion
 	var responseBody map[string]interface{}
-	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	err := json.Unmarshal(res.Body.Bytes(), &responseBody)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)

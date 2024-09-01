@@ -108,22 +108,14 @@ func (h *Hlr) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Hlr) Token(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		RefreshToken string `json:"refresh_token"`
-	}
-	if err := jsonutil.ReadJson(w, r, &input); err != nil {
-		logger.Error("jsonutil.ReadJson failed", "package", "handler", "err", err)
-		errutil.BadRequestResponse(w, r, err)
-		return
-	}
-
+	refreshToken := r.URL.Query().Get("refresh_token")
 	v := validator.New()
-	if !v.Token(input.RefreshToken) {
+	if !v.Token(refreshToken) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
-	token, err := h.User.Token(r.Context(), input.RefreshToken)
+	token, err := h.User.Token(r.Context(), refreshToken)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
