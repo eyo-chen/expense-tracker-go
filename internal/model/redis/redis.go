@@ -23,7 +23,7 @@ func (r *redisService) GetByFunc(ctx context.Context, key string, ttl time.Durat
 		return v, nil
 	}
 	if err != redis.Nil {
-		logger.Error("Failed to get value from cache", "err", err)
+		logger.Error("Failed to get value from cache", "err", err, "key", key)
 	}
 
 	// get value from function
@@ -33,7 +33,7 @@ func (r *redisService) GetByFunc(ctx context.Context, key string, ttl time.Durat
 	}
 
 	if err := r.redis.Set(ctx, key, res, ttl).Err(); err != nil {
-		logger.Error("Failed to cache value", "err", err)
+		logger.Error("Failed to cache value", "err", err, "key", key)
 	}
 
 	return res, nil
