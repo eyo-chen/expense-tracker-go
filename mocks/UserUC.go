@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/eyo-chen/expense-tracker-go/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
@@ -90,6 +92,34 @@ func (_m *UserUC) Signup(user domain.User) (string, error) {
 
 	if rf, ok := ret.Get(1).(func(domain.User) error); ok {
 		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Token provides a mock function with given fields: ctx, refreshToken
+func (_m *UserUC) Token(ctx context.Context, refreshToken string) (domain.Token, error) {
+	ret := _m.Called(ctx, refreshToken)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Token")
+	}
+
+	var r0 domain.Token
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (domain.Token, error)); ok {
+		return rf(ctx, refreshToken)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) domain.Token); ok {
+		r0 = rf(ctx, refreshToken)
+	} else {
+		r0 = ret.Get(0).(domain.Token)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, refreshToken)
 	} else {
 		r1 = ret.Error(1)
 	}
