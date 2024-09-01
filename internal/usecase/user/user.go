@@ -99,9 +99,8 @@ func (u *UserUC) Token(ctx context.Context, refreshToken string) (domain.Token, 
 		return domain.Token{}, err
 	}
 
-	if err := u.redis.Set(ctx, hashToken(newRefreshToken), userEmail, 7*24*time.Hour); err != nil {
-		return domain.Token{}, err
-	}
+	// it's ok to fail
+	_ = u.redis.Set(ctx, hashToken(newRefreshToken), userEmail, 7*24*time.Hour)
 
 	return domain.Token{
 		Access:  accessToken,
