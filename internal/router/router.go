@@ -16,6 +16,7 @@ func New(handler *hd.Handler) http.Handler {
 	// user
 	r.HandleFunc("/v1/user/signup", handler.User.Signup).Methods(http.MethodPost)
 	r.HandleFunc("/v1/user/login", handler.User.Login).Methods(http.MethodPost)
+	r.HandleFunc("/v1/user/token", handler.User.Token).Methods(http.MethodGet)
 
 	// init data
 	r.Handle("/v1/init-data", http.HandlerFunc(handler.InitData.List)).Methods(http.MethodGet)

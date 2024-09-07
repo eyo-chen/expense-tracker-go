@@ -16,7 +16,7 @@ type Hlr struct {
 	User interfaces.UserUC
 }
 
-func NewUserHandler(user interfaces.UserUC) *Hlr {
+func New(user interfaces.UserUC) *Hlr {
 	return &Hlr{User: user}
 }
 
@@ -99,6 +99,31 @@ func (h *Hlr) Login(w http.ResponseWriter, r *http.Request) {
 
 	resp := map[string]interface{}{
 		"token": token,
+	}
+	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
+
+func (h *Hlr) Token(w http.ResponseWriter, r *http.Request) {
+	refreshToken := r.URL.Query().Get("refresh_token")
+	v := validator.New()
+	if !v.Token(refreshToken) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	token, err := h.User.Token(r.Context(), refreshToken)
+	if err != nil {
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"access_token":  token.Access,
+		"refresh_token": token.Refresh,
 	}
 	if err := jsonutil.WriteJSON(w, http.StatusOK, resp, nil); err != nil {
 		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
