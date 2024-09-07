@@ -22,7 +22,7 @@ type TransactionFactory struct {
 
 func NewTransactionFactory(db *sql.DB) *TransactionFactory {
 	return &TransactionFactory{
-		transaction: gofacto.New(Transaction{}).WithDB(mysqlf.NewConfig(db)).WithBlueprint(BluePrint),
+		transaction: gofacto.New(Transaction{}).WithDB(mysqlf.NewConfig(db)).WithBlueprint(blueprint),
 		user:        gofacto.New(user.User{}).WithDB(mysqlf.NewConfig(db)),
 		maincateg: gofacto.New(maincateg.MainCateg{}).
 			WithDB(mysqlf.NewConfig(db)).

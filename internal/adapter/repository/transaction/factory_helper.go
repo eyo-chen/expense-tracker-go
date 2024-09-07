@@ -16,7 +16,7 @@ var (
 	mockTimeNow = time.Unix(1629446406, 0).Truncate(24 * time.Hour).In(mockLoc)
 )
 
-func BluePrint(i int) Transaction {
+func blueprint(i int) Transaction {
 	return Transaction{
 		Type:  domain.TransactionTypeIncome.ToModelValue(),
 		Price: float64(i*10.0 + 1.0),
