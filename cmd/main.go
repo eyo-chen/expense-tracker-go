@@ -51,10 +51,10 @@ func main() {
 	}
 	defer redisClient.Close()
 
-	// Setup model, usecase, and handler
-	model := adapter.New(mysqlDB)
+	// Setup adapter, usecase, and handler
+	adapter := adapter.New(mysqlDB)
 	redis := redisservice.New(redisClient)
-	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon, &model.Transaction, redis)
+	usecase := usecase.New(&adapter.User, &adapter.MainCateg, &adapter.SubCateg, &adapter.Icon, &adapter.Transaction, redis)
 	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction, &usecase.Icon, &usecase.InitData)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
