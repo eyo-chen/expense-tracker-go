@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	PackageName = "model/icon"
+	packageName = "adapter/repository/icon"
 )
 
 type Repo struct {
@@ -29,7 +29,7 @@ func (r *Repo) List() ([]domain.Icon, error) {
 
 	rows, err := r.DB.Query(stmt)
 	if err != nil {
-		logger.Error("m.DB.Query failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -38,7 +38,7 @@ func (r *Repo) List() ([]domain.Icon, error) {
 	for rows.Next() {
 		var icon Icon
 		if err := rows.Scan(&icon.ID, &icon.URL); err != nil {
-			logger.Error("rows.Scan failed", "package", PackageName, "err", err)
+			logger.Error("rows.Scan failed", "package", packageName, "err", err)
 			return nil, err
 		}
 

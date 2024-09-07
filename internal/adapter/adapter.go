@@ -10,7 +10,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 )
 
-type Model struct {
+type Adapter struct {
 	User        user.Repo
 	MainCateg   maincateg.Repo
 	SubCateg    subcateg.Repo
@@ -18,8 +18,8 @@ type Model struct {
 	Transaction transaction.Repo
 }
 
-func New(mysqlDB *sql.DB) *Model {
-	return &Model{
+func New(mysqlDB *sql.DB) *Adapter {
+	return &Adapter{
 		User:        *user.New(mysqlDB),
 		MainCateg:   *maincateg.New(mysqlDB),
 		SubCateg:    *subcateg.New(mysqlDB),
