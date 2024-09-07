@@ -14,3 +14,9 @@ type User struct {
 type UpdateUserOpt struct {
 	IsSetInitCategory *bool
 }
+
+// Token contains access token and refresh token
+type Token struct {
+	Access  string
+	Refresh string
+}

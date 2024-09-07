@@ -1,34 +1,30 @@
 package user
 
 import (
+	"context"
+	"time"
+
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/auth"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
 	packageName = "usecase/user"
 )
 
-type UserUC struct {
-	User interfaces.UserModel
+type UC struct {
+	user  interfaces.UserModel
+	redis interfaces.RedisService
 }
 
-func NewUserUC(u interfaces.UserModel) *UserUC {
-	return &UserUC{User: u}
+func New(u interfaces.UserModel, r interfaces.RedisService) *UC {
+	return &UC{user: u, redis: r}
 }
 
-type Claims struct {
-	UserID    int64  `json:"user_id"`
-	UserName  string `json:"user_name"`
-	UserEmail string `json:"user_email"`
-	jwt.RegisteredClaims
-}
-
-func (u *UserUC) Signup(user domain.User) (string, error) {
-	_, err := u.User.FindByEmail(user.Email)
+func (u *UC) Signup(user domain.User) (string, error) {
+	_, err := u.user.FindByEmail(user.Email)
 	if err != nil && err != domain.ErrEmailNotFound {
 		return "", err
 	}
@@ -42,11 +38,11 @@ func (u *UserUC) Signup(user domain.User) (string, error) {
 		return "", err
 	}
 
-	if err := u.User.Create(user.Name, user.Email, passwordHash); err != nil {
+	if err := u.user.Create(user.Name, user.Email, passwordHash); err != nil {
 		return "", err
 	}
 
-	userWithID, err := u.User.FindByEmail(user.Email)
+	userWithID, err := u.user.FindByEmail(user.Email)
 	if err != nil {
 		return "", err
 	}
@@ -59,8 +55,8 @@ func (u *UserUC) Signup(user domain.User) (string, error) {
 	return token, nil
 }
 
-func (u *UserUC) Login(user domain.User) (string, error) {
-	userByEmail, err := u.User.FindByEmail(user.Email)
+func (u *UC) Login(user domain.User) (string, error) {
+	userByEmail, err := u.user.FindByEmail(user.Email)
 	if err != nil {
 		if err == domain.ErrEmailNotFound {
 			return "", domain.ErrAuthentication
@@ -81,6 +77,37 @@ func (u *UserUC) Login(user domain.User) (string, error) {
 	return token, nil
 }
 
-func (u *UserUC) GetInfo(userID int64) (domain.User, error) {
-	return u.User.GetInfo(userID)
+func (u *UC) Token(ctx context.Context, refreshToken string) (domain.Token, error) {
+	hashedToken := hashToken(refreshToken)
+	userEmail, err := u.redis.GetDel(ctx, hashedToken)
+	if err != nil {
+		return domain.Token{}, err
+	}
+
+	user, err := u.user.FindByEmail(userEmail)
+	if err != nil {
+		return domain.Token{}, err
+	}
+
+	accessToken, err := genJWTToken(user)
+	if err != nil {
+		return domain.Token{}, err
+	}
+
+	newRefreshToken, err := genRefreshToken()
+	if err != nil {
+		return domain.Token{}, err
+	}
+
+	// it's ok to fail
+	_ = u.redis.Set(ctx, hashToken(newRefreshToken), userEmail, 7*24*time.Hour)
+
+	return domain.Token{
+		Access:  accessToken,
+		Refresh: newRefreshToken,
+	}, nil
+}
+
+func (u *UC) GetInfo(userID int64) (domain.User, error) {
+	return u.user.GetInfo(userID)
 }

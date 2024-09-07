@@ -1,7 +1,10 @@
 package user
 
 import (
+	"context"
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
@@ -13,10 +16,15 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+var (
+	mockCTX = context.Background()
+)
+
 type UserSuite struct {
 	suite.Suite
-	userUC   interfaces.UserUC
-	mockUser *mocks.UserModel
+	userUC    interfaces.UserUC
+	mockUser  *mocks.UserModel
+	mockRedis *mocks.RedisService
 }
 
 func TestUserSuite(t *testing.T) {
@@ -29,7 +37,8 @@ func (s *UserSuite) SetupSuite() {
 
 func (s *UserSuite) SetupTest() {
 	s.mockUser = mocks.NewUserModel(s.T())
-	s.userUC = NewUserUC(s.mockUser)
+	s.mockRedis = mocks.NewRedisService(s.T())
+	s.userUC = New(s.mockUser, s.mockRedis)
 }
 
 func (s *UserSuite) TearDownTest() {
@@ -156,6 +165,101 @@ func login_PasswordNotMatch_ReturnError(s *UserSuite, desc string) {
 	token, err := s.userUC.Login(input)
 	s.Require().Equal(domain.ErrAuthentication, err, desc)
 	s.Require().Empty(token, desc)
+}
+
+func (s *UserSuite) TestToken() {
+	for scenario, fn := range map[string]func(s *UserSuite, desc string){
+		"when no error, return successfully":    token_NoError_ReturnSuccessfully,
+		"when redis get del fail, return error": token_RedisGetDelFail_ReturnError,
+		"when user not found, return error":     token_UserNotFound_ReturnError,
+		"when set fail, dont return error":      token_SetFail_DontReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func token_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
+	mockRefreshToken := "refresh_token"
+	mockEmail := "email.com"
+	mockUser := domain.User{Name: "username", Email: mockEmail}
+	mockAccessToken, err := genJWTToken(mockUser)
+	s.Require().NoError(err)
+	mockNewRefreshToken, err := genRefreshToken()
+	s.Require().NoError(err)
+
+	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
+		Return(mockEmail, nil).Once()
+
+	s.mockUser.On("FindByEmail", mockEmail).Return(mockUser, nil).Once()
+
+	s.mockRedis.On("Set", mockCTX, hashToken(mockNewRefreshToken), mockEmail, 7*24*time.Hour).Return(nil).Once()
+
+	expResp := domain.Token{
+		Access:  mockAccessToken,
+		Refresh: mockNewRefreshToken,
+	}
+
+	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, token, desc)
+}
+
+func token_RedisGetDelFail_ReturnError(s *UserSuite, desc string) {
+	mockRefreshToken := "refresh_token"
+	mockErr := errors.New("redis get del fail")
+
+	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
+		Return("", mockErr).Once()
+
+	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	s.Require().ErrorIs(err, mockErr, desc)
+	s.Require().Empty(token, desc)
+}
+
+func token_UserNotFound_ReturnError(s *UserSuite, desc string) {
+	mockRefreshToken := "refresh_token"
+	mockEmail := "email.com"
+	mockErr := errors.New("find by email fail")
+
+	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
+		Return(mockEmail, nil).Once()
+
+	s.mockUser.On("FindByEmail", mockEmail).Return(domain.User{}, mockErr).Once()
+
+	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	s.Require().ErrorIs(err, mockErr, desc)
+	s.Require().Empty(token, desc)
+}
+
+func token_SetFail_DontReturnError(s *UserSuite, desc string) {
+	mockRefreshToken := "refresh_token"
+	mockEmail := "email.com"
+	mockUser := domain.User{Name: "username", Email: mockEmail}
+	mockErr := errors.New("set fail")
+	mockAccessToken, err := genJWTToken(mockUser)
+	s.Require().NoError(err)
+	mockNewRefreshToken, err := genRefreshToken()
+	s.Require().NoError(err)
+
+	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
+		Return(mockEmail, nil).Once()
+
+	s.mockUser.On("FindByEmail", mockEmail).Return(mockUser, nil).Once()
+
+	s.mockRedis.On("Set", mockCTX, hashToken(mockNewRefreshToken), mockEmail, 7*24*time.Hour).Return(mockErr).Once()
+
+	expResp := domain.Token{
+		Access:  mockAccessToken,
+		Refresh: mockNewRefreshToken,
+	}
+
+	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, token, desc)
 }
 
 func (s *UserSuite) TestGetInfo() {

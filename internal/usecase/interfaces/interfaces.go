@@ -16,6 +16,9 @@ type UserUC interface {
 
 	// GetInfo returns the user information by user id.
 	GetInfo(userID int64) (domain.User, error)
+
+	// Token returns the access token and refresh token by refresh token.
+	Token(ctx context.Context, refreshToken string) (domain.Token, error)
 }
 
 // MainCategUC is the interface that wraps the basic methods for main category usecase.
