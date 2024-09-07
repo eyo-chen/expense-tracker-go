@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/transaction"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/transaction"
 	"github.com/eyo-chen/expense-tracker-go/pkg/codeutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"

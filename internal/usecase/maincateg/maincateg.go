@@ -3,8 +3,8 @@ package maincateg
 import (
 	"context"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
 )
 
 type MainCategUC struct {

@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
 	"github.com/eyo-chen/gofacto"
 	"github.com/eyo-chen/gofacto/db/mysqlf"
 	"github.com/eyo-chen/gofacto/typeconv"

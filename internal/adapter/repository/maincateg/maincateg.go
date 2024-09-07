@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errorutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )

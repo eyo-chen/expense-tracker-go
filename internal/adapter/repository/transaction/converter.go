@@ -1,10 +1,10 @@
 package transaction
 
 import (
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/maincateg"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/subcateg"
 )
 
 func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.SubCateg, i icon.Icon) domain.Transaction {
