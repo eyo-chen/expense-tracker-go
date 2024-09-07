@@ -13,9 +13,9 @@ import (
 
 type SubCategSuite struct {
 	suite.Suite
-	subCategUC         interfaces.SubCategUC
-	mockSubCategModel  *mocks.SubCategModel
-	mockMainCategModel *mocks.MainCategModel
+	subCategUC        interfaces.SubCategUC
+	mockSubCategRepo  *mocks.SubCategRepo
+	mockMainCategRepo *mocks.MainCategRepo
 }
 
 func TestSubCategSuite(t *testing.T) {
@@ -23,14 +23,14 @@ func TestSubCategSuite(t *testing.T) {
 }
 
 func (s *SubCategSuite) SetupTest() {
-	s.mockSubCategModel = mocks.NewSubCategModel(s.T())
-	s.mockMainCategModel = mocks.NewMainCategModel(s.T())
-	s.subCategUC = NewSubCategUC(s.mockSubCategModel, s.mockMainCategModel)
+	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
+	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
+	s.subCategUC = NewSubCategUC(s.mockSubCategRepo, s.mockMainCategRepo)
 }
 
 func (s *SubCategSuite) TearDownTest() {
-	s.mockSubCategModel.AssertExpectations(s.T())
-	s.mockMainCategModel.AssertExpectations(s.T())
+	s.mockSubCategRepo.AssertExpectations(s.T())
+	s.mockMainCategRepo.AssertExpectations(s.T())
 }
 
 func (s *SubCategSuite) TestCreate() {
@@ -55,9 +55,9 @@ func create_NoError_CreateSuccessfully(s *SubCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockMainCategModel.On("GetByID", mockCateg.MainCategID, mockUserID).Return(&domain.MainCateg{}, nil)
+	s.mockMainCategRepo.On("GetByID", mockCateg.MainCategID, mockUserID).Return(&domain.MainCateg{}, nil)
 
-	s.mockSubCategModel.On("Create", mockCateg, mockUserID).Return(nil)
+	s.mockSubCategRepo.On("Create", mockCateg, mockUserID).Return(nil)
 
 	// action, assertion
 	err := s.subCategUC.Create(mockCateg, mockUserID)
@@ -73,7 +73,7 @@ func create_MainCategNotExist_ReturnError(s *SubCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockMainCategModel.On("GetByID", mockCateg.MainCategID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
+	s.mockMainCategRepo.On("GetByID", mockCateg.MainCategID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
 
 	// action, assertion
 	err := s.subCategUC.Create(mockCateg, mockUserID)
@@ -103,7 +103,7 @@ func getByMainCategID_NoError_ReturnData(s *SubCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockSubCategModel.On("GetByMainCategID", mockUserID, mockMainCategID).Return(mockSubCategs, nil)
+	s.mockSubCategRepo.On("GetByMainCategID", mockUserID, mockMainCategID).Return(mockSubCategs, nil)
 
 	// action, assertion
 	subCategs, err := s.subCategUC.GetByMainCategID(mockUserID, mockMainCategID)
@@ -117,7 +117,7 @@ func getByMainCategID_GetByMainCategIDFail_ReturnError(s *SubCategSuite, desc st
 	mockMainCategID := int64(1)
 
 	// prepare mock service
-	s.mockSubCategModel.On("GetByMainCategID", mockUserID, mockMainCategID).Return(nil, errors.New("getByMainCategID error"))
+	s.mockSubCategRepo.On("GetByMainCategID", mockUserID, mockMainCategID).Return(nil, errors.New("getByMainCategID error"))
 
 	// action, assertion
 	subCategs, err := s.subCategUC.GetByMainCategID(mockUserID, mockMainCategID)
@@ -155,8 +155,8 @@ func update_NoError_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockSubCategModel.On("GetByID", mockInputCateg.ID, mockUserID).Return(mockCateg, nil)
-	s.mockSubCategModel.On("Update", mockInputCateg).Return(nil)
+	s.mockSubCategRepo.On("GetByID", mockInputCateg.ID, mockUserID).Return(mockCateg, nil)
+	s.mockSubCategRepo.On("Update", mockInputCateg).Return(nil)
 
 	// action, assertion
 	err := s.subCategUC.Update(mockInputCateg, mockUserID)
@@ -173,7 +173,7 @@ func update_SubCategNotExist_ReturnError(s *SubCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockSubCategModel.On("GetByID", mockInputCateg.ID, mockUserID).Return(nil, domain.ErrSubCategNotFound)
+	s.mockSubCategRepo.On("GetByID", mockInputCateg.ID, mockUserID).Return(nil, domain.ErrSubCategNotFound)
 
 	// action, assertion
 	err := s.subCategUC.Update(mockInputCateg, mockUserID)
@@ -195,7 +195,7 @@ func update_MainCategIDNotMatch_ReturnError(s *SubCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockSubCategModel.On("GetByID", mockInputCateg.ID, mockUserID).Return(mockSubCateg, nil)
+	s.mockSubCategRepo.On("GetByID", mockInputCateg.ID, mockUserID).Return(mockSubCateg, nil)
 
 	// action, assertion
 	err := s.subCategUC.Update(mockInputCateg, mockUserID)
@@ -217,8 +217,8 @@ func update_UpdateFail_ReturnError(s *SubCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockSubCategModel.On("GetByID", mockInputCateg.ID, mockUserID).Return(mockCateg, nil)
-	s.mockSubCategModel.On("Update", mockInputCateg).Return(errors.New("update error"))
+	s.mockSubCategRepo.On("GetByID", mockInputCateg.ID, mockUserID).Return(mockCateg, nil)
+	s.mockSubCategRepo.On("Update", mockInputCateg).Return(errors.New("update error"))
 
 	// action, assertion
 	err := s.subCategUC.Update(mockInputCateg, mockUserID)
@@ -243,7 +243,7 @@ func delete_NoError_DeleteSuccessfully(s *SubCategSuite, desc string) {
 	mockID := int64(1)
 
 	// prepare mock service
-	s.mockSubCategModel.On("Delete", mockID).Return(nil)
+	s.mockSubCategRepo.On("Delete", mockID).Return(nil)
 
 	// action, assertion
 	err := s.subCategUC.Delete(mockID)
@@ -255,7 +255,7 @@ func delete_DeleteFail_ReturnError(s *SubCategSuite, desc string) {
 	mockID := int64(1)
 
 	// prepare mock service
-	s.mockSubCategModel.On("Delete", mockID).Return(errors.New("delete error"))
+	s.mockSubCategRepo.On("Delete", mockID).Return(errors.New("delete error"))
 
 	// action, assertion
 	err := s.subCategUC.Delete(mockID)

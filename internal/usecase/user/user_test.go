@@ -22,9 +22,9 @@ var (
 
 type UserSuite struct {
 	suite.Suite
-	userUC    interfaces.UserUC
-	mockUser  *mocks.UserModel
-	mockRedis *mocks.RedisService
+	userUC       interfaces.UserUC
+	mockUserRepo *mocks.UserRepo
+	mockRedis    *mocks.RedisService
 }
 
 func TestUserSuite(t *testing.T) {
@@ -36,13 +36,13 @@ func (s *UserSuite) SetupSuite() {
 }
 
 func (s *UserSuite) SetupTest() {
-	s.mockUser = mocks.NewUserModel(s.T())
+	s.mockUserRepo = mocks.NewUserRepo(s.T())
 	s.mockRedis = mocks.NewRedisService(s.T())
-	s.userUC = New(s.mockUser, s.mockRedis)
+	s.userUC = New(s.mockUserRepo, s.mockRedis)
 }
 
 func (s *UserSuite) TearDownTest() {
-	s.mockUser.AssertExpectations(s.T())
+	s.mockUserRepo.AssertExpectations(s.T())
 }
 
 func (s *UserSuite) TestSignup() {
@@ -68,9 +68,9 @@ func singup_EmailNotExists_SignupSuccessfully(s *UserSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
-	s.mockUser.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
-	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
+	s.mockUserRepo.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(nil).Once()
 
 	token, err := s.userUC.Signup(mockCTX, mockUser)
@@ -85,7 +85,7 @@ func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
 		Name:  "username",
 		Email: "email.com",
 	}
-	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 
 	token, err := s.userUC.Signup(mockCTX, mockUser)
 	s.Require().Equal(domain.ErrEmailAlreadyExists, err, desc)
@@ -101,9 +101,9 @@ func singup_SetCacheFail_DontReturnError(s *UserSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
-	s.mockUser.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
-	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
+	s.mockUserRepo.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(errors.New("set fail")).Once()
 
 	token, err := s.userUC.Signup(mockCTX, mockUser)
@@ -138,7 +138,7 @@ func login_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 		Password:      "password",
 		Password_hash: hashedPassword,
 	}
-	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(nil).Once()
 
 	token, err := s.userUC.Login(mockCTX, mockUser)
@@ -148,7 +148,7 @@ func login_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 }
 
 func login_EmailNotExists_ReturnError(s *UserSuite, desc string) {
-	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
 
 	input := domain.User{
 		Email:    "email.com",
@@ -170,7 +170,7 @@ func login_PasswordNotMatch_ReturnError(s *UserSuite, desc string) {
 		Password:      "password",
 		Password_hash: hashedPassword,
 	}
-	s.mockUser.On("FindByEmail", "email.com").Return(userByEmail, nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(userByEmail, nil).Once()
 
 	input := domain.User{
 		Email:    "email.com",
@@ -192,7 +192,7 @@ func login_RedisSetFail_DontReturnError(s *UserSuite, desc string) {
 		Password:      "password",
 		Password_hash: hashedPassword,
 	}
-	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(errors.New("set fail")).Once()
 
 	token, err := s.userUC.Login(mockCTX, mockUser)
@@ -228,7 +228,7 @@ func token_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
 		Return(mockEmail, nil).Once()
 
-	s.mockUser.On("FindByEmail", mockEmail).Return(mockUser, nil).Once()
+	s.mockUserRepo.On("FindByEmail", mockEmail).Return(mockUser, nil).Once()
 
 	s.mockRedis.On("Set", mockCTX, hashToken(mockNewRefreshToken), mockEmail, 7*24*time.Hour).Return(nil).Once()
 
@@ -262,7 +262,7 @@ func token_UserNotFound_ReturnError(s *UserSuite, desc string) {
 	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
 		Return(mockEmail, nil).Once()
 
-	s.mockUser.On("FindByEmail", mockEmail).Return(domain.User{}, mockErr).Once()
+	s.mockUserRepo.On("FindByEmail", mockEmail).Return(domain.User{}, mockErr).Once()
 
 	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
 	s.Require().ErrorIs(err, mockErr, desc)
@@ -282,7 +282,7 @@ func token_SetFail_DontReturnError(s *UserSuite, desc string) {
 	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
 		Return(mockEmail, nil).Once()
 
-	s.mockUser.On("FindByEmail", mockEmail).Return(mockUser, nil).Once()
+	s.mockUserRepo.On("FindByEmail", mockEmail).Return(mockUser, nil).Once()
 
 	s.mockRedis.On("Set", mockCTX, hashToken(mockNewRefreshToken), mockEmail, 7*24*time.Hour).Return(mockErr).Once()
 
@@ -315,7 +315,7 @@ func getInfo_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 		Name:  "username",
 		Email: "email.com",
 	}
-	s.mockUser.On("GetInfo", int64(1)).Return(userByID, nil).Once()
+	s.mockUserRepo.On("GetInfo", int64(1)).Return(userByID, nil).Once()
 
 	user, err := s.userUC.GetInfo(1)
 	s.Require().NoError(err, desc)
@@ -323,7 +323,7 @@ func getInfo_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 }
 
 func getInfo_GetFail_ReturnError(s *UserSuite, desc string) {
-	s.mockUser.On("GetInfo", int64(1)).Return(domain.User{}, domain.ErrUserIDNotFound).Once()
+	s.mockUserRepo.On("GetInfo", int64(1)).Return(domain.User{}, domain.ErrUserIDNotFound).Once()
 
 	user, err := s.userUC.GetInfo(1)
 	s.Require().Equal(domain.ErrUserIDNotFound, err, desc)

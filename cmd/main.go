@@ -9,7 +9,7 @@ import (
 	"time"
 
 	adapter "github.com/eyo-chen/expense-tracker-go/internal/adapter"
-	redisservice "github.com/eyo-chen/expense-tracker-go/internal/adapter/redis"
+	redisservice "github.com/eyo-chen/expense-tracker-go/internal/adapter/service/redis"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler"
 	"github.com/eyo-chen/expense-tracker-go/internal/router"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase"
