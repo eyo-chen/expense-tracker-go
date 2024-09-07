@@ -6,10 +6,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/user"
 	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"

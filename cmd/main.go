@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
+	adapter "github.com/eyo-chen/expense-tracker-go/internal/adapter"
+	redisservice "github.com/eyo-chen/expense-tracker-go/internal/adapter/redis"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler"
-	"github.com/eyo-chen/expense-tracker-go/internal/model"
-	redisservice "github.com/eyo-chen/expense-tracker-go/internal/model/redis"
 	"github.com/eyo-chen/expense-tracker-go/internal/router"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -52,7 +52,7 @@ func main() {
 	defer redisClient.Close()
 
 	// Setup model, usecase, and handler
-	model := model.New(mysqlDB)
+	model := adapter.New(mysqlDB)
 	redis := redisservice.New(redisClient)
 	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon, &model.Transaction, redis)
 	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction, &usecase.Icon, &usecase.InitData)

@@ -1,8 +1,8 @@
 package maincateg
 
 import (
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/icon"
 )
 
 func cvtToDomainMainCateg(c MainCateg, i icon.Icon) domain.MainCateg {
