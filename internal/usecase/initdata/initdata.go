@@ -8,17 +8,17 @@ import (
 )
 
 type InitDataUC struct {
-	icon      interfaces.IconModel
-	mainCateg interfaces.MainCategModel
-	subCateg  interfaces.SubCategModel
-	user      interfaces.UserModel
+	icon      interfaces.IconRepo
+	mainCateg interfaces.MainCategRepo
+	subCateg  interfaces.SubCategRepo
+	user      interfaces.UserRepo
 }
 
 func NewInitDataUC(
-	i interfaces.IconModel,
-	m interfaces.MainCategModel,
-	s interfaces.SubCategModel,
-	u interfaces.UserModel,
+	i interfaces.IconRepo,
+	m interfaces.MainCategRepo,
+	s interfaces.SubCategRepo,
+	u interfaces.UserRepo,
 ) *InitDataUC {
 	return &InitDataUC{
 		icon:      i,

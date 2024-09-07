@@ -7,8 +7,8 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
-// UserModel is the interface that wraps the basic methods for user model.
-type UserModel interface {
+// UserRepo is the interface that wraps the basic methods for user repository.
+type UserRepo interface {
 	// Create inserts a new user into the database.
 	Create(name, email, passwordHash string) error
 
@@ -22,8 +22,8 @@ type UserModel interface {
 	Update(ctx context.Context, userID int64, opt domain.UpdateUserOpt) error
 }
 
-// MainCategModel is the interface that wraps the basic methods for main category model.
-type MainCategModel interface {
+// MainCategRepo is the interface that wraps the basic methods for main category repository.
+type MainCategRepo interface {
 	// Create inserts a new main category into the database.
 	Create(categ *domain.MainCateg, userID int64) error
 
@@ -43,8 +43,8 @@ type MainCategModel interface {
 	BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error
 }
 
-// SubCategModel is the interface that wraps the basic methods for sub category model.
-type SubCategModel interface {
+// SubCategRepo is the interface that wraps the basic methods for sub category repository.
+type SubCategRepo interface {
 	// Create inserts a new sub category into the database.
 	Create(categ *domain.SubCateg, userID int64) error
 
@@ -64,8 +64,8 @@ type SubCategModel interface {
 	BatchCreate(ctx context.Context, categs []domain.SubCateg, userID int64) error
 }
 
-// IconModel is the interface that wraps the basic methods for icon model.
-type IconModel interface {
+// IconRepo is the interface that wraps the basic methods for icon repository.
+type IconRepo interface {
 	// GetByID returns an icon by id.
 	GetByID(id int64) (domain.Icon, error)
 
@@ -76,8 +76,8 @@ type IconModel interface {
 	GetByIDs(ids []int64) (map[int64]domain.Icon, error)
 }
 
-// TransactionModel is the interface that wraps the basic methods for transaction model.
-type TransactionModel interface {
+// TransactionRepo is the interface that wraps the basic methods for transaction repository.
+type TransactionRepo interface {
 	// Create inserts a new transaction into the database.
 	Create(ctx context.Context, trans domain.CreateTransactionInput) error
 

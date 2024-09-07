@@ -23,13 +23,13 @@ var (
 
 type MainCategSuite struct {
 	suite.Suite
-	db             *sql.DB
-	dk             *dockerutil.Container
-	migrate        *migrate.Migrate
-	f              *factory
-	mainCategModel interfaces.MainCategModel
-	userModel      interfaces.UserModel
-	iconModel      interfaces.IconModel
+	db            *sql.DB
+	dk            *dockerutil.Container
+	migrate       *migrate.Migrate
+	f             *factory
+	mainCategRepo interfaces.MainCategRepo
+	userRepo      interfaces.UserRepo
+	iconRepo      interfaces.IconRepo
 }
 
 func TestMainCategSuite(t *testing.T) {
@@ -42,9 +42,9 @@ func (s *MainCategSuite) SetupSuite() {
 	logger.Register()
 	s.db = db
 	s.migrate = migrate
-	s.mainCategModel = NewMainCategModel(db)
-	s.userModel = user.NewUserModel(db)
-	s.iconModel = icon.NewIconModel(db)
+	s.mainCategRepo = New(db)
+	s.userRepo = user.New(db)
+	s.iconRepo = icon.New(db)
 
 	s.f = newFactory(db)
 }
@@ -56,9 +56,9 @@ func (s *MainCategSuite) TearDownSuite() {
 }
 
 func (s *MainCategSuite) SetupTest() {
-	s.mainCategModel = NewMainCategModel(s.db)
-	s.userModel = user.NewUserModel(s.db)
-	s.iconModel = icon.NewIconModel(s.db)
+	s.mainCategRepo = New(s.db)
+	s.userRepo = user.New(s.db)
+	s.iconRepo = icon.New(s.db)
 	s.f = newFactory(s.db)
 }
 
@@ -109,7 +109,7 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 			ID: icons[0].ID,
 		},
 	}
-	err = s.mainCategModel.Create(categ, users[0].ID)
+	err = s.mainCategRepo.Create(categ, users[0].ID)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_id
@@ -140,7 +140,7 @@ func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 			ID: icon.ID,
 		},
 	}
-	err = s.mainCategModel.Create(categ, user.ID)
+	err = s.mainCategRepo.Create(categ, user.ID)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 }
 
@@ -175,7 +175,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(mockCTX, users[0].ID, domain.TransactionTypeIncome)
+	categs, err := s.mainCategRepo.GetAll(mockCTX, users[0].ID, domain.TransactionTypeIncome)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -196,7 +196,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(mockCTX, users[0].ID, domain.TransactionTypeExpense)
+	categs, err := s.mainCategRepo.GetAll(mockCTX, users[0].ID, domain.TransactionTypeExpense)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -226,7 +226,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(mockCTX, users[0].ID, domain.TransactionTypeUnSpecified)
+	categs, err := s.mainCategRepo.GetAll(mockCTX, users[0].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, categs, desc)
 }
@@ -256,7 +256,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 		},
 	}
 
-	categs, err := s.mainCategModel.GetAll(mockCTX, users[1].ID, domain.TransactionTypeUnSpecified)
+	categs, err := s.mainCategRepo.GetAll(mockCTX, users[1].ID, domain.TransactionTypeUnSpecified)
 	s.Require().NoError(err)
 	s.Require().Equal(expResult, categs)
 }
@@ -287,7 +287,7 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 			ID: categ.IconID,
 		},
 	}
-	err = s.mainCategModel.Update(inputCateg)
+	err = s.mainCategRepo.Update(inputCateg)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_id
@@ -313,7 +313,7 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 			ID: categs[0].IconID,
 		},
 	}
-	err = s.mainCategModel.Update(inputCateg)
+	err = s.mainCategRepo.Update(inputCateg)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_id
@@ -347,7 +347,7 @@ func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 			ID: categs[0].IconID,
 		},
 	}
-	err = s.mainCategModel.Update(domainMainCateg)
+	err = s.mainCategRepo.Update(domainMainCateg)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 }
 
@@ -367,7 +367,7 @@ func delete_NoError_DeleteSuccessfully(s *MainCategSuite, desc string) {
 	categ, _, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
-	err = s.mainCategModel.Delete(categ.ID)
+	err = s.mainCategRepo.Delete(categ.ID)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id
@@ -409,7 +409,7 @@ func getByID_NoError_ReturnSuccessfully(s *MainCategSuite, desc string) {
 		Type: domain.CvtToTransactionType(categ.Type),
 	}
 
-	result, err := s.mainCategModel.GetByID(categ.ID, user.ID)
+	result, err := s.mainCategRepo.GetByID(categ.ID, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, *result, desc)
 }
@@ -425,7 +425,7 @@ func getByID_FindNoData_ReturnSuccessfully(s *MainCategSuite, desc string) {
 	_, _, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
-	result, err := s.mainCategModel.GetByID(0, user.ID)
+	result, err := s.mainCategRepo.GetByID(0, user.ID)
 	s.Require().Equal(domain.ErrMainCategNotFound, err, desc)
 	s.Require().Nil(result, desc)
 }
@@ -459,7 +459,7 @@ func createBatch_InsertOneData_InsertSuccessfully(s *MainCategSuite, desc string
 		},
 	}
 
-	err = s.mainCategModel.BatchCreate(mockCTX, categs, users[0].ID)
+	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_id
@@ -496,7 +496,7 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 		},
 	}
 
-	err = s.mainCategModel.BatchCreate(mockCTX, categs, users[0].ID)
+	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_id
@@ -535,7 +535,7 @@ func createBatch_InsertDuplicateNameData_ReturnError(s *MainCategSuite, desc str
 		},
 	}
 
-	err = s.mainCategModel.BatchCreate(mockCTX, categs, users[0].ID)
+	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 
 	// check if the data is not inserted
@@ -569,7 +569,7 @@ func createBatch_AlreadyExistData_ReturnError(s *MainCategSuite, desc string) {
 		},
 	}
 
-	err = s.mainCategModel.BatchCreate(mockCTX, categs, user.ID)
+	err = s.mainCategRepo.BatchCreate(mockCTX, categs, user.ID)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 
 	// check if the data is not inserted

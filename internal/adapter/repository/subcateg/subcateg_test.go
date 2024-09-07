@@ -21,11 +21,11 @@ var (
 
 type SubCategSuite struct {
 	suite.Suite
-	dk            *dockerutil.Container
-	subCategModel interfaces.SubCategModel
-	db            *sql.DB
-	migrate       *migrate.Migrate
-	f             *factory
+	dk           *dockerutil.Container
+	subCategRepo interfaces.SubCategRepo
+	db           *sql.DB
+	migrate      *migrate.Migrate
+	f            *factory
 }
 
 func TestSubCategSuite(t *testing.T) {
@@ -37,7 +37,7 @@ func (s *SubCategSuite) SetupSuite() {
 	db, migrate := testutil.ConnToDB(s.dk.Port)
 	logger.Register()
 	s.db = db
-	s.subCategModel = NewSubCategModel(db)
+	s.subCategRepo = New(db)
 	s.migrate = migrate
 	s.f = newFactory(db)
 }
@@ -49,7 +49,7 @@ func (s *SubCategSuite) TearDownSuite() {
 }
 
 func (s *SubCategSuite) SetupTest() {
-	s.subCategModel = NewSubCategModel(s.db)
+	s.subCategRepo = New(s.db)
 	s.f = newFactory(s.db)
 }
 
@@ -108,7 +108,7 @@ func create_NoDuplicateData_CreateSuccessfully(s *SubCategSuite, desc string) {
 	}
 
 	// action
-	err = s.subCategModel.Create(subCateg, user.ID)
+	err = s.subCategRepo.Create(subCateg, user.ID)
 	s.Require().NoError(err, desc)
 
 	// check
@@ -134,7 +134,7 @@ func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string
 	}
 
 	// action and check
-	err = s.subCategModel.Create(inputSubCateg, user.ID)
+	err = s.subCategRepo.Create(inputSubCateg, user.ID)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 }
 
@@ -162,7 +162,7 @@ func getByMainCategID_FindNoData_ReturnEmpty(s *SubCategSuite, desc string) {
 	mainCateg := mainCategs[0]
 
 	// action
-	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID+9999)
+	result, err := s.subCategRepo.GetByMainCategID(user.ID, mainCateg.ID+9999)
 	s.Require().NoError(err, desc)
 	s.Require().Nil(result, desc)
 }
@@ -188,7 +188,7 @@ func getByMainCategID_WithOneMainCateg_ReturnCorrectSubCategs(s *SubCategSuite, 
 	}
 
 	// action
-	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	result, err := s.subCategRepo.GetByMainCategID(user.ID, mainCateg.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -209,7 +209,7 @@ func getByMainCategID_WithManyMainCategs_ReturnCorrectSubCategs(s *SubCategSuite
 	}
 
 	// action
-	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	result, err := s.subCategRepo.GetByMainCategID(user.ID, mainCateg.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -236,7 +236,7 @@ func getByMainCategID_WithManyUsers_ReturnCorrectSubCategs(s *SubCategSuite, des
 	}
 
 	// action
-	result, err := s.subCategModel.GetByMainCategID(user.ID, mainCateg.ID)
+	result, err := s.subCategRepo.GetByMainCategID(user.ID, mainCateg.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -270,7 +270,7 @@ func update_NoDuplicateData_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	}
 
 	// action
-	err = s.subCategModel.Update(inputSubCateg)
+	err = s.subCategRepo.Update(inputSubCateg)
 	s.Require().NoError(err, desc)
 
 	// check
@@ -297,7 +297,7 @@ func update_WithMultipleMainCateg_UpdateSuccessfully(s *SubCategSuite, desc stri
 	}
 
 	// action
-	err = s.subCategModel.Update(inputSubCateg)
+	err = s.subCategRepo.Update(inputSubCateg)
 	s.Require().NoError(err, desc)
 
 	// check
@@ -334,7 +334,7 @@ func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 	}
 
 	// action and check
-	err = s.subCategModel.Update(inputSubCateg)
+	err = s.subCategRepo.Update(inputSubCateg)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 }
 
@@ -351,7 +351,7 @@ func (s *SubCategSuite) TestDelete() {
 	mainCateg := mainCategs[0] // choose the first main category
 
 	// action
-	err = s.subCategModel.Delete(mainCategIDToSubCategs[mainCateg.ID][0].ID)
+	err = s.subCategRepo.Delete(mainCategIDToSubCategs[mainCateg.ID][0].ID)
 	s.Require().NoError(err, "test delete")
 
 	// check to see if the sub category is deleted
@@ -426,7 +426,7 @@ func getByID_FindNoData_ReturnError(s *SubCategSuite, desc string) {
 	mainCateg := mainCategs[0]
 
 	// action
-	result, err := s.subCategModel.GetByID(mainCateg.ID+999, user.ID)
+	result, err := s.subCategRepo.GetByID(mainCateg.ID+999, user.ID)
 	s.Require().Equal(domain.ErrSubCategNotFound, err, desc)
 	s.Require().Nil(result, desc)
 }
@@ -446,7 +446,7 @@ func getByID_WithOneData_ReturnCorrectData(s *SubCategSuite, desc string) {
 	}
 
 	// action
-	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	result, err := s.subCategRepo.GetByID(subCateg.ID, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -466,7 +466,7 @@ func getByID_WithManyData_ReturnCorrectData(s *SubCategSuite, desc string) {
 	}
 
 	// action
-	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	result, err := s.subCategRepo.GetByID(subCateg.ID, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -492,7 +492,7 @@ func getByID_WithManyUsers_ReturnCorrectData(s *SubCategSuite, desc string) {
 	}
 
 	// action
-	result, err := s.subCategModel.GetByID(subCateg.ID, user.ID)
+	result, err := s.subCategRepo.GetByID(subCateg.ID, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -523,7 +523,7 @@ func createBatch_InsertOneData_InsertSuccessfully(s *SubCategSuite, desc string)
 	}
 
 	// action
-	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
+	err = s.subCategRepo.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().NoError(err, desc)
 
 	// check
@@ -550,7 +550,7 @@ func createBatch_InsertManyData_InsertSuccessfully(s *SubCategSuite, desc string
 	}
 
 	// action
-	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
+	err = s.subCategRepo.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().NoError(err, desc)
 
 	// check
@@ -582,7 +582,7 @@ func createBatch_InsertDuplicateNameData_ReturnError(s *SubCategSuite, desc stri
 	}
 
 	// action
-	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
+	err = s.subCategRepo.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 
 	// check
@@ -606,7 +606,7 @@ func createBatch_AlreadyExistData_ReturnError(s *SubCategSuite, desc string) {
 	}
 
 	// action
-	err = s.subCategModel.BatchCreate(mockCTX, subCategs, user.ID)
+	err = s.subCategRepo.BatchCreate(mockCTX, subCategs, user.ID)
 	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
 
 	// check

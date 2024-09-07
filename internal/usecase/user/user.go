@@ -15,11 +15,11 @@ const (
 )
 
 type UC struct {
-	user  interfaces.UserModel
+	user  interfaces.UserRepo
 	redis interfaces.RedisService
 }
 
-func New(u interfaces.UserModel, r interfaces.RedisService) *UC {
+func New(u interfaces.UserRepo, r interfaces.RedisService) *UC {
 	return &UC{user: u, redis: r}
 }
 

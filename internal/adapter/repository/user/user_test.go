@@ -26,7 +26,7 @@ type UserSuite struct {
 	db      *sql.DB
 	migrate *migrate.Migrate
 	f       *gofacto.Factory[User]
-	model   interfaces.UserModel
+	repo    interfaces.UserRepo
 }
 
 func TestUserSuite(t *testing.T) {
@@ -36,7 +36,7 @@ func TestUserSuite(t *testing.T) {
 func (s *UserSuite) SetupSuite() {
 	s.dk = dockerutil.RunDocker(dockerutil.ImageMySQL)
 	db, migrate := testutil.ConnToDB(s.dk.Port)
-	s.model = NewUserModel(db)
+	s.repo = New(db)
 	logger.Register()
 	s.db = db
 	s.migrate = migrate
@@ -50,7 +50,7 @@ func (s *UserSuite) TearDownSuite() {
 }
 
 func (s *UserSuite) SetupTest() {
-	s.model = NewUserModel(s.db)
+	s.repo = New(s.db)
 }
 
 func (s *UserSuite) TearDownTest() {
@@ -69,7 +69,7 @@ func (s *UserSuite) TestCreate() {
 		Password_hash: "password_hash",
 	}
 
-	err := s.model.Create(user.Name, user.Email, user.Password_hash)
+	err := s.repo.Create(user.Name, user.Email, user.Password_hash)
 	s.Require().NoError(err)
 
 	// check if user is created
@@ -105,7 +105,7 @@ func findByEmail_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
 		Password_hash: users[0].Password_hash,
 	}
 
-	user, err := s.model.FindByEmail(users[0].Email)
+	user, err := s.repo.FindByEmail(users[0].Email)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, user, desc)
 }
@@ -114,7 +114,7 @@ func findByEmail_NotFound_ReturnError(s *UserSuite, desc string) {
 	_, err := s.f.BuildList(mockCTX, 2).Insert()
 	s.Require().NoError(err, desc)
 
-	_, err = s.model.FindByEmail("notfound")
+	_, err = s.repo.FindByEmail("notfound")
 	s.Require().Error(err, desc)
 	s.Require().Equal(domain.ErrEmailNotFound, err, desc)
 }
@@ -143,7 +143,7 @@ func getInfo_FoundUser_ReturnSuccessfully(s *UserSuite, desc string) {
 		IsSetInitCategory: users[0].IsSetInitCategory,
 	}
 
-	user, err := s.model.GetInfo(users[0].ID)
+	user, err := s.repo.GetInfo(users[0].ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, user, desc)
 }
@@ -152,7 +152,7 @@ func getInfo_NotFound_ReturnError(s *UserSuite, desc string) {
 	_, err := s.f.BuildList(mockCTX, 2).Insert()
 	s.Require().NoError(err, desc)
 
-	user, err := s.model.GetInfo(999)
+	user, err := s.repo.GetInfo(999)
 	s.Require().Empty(user, desc)
 	s.Require().EqualError(err, domain.ErrUserIDNotFound.Error(), desc)
 }
@@ -179,7 +179,7 @@ func update_IsSetInitCategory_UpdateSuccessfully(s *UserSuite, desc string) {
 	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
 
 	// action
-	err = s.model.Update(mockCTX, users[0].ID, opt)
+	err = s.repo.Update(mockCTX, users[0].ID, opt)
 	s.Require().NoError(err, desc)
 
 	// check if user is updated

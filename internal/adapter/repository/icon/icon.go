@@ -11,12 +11,12 @@ const (
 	PackageName = "model/icon"
 )
 
-type IconModel struct {
+type Repo struct {
 	DB *sql.DB
 }
 
-func NewIconModel(db *sql.DB) *IconModel {
-	return &IconModel{DB: db}
+func New(db *sql.DB) *Repo {
+	return &Repo{DB: db}
 }
 
 type Icon struct {
@@ -24,10 +24,10 @@ type Icon struct {
 	URL string `json:"url"`
 }
 
-func (m *IconModel) List() ([]domain.Icon, error) {
+func (r *Repo) List() ([]domain.Icon, error) {
 	stmt := `SELECT id, url FROM icons`
 
-	rows, err := m.DB.Query(stmt)
+	rows, err := r.DB.Query(stmt)
 	if err != nil {
 		logger.Error("m.DB.Query failed", "package", PackageName, "err", err)
 		return nil, err
@@ -49,11 +49,11 @@ func (m *IconModel) List() ([]domain.Icon, error) {
 	return icons, nil
 }
 
-func (m *IconModel) GetByID(id int64) (domain.Icon, error) {
+func (r *Repo) GetByID(id int64) (domain.Icon, error) {
 	stmt := `SELECT id, url FROM icons WHERE id = ?`
 
 	var icon Icon
-	if err := m.DB.QueryRow(stmt, id).Scan(&icon.ID, &icon.URL); err != nil {
+	if err := r.DB.QueryRow(stmt, id).Scan(&icon.ID, &icon.URL); err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Icon{}, domain.ErrIconNotFound
 		}
@@ -64,7 +64,7 @@ func (m *IconModel) GetByID(id int64) (domain.Icon, error) {
 	return cvtToDomainIcon(icon), nil
 }
 
-func (m *IconModel) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
+func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
 	stmt := `SELECT id, url FROM icons WHERE id IN (`
 	for i := range ids {
 		if i == 0 {
@@ -84,7 +84,7 @@ func (m *IconModel) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
 	}
 
 	var icons []Icon
-	rows, err := m.DB.Query(stmt, idsInterface...)
+	rows, err := r.DB.Query(stmt, idsInterface...)
 	if err != nil {
 		return nil, err
 	}

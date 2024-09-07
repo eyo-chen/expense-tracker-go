@@ -19,11 +19,11 @@ type Usecase struct {
 	InitData    initdata.InitDataUC
 }
 
-func New(u interfaces.UserModel,
-	m interfaces.MainCategModel,
-	s interfaces.SubCategModel,
-	i interfaces.IconModel,
-	t interfaces.TransactionModel,
+func New(u interfaces.UserRepo,
+	m interfaces.MainCategRepo,
+	s interfaces.SubCategRepo,
+	i interfaces.IconRepo,
+	t interfaces.TransactionRepo,
 	r interfaces.RedisService,
 ) *Usecase {
 	return &Usecase{

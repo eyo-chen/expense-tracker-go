@@ -27,11 +27,11 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
-	dk               *dockerutil.Container
-	db               *sql.DB
-	migrate          *migrate.Migrate
-	transactionModel *transaction.TransactionModel
-	f                *transaction.TransactionFactory
+	dk      *dockerutil.Container
+	db      *sql.DB
+	migrate *migrate.Migrate
+	repo    *transaction.Repo
+	f       *transaction.TransactionFactory
 }
 
 func TestTransactionSuite(t *testing.T) {
@@ -45,7 +45,7 @@ func (s *TransactionSuite) SetupSuite() {
 
 	s.db = db
 	s.migrate = migrate
-	s.transactionModel = transaction.NewTransactionModel(s.db)
+	s.repo = transaction.New(s.db)
 	s.f = transaction.NewTransactionFactory(db)
 }
 
@@ -56,7 +56,7 @@ func (s *TransactionSuite) TearDownSuite() {
 }
 
 func (s *TransactionSuite) SetupTest() {
-	s.transactionModel = transaction.NewTransactionModel(s.db)
+	s.repo = transaction.New(s.db)
 	s.f = transaction.NewTransactionFactory(s.db)
 }
 
@@ -109,7 +109,7 @@ func (s *TransactionSuite) TestCreate() {
 		Date:        mockTimeNow,
 	}
 
-	err = s.transactionModel.Create(mockCTX, t)
+	err = s.repo.Create(mockCTX, t)
 	s.Require().NoError(err)
 
 	var checkT transaction.Transaction
@@ -166,7 +166,7 @@ func getAll_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
 	opt := domain.GetTransOpt{}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -181,7 +181,7 @@ func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc strin
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
 
 	opt := domain.GetTransOpt{}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -210,7 +210,7 @@ func getAll_WithSearchKeyword_ReturnDataWithKeyword(s *TransactionSuite, desc st
 			Keyword: &searchKeyword,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -229,7 +229,7 @@ func getAll_WithManyTransaction_ReturnSuccessfully(s *TransactionSuite, desc str
 	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1, 2)
 
 	opt := domain.GetTransOpt{}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -258,7 +258,7 @@ func getAll_FilterByStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc
 			StartDate: &startDate,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -286,7 +286,7 @@ func getAll_FilterByEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc st
 			EndDate: &endDate,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -314,7 +314,7 @@ func getAll_FilterByMinPrice_ReturnDataGreaterThanMinPrice(s *TransactionSuite, 
 			MinPrice: &minPrice,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -342,7 +342,7 @@ func getAll_FilterByMaxPrice_ReturnDataLessThanMinPrice(s *TransactionSuite, des
 			MaxPrice: &maxPrice,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -372,7 +372,7 @@ func getAll_FilterByStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transact
 			EndDate:   &endDate,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -395,7 +395,7 @@ func getAll_FilterByMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, d
 			MainCategIDs: []int64{mainList[0].ID, mainList[2].ID},
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -418,7 +418,7 @@ func getAll_FilterBySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, des
 			SubCategIDs: []int64{subList[1].ID, subList[3].ID},
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -457,7 +457,7 @@ func getAll_FilterByDateAndPriceAndMainCateg_ReturnCorrectData(s *TransactionSui
 			MainCategIDs: []int64{mainList[1].ID, mainList[2].ID},
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -487,7 +487,7 @@ func getAll_SortByDateAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
 			Dir: domain.SortDirTypeAsc,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -517,7 +517,7 @@ func getAll_SortByDateDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) 
 			Dir: domain.SortDirTypeDesc,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -547,7 +547,7 @@ func getAll_SortByPriceAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) 
 			Dir: domain.SortDirTypeAsc,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -577,7 +577,7 @@ func getAll_SortByPriceDesc_ReturnCorrectOrder(s *TransactionSuite, desc string)
 			Dir: domain.SortDirTypeDesc,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -607,7 +607,7 @@ func getAll_SortByTypeAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
 			Dir: domain.SortDirTypeAsc,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -637,7 +637,7 @@ func getAll_SortByTypeDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) 
 			Dir: domain.SortDirTypeDesc,
 		},
 	}
-	trans, decodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Empty(decodedNextKey, desc)
@@ -666,7 +666,7 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 			Size:    3,
 		},
 	}
-	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, deencodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	decodedNextKeyID := transactionList[4].ID
@@ -711,7 +711,7 @@ func getAll_WithNextKeyCursorAndSortByDate_ReturnCorrectData(s *TransactionSuite
 			Dir: domain.SortDirTypeDesc,
 		},
 	}
-	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, deencodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Equal(expDecodedNextKey, deencodedNextKey, desc)
@@ -755,7 +755,7 @@ func getAll_WithNextKeyCursorAndSortByPrice_ReturnCorrectData(s *TransactionSuit
 			Dir: domain.SortDirTypeDesc,
 		},
 	}
-	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, deencodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Equal(expDecodedNextKey, deencodedNextKey, desc)
@@ -799,7 +799,7 @@ func getAll_WithNextKeyCursorAndSortByTransType_ReturnCorrectData(s *Transaction
 			Dir: domain.SortDirTypeDesc,
 		},
 	}
-	trans, deencodedNextKey, err := s.transactionModel.GetAll(mockCTX, opt, user.ID)
+	trans, deencodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 	s.Require().Equal(expDecodedNextKey, deencodedNextKey, desc)
@@ -833,7 +833,7 @@ func update_WithOneData_UpdateSuccessfully(s *TransactionSuite, desc string) {
 		Date:        mockTimeNow.AddDate(0, 0, -1),
 	}
 
-	err = s.transactionModel.Update(mockCTX, t)
+	err = s.repo.Update(mockCTX, t)
 	s.Require().NoError(err, desc)
 
 	var checkT transaction.Transaction
@@ -862,7 +862,7 @@ func update_WithMultipleData_UpdateSuccessfully(s *TransactionSuite, desc string
 		Date:        mockTimeNow.AddDate(0, 0, -1),
 	}
 
-	err = s.transactionModel.Update(mockCTX, t)
+	err = s.repo.Update(mockCTX, t)
 	s.Require().NoError(err, desc)
 
 	var checkT transaction.Transaction
@@ -902,7 +902,7 @@ func update_WithMultipleUsers_UpdateSuccessfully(s *TransactionSuite, desc strin
 		Date:        mockTimeNow,
 	}
 
-	err = s.transactionModel.Update(mockCTX, t)
+	err = s.repo.Update(mockCTX, t)
 	s.Require().NoError(err, desc)
 
 	var checkT transaction.Transaction
@@ -942,7 +942,7 @@ func delete_WithOneData_DeleteSuccessfully(s *TransactionSuite, desc string) {
 	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	err = s.transactionModel.Delete(mockCTX, transactions[0].ID)
+	err = s.repo.Delete(mockCTX, transactions[0].ID)
 	s.Require().NoError(err, desc)
 
 	var count int
@@ -961,7 +961,7 @@ func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string
 	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
 	s.Require().NoError(err, desc)
 
-	err = s.transactionModel.Delete(mockCTX, transactions[0].ID)
+	err = s.repo.Delete(mockCTX, transactions[0].ID)
 	s.Require().NoError(err, desc)
 
 	var count int
@@ -984,7 +984,7 @@ func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc strin
 	transactions2, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	err = s.transactionModel.Delete(mockCTX, transactions[0].ID)
+	err = s.repo.Delete(mockCTX, transactions[0].ID)
 	s.Require().NoError(err, desc)
 
 	var count int
@@ -1035,7 +1035,7 @@ func getAccInfo_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	}
 
 	query := domain.GetAccInfoQuery{}
-	accInfo, err := s.transactionModel.GetAccInfo(mockCTX, query, user.ID)
+	accInfo, err := s.repo.GetAccInfo(mockCTX, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
 }
@@ -1056,7 +1056,7 @@ func getAccInfo_WithMultipleUsers_ReturnDataOnlyWithOneUser(s *TransactionSuite,
 	}
 
 	query := domain.GetAccInfoQuery{}
-	accInfo, err := s.transactionModel.GetAccInfo(mockCTX, query, user.ID)
+	accInfo, err := s.repo.GetAccInfo(mockCTX, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
 }
@@ -1081,7 +1081,7 @@ func getAccInfo_WithManyTransaction_ReturnCorrectCalculation(s *TransactionSuite
 	}
 
 	query := domain.GetAccInfoQuery{}
-	accInfo, err := s.transactionModel.GetAccInfo(mockCTX, query, user.ID)
+	accInfo, err := s.repo.GetAccInfo(mockCTX, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
 }
@@ -1110,7 +1110,7 @@ func getAccInfo_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, des
 	query := domain.GetAccInfoQuery{
 		StartDate: &startDate,
 	}
-	accInfo, err := s.transactionModel.GetAccInfo(mockCTX, query, user.ID)
+	accInfo, err := s.repo.GetAccInfo(mockCTX, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
 }
@@ -1139,7 +1139,7 @@ func getAccInfo_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc s
 	query := domain.GetAccInfoQuery{
 		EndDate: &endDate,
 	}
-	accInfo, err := s.transactionModel.GetAccInfo(mockCTX, query, user.ID)
+	accInfo, err := s.repo.GetAccInfo(mockCTX, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
 }
@@ -1170,7 +1170,7 @@ func getAccInfo_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transac
 		StartDate: &startDate,
 		EndDate:   &endDate,
 	}
-	accInfo, err := s.transactionModel.GetAccInfo(mockCTX, query, user.ID)
+	accInfo, err := s.repo.GetAccInfo(mockCTX, query, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, accInfo, desc)
 }
@@ -1204,7 +1204,7 @@ func getByIDAndUserID_OnlyOneData_ReturnSuccessfully(s *TransactionSuite, desc s
 		Date:   transactions[0].Date,
 	}
 
-	trans, err := s.transactionModel.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID)
+	trans, err := s.repo.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, desc)
 }
@@ -1222,7 +1222,7 @@ func getByIDAndUserID_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, d
 		Date:   transactions[0].Date,
 	}
 
-	trans, err := s.transactionModel.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID)
+	trans, err := s.repo.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, err)
 }
@@ -1244,7 +1244,7 @@ func getByIDAndUserID_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, 
 		Date:   transactions[0].Date,
 	}
 
-	trans, err := s.transactionModel.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID)
+	trans, err := s.repo.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, trans, err)
 }
@@ -1253,7 +1253,7 @@ func getByIDAndUserID_IDNotFound_ReturnError(s *TransactionSuite, desc string) {
 	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	_, err = s.transactionModel.GetByIDAndUserID(mockCTX, transactions[0].ID+1, transactions[0].UserID)
+	_, err = s.repo.GetByIDAndUserID(mockCTX, transactions[0].ID+1, transactions[0].UserID)
 	s.Require().Error(err, desc)
 }
 
@@ -1261,7 +1261,7 @@ func getByIDAndUserID_UserIDNotFound_ReturnError(s *TransactionSuite, desc strin
 	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	_, err = s.transactionModel.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID+1)
+	_, err = s.repo.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID+1)
 	s.Require().Error(err, desc)
 }
 
@@ -1303,7 +1303,7 @@ func getDailyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, de
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
+	chartData, err := s.repo.GetDailyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1350,7 +1350,7 @@ func getDailyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuit
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
+	chartData, err := s.repo.GetDailyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1408,7 +1408,7 @@ func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSui
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
+	chartData, err := s.repo.GetDailyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1454,7 +1454,7 @@ func getDailyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs(s *Transactio
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
+	chartData, err := s.repo.GetDailyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1497,7 +1497,7 @@ func getMonthlyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, 
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
+	chartData, err := s.repo.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1544,7 +1544,7 @@ func getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSu
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
+	chartData, err := s.repo.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1602,7 +1602,7 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
+	chartData, err := s.repo.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, mainCategIDs, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1648,7 +1648,7 @@ func getMonthlyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs(s *Transact
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
+	chartData, err := s.repo.GetMonthlyBarChartData(mockCTX, dataRange, transactionType, nil, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1692,7 +1692,7 @@ func getPieChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc st
 	}
 	transactionType := domain.TransactionTypeExpense
 
-	chartData, err := s.transactionModel.GetPieChartData(mockCTX, dataRange, transactionType, user.ID)
+	chartData, err := s.repo.GetPieChartData(mockCTX, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1738,7 +1738,7 @@ func getPieChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetPieChartData(mockCTX, dataRange, transactionType, user.ID)
+	chartData, err := s.repo.GetPieChartData(mockCTX, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1795,7 +1795,7 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetPieChartData(mockCTX, dataRange, transactionType, user.ID)
+	chartData, err := s.repo.GetPieChartData(mockCTX, dataRange, transactionType, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1834,7 +1834,7 @@ func getDailyLineChartData_WithTwoData_ReturnSuccessFully(s *TransactionSuite, d
 		End:   end,
 	}
 
-	chartData, err := s.transactionModel.GetDailyLineChartData(mockCTX, dataRange, user.ID)
+	chartData, err := s.repo.GetDailyLineChartData(mockCTX, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1872,7 +1872,7 @@ func getDailyLineChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSui
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyLineChartData(mockCTX, dataRange, user.ID)
+	chartData, err := s.repo.GetDailyLineChartData(mockCTX, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1921,7 +1921,7 @@ func getDailyLineChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSu
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetDailyLineChartData(mockCTX, dataRange, user.ID)
+	chartData, err := s.repo.GetDailyLineChartData(mockCTX, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1960,7 +1960,7 @@ func getMonthlyLineChartData_WithTwoData_ReturnSuccessFully(s *TransactionSuite,
 		End:   end,
 	}
 
-	chartData, err := s.transactionModel.GetMonthlyLineChartData(mockCTX, dataRange, user.ID)
+	chartData, err := s.repo.GetMonthlyLineChartData(mockCTX, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -1998,7 +1998,7 @@ func getMonthlyLineChartData_WithMultipleData_ReturnSuccessfully(s *TransactionS
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyLineChartData(mockCTX, dataRange, user.ID)
+	chartData, err := s.repo.GetMonthlyLineChartData(mockCTX, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -2047,7 +2047,7 @@ func getMonthlyLineChartData_WithMultipleUsers_ReturnSuccessfully(s *Transaction
 		Start: start,
 		End:   end,
 	}
-	chartData, err := s.transactionModel.GetMonthlyLineChartData(mockCTX, dataRange, user.ID)
+	chartData, err := s.repo.GetMonthlyLineChartData(mockCTX, dataRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, chartData, desc)
 }
@@ -2085,7 +2085,7 @@ func getMonthlyData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc str
 		4: domain.TransactionTypeExpense, // startDate.AddDate(0, 0, 3)
 	}
 
-	monthlyData, err := s.transactionModel.GetMonthlyData(mockCTX, dateRange, user.ID)
+	monthlyData, err := s.repo.GetMonthlyData(mockCTX, dateRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, monthlyData, desc)
 }
@@ -2121,7 +2121,7 @@ func getMonthlyData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, des
 		7: domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
 	}
 
-	monthlyData, err := s.transactionModel.GetMonthlyData(mockCTX, dateRange, user.ID)
+	monthlyData, err := s.repo.GetMonthlyData(mockCTX, dateRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, monthlyData, desc)
 }
@@ -2165,7 +2165,7 @@ func getMonthlyData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, de
 		7: domain.TransactionTypeBoth,    // startDate.AddDate(0, 0, 6)
 	}
 
-	monthlyData, err := s.transactionModel.GetMonthlyData(mockCTX, dateRange, user.ID)
+	monthlyData, err := s.repo.GetMonthlyData(mockCTX, dateRange, user.ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, monthlyData, desc)
 }
