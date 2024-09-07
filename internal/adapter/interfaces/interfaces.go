@@ -141,8 +141,14 @@ type S3PreSignerService interface {
 	DeleteObject(ctx context.Context, objectKey string) error
 }
 
-// S3PreSigner is the interface that wraps the basic methods for s3 pre-signer.
-type S3PreSigner interface {
+// S3Client is the interface that wraps the basic methods for s3 client.
+type S3Client interface {
+	// DeleteObject deletes an object from S3.
+	DeleteObject(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
+}
+
+// S3PresignClient is the interface that wraps the basic methods for s3 presign client.
+type S3PresignClient interface {
 	// PresignPutObject returns a pre-signed URL to upload an object to S3.
 	PresignPutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.PresignOptions)) (*v4.PresignedHTTPRequest, error)
 
