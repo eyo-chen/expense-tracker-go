@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
 
@@ -14,11 +15,11 @@ var (
 
 type preSigner struct {
 	bucket string
-	client *s3.PresignClient
+	client interfaces.S3PreSigner
 }
 
 // NewPreSigner creates a new s3 pre-signer.
-func NewPreSigner(bucket string, client *s3.PresignClient) *preSigner {
+func NewPreSigner(bucket string, client interfaces.S3PreSigner) *preSigner {
 	return &preSigner{bucket: bucket, client: client}
 }
 
@@ -50,17 +51,4 @@ func (p *preSigner) GetObjectUrl(ctx context.Context, objectKey string, lifetime
 	}
 
 	return req.URL, nil
-}
-
-func (p *preSigner) DeleteObject(ctx context.Context, objectKey string) error {
-	_, err := p.client.PresignDeleteObject(ctx, &s3.DeleteObjectInput{
-		Bucket: &p.bucket,
-		Key:    &objectKey,
-	})
-	if err != nil {
-		logger.Error("Failed to get presigned URL", "error", err, "package", packageName)
-		return err
-	}
-
-	return nil
 }
