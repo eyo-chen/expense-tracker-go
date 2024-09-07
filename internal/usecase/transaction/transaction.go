@@ -14,12 +14,12 @@ const (
 )
 
 type TransactionUC struct {
-	Transaction interfaces.TransactionModel
-	MainCateg   interfaces.MainCategModel
-	SubCateg    interfaces.SubCategModel
+	Transaction interfaces.TransactionRepo
+	MainCateg   interfaces.MainCategRepo
+	SubCateg    interfaces.SubCategRepo
 }
 
-func NewTransactionUC(t interfaces.TransactionModel, m interfaces.MainCategModel, s interfaces.SubCategModel) *TransactionUC {
+func NewTransactionUC(t interfaces.TransactionRepo, m interfaces.MainCategRepo, s interfaces.SubCategRepo) *TransactionUC {
 	return &TransactionUC{
 		Transaction: t,
 		MainCateg:   m,

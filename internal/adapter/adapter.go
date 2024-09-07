@@ -11,19 +11,19 @@ import (
 )
 
 type Model struct {
-	User        user.UserModel
-	MainCateg   maincateg.MainCategModel
-	SubCateg    subcateg.SubCategModel
-	Icon        icon.IconModel
-	Transaction transaction.TransactionModel
+	User        user.Repo
+	MainCateg   maincateg.Repo
+	SubCateg    subcateg.Repo
+	Icon        icon.Repo
+	Transaction transaction.Repo
 }
 
 func New(mysqlDB *sql.DB) *Model {
 	return &Model{
-		User:        *user.NewUserModel(mysqlDB),
-		MainCateg:   *maincateg.NewMainCategModel(mysqlDB),
-		SubCateg:    *subcateg.NewSubCategModel(mysqlDB),
-		Icon:        *icon.NewIconModel(mysqlDB),
-		Transaction: *transaction.NewTransactionModel(mysqlDB),
+		User:        *user.New(mysqlDB),
+		MainCateg:   *maincateg.New(mysqlDB),
+		SubCateg:    *subcateg.New(mysqlDB),
+		Icon:        *icon.New(mysqlDB),
+		Transaction: *transaction.New(mysqlDB),
 	}
 }

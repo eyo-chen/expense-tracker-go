@@ -6,11 +6,11 @@ import (
 )
 
 type SubCategUC struct {
-	SubCateg  interfaces.SubCategModel
-	MainCateg interfaces.MainCategModel
+	SubCateg  interfaces.SubCategRepo
+	MainCateg interfaces.MainCategRepo
 }
 
-func NewSubCategUC(s interfaces.SubCategModel, m interfaces.MainCategModel) *SubCategUC {
+func NewSubCategUC(s interfaces.SubCategRepo, m interfaces.MainCategRepo) *SubCategUC {
 	return &SubCategUC{
 		SubCateg:  s,
 		MainCateg: m,

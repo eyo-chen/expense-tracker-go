@@ -18,7 +18,7 @@ const (
 	PackageName = "model/transaction"
 )
 
-type TransactionModel struct {
+type Repo struct {
 	DB *sql.DB
 }
 
@@ -33,23 +33,23 @@ type Transaction struct {
 	Date        time.Time
 }
 
-func NewTransactionModel(db *sql.DB) *TransactionModel {
-	return &TransactionModel{DB: db}
+func New(db *sql.DB) *Repo {
+	return &Repo{DB: db}
 }
 
-func (t *TransactionModel) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
+func (r *Repo) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
 	tr := cvtCreateTransInputToModelTransaction(trans)
 	qStmt := "INSERT INTO transactions (user_id, type, main_category_id, sub_category_id, price, note, date) VALUES (?, ?, ?, ?, ?, ?, ?)"
 
-	if _, err := t.DB.ExecContext(ctx, qStmt, tr.UserID, tr.Type, tr.MainCategID, tr.SubCategID, tr.Price, tr.Note, tr.Date); err != nil {
-		logger.Error("t.DB.ExecContext failed", "package", PackageName, "err", err)
+	if _, err := r.DB.ExecContext(ctx, qStmt, tr.UserID, tr.Type, tr.MainCategID, tr.SubCategID, tr.Price, tr.Note, tr.Date); err != nil {
+		logger.Error("r.DB.ExecContext failed", "package", PackageName, "err", err)
 		return err
 	}
 
 	return nil
 }
 
-func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKeys, error) {
+func (r *Repo) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64) ([]domain.Transaction, domain.DecodedNextKeys, error) {
 	var decodedNextKeys domain.DecodedNextKeys
 	if opt.Cursor.NextKey != "" {
 		var err error
@@ -63,9 +63,9 @@ func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, u
 	qStmt := getAllQStmt(opt, decodedNextKeys, Transaction{})
 	args := getAllArgs(opt, decodedNextKeys, userID)
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
+	rows, err := r.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {
-		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryContext failed", "package", PackageName, "err", err)
 		return nil, nil, err
 	}
 	defer rows.Close()
@@ -89,67 +89,67 @@ func (t *TransactionModel) GetAll(ctx context.Context, opt domain.GetTransOpt, u
 	return transactions, decodedNextKeys, nil
 }
 
-func (t *TransactionModel) Update(ctx context.Context, trans domain.UpdateTransactionInput) error {
+func (r *Repo) Update(ctx context.Context, trans domain.UpdateTransactionInput) error {
 	tr := cvtUpdateTransInputToModelTransaction(trans)
 	qStmt := "UPDATE transactions SET type = ?, main_category_id = ?, sub_category_id = ?, price = ?, note = ?, date = ? WHERE id = ?"
 
-	if _, err := t.DB.ExecContext(ctx, qStmt, tr.Type, tr.MainCategID, tr.SubCategID, tr.Price, tr.Note, tr.Date, tr.ID); err != nil {
-		logger.Error("t.DB.ExecContext failed", "package", PackageName, "err", err)
+	if _, err := r.DB.ExecContext(ctx, qStmt, tr.Type, tr.MainCategID, tr.SubCategID, tr.Price, tr.Note, tr.Date, tr.ID); err != nil {
+		logger.Error("r.DB.ExecContext failed", "package", PackageName, "err", err)
 		return err
 	}
 
 	return nil
 }
 
-func (t *TransactionModel) Delete(ctx context.Context, id int64) error {
+func (r *Repo) Delete(ctx context.Context, id int64) error {
 	qStmt := "DELETE FROM transactions WHERE id = ?"
 
-	if _, err := t.DB.ExecContext(ctx, qStmt, id); err != nil {
-		logger.Error("t.DB.ExecContext failed", "package", PackageName, "err", err)
+	if _, err := r.DB.ExecContext(ctx, qStmt, id); err != nil {
+		logger.Error("r.DB.ExecContext failed", "package", PackageName, "err", err)
 		return err
 	}
 
 	return nil
 }
 
-func (t *TransactionModel) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error) {
+func (r *Repo) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, userID int64) (domain.AccInfo, error) {
 	qStmt := getAccInfoQStmt(query)
 	args := getAccInfoArgs(query, userID)
 
 	var accInfo domain.AccInfo
-	if err := t.DB.QueryRowContext(ctx, qStmt, args...).
+	if err := r.DB.QueryRowContext(ctx, qStmt, args...).
 		Scan(&accInfo.TotalIncome, &accInfo.TotalExpense, &accInfo.TotalBalance); err != nil && err != sql.ErrNoRows {
-		logger.Error("t.DB.QueryRowContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryRowContext failed", "package", PackageName, "err", err)
 		return domain.AccInfo{}, err
 	}
 
 	return accInfo, nil
 }
 
-func (t *TransactionModel) GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error) {
+func (r *Repo) GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.Transaction, error) {
 	qStmt := "SELECT id, user_id, type, main_category_id, sub_category_id, price, note, date FROM transactions WHERE id = ? AND user_id = ?"
 
 	var trans Transaction
-	if err := t.DB.QueryRowContext(ctx, qStmt, id, userID).
+	if err := r.DB.QueryRowContext(ctx, qStmt, id, userID).
 		Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.MainCategID, &trans.SubCategID, &trans.Price, &trans.Note, &trans.Date); err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Transaction{}, domain.ErrTransactionDataNotFound
 		}
 
-		logger.Error("t.DB.QueryRowContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryRowContext failed", "package", PackageName, "err", err)
 		return domain.Transaction{}, err
 	}
 
 	return cvtToDomainTransactionWithoutCategory(trans), nil
 }
 
-func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs []int64, userID int64) (domain.DateToChartData, error) {
+func (r *Repo) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs []int64, userID int64) (domain.DateToChartData, error) {
 	qStmt := getGetDailyBarChartDataQuery(mainCategIDs)
 	args := genGetDailyBarChartDataArgs(userID, transactionType, dateRange, mainCategIDs)
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
+	rows, err := r.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {
-		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
 	}
 
@@ -169,13 +169,13 @@ func (t *TransactionModel) GetDailyBarChartData(ctx context.Context, dateRange d
 	return dateToData, nil
 }
 
-func (t *TransactionModel) GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs []int64, userID int64) (domain.DateToChartData, error) {
+func (r *Repo) GetMonthlyBarChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, mainCategIDs []int64, userID int64) (domain.DateToChartData, error) {
 	qStmt := getGetMonthlyBarChartDataQuery(mainCategIDs)
 	args := getGetMonthlyBarChartDataArgs(userID, transactionType, dateRange, mainCategIDs)
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, args...)
+	rows, err := r.DB.QueryContext(ctx, qStmt, args...)
 	if err != nil {
-		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
 	}
 
@@ -197,7 +197,7 @@ func (t *TransactionModel) GetMonthlyBarChartData(ctx context.Context, dateRange
 	return dateToData, nil
 }
 
-func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
+func (r *Repo) GetPieChartData(ctx context.Context, dateRange domain.ChartDateRange, transactionType domain.TransactionType, userID int64) (domain.ChartData, error) {
 	qStmt := `
 	  SELECT mc.name,
 		       SUM(ts.price)
@@ -210,9 +210,9 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain
 		GROUP BY mc.name
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
+	rows, err := r.DB.QueryContext(ctx, qStmt, userID, transactionType.ToModelValue(), dateRange.Start, dateRange.End)
 	if err != nil {
-		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.ChartData{}, err
 	}
 
@@ -234,10 +234,10 @@ func (t *TransactionModel) GetPieChartData(ctx context.Context, dateRange domain
 	return domain.ChartData{Labels: labels, Datasets: datasets}, nil
 }
 
-func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
-	_, err := t.DB.Exec("SET @csum := 0")
+func (r *Repo) GetDailyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
+	_, err := r.DB.Exec("SET @csum := 0")
 	if err != nil {
-		logger.Error("t.DB.Exec failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.Exec failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
 	}
 
@@ -259,9 +259,9 @@ func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange 
 					) AS temp
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.Start, dateRange.End)
+	rows, err := r.DB.QueryContext(ctx, qStmt, userID, dateRange.Start, dateRange.End)
 	if err != nil {
-		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
 	}
 
@@ -281,10 +281,10 @@ func (t *TransactionModel) GetDailyLineChartData(ctx context.Context, dateRange 
 	return dataToDate, nil
 }
 
-func (t *TransactionModel) GetMonthlyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
-	_, err := t.DB.Exec("SET @csum := 0")
+func (r *Repo) GetMonthlyLineChartData(ctx context.Context, dateRange domain.ChartDateRange, userID int64) (domain.DateToChartData, error) {
+	_, err := r.DB.Exec("SET @csum := 0")
 	if err != nil {
-		logger.Error("t.DB.Exec failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.Exec failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
 	}
 
@@ -309,9 +309,9 @@ func (t *TransactionModel) GetMonthlyLineChartData(ctx context.Context, dateRang
 					) AS temp
 				 `
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.Start, dateRange.End)
+	rows, err := r.DB.QueryContext(ctx, qStmt, userID, dateRange.Start, dateRange.End)
 	if err != nil {
-		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.DateToChartData{}, err
 	}
 
@@ -333,7 +333,7 @@ func (t *TransactionModel) GetMonthlyLineChartData(ctx context.Context, dateRang
 	return dateToData, nil
 }
 
-func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error) {
+func (r *Repo) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error) {
 	qStmt := `
 		SELECT
 		DAY(date) AS day,
@@ -348,9 +348,9 @@ func (t *TransactionModel) GetMonthlyData(ctx context.Context, dateRange domain.
 		GROUP BY DAY(date)
 	`
 
-	rows, err := t.DB.QueryContext(ctx, qStmt, userID, dateRange.StartDate, dateRange.EndDate)
+	rows, err := r.DB.QueryContext(ctx, qStmt, userID, dateRange.StartDate, dateRange.EndDate)
 	if err != nil {
-		logger.Error("t.DB.QueryContext failed", "package", PackageName, "err", err)
+		logger.Error("r.DB.QueryContext failed", "package", PackageName, "err", err)
 		return domain.MonthDayToTransactionType{}, err
 	}
 	defer rows.Close()

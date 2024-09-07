@@ -8,11 +8,11 @@ import (
 )
 
 type MainCategUC struct {
-	MainCateg interfaces.MainCategModel
-	Icon      interfaces.IconModel
+	MainCateg interfaces.MainCategRepo
+	Icon      interfaces.IconRepo
 }
 
-func NewMainCategUC(m interfaces.MainCategModel, i interfaces.IconModel) *MainCategUC {
+func NewMainCategUC(m interfaces.MainCategRepo, i interfaces.IconRepo) *MainCategUC {
 	return &MainCategUC{
 		MainCateg: m,
 		Icon:      i,

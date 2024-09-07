@@ -10,11 +10,11 @@ import (
 )
 
 type IconUC struct {
-	icon  interfaces.IconModel
+	icon  interfaces.IconRepo
 	redis interfaces.RedisService
 }
 
-func NewIconUC(i interfaces.IconModel, r interfaces.RedisService) *IconUC {
+func NewIconUC(i interfaces.IconRepo, r interfaces.RedisService) *IconUC {
 	return &IconUC{
 		icon:  i,
 		redis: r,

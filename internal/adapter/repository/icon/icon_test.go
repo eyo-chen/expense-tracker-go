@@ -24,7 +24,7 @@ type IconSuite struct {
 	dk      *dockerutil.Container
 	db      *sql.DB
 	migrate *migrate.Migrate
-	model   interfaces.IconModel
+	repo    interfaces.IconRepo
 	f       *factory
 }
 
@@ -36,7 +36,7 @@ func (s *IconSuite) SetupSuite() {
 	s.dk = dockerutil.RunDocker(dockerutil.ImageMySQL)
 	db, migrate := testutil.ConnToDB(s.dk.Port)
 	logger.Register()
-	s.model = NewIconModel(db)
+	s.repo = New(db)
 	s.db = db
 	s.migrate = migrate
 	s.f = newFactory(db)
@@ -49,7 +49,7 @@ func (s *IconSuite) TearDownSuite() {
 }
 
 func (s *IconSuite) SetupTest() {
-	s.model = NewIconModel(s.db)
+	s.repo = New(s.db)
 	s.f = newFactory(s.db)
 }
 
@@ -97,13 +97,13 @@ func list_WithIcons_ReturnAll(s *IconSuite, desc string) {
 		},
 	}
 
-	res, err := s.model.List()
+	res, err := s.repo.List()
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expRes, res, desc)
 }
 
 func list_WithoutIcons_ReturnNil(s *IconSuite, desc string) {
-	res, err := s.model.List()
+	res, err := s.repo.List()
 	s.Require().NoError(err, desc)
 	s.Require().Nil(res, desc)
 }
@@ -130,7 +130,7 @@ func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
 		URL: icons[0].URL,
 	}
 
-	res, err := s.model.GetByID(icons[0].ID)
+	res, err := s.repo.GetByID(icons[0].ID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expRes, res, desc)
 }
@@ -141,7 +141,7 @@ func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 
 	expRes := domain.Icon{}
 
-	res, err := s.model.GetByID(999)
+	res, err := s.repo.GetByID(999)
 	s.Require().Equal(expRes, res, desc)
 	s.Require().Equal(domain.ErrIconNotFound, err, desc)
 }
@@ -175,7 +175,7 @@ func getByIDs_WithIcon_ReturnIcons(s *IconSuite, desc string) {
 	}
 
 	ids := []int64{icons[0].ID, icons[1].ID, 999}
-	res, err := s.model.GetByIDs(ids)
+	res, err := s.repo.GetByIDs(ids)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expRes, res, desc)
 }
@@ -185,7 +185,7 @@ func getByIDs_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	ids := []int64{999}
-	res, err := s.model.GetByIDs(ids)
+	res, err := s.repo.GetByIDs(ids)
 	s.Require().Nil(res, desc)
 	s.Require().Equal(domain.ErrIconNotFound, err, desc)
 }

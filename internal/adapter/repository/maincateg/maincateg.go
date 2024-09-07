@@ -15,12 +15,12 @@ const (
 	packagename        = "model/maincateg"
 )
 
-type MainCategModel struct {
+type Repo struct {
 	DB *sql.DB
 }
 
-func NewMainCategModel(db *sql.DB) *MainCategModel {
-	return &MainCategModel{DB: db}
+func New(db *sql.DB) *Repo {
+	return &Repo{DB: db}
 }
 
 type MainCateg struct {
@@ -31,11 +31,11 @@ type MainCateg struct {
 	UserID int64  `json:"user_id" gofacto:"foreignKey,struct:User"`
 }
 
-func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
+func (r *Repo) Create(categ *domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
 
 	c := cvtToMainCateg(categ, userID)
-	if _, err := m.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID); err != nil {
+	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -47,7 +47,7 @@ func (m *MainCategModel) Create(categ *domain.MainCateg, userID int64) error {
 	return nil
 }
 
-func (m *MainCategModel) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
+func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
 	stmt := `SELECT mc.id, mc.name, mc.type, i.id, i.url
 					 FROM main_categories AS mc
 					 LEFT JOIN icons AS i 
@@ -58,7 +58,7 @@ func (m *MainCategModel) GetAll(ctx context.Context, userID int64, transType dom
 		stmt += ` AND type = ` + transType.ToModelValue()
 	}
 
-	rows, err := m.DB.QueryContext(ctx, stmt, userID)
+	rows, err := r.DB.QueryContext(ctx, stmt, userID)
 	if err != nil {
 		logger.Error("m.DB.Query failed", "package", packagename, "err", err)
 		return nil, err
@@ -81,11 +81,11 @@ func (m *MainCategModel) GetAll(ctx context.Context, userID int64, transType dom
 	return categs, nil
 }
 
-func (m *MainCategModel) Update(categ *domain.MainCateg) error {
+func (r *Repo) Update(categ *domain.MainCateg) error {
 	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ? WHERE id = ?`
 
 	c := cvtToMainCateg(categ, 0)
-	if _, err := m.DB.Exec(stmt, c.Name, c.Type, c.IconID, c.ID); err != nil {
+	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.IconID, c.ID); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -97,10 +97,10 @@ func (m *MainCategModel) Update(categ *domain.MainCateg) error {
 	return nil
 }
 
-func (m *MainCategModel) Delete(id int64) error {
+func (r *Repo) Delete(id int64) error {
 	stmt := `DELETE FROM main_categories WHERE id = ?`
 
-	if _, err := m.DB.Exec(stmt, id); err != nil {
+	if _, err := r.DB.Exec(stmt, id); err != nil {
 		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
 		return err
 	}
@@ -108,11 +108,11 @@ func (m *MainCategModel) Delete(id int64) error {
 	return nil
 }
 
-func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
+func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
 	stmt := `SELECT id, name, type FROM main_categories WHERE id = ? AND user_id = ?`
 
 	var categ MainCateg
-	if err := m.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
+	if err := r.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrMainCategNotFound
 		}
@@ -125,7 +125,7 @@ func (m *MainCategModel) GetByID(id, userID int64) (*domain.MainCateg, error) {
 	return &domainCateg, nil
 }
 
-func (m *MainCategModel) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
+func (r *Repo) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES `
 	args := make([]interface{}, 0, len(categs)*4)
 	for i, c := range categs {
@@ -137,7 +137,7 @@ func (m *MainCategModel) BatchCreate(ctx context.Context, categs []domain.MainCa
 		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.Icon.ID)
 	}
 
-	if _, err := m.DB.ExecContext(ctx, stmt, args...); err != nil {
+	if _, err := r.DB.ExecContext(ctx, stmt, args...); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
