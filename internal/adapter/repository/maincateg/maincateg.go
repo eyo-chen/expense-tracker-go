@@ -12,7 +12,7 @@ import (
 
 const (
 	uniqueNameUserType = "main_categories.unique_name_user_type"
-	packagename        = "model/maincateg"
+	packageName        = "adapter/repository/maincateg"
 )
 
 type Repo struct {
@@ -40,7 +40,7 @@ func (r *Repo) Create(categ *domain.MainCateg, userID int64) error {
 			return domain.ErrUniqueNameUserType
 		}
 
-		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
+		logger.Error("r.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -60,7 +60,7 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 
 	rows, err := r.DB.QueryContext(ctx, stmt, userID)
 	if err != nil {
-		logger.Error("m.DB.Query failed", "package", packagename, "err", err)
+		logger.Error("r.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -70,7 +70,7 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 		var categ MainCateg
 		var icon icon.Icon
 		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &icon.ID, &icon.URL); err != nil {
-			logger.Error("rows.Scan failed", "package", packagename, "err", err)
+			logger.Error("rows.Scan failed", "package", packageName, "err", err)
 			return nil, err
 		}
 
@@ -90,7 +90,7 @@ func (r *Repo) Update(categ *domain.MainCateg) error {
 			return domain.ErrUniqueNameUserType
 		}
 
-		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
+		logger.Error("r.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -101,7 +101,7 @@ func (r *Repo) Delete(id int64) error {
 	stmt := `DELETE FROM main_categories WHERE id = ?`
 
 	if _, err := r.DB.Exec(stmt, id); err != nil {
-		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
+		logger.Error("r.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -117,7 +117,7 @@ func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
 			return nil, domain.ErrMainCategNotFound
 		}
 
-		logger.Error("m.DB.QueryRow failed", "package", packagename, "err", err)
+		logger.Error("r.DB.QueryRow failed", "package", packageName, "err", err)
 		return nil, err
 	}
 
@@ -142,7 +142,7 @@ func (r *Repo) BatchCreate(ctx context.Context, categs []domain.MainCateg, userI
 			return domain.ErrUniqueNameUserType
 		}
 
-		logger.Error("m.DB.Exec failed", "package", packagename, "err", err)
+		logger.Error("r.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 

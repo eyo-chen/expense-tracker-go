@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	UniqueNameUserMainCategory = "sub_categories.unique_name_user_maincategory"
-	packageName                = "model/subcateg"
+	uniqueNameUserMainCategory = "sub_categories.unique_name_user_maincategory"
+	packageName                = "adapter/repository/subcateg"
 )
 
 type Repo struct {
@@ -34,11 +34,11 @@ func (r *Repo) Create(categ *domain.SubCateg, userID int64) error {
 
 	c := cvtToSubCateg(categ, userID)
 	if _, err := r.DB.Exec(stmt, c.Name, c.UserID, c.MainCategID); err != nil {
-		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
+		if errorutil.ParseError(err, uniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
 
-		logger.Error("m.DB.Exec failed", "package", packageName, "err", err)
+		logger.Error("r.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -50,7 +50,7 @@ func (r *Repo) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, 
 
 	rows, err := r.DB.Query(stmt, userID, mainCategID)
 	if err != nil {
-		logger.Error("m.DB.Query failed", "package", packageName, "err", err)
+		logger.Error("r.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -75,11 +75,11 @@ func (r *Repo) Update(categ *domain.SubCateg) error {
 
 	c := cvtToSubCateg(categ, 0)
 	if _, err := r.DB.Exec(stmt, c.Name, c.ID); err != nil {
-		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
+		if errorutil.ParseError(err, uniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
 
-		logger.Error("m.DB.Exec failed", "package", packageName, "err", err)
+		logger.Error("r.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (r *Repo) Delete(id int64) error {
 	stmt := `DELETE FROM sub_categories WHERE id = ?`
 
 	if _, err := r.DB.Exec(stmt, id); err != nil {
-		logger.Error("m.DB.Exec failed", "package", packageName, "err", err)
+		logger.Error("r.DB.Exec failed", "package", packageName, "err", err)
 		return err
 	}
 
@@ -106,7 +106,7 @@ func (r *Repo) GetByID(id, userID int64) (*domain.SubCateg, error) {
 			return nil, domain.ErrSubCategNotFound
 		}
 
-		logger.Error("m.DB.QueryRow failed", "package", packageName, "err", err)
+		logger.Error("r.DB.QueryRow failed", "package", packageName, "err", err)
 		return nil, err
 	}
 
@@ -126,11 +126,11 @@ func (r *Repo) BatchCreate(ctx context.Context, categs []domain.SubCateg, userID
 	}
 
 	if _, err := r.DB.ExecContext(ctx, stmt, args...); err != nil {
-		if errorutil.ParseError(err, UniqueNameUserMainCategory) {
+		if errorutil.ParseError(err, uniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}
 
-		logger.Error("m.DB.ExecContext CreateBatch failed", "package", packageName, "err", err)
+		logger.Error("r.DB.ExecContext CreateBatch failed", "package", packageName, "err", err)
 		return err
 	}
 
