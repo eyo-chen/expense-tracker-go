@@ -11,12 +11,12 @@ import (
 )
 
 type Usecase struct {
-	User        user.UC
-	MainCateg   maincateg.MainCategUC
-	SubCateg    subcateg.SubCategUC
-	Transaction transaction.TransactionUC
-	Icon        icon.IconUC
-	InitData    initdata.InitDataUC
+	User        *user.UC
+	MainCateg   *maincateg.MainCategUC
+	SubCateg    *subcateg.SubCategUC
+	Transaction *transaction.TransactionUC
+	Icon        *icon.IconUC
+	InitData    *initdata.InitDataUC
 }
 
 func New(u interfaces.UserRepo,
@@ -27,11 +27,11 @@ func New(u interfaces.UserRepo,
 	r interfaces.RedisService,
 ) *Usecase {
 	return &Usecase{
-		User:        *user.New(u, r),
-		MainCateg:   *maincateg.NewMainCategUC(m, i),
-		SubCateg:    *subcateg.NewSubCategUC(s, m),
-		Transaction: *transaction.NewTransactionUC(t, m, s),
-		Icon:        *icon.NewIconUC(i, r),
-		InitData:    *initdata.NewInitDataUC(i, m, s, u),
+		User:        user.New(u, r),
+		MainCateg:   maincateg.NewMainCategUC(m, i),
+		SubCateg:    subcateg.NewSubCategUC(s, m),
+		Transaction: transaction.NewTransactionUC(t, m, s),
+		Icon:        icon.NewIconUC(i, r),
+		InitData:    initdata.NewInitDataUC(i, m, s, u),
 	}
 }

@@ -11,12 +11,12 @@ import (
 )
 
 type Handler struct {
-	User        user.Hlr
-	MainCateg   maincateg.MainCategHandler
-	SubCateg    subcateg.SubCategHandler
-	Transaction transaction.TransactionHandler
-	Icon        icon.IconHandler
-	InitData    initdata.InitDataHlr
+	User        *user.Hlr
+	MainCateg   *maincateg.MainCategHandler
+	SubCateg    *subcateg.SubCategHandler
+	Transaction *transaction.TransactionHandler
+	Icon        *icon.IconHandler
+	InitData    *initdata.InitDataHlr
 }
 
 func New(u interfaces.UserUC,
@@ -27,11 +27,11 @@ func New(u interfaces.UserUC,
 	in interfaces.InitDataUC,
 ) *Handler {
 	return &Handler{
-		User:        *user.New(u),
-		MainCateg:   *maincateg.NewMainCategHandler(m),
-		SubCateg:    *subcateg.NewSubCategHandler(s),
-		Transaction: *transaction.NewTransactionHandler(t),
-		Icon:        *icon.NewIconHandler(i),
-		InitData:    *initdata.New(in),
+		User:        user.New(u),
+		MainCateg:   maincateg.NewMainCategHandler(m),
+		SubCateg:    subcateg.NewSubCategHandler(s),
+		Transaction: transaction.NewTransactionHandler(t),
+		Icon:        icon.NewIconHandler(i),
+		InitData:    initdata.New(in),
 	}
 }
