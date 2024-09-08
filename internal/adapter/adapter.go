@@ -13,21 +13,21 @@ import (
 )
 
 type Adapter struct {
-	User         user.Repo
-	MainCateg    maincateg.Repo
-	SubCateg     subcateg.Repo
-	Icon         icon.Repo
-	Transaction  transaction.Repo
-	RedisService redisservice.Service
+	User         *user.Repo
+	MainCateg    *maincateg.Repo
+	SubCateg     *subcateg.Repo
+	Icon         *icon.Repo
+	Transaction  *transaction.Repo
+	RedisService *redisservice.Service
 }
 
 func New(mysqlDB *sql.DB, redisClient *redis.Client) *Adapter {
 	return &Adapter{
-		User:         *user.New(mysqlDB),
-		MainCateg:    *maincateg.New(mysqlDB),
-		SubCateg:     *subcateg.New(mysqlDB),
-		Icon:         *icon.New(mysqlDB),
-		Transaction:  *transaction.New(mysqlDB),
-		RedisService: *redisservice.New(redisClient),
+		User:         user.New(mysqlDB),
+		MainCateg:    maincateg.New(mysqlDB),
+		SubCateg:     subcateg.New(mysqlDB),
+		Icon:         icon.New(mysqlDB),
+		Transaction:  transaction.New(mysqlDB),
+		RedisService: redisservice.New(redisClient),
 	}
 }
