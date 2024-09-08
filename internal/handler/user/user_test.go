@@ -80,11 +80,15 @@ func signup_NoError_CreateSuccessfully(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Signup", user).Return("token", nil).Once()
+	s.mockUserUC.On("Signup", mockCTX, user).Return(domain.Token{
+		Access:  "access_token",
+		Refresh: "refresh_token",
+	}, nil).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{
-		"token": "token",
+		"access_token":  "access_token",
+		"refresh_token": "refresh_token",
 	}
 
 	// action
@@ -219,7 +223,7 @@ func signup_EmailExists_CreateSuccessfully(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Signup", user).Return("", domain.ErrEmailAlreadyExists).Once()
+	s.mockUserUC.On("Signup", mockCTX, user).Return(domain.Token{}, domain.ErrEmailAlreadyExists).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{
@@ -256,7 +260,7 @@ func signup_SignupFail_CreateSuccessfully(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Signup", user).Return("", errors.New("error")).Once()
+	s.mockUserUC.On("Signup", mockCTX, user).Return(domain.Token{}, errors.New("error")).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{
@@ -308,11 +312,15 @@ func login_NoError_LoginSuccessfully(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Login", user).Return("token", nil).Once()
+	s.mockUserUC.On("Login", mockCTX, user).Return(domain.Token{
+		Access:  "access_token",
+		Refresh: "refresh_token",
+	}, nil).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{
-		"token": "token",
+		"access_token":  "access_token",
+		"refresh_token": "refresh_token",
 	}
 
 	// action
@@ -410,7 +418,7 @@ func login_AuthError_ReturnError(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Login", user).Return("", domain.ErrAuthentication).Once()
+	s.mockUserUC.On("Login", mockCTX, user).Return(domain.Token{}, domain.ErrAuthentication).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{
@@ -446,7 +454,7 @@ func login_LoginFail_ReturnError(s *UserSuite, desc string) {
 	defer res.Result().Body.Close()
 
 	// prepare service
-	s.mockUserUC.On("Login", user).Return("", errors.New("error")).Once()
+	s.mockUserUC.On("Login", mockCTX, user).Return(domain.Token{}, errors.New("error")).Once()
 
 	// prepare expected response
 	expResp := map[string]interface{}{

@@ -30,7 +30,7 @@ func genJWTToken(user domain.User) (string, error) {
 		UserName:  user.Name,
 		UserEmail: user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
 		},
 	}
 
@@ -40,7 +40,7 @@ func genJWTToken(user domain.User) (string, error) {
 func genRefreshToken() (string, error) {
 	key := []byte(os.Getenv("JWT_SECRET_KEY"))
 	claims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
 	}
 
 	return genToken(key, claims)

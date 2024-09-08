@@ -49,6 +49,7 @@ func (s *UserSuite) TestSignup() {
 	for scenario, fn := range map[string]func(s *UserSuite, desc string){
 		"when email not exists, signup successfully": singup_EmailNotExists_SignupSuccessfully,
 		"when email exists, return error":            singup_EmailExists_ReturnError,
+		"when set cache fail, dont return error":     singup_SetCacheFail_DontReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -59,49 +60,64 @@ func (s *UserSuite) TestSignup() {
 }
 
 func singup_EmailNotExists_SignupSuccessfully(s *UserSuite, desc string) {
-	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
-	s.mockUser.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
-	s.mockUser.On("FindByEmail", "email.com").
-		Return(domain.User{
-			ID:       1,
-			Name:     "username",
-			Email:    "email.com",
-			Password: "password",
-		}, nil).Once()
-
-	input := domain.User{
-		Name:     "username",
-		Email:    "email.com",
-		Password: "password",
-	}
-	token, err := s.userUC.Signup(input)
-	s.Require().NoError(err, desc)
-	s.Require().NotEmpty(token, desc)
-}
-
-func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
-	userByEmail := domain.User{
+	// prepare mock data
+	mockUser := domain.User{
 		ID:    1,
 		Name:  "username",
 		Email: "email.com",
 	}
-	s.mockUser.On("FindByEmail", "email.com").Return(userByEmail, nil).Once()
 
-	input := domain.User{
-		Name:     "username",
-		Email:    "email.com",
-		Password: "password",
+	// prepare mock service
+	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
+	s.mockUser.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
+	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(nil).Once()
+
+	token, err := s.userUC.Signup(mockCTX, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().NotEmpty(token.Access, desc)
+	s.Require().NotEmpty(token.Refresh, desc)
+}
+
+func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
+	mockUser := domain.User{
+		ID:    1,
+		Name:  "username",
+		Email: "email.com",
 	}
-	token, err := s.userUC.Signup(input)
+	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+
+	token, err := s.userUC.Signup(mockCTX, mockUser)
 	s.Require().Equal(domain.ErrEmailAlreadyExists, err, desc)
 	s.Require().Empty(token, desc)
 }
 
+func singup_SetCacheFail_DontReturnError(s *UserSuite, desc string) {
+	// prepare mock data
+	mockUser := domain.User{
+		ID:    1,
+		Name:  "username",
+		Email: "email.com",
+	}
+
+	// prepare mock service
+	s.mockUser.On("FindByEmail", "email.com").Return(domain.User{}, domain.ErrEmailNotFound).Once()
+	s.mockUser.On("Create", "username", "email.com", mock.Anything).Return(nil).Once()
+	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(errors.New("set fail")).Once()
+
+	token, err := s.userUC.Signup(mockCTX, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().NotEmpty(token.Access, desc)
+	s.Require().NotEmpty(token.Refresh, desc)
+}
+
 func (s *UserSuite) TestLogin() {
 	for scenario, fn := range map[string]func(s *UserSuite, desc string){
-		"when no error, return successfully":    login_NoError_ReturnSuccessfully,
-		"when email not exists, return error":   login_EmailNotExists_ReturnError,
-		"when password not match, return error": login_PasswordNotMatch_ReturnError,
+		"when no error, return successfully":     login_NoError_ReturnSuccessfully,
+		"when email not exists, return error":    login_EmailNotExists_ReturnError,
+		"when password not match, return error":  login_PasswordNotMatch_ReturnError,
+		"when redis set fail, dont return error": login_RedisSetFail_DontReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -115,22 +131,20 @@ func login_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 	hashedPassword, err := auth.GenerateHashPassword("password")
 	s.Require().NoError(err)
 
-	userByEmail := domain.User{
+	mockUser := domain.User{
 		ID:            1,
 		Name:          "username",
 		Email:         "email.com",
 		Password:      "password",
 		Password_hash: hashedPassword,
 	}
-	s.mockUser.On("FindByEmail", "email.com").Return(userByEmail, nil).Once()
+	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(nil).Once()
 
-	input := domain.User{
-		Email:    "email.com",
-		Password: "password",
-	}
-	token, err := s.userUC.Login(input)
+	token, err := s.userUC.Login(mockCTX, mockUser)
 	s.Require().NoError(err, desc)
-	s.Require().NotEmpty(token, desc)
+	s.Require().NotEmpty(token.Access, desc)
+	s.Require().NotEmpty(token.Refresh, desc)
 }
 
 func login_EmailNotExists_ReturnError(s *UserSuite, desc string) {
@@ -140,7 +154,7 @@ func login_EmailNotExists_ReturnError(s *UserSuite, desc string) {
 		Email:    "email.com",
 		Password: "password",
 	}
-	token, err := s.userUC.Login(input)
+	token, err := s.userUC.Login(mockCTX, input)
 	s.Require().Equal(domain.ErrAuthentication, err, desc)
 	s.Require().Empty(token, desc)
 }
@@ -162,9 +176,29 @@ func login_PasswordNotMatch_ReturnError(s *UserSuite, desc string) {
 		Email:    "email.com",
 		Password: "password2", // wrong password
 	}
-	token, err := s.userUC.Login(input)
+	token, err := s.userUC.Login(mockCTX, input)
 	s.Require().Equal(domain.ErrAuthentication, err, desc)
 	s.Require().Empty(token, desc)
+}
+
+func login_RedisSetFail_DontReturnError(s *UserSuite, desc string) {
+	hashedPassword, err := auth.GenerateHashPassword("password")
+	s.Require().NoError(err)
+
+	mockUser := domain.User{
+		ID:            1,
+		Name:          "username",
+		Email:         "email.com",
+		Password:      "password",
+		Password_hash: hashedPassword,
+	}
+	s.mockUser.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
+	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(errors.New("set fail")).Once()
+
+	token, err := s.userUC.Login(mockCTX, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().NotEmpty(token.Access, desc)
+	s.Require().NotEmpty(token.Refresh, desc)
 }
 
 func (s *UserSuite) TestToken() {
