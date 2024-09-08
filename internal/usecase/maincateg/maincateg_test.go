@@ -17,9 +17,9 @@ var (
 
 type MainCategSuite struct {
 	suite.Suite
-	mainCategUC        interfaces.MainCategUC
-	mockIconModel      *mocks.IconModel
-	mockMainCategModel *mocks.MainCategModel
+	mainCategUC       interfaces.MainCategUC
+	mockIconRepo      *mocks.IconRepo
+	mockMainCategRepo *mocks.MainCategRepo
 }
 
 func TestMainCategSuite(t *testing.T) {
@@ -27,14 +27,14 @@ func TestMainCategSuite(t *testing.T) {
 }
 
 func (s *MainCategSuite) SetupTest() {
-	s.mockIconModel = mocks.NewIconModel(s.T())
-	s.mockMainCategModel = mocks.NewMainCategModel(s.T())
-	s.mainCategUC = NewMainCategUC(s.mockMainCategModel, s.mockIconModel)
+	s.mockIconRepo = mocks.NewIconRepo(s.T())
+	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
+	s.mainCategUC = NewMainCategUC(s.mockMainCategRepo, s.mockIconRepo)
 }
 
 func (s *MainCategSuite) TearDownTest() {
-	s.mockIconModel.AssertExpectations(s.T())
-	s.mockMainCategModel.AssertExpectations(s.T())
+	s.mockIconRepo.AssertExpectations(s.T())
+	s.mockMainCategRepo.AssertExpectations(s.T())
 }
 
 func (s *MainCategSuite) TestCreate() {
@@ -59,8 +59,8 @@ func create_NoError_CreateSuccessfully(s *MainCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockIconModel.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, nil)
-	s.mockMainCategModel.On("Create", &mockCateg, mockUserID).Return(nil)
+	s.mockIconRepo.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, nil)
+	s.mockMainCategRepo.On("Create", &mockCateg, mockUserID).Return(nil)
 
 	// action, assertion
 	err := s.mainCategUC.Create(mockCateg, mockUserID)
@@ -76,7 +76,7 @@ func create_IconNotExist_ReturnError(s *MainCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockIconModel.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, domain.ErrIconNotFound)
+	s.mockIconRepo.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, domain.ErrIconNotFound)
 
 	// action, assertion
 	err := s.mainCategUC.Create(mockCateg, mockUserID)
@@ -104,7 +104,7 @@ func getAll_NoError_ReturnMainCategories(s *MainCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockMainCategModel.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeExpense).Return(mockMainCategs, nil)
+	s.mockMainCategRepo.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeExpense).Return(mockMainCategs, nil)
 
 	// action, assertion
 	res, err := s.mainCategUC.GetAll(mockCtx, mockUserID, domain.TransactionTypeExpense)
@@ -136,9 +136,9 @@ func update_NoError_UpdateSuccessfully(s *MainCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockMainCategModel.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
-	s.mockIconModel.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, nil)
-	s.mockMainCategModel.On("Update", &mockCateg).Return(nil)
+	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
+	s.mockIconRepo.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, nil)
+	s.mockMainCategRepo.On("Update", &mockCateg).Return(nil)
 
 	// action, assertion
 	err := s.mainCategUC.Update(mockCateg, mockUserID)
@@ -155,7 +155,7 @@ func update_MainCategNotExist_ReturnError(s *MainCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockMainCategModel.On("GetByID", mockCateg.ID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
+	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
 
 	// action, assertion
 	err := s.mainCategUC.Update(mockCateg, mockUserID)
@@ -172,8 +172,8 @@ func update_IconNotExist_ReturnError(s *MainCategSuite, desc string) {
 	}
 
 	// prepare mock service
-	s.mockMainCategModel.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
-	s.mockIconModel.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, domain.ErrIconNotFound)
+	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
+	s.mockIconRepo.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, domain.ErrIconNotFound)
 
 	// action, assertion
 	err := s.mainCategUC.Update(mockCateg, mockUserID)
@@ -197,7 +197,7 @@ func delete_NoError_DeleteSuccessfully(s *MainCategSuite, desc string) {
 	mockID := int64(1)
 
 	// prepare mock service
-	s.mockMainCategModel.On("Delete", mockID).Return(nil)
+	s.mockMainCategRepo.On("Delete", mockID).Return(nil)
 
 	// action, assertion
 	err := s.mainCategUC.Delete(mockID)

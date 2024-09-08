@@ -8,9 +8,8 @@ import (
 	"os"
 	"time"
 
+	adapter "github.com/eyo-chen/expense-tracker-go/internal/adapter"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler"
-	"github.com/eyo-chen/expense-tracker-go/internal/model"
-	redisservice "github.com/eyo-chen/expense-tracker-go/internal/model/redis"
 	"github.com/eyo-chen/expense-tracker-go/internal/router"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -51,11 +50,10 @@ func main() {
 	}
 	defer redisClient.Close()
 
-	// Setup model, usecase, and handler
-	model := model.New(mysqlDB)
-	redis := redisservice.New(redisClient)
-	usecase := usecase.New(&model.User, &model.MainCateg, &model.SubCateg, &model.Icon, &model.Transaction, redis)
-	handler := handler.New(&usecase.User, &usecase.MainCateg, &usecase.SubCateg, &usecase.Transaction, &usecase.Icon, &usecase.InitData)
+	// Setup adapter, usecase, and handler
+	adapter := adapter.New(mysqlDB, redisClient)
+	usecase := usecase.New(adapter.User, adapter.MainCateg, adapter.SubCateg, adapter.Icon, adapter.Transaction, adapter.RedisService)
+	handler := handler.New(usecase.User, usecase.MainCateg, usecase.SubCateg, usecase.Transaction, usecase.Icon, usecase.InitData)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}

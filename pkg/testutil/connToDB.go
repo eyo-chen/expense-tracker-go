@@ -23,7 +23,7 @@ func ConnToDB(port string) (*sql.DB, *migrate.Migrate) {
 		log.Fatalf("mysql.WithInstance failed: %s", err)
 	}
 
-	baseDir := filepath.Join("..", "..", "..")
+	baseDir := filepath.Join("..", "..", "..", "..")
 	migrationDir := fmt.Sprintf("file://%s/migrations/schema", baseDir)
 	migration, err := migrate.NewWithDatabaseInstance(
 		migrationDir,

@@ -4,17 +4,17 @@ import (
 	"context"
 	"time"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
 )
 
 type IconUC struct {
-	icon  interfaces.IconModel
+	icon  interfaces.IconRepo
 	redis interfaces.RedisService
 }
 
-func NewIconUC(i interfaces.IconModel, r interfaces.RedisService) *IconUC {
+func NewIconUC(i interfaces.IconRepo, r interfaces.RedisService) *IconUC {
 	return &IconUC{
 		icon:  i,
 		redis: r,

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/auth"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
@@ -15,11 +15,11 @@ const (
 )
 
 type UC struct {
-	user  interfaces.UserModel
+	user  interfaces.UserRepo
 	redis interfaces.RedisService
 }
 
-func New(u interfaces.UserModel, r interfaces.RedisService) *UC {
+func New(u interfaces.UserRepo, r interfaces.RedisService) *UC {
 	return &UC{user: u, redis: r}
 }
 

@@ -22,10 +22,10 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
-	transactionUC   *TransactionUC
-	mockTransaction *mocks.TransactionModel
-	mockMainCateg   *mocks.MainCategModel
-	mockSubCateg    *mocks.SubCategModel
+	transactionUC       *TransactionUC
+	mockTransactionRepo *mocks.TransactionRepo
+	mockMainCategRepo   *mocks.MainCategRepo
+	mockSubCategRepo    *mocks.SubCategRepo
 }
 
 func TestTransactionSuite(t *testing.T) {
@@ -37,16 +37,16 @@ func (s *TransactionSuite) SetupSuite() {
 }
 
 func (s *TransactionSuite) SetupTest() {
-	s.mockTransaction = mocks.NewTransactionModel(s.T())
-	s.mockMainCateg = mocks.NewMainCategModel(s.T())
-	s.mockSubCateg = mocks.NewSubCategModel(s.T())
-	s.transactionUC = NewTransactionUC(s.mockTransaction, s.mockMainCateg, s.mockSubCateg)
+	s.mockTransactionRepo = mocks.NewTransactionRepo(s.T())
+	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
+	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
+	s.transactionUC = NewTransactionUC(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo)
 }
 
 func (s *TransactionSuite) TearDownTest() {
-	s.mockTransaction.AssertExpectations(s.T())
-	s.mockMainCateg.AssertExpectations(s.T())
-	s.mockSubCateg.AssertExpectations(s.T())
+	s.mockTransactionRepo.AssertExpectations(s.T())
+	s.mockMainCategRepo.AssertExpectations(s.T())
+	s.mockSubCategRepo.AssertExpectations(s.T())
 }
 
 func (s *TransactionSuite) TestCreate() {
@@ -83,9 +83,9 @@ func create_NoError_CreateSuccessfully(s *TransactionSuite, desc string) {
 	}
 
 	// prepare mock services
-	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
-	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
-	s.mockTransaction.Mock.On("Create", mockCtx, transInput).Return(nil).Once()
+	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCategRepo.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+	s.mockTransactionRepo.Mock.On("Create", mockCtx, transInput).Return(nil).Once()
 
 	// action, assertion
 	err := s.transactionUC.Create(mockCtx, transInput)
@@ -105,7 +105,7 @@ func create_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
 	}
 
 	// prepare mock services
-	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(nil, errors.New("get main category fail")).Once()
+	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(nil, errors.New("get main category fail")).Once()
 
 	// action, assertion
 	err := s.transactionUC.Create(mockCtx, transInput)
@@ -128,7 +128,7 @@ func create_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
 	}
 
 	// prepare mock services
-	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
 
 	// action, assertion
 	err := s.transactionUC.Create(mockCtx, transInput)
@@ -151,8 +151,8 @@ func create_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
 	}
 
 	// prepare mock services
-	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
-	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(nil, errors.New("get subcategory fail")).Once()
+	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCategRepo.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(nil, errors.New("get subcategory fail")).Once()
 
 	// action, assertion
 	err := s.transactionUC.Create(mockCtx, transInput)
@@ -176,8 +176,8 @@ func create_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
 	}
 
 	// prepare mock services
-	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
-	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCategRepo.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
 
 	// action, assertion
 	err := s.transactionUC.Create(mockCtx, transInput)
@@ -201,9 +201,9 @@ func create_CreateFail_ReturnError(s *TransactionSuite, desc string) {
 	}
 
 	// prepare mock services
-	s.mockMainCateg.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
-	s.mockSubCateg.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
-	s.mockTransaction.Mock.On("Create", mockCtx, transInput).Return(errors.New("create fail")).Once()
+	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
+	s.mockSubCategRepo.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
+	s.mockTransactionRepo.Mock.On("Create", mockCtx, transInput).Return(errors.New("create fail")).Once()
 
 	// action, assertion
 	err := s.transactionUC.Create(mockCtx, transInput)
@@ -233,7 +233,7 @@ func getAll_NoError_ReturnTransactions(s *TransactionSuite, desc string) {
 	mockUser := domain.User{ID: 1}
 	mockTrans := []domain.Transaction{{ID: 1, UserID: 1}}
 
-	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
 	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
@@ -247,7 +247,7 @@ func getAll_GetTransFail_ReturnError(s *TransactionSuite, desc string) {
 	mockOpt := domain.GetTransOpt{}
 	mockUser := domain.User{ID: 1}
 
-	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(nil, mockDecodedNextKeys, errors.New("error")).Once()
 
 	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
@@ -262,7 +262,7 @@ func getAll_InitPageWithSize_ReturnCorrectCursor(s *TransactionSuite, desc strin
 	mockUser := domain.User{ID: 1}
 	mockTrans := []domain.Transaction{{ID: 1, UserID: 1}}
 
-	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
 	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
@@ -290,7 +290,7 @@ func getAll_InitPageWithSizeAndSort_ReturnCorrectCursor(s *TransactionSuite, des
 		{Field: "ID", Value: "2"},
 	}
 
-	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
 	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
@@ -310,7 +310,7 @@ func getAll_WithDecodedNextKey_ReturnCorrectCursor(s *TransactionSuite, desc str
 	mockUser := domain.User{ID: 1}
 	mockTrans := []domain.Transaction{{ID: 2, UserID: 1}}
 
-	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
 	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
@@ -330,7 +330,7 @@ func getAll_SizeIsEmptyValue_ReturnNoCursor(s *TransactionSuite, desc string) {
 	mockUser := domain.User{ID: 1}
 	mockTrans := []domain.Transaction{}
 
-	s.mockTransaction.On("GetAll", mockCtx, mockOpt, int64(1)).
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
 	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
@@ -371,16 +371,16 @@ func update_NoError_UpdateSuccessfully(s *TransactionSuite, desc string) {
 		Note:        "note",
 	}
 
-	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(&mainCateg, nil).Once()
 
-	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+	s.mockSubCategRepo.On("GetByID", trans.SubCategID, user.ID).
 		Return(&subCateg, nil).Once()
 
-	s.mockTransaction.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
+	s.mockTransactionRepo.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
 		Return(domain.Transaction{}, nil).Once()
 
-	s.mockTransaction.On("Update", mockCtx, trans).
+	s.mockTransactionRepo.On("Update", mockCtx, trans).
 		Return(nil).Once()
 
 	err := s.transactionUC.Update(mockCtx, trans, user)
@@ -399,7 +399,7 @@ func update_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
 		Note:        "note",
 	}
 
-	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(nil, errors.New("error")).Once()
 
 	err := s.transactionUC.Update(mockCtx, trans, user)
@@ -419,7 +419,7 @@ func update_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
 		Note:        "note",
 	}
 
-	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(&mainCateg, nil).Once()
 
 	err := s.transactionUC.Update(mockCtx, trans, user)
@@ -439,10 +439,10 @@ func update_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
 		Note:        "note",
 	}
 
-	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(&mainCateg, nil).Once()
 
-	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+	s.mockSubCategRepo.On("GetByID", trans.SubCategID, user.ID).
 		Return(nil, errors.New("error")).Once()
 
 	err := s.transactionUC.Update(mockCtx, trans, user)
@@ -463,10 +463,10 @@ func update_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
 		Note:        "note",
 	}
 
-	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(&mainCateg, nil).Once()
 
-	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+	s.mockSubCategRepo.On("GetByID", trans.SubCategID, user.ID).
 		Return(&subCateg, nil).Once()
 
 	err := s.transactionUC.Update(mockCtx, trans, user)
@@ -487,13 +487,13 @@ func update_GetTransFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
 		Note:        "note",
 	}
 
-	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(&mainCateg, nil).Once()
 
-	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+	s.mockSubCategRepo.On("GetByID", trans.SubCategID, user.ID).
 		Return(&subCateg, nil).Once()
 
-	s.mockTransaction.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
+	s.mockTransactionRepo.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
 		Return(domain.Transaction{}, errors.New("error")).Once()
 
 	err := s.transactionUC.Update(mockCtx, trans, user)
@@ -514,16 +514,16 @@ func update_UpdateFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
 		Note:        "note",
 	}
 
-	s.mockMainCateg.On("GetByID", trans.MainCategID, user.ID).
+	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(&mainCateg, nil).Once()
 
-	s.mockSubCateg.On("GetByID", trans.SubCategID, user.ID).
+	s.mockSubCategRepo.On("GetByID", trans.SubCategID, user.ID).
 		Return(&subCateg, nil).Once()
 
-	s.mockTransaction.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
+	s.mockTransactionRepo.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
 		Return(domain.Transaction{}, nil).Once()
 
-	s.mockTransaction.On("Update", mockCtx, trans).
+	s.mockTransactionRepo.On("Update", mockCtx, trans).
 		Return(errors.New("error")).Once()
 
 	err := s.transactionUC.Update(mockCtx, trans, user)
@@ -548,11 +548,11 @@ func delete_NoError_DeleteSuccessfully(s *TransactionSuite, desc string) {
 		ID: 1,
 	}
 
-	s.mockTransaction.
+	s.mockTransactionRepo.
 		On("GetByIDAndUserID", mockCtx, int64(1), user.ID).
 		Return(domain.Transaction{}, nil).Once()
 
-	s.mockTransaction.On("Delete", mockCtx, int64(1)).
+	s.mockTransactionRepo.On("Delete", mockCtx, int64(1)).
 		Return(nil).Once()
 
 	err := s.transactionUC.Delete(mockCtx, int64(1), user)
@@ -564,7 +564,7 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 		ID: 1,
 	}
 
-	s.mockTransaction.
+	s.mockTransactionRepo.
 		On("GetByIDAndUserID", mockCtx, int64(1), user.ID).
 		Return(domain.Transaction{}, errors.New("error")).Once()
 
@@ -596,7 +596,7 @@ func getAccInfo_NoError_ReturnAccInfo(s *TransactionSuite, desc string) {
 		TotalBalance: -100,
 	}
 
-	s.mockTransaction.On("GetAccInfo", mockCtx, query, user.ID).
+	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
 		Return(accInfo, nil).Once()
 
 	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
@@ -610,7 +610,7 @@ func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
 	user := domain.User{ID: 1}
 	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
 
-	s.mockTransaction.On("GetAccInfo", mockCtx, query, user.ID).
+	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
 		Return(domain.AccInfo{}, errors.New("get acc info fail")).Once()
 
 	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
@@ -657,7 +657,7 @@ func getBarChartData_WithOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc 
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -691,7 +691,7 @@ func getBarChartData_WithOneWeek_ReturnDateData(s *TransactionSuite, desc string
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -728,7 +728,7 @@ func getBarChartData_WithTwoWeeks_ReturnDateData(s *TransactionSuite, desc strin
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -765,7 +765,7 @@ func getBarChartData_WithOneMonth_ReturnDateData(s *TransactionSuite, desc strin
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -816,7 +816,7 @@ func getBarChartData_WithThreeMonths_ReturnDateData(s *TransactionSuite, desc st
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -851,7 +851,7 @@ func getBarChartData_WithSixMonths_ReturnDateData(s *TransactionSuite, desc stri
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -892,7 +892,7 @@ func getBarChartData_WithOneYear_ReturnDateData(s *TransactionSuite, desc string
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -919,7 +919,7 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 
 	mainCategIDs := []int64{1}
 
-	s.mockTransaction.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
+	s.mockTransactionRepo.On("GetDailyBarChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, mainCategIDs, int64(1)).
 		Return(domain.DateToChartData{}, errors.New("error")).Once()
 
 	// prepare expected result
@@ -959,7 +959,7 @@ func getPieChartData_NoError_ReturnChartData(s *TransactionSuite, desc string) {
 		Datasets: []float64{100, 200},
 	}
 
-	s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	s.mockTransactionRepo.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 		Return(chartData, nil).Once()
 
 	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
@@ -978,7 +978,7 @@ func getPieChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 		End:   end,
 	}
 
-	s.mockTransaction.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
+	s.mockTransactionRepo.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 		Return(domain.ChartData{}, errors.New("error")).Once()
 
 	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
@@ -1023,7 +1023,7 @@ func getLineChartData_WithOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc
 		"2024-03-22": 600,
 	}
 
-	s.mockTransaction.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -1055,7 +1055,7 @@ func getLineChartData_WithOneWeek_ReturnData(s *TransactionSuite, desc string) {
 		"2024-03-22": 600,
 	}
 
-	s.mockTransaction.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -1090,7 +1090,7 @@ func getLineChartData_WithTwoWeeks_ReturnData(s *TransactionSuite, desc string) 
 		"2024-03-29": 900,
 	}
 
-	s.mockTransaction.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -1128,7 +1128,7 @@ func getLineChartData_WithOneMonth_ReturnData(s *TransactionSuite, desc string) 
 		"2024-04-02": 100,
 	}
 
-	s.mockTransaction.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -1177,7 +1177,7 @@ func getLineChartData_WithThreeMonths_ReturnData(s *TransactionSuite, desc strin
 		"2024-05-20": -2300,
 	}
 
-	s.mockTransaction.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -1210,7 +1210,7 @@ func getLineChartData_WithSixMonths_ReturnMonthData(s *TransactionSuite, desc st
 		"2024-08": -1100,
 	}
 
-	s.mockTransaction.On("GetMonthlyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -1249,7 +1249,7 @@ func getLineChartData_WithOneYear_ReturnMonthData(s *TransactionSuite, desc stri
 		"2025-02": 2300,
 	}
 
-	s.mockTransaction.On("GetMonthlyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(DateToChartData, nil).Once()
 
 	// prepare expected result
@@ -1274,7 +1274,7 @@ func getLineChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc str
 		End:   end,
 	}
 
-	s.mockTransaction.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
+	s.mockTransactionRepo.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(domain.DateToChartData{}, errors.New("error")).Once()
 
 	expResult := domain.ChartData{}
@@ -1330,7 +1330,7 @@ func getMonthlyData_31DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc s
 		domain.TransactionTypeUnSpecified,
 	}
 
-	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(monthlyData, nil).Once()
 
 	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
@@ -1368,7 +1368,7 @@ func getMonthlyData_30DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc s
 		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
 	}
 
-	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(monthlyData, nil).Once()
 
 	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
@@ -1406,7 +1406,7 @@ func getMonthlyData_29DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc s
 		domain.TransactionTypeUnSpecified, domain.TransactionTypeUnSpecified,
 	}
 
-	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(monthlyData, nil).Once()
 
 	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
@@ -1425,7 +1425,7 @@ func getMonthlyData_GetMonthlyDataFail_ReturnError(s *TransactionSuite, desc str
 		EndDate:   endDate,
 	}
 
-	s.mockTransaction.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
+	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(nil, errors.New("error")).Once()
 
 	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})

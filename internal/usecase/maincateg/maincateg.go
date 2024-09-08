@@ -3,16 +3,16 @@ package maincateg
 import (
 	"context"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
 )
 
 type MainCategUC struct {
-	MainCateg interfaces.MainCategModel
-	Icon      interfaces.IconModel
+	MainCateg interfaces.MainCategRepo
+	Icon      interfaces.IconRepo
 }
 
-func NewMainCategUC(m interfaces.MainCategModel, i interfaces.IconModel) *MainCategUC {
+func NewMainCategUC(m interfaces.MainCategRepo, i interfaces.IconRepo) *MainCategUC {
 	return &MainCategUC{
 		MainCateg: m,
 		Icon:      i,

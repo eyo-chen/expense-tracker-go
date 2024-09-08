@@ -18,11 +18,11 @@ var (
 
 type InitDataSuite struct {
 	suite.Suite
-	uc            interfaces.InitDataUC
-	mockIcon      *mocks.IconModel
-	mockMainCateg *mocks.MainCategModel
-	mockSubCateg  *mocks.SubCategModel
-	mockUser      *mocks.UserModel
+	uc                interfaces.InitDataUC
+	mockIconRepo      *mocks.IconRepo
+	mockMainCategRepo *mocks.MainCategRepo
+	mockSubCategRepo  *mocks.SubCategRepo
+	mockUserRepo      *mocks.UserRepo
 }
 
 func TestInitDataSuite(t *testing.T) {
@@ -30,18 +30,19 @@ func TestInitDataSuite(t *testing.T) {
 }
 
 func (s *InitDataSuite) SetupTest() {
-	s.mockIcon = mocks.NewIconModel(s.T())
-	s.mockMainCateg = mocks.NewMainCategModel(s.T())
-	s.mockSubCateg = mocks.NewSubCategModel(s.T())
-	s.mockUser = mocks.NewUserModel(s.T())
+	s.mockIconRepo = mocks.NewIconRepo(s.T())
+	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
+	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
+	s.mockUserRepo = mocks.NewUserRepo(s.T())
 
-	s.uc = NewInitDataUC(s.mockIcon, s.mockMainCateg, s.mockSubCateg, s.mockUser)
+	s.uc = NewInitDataUC(s.mockIconRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockUserRepo)
 }
 
 func (s *InitDataSuite) TearDownTest() {
-	s.mockIcon.AssertExpectations(s.T())
-	s.mockMainCateg.AssertExpectations(s.T())
-	s.mockSubCateg.AssertExpectations(s.T())
+	s.mockIconRepo.AssertExpectations(s.T())
+	s.mockMainCategRepo.AssertExpectations(s.T())
+	s.mockSubCategRepo.AssertExpectations(s.T())
+	s.mockUserRepo.AssertExpectations(s.T())
 }
 
 func (s *InitDataSuite) TestList() {
@@ -75,7 +76,7 @@ func list_NoError_ReturnInitData(s *InitDataSuite, desc string) {
 		15: {ID: 15, URL: "url15"},
 	}
 
-	s.mockIcon.On("GetByIDs",
+	s.mockIconRepo.On("GetByIDs",
 		[]int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15},
 	).Return(mockIDToIcon, nil).Once()
 
@@ -197,7 +198,7 @@ func list_NoError_ReturnInitData(s *InitDataSuite, desc string) {
 }
 
 func list_GetIconFail_ReturnError(s *InitDataSuite, desc string) {
-	s.mockIcon.On("GetByIDs",
+	s.mockIconRepo.On("GetByIDs",
 		[]int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15},
 	).Return(nil, errors.New("GetByIDs failed")).Once()
 
@@ -456,15 +457,15 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 	}
 
 	// mock service
-	s.mockMainCateg.On("BatchCreate", mockCtx, mockMainCategs, mockUserID).Return(nil).Once()
+	s.mockMainCategRepo.On("BatchCreate", mockCtx, mockMainCategs, mockUserID).Return(nil).Once()
 
-	s.mockMainCateg.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
+	s.mockMainCategRepo.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
 
-	s.mockSubCateg.On("BatchCreate", mockCtx, mockSubCategs, mockUserID).Return(nil).Once()
+	s.mockSubCategRepo.On("BatchCreate", mockCtx, mockSubCategs, mockUserID).Return(nil).Once()
 
 	t := true
 	opt := domain.UpdateUserOpt{IsSetInitCategory: &t}
-	s.mockUser.On("Update", mockCtx, mockUserID, opt).Return(nil).Once()
+	s.mockUserRepo.On("Update", mockCtx, mockUserID, opt).Return(nil).Once()
 
 	err := s.uc.Create(mockCtx, mockData, mockUserID)
 	s.Require().NoError(err, desc)
@@ -498,9 +499,9 @@ func create_NoSubCategory_DoNotCreateSubCategory(s *InitDataSuite, desc string) 
 	}
 
 	// mock service
-	s.mockMainCateg.On("BatchCreate", mockCtx, mockMainCategs, mockUserID).Return(nil).Once()
+	s.mockMainCategRepo.On("BatchCreate", mockCtx, mockMainCategs, mockUserID).Return(nil).Once()
 
-	s.mockMainCateg.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
+	s.mockMainCategRepo.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeUnSpecified).Return(mockMainCategsWithID, nil).Once()
 
 	err := s.uc.Create(mockCtx, mockData, mockUserID)
 	s.Require().NoError(err, desc)

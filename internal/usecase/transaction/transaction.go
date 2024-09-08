@@ -3,8 +3,8 @@ package transaction
 import (
 	"context"
 
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/model/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/codeutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 )
@@ -14,12 +14,12 @@ const (
 )
 
 type TransactionUC struct {
-	Transaction interfaces.TransactionModel
-	MainCateg   interfaces.MainCategModel
-	SubCateg    interfaces.SubCategModel
+	Transaction interfaces.TransactionRepo
+	MainCateg   interfaces.MainCategRepo
+	SubCateg    interfaces.SubCategRepo
 }
 
-func NewTransactionUC(t interfaces.TransactionModel, m interfaces.MainCategModel, s interfaces.SubCategModel) *TransactionUC {
+func NewTransactionUC(t interfaces.TransactionRepo, m interfaces.MainCategRepo, s interfaces.SubCategRepo) *TransactionUC {
 	return &TransactionUC{
 		Transaction: t,
 		MainCateg:   m,
