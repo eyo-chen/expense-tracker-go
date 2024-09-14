@@ -6,7 +6,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -22,7 +21,7 @@ var (
 type SubCategSuite struct {
 	suite.Suite
 	dk           *dockerutil.Container
-	subCategRepo interfaces.SubCategRepo
+	subCategRepo *Repo
 	db           *sql.DB
 	migrate      *migrate.Migrate
 	f            *factory

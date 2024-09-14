@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -13,7 +12,7 @@ import (
 
 type SubCategSuite struct {
 	suite.Suite
-	subCategUC        interfaces.SubCategUC
+	subCategUC        *SubCategUC
 	mockSubCategRepo  *mocks.SubCategRepo
 	mockMainCategRepo *mocks.MainCategRepo
 }

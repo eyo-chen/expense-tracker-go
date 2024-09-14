@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/mock"
@@ -20,7 +19,7 @@ var (
 
 type IconSuite struct {
 	suite.Suite
-	iconUC           interfaces.IconUC
+	iconUC           *IconUC
 	mockIconRepo     *mocks.IconRepo
 	mockRedisService *mocks.RedisService
 }

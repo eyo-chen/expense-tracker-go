@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/auth"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -22,7 +21,7 @@ var (
 
 type UserSuite struct {
 	suite.Suite
-	userUC       interfaces.UserUC
+	userUC       *UC
 	mockUserRepo *mocks.UserRepo
 	mockRedis    *mocks.RedisService
 }

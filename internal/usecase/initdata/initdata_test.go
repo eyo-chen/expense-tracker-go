@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -18,7 +17,7 @@ var (
 
 type InitDataSuite struct {
 	suite.Suite
-	uc                interfaces.InitDataUC
+	uc                *InitDataUC
 	mockIconRepo      *mocks.IconRepo
 	mockMainCategRepo *mocks.MainCategRepo
 	mockSubCategRepo  *mocks.SubCategRepo

@@ -3,7 +3,7 @@ package icon
 import (
 	"net/http"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -26,7 +25,7 @@ type UserSuite struct {
 	db      *sql.DB
 	migrate *migrate.Migrate
 	f       *gofacto.Factory[User]
-	repo    interfaces.UserRepo
+	repo    *Repo
 }
 
 func TestUserSuite(t *testing.T) {

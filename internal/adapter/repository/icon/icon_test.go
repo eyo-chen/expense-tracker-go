@@ -6,7 +6,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -24,7 +23,7 @@ type IconSuite struct {
 	dk      *dockerutil.Container
 	db      *sql.DB
 	migrate *migrate.Migrate
-	repo    interfaces.IconRepo
+	repo    *Repo
 	f       *factory
 }
 

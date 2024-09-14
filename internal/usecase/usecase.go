@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/initdata"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/transaction"

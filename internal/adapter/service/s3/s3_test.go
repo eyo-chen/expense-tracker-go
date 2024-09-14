@@ -7,7 +7,6 @@ import (
 
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
@@ -22,7 +21,7 @@ var (
 
 type s3ServiceSuite struct {
 	suite.Suite
-	s3Service           interfaces.S3Service
+	s3Service           *s3Service
 	mockS3Client        *mocks.S3Client
 	mockS3PresignClient *mocks.S3PresignClient
 }
