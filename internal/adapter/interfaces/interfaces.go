@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
@@ -125,4 +127,31 @@ type RedisService interface {
 
 	// Set sets a value by key.
 	Set(ctx context.Context, key string, value string, ttl time.Duration) error
+}
+
+// S3Service is the interface that wraps the basic methods for s3 service.
+type S3Service interface {
+	// PutObjectUrl returns a pre-signed URL to upload an object to S3.
+	PutObjectUrl(ctx context.Context, objectKey string, lifetimeSecs int64) (string, error)
+
+	// GetObjectUrl returns a pre-signed URL to get an object from S3.
+	GetObjectUrl(ctx context.Context, objectKey string, lifetimeSecs int64) (string, error)
+
+	// DeleteObject deletes an object from S3.
+	DeleteObject(ctx context.Context, objectKey string) error
+}
+
+// S3Client is the interface that wraps the basic methods for s3 client.
+type S3Client interface {
+	// DeleteObject deletes an object from S3.
+	DeleteObject(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
+}
+
+// S3PresignClient is the interface that wraps the basic methods for s3 presign client.
+type S3PresignClient interface {
+	// PresignPutObject returns a pre-signed URL to upload an object to S3.
+	PresignPutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.PresignOptions)) (*v4.PresignedHTTPRequest, error)
+
+	// PresignGetObject returns a pre-signed URL to get an object from S3.
+	PresignGetObject(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.PresignOptions)) (*v4.PresignedHTTPRequest, error)
 }
