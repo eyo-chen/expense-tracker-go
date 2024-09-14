@@ -13,15 +13,15 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/pkg/validator"
 )
 
-type MainCategHandler struct {
+type Hlr struct {
 	MainCateg interfaces.MainCategUC
 }
 
-func NewMainCategHandler(m interfaces.MainCategUC) *MainCategHandler {
-	return &MainCategHandler{MainCateg: m}
+func New(m interfaces.MainCategUC) *Hlr {
+	return &Hlr{MainCateg: m}
 }
 
-func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name   string `json:"name"`
 		Type   string `json:"type"`
@@ -48,7 +48,7 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Create(categ, user.ID); err != nil {
+	if err := h.MainCateg.Create(categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrIconNotFound,
 			domain.ErrUniqueNameUserType,
@@ -70,13 +70,13 @@ func (m *MainCategHandler) CreateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
 	qType := r.URL.Query().Get("type")
 	categType := domain.CvtToTransactionType(qType)
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
 
-	categs, err := m.MainCateg.GetAll(ctx, user.ID, categType)
+	categs, err := h.MainCateg.GetAll(ctx, user.ID, categType)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -93,7 +93,7 @@ func (m *MainCategHandler) GetAllMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -128,7 +128,7 @@ func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := m.MainCateg.Update(categ, user.ID); err != nil {
+	if err := h.MainCateg.Update(categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrUniqueNameUserType,
 			domain.ErrUniqueIconUser,
@@ -151,7 +151,7 @@ func (m *MainCategHandler) UpdateMainCateg(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (m *MainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -159,8 +159,7 @@ func (m *MainCategHandler) DeleteMainCateg(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := m.MainCateg.Delete(id); err != nil {
-		logger.Error("m.MainCateg.Delete failed", "package", "handler", "err", err)
+	if err := h.MainCateg.Delete(id); err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
