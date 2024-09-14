@@ -29,8 +29,10 @@ func setExpenseType(m *MainCateg) {
 
 func Blueprint(i int) MainCateg {
 	return MainCateg{
-		Name: fmt.Sprintf("test%d", i),
-		Type: domain.TransactionTypeIncome.ToModelValue(),
+		Name:     fmt.Sprintf("test%d", i),
+		Type:     domain.TransactionTypeIncome.ToModelValue(),
+		IconType: domain.IconTypeDefault.ToModelValue(),
+		IconData: "url",
 	}
 }
 

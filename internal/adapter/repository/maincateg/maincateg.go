@@ -24,18 +24,20 @@ func New(db *sql.DB) *Repo {
 }
 
 type MainCateg struct {
-	ID     int64  `json:"id"`
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	IconID int64  `json:"icon_id" gofacto:"foreignKey,struct:Icon"`
-	UserID int64  `json:"user_id" gofacto:"foreignKey,struct:User"`
+	ID       int64
+	Name     string
+	Type     string
+	IconID   int64 `gofacto:"foreignKey,struct:Icon"`
+	UserID   int64 `gofacto:"foreignKey,struct:User"`
+	IconType string
+	IconData string
 }
 
 func (r *Repo) Create(categ *domain.MainCateg, userID int64) error {
-	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES (?, ?, ?, ?)`
+	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id, icon_type, icon_data) VALUES (?, ?, ?, ?, ?, ?)`
 
 	c := cvtToMainCateg(categ, userID)
-	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID); err != nil {
+	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID, c.IconType, c.IconData); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -126,15 +128,15 @@ func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
 }
 
 func (r *Repo) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
-	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id) VALUES `
-	args := make([]interface{}, 0, len(categs)*4)
+	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id, icon_type, icon_data) VALUES `
+	args := make([]interface{}, 0, len(categs)*6)
 	for i, c := range categs {
-		stmt += "(?, ?, ?, ?)"
+		stmt += "(?, ?, ?, ?, ?, ?)"
 		if i < len(categs)-1 {
 			stmt += ", "
 		}
 
-		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.Icon.ID)
+		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.Icon.ID, c.IconType.ToModelValue(), c.IconData)
 	}
 
 	if _, err := r.DB.ExecContext(ctx, stmt, args...); err != nil {
