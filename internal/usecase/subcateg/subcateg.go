@@ -5,34 +5,34 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 )
 
-type SubCategUC struct {
+type UC struct {
 	SubCateg  interfaces.SubCategRepo
 	MainCateg interfaces.MainCategRepo
 }
 
-func NewSubCategUC(s interfaces.SubCategRepo, m interfaces.MainCategRepo) *SubCategUC {
-	return &SubCategUC{
+func New(s interfaces.SubCategRepo, m interfaces.MainCategRepo) *UC {
+	return &UC{
 		SubCateg:  s,
 		MainCateg: m,
 	}
 }
 
-func (s *SubCategUC) Create(categ *domain.SubCateg, userID int64) error {
+func (u *UC) Create(categ *domain.SubCateg, userID int64) error {
 	// check if the main category exists
-	if _, err := s.MainCateg.GetByID(categ.MainCategID, userID); err != nil {
+	if _, err := u.MainCateg.GetByID(categ.MainCategID, userID); err != nil {
 		return err
 	}
 
-	return s.SubCateg.Create(categ, userID)
+	return u.SubCateg.Create(categ, userID)
 }
 
-func (s *SubCategUC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
-	return s.SubCateg.GetByMainCategID(userID, mainCategID)
+func (u *UC) GetByMainCategID(userID, mainCategID int64) ([]*domain.SubCateg, error) {
+	return u.SubCateg.GetByMainCategID(userID, mainCategID)
 }
 
-func (s *SubCategUC) Update(categ *domain.SubCateg, userID int64) error {
+func (u *UC) Update(categ *domain.SubCateg, userID int64) error {
 	// check if the sub category exists
-	subCategByID, err := s.SubCateg.GetByID(categ.ID, userID)
+	subCategByID, err := u.SubCateg.GetByID(categ.ID, userID)
 	if err != nil {
 		return err
 	}
@@ -42,13 +42,13 @@ func (s *SubCategUC) Update(categ *domain.SubCateg, userID int64) error {
 		return domain.ErrMainCategNotFound
 	}
 
-	if err := s.SubCateg.Update(categ); err != nil {
+	if err := u.SubCateg.Update(categ); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *SubCategUC) Delete(id int64) error {
-	return s.SubCateg.Delete(id)
+func (u *UC) Delete(id int64) error {
+	return u.SubCateg.Delete(id)
 }

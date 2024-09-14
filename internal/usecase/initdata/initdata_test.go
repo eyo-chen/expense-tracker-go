@@ -17,7 +17,7 @@ var (
 
 type InitDataSuite struct {
 	suite.Suite
-	uc                *InitDataUC
+	uc                *UC
 	mockIconRepo      *mocks.IconRepo
 	mockMainCategRepo *mocks.MainCategRepo
 	mockSubCategRepo  *mocks.SubCategRepo
@@ -34,7 +34,7 @@ func (s *InitDataSuite) SetupTest() {
 	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
 	s.mockUserRepo = mocks.NewUserRepo(s.T())
 
-	s.uc = NewInitDataUC(s.mockIconRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockUserRepo)
+	s.uc = New(s.mockIconRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockUserRepo)
 }
 
 func (s *InitDataSuite) TearDownTest() {

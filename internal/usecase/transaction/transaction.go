@@ -13,23 +13,23 @@ const (
 	PackageName = "usecase/transaction"
 )
 
-type TransactionUC struct {
+type UC struct {
 	Transaction interfaces.TransactionRepo
 	MainCateg   interfaces.MainCategRepo
 	SubCateg    interfaces.SubCategRepo
 }
 
-func NewTransactionUC(t interfaces.TransactionRepo, m interfaces.MainCategRepo, s interfaces.SubCategRepo) *TransactionUC {
-	return &TransactionUC{
+func New(t interfaces.TransactionRepo, m interfaces.MainCategRepo, s interfaces.SubCategRepo) *UC {
+	return &UC{
 		Transaction: t,
 		MainCateg:   m,
 		SubCateg:    s,
 	}
 }
 
-func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
+func (u *UC) Create(ctx context.Context, trans domain.CreateTransactionInput) error {
 	// check if the main category exists
-	mainCateg, err := t.MainCateg.GetByID(trans.MainCategID, trans.UserID)
+	mainCateg, err := u.MainCateg.GetByID(trans.MainCategID, trans.UserID)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 	}
 
 	// check if the sub category exists
-	subCateg, err := t.SubCateg.GetByID(trans.SubCategID, trans.UserID)
+	subCateg, err := u.SubCateg.GetByID(trans.SubCategID, trans.UserID)
 	if err != nil {
 		return err
 	}
@@ -52,11 +52,11 @@ func (t *TransactionUC) Create(ctx context.Context, trans domain.CreateTransacti
 		return domain.ErrMainCategNotConsistent
 	}
 
-	return t.Transaction.Create(ctx, trans)
+	return u.Transaction.Create(ctx, trans)
 }
 
-func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, domain.Cursor, error) {
-	trans, decodedNextKeys, err := t.Transaction.GetAll(ctx, opt, user.ID)
+func (u *UC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.User) ([]domain.Transaction, domain.Cursor, error) {
+	trans, decodedNextKeys, err := u.Transaction.GetAll(ctx, opt, user.ID)
 	if err != nil {
 		return nil, domain.Cursor{}, err
 	}
@@ -101,9 +101,9 @@ func (t *TransactionUC) GetAll(ctx context.Context, opt domain.GetTransOpt, user
 	return trans, cursor, nil
 }
 
-func (t *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error {
+func (u *UC) Update(ctx context.Context, trans domain.UpdateTransactionInput, user domain.User) error {
 	// check if the main category exists
-	mainCateg, err := t.MainCateg.GetByID(trans.MainCategID, user.ID)
+	mainCateg, err := u.MainCateg.GetByID(trans.MainCategID, user.ID)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (t *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransacti
 	}
 
 	// check if the sub category exists
-	subCateg, err := t.SubCateg.GetByID(trans.SubCategID, user.ID)
+	subCateg, err := u.SubCateg.GetByID(trans.SubCategID, user.ID)
 	if err != nil {
 		return err
 	}
@@ -127,36 +127,36 @@ func (t *TransactionUC) Update(ctx context.Context, trans domain.UpdateTransacti
 	}
 
 	// check permission
-	if _, err := t.Transaction.GetByIDAndUserID(ctx, trans.ID, user.ID); err != nil {
+	if _, err := u.Transaction.GetByIDAndUserID(ctx, trans.ID, user.ID); err != nil {
 		return err
 	}
 
-	return t.Transaction.Update(ctx, trans)
+	return u.Transaction.Update(ctx, trans)
 }
 
-func (t *TransactionUC) Delete(ctx context.Context, id int64, user domain.User) error {
+func (u *UC) Delete(ctx context.Context, id int64, user domain.User) error {
 	// check permission
-	if _, err := t.Transaction.GetByIDAndUserID(ctx, id, user.ID); err != nil {
+	if _, err := u.Transaction.GetByIDAndUserID(ctx, id, user.ID); err != nil {
 		return err
 	}
 
-	return t.Transaction.Delete(ctx, id)
+	return u.Transaction.Delete(ctx, id)
 }
 
-func (t *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
-	return t.Transaction.GetAccInfo(ctx, query, user.ID)
+func (u *UC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
+	return u.Transaction.GetAccInfo(ctx, query, user.ID)
 }
 
-func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, mainCategIDs []int64, user domain.User) (domain.ChartData, error) {
+func (u *UC) GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, mainCategIDs []int64, user domain.User) (domain.ChartData, error) {
 	var dateToData domain.DateToChartData
 	var err error
 	if timeRangeType.IsDailyType() {
-		dateToData, err = t.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, mainCategIDs, user.ID)
+		dateToData, err = u.Transaction.GetDailyBarChartData(ctx, chartDateRange, transactionType, mainCategIDs, user.ID)
 		if err != nil {
 			return domain.ChartData{}, err
 		}
 	} else {
-		dateToData, err = t.Transaction.GetMonthlyBarChartData(ctx, chartDateRange, transactionType, mainCategIDs, user.ID)
+		dateToData, err = u.Transaction.GetMonthlyBarChartData(ctx, chartDateRange, transactionType, mainCategIDs, user.ID)
 		if err != nil {
 			return domain.ChartData{}, err
 		}
@@ -165,20 +165,20 @@ func (t *TransactionUC) GetBarChartData(ctx context.Context, chartDateRange doma
 	return genChartData(dateToData, timeRangeType, chartDateRange.Start, chartDateRange.End), nil
 }
 
-func (t *TransactionUC) GetPieChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
-	return t.Transaction.GetPieChartData(ctx, chartDateRange, transactionType, user.ID)
+func (u *UC) GetPieChartData(ctx context.Context, chartDateRange domain.ChartDateRange, transactionType domain.TransactionType, user domain.User) (domain.ChartData, error) {
+	return u.Transaction.GetPieChartData(ctx, chartDateRange, transactionType, user.ID)
 }
 
-func (t *TransactionUC) GetLineChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, user domain.User) (domain.ChartData, error) {
+func (u *UC) GetLineChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, user domain.User) (domain.ChartData, error) {
 	var dateToData domain.DateToChartData
 	var err error
 	if timeRangeType.IsDailyType() {
-		dateToData, err = t.Transaction.GetDailyLineChartData(ctx, chartDateRange, user.ID)
+		dateToData, err = u.Transaction.GetDailyLineChartData(ctx, chartDateRange, user.ID)
 		if err != nil {
 			return domain.ChartData{}, err
 		}
 	} else {
-		dateToData, err = t.Transaction.GetMonthlyLineChartData(ctx, chartDateRange, user.ID)
+		dateToData, err = u.Transaction.GetMonthlyLineChartData(ctx, chartDateRange, user.ID)
 		if err != nil {
 			return domain.ChartData{}, err
 		}
@@ -187,10 +187,10 @@ func (t *TransactionUC) GetLineChartData(ctx context.Context, chartDateRange dom
 	return genLineChartData(dateToData, timeRangeType, chartDateRange.Start, chartDateRange.End), nil
 }
 
-func (t *TransactionUC) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error) {
+func (u *UC) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, user domain.User) ([]domain.TransactionType, error) {
 	data := make([]domain.TransactionType, 0, dateRange.EndDate.Day())
 
-	monthlyData, err := t.Transaction.GetMonthlyData(ctx, dateRange, user.ID)
+	monthlyData, err := u.Transaction.GetMonthlyData(ctx, dateRange, user.ID)
 	if err != nil {
 		return data, err
 	}

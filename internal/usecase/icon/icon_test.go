@@ -19,7 +19,7 @@ var (
 
 type IconSuite struct {
 	suite.Suite
-	iconUC           *IconUC
+	uc               *UC
 	mockIconRepo     *mocks.IconRepo
 	mockRedisService *mocks.RedisService
 }
@@ -31,7 +31,7 @@ func TestIconSuite(t *testing.T) {
 func (s *IconSuite) SetupTest() {
 	s.mockIconRepo = mocks.NewIconRepo(s.T())
 	s.mockRedisService = mocks.NewRedisService(s.T())
-	s.iconUC = NewIconUC(s.mockIconRepo, s.mockRedisService)
+	s.uc = New(s.mockIconRepo, s.mockRedisService)
 }
 
 func (s *IconSuite) TearDownTest() {
@@ -67,7 +67,7 @@ func list_NoError_ReturnIconList(s *IconSuite, desc string) {
 	}
 
 	// test function
-	icons, err := s.iconUC.List()
+	icons, err := s.uc.List()
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, icons, desc)
 }
@@ -82,7 +82,7 @@ func list_CacheFailed_ReturnError(s *IconSuite, desc string) {
 	s.mockRedisService.On("GetByFunc", mockCTX, "icons", mockTTL, mockGetFun).Return("", mockErr)
 
 	// test function
-	icons, err := s.iconUC.List()
+	icons, err := s.uc.List()
 	s.Require().ErrorIs(err, mockErr, desc)
 	s.Require().Nil(icons, desc)
 }

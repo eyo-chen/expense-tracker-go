@@ -22,7 +22,7 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
-	transactionUC       *TransactionUC
+	uc                  *UC
 	mockTransactionRepo *mocks.TransactionRepo
 	mockMainCategRepo   *mocks.MainCategRepo
 	mockSubCategRepo    *mocks.SubCategRepo
@@ -40,7 +40,7 @@ func (s *TransactionSuite) SetupTest() {
 	s.mockTransactionRepo = mocks.NewTransactionRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
 	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
-	s.transactionUC = NewTransactionUC(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo)
+	s.uc = New(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo)
 }
 
 func (s *TransactionSuite) TearDownTest() {
@@ -88,7 +88,7 @@ func create_NoError_CreateSuccessfully(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.Mock.On("Create", mockCtx, transInput).Return(nil).Once()
 
 	// action, assertion
-	err := s.transactionUC.Create(mockCtx, transInput)
+	err := s.uc.Create(mockCtx, transInput)
 	s.Require().NoError(err, desc)
 }
 
@@ -108,7 +108,7 @@ func create_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(nil, errors.New("get main category fail")).Once()
 
 	// action, assertion
-	err := s.transactionUC.Create(mockCtx, transInput)
+	err := s.uc.Create(mockCtx, transInput)
 	s.Require().Equal(errors.New("get main category fail"), err, desc)
 }
 
@@ -131,7 +131,7 @@ func create_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
 	s.mockMainCategRepo.Mock.On("GetByID", transInput.MainCategID, transInput.UserID).Return(&mainCateg, nil).Once()
 
 	// action, assertion
-	err := s.transactionUC.Create(mockCtx, transInput)
+	err := s.uc.Create(mockCtx, transInput)
 	s.Require().EqualError(err, domain.ErrTypeNotConsistent.Error(), desc)
 }
 
@@ -155,7 +155,7 @@ func create_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockSubCategRepo.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(nil, errors.New("get subcategory fail")).Once()
 
 	// action, assertion
-	err := s.transactionUC.Create(mockCtx, transInput)
+	err := s.uc.Create(mockCtx, transInput)
 	s.Require().EqualError(err, "get subcategory fail", desc)
 }
 
@@ -180,7 +180,7 @@ func create_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
 	s.mockSubCategRepo.Mock.On("GetByID", transInput.SubCategID, transInput.UserID).Return(&subCateg, nil).Once()
 
 	// action, assertion
-	err := s.transactionUC.Create(mockCtx, transInput)
+	err := s.uc.Create(mockCtx, transInput)
 	s.Require().EqualError(err, domain.ErrMainCategNotConsistent.Error(), desc)
 }
 
@@ -206,7 +206,7 @@ func create_CreateFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.Mock.On("Create", mockCtx, transInput).Return(errors.New("create fail")).Once()
 
 	// action, assertion
-	err := s.transactionUC.Create(mockCtx, transInput)
+	err := s.uc.Create(mockCtx, transInput)
 	s.Require().EqualError(err, "create fail", desc)
 }
 
@@ -236,7 +236,7 @@ func getAll_NoError_ReturnTransactions(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
-	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
 	s.Require().Equal(domain.Cursor{}, cursor, desc)
@@ -250,7 +250,7 @@ func getAll_GetTransFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(nil, mockDecodedNextKeys, errors.New("error")).Once()
 
-	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().Equal(errors.New("error"), err, desc)
 	s.Require().Nil(result, desc)
 	s.Require().Equal(domain.Cursor{}, cursor, desc)
@@ -265,7 +265,7 @@ func getAll_InitPageWithSize_ReturnCorrectCursor(s *TransactionSuite, desc strin
 	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
-	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
 	s.Require().Equal(1, cursor.Size, desc)
@@ -293,7 +293,7 @@ func getAll_InitPageWithSizeAndSort_ReturnCorrectCursor(s *TransactionSuite, des
 	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
-	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
 	s.Require().Equal(2, cursor.Size, desc)
@@ -313,7 +313,7 @@ func getAll_WithDecodedNextKey_ReturnCorrectCursor(s *TransactionSuite, desc str
 	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
-	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
 	s.Require().Equal(1, cursor.Size, desc)
@@ -333,7 +333,7 @@ func getAll_SizeIsEmptyValue_ReturnNoCursor(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
 		Return(mockTrans, mockDecodedNextKeys, nil).Once()
 
-	result, cursor, err := s.transactionUC.GetAll(mockCtx, mockOpt, mockUser)
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
 	s.Require().Equal(domain.Cursor{}, cursor, desc)
@@ -383,7 +383,7 @@ func update_NoError_UpdateSuccessfully(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("Update", mockCtx, trans).
 		Return(nil).Once()
 
-	err := s.transactionUC.Update(mockCtx, trans, user)
+	err := s.uc.Update(mockCtx, trans, user)
 	s.Require().NoError(err, desc)
 }
 
@@ -402,7 +402,7 @@ func update_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(nil, errors.New("error")).Once()
 
-	err := s.transactionUC.Update(mockCtx, trans, user)
+	err := s.uc.Update(mockCtx, trans, user)
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
@@ -422,7 +422,7 @@ func update_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
 	s.mockMainCategRepo.On("GetByID", trans.MainCategID, user.ID).
 		Return(&mainCateg, nil).Once()
 
-	err := s.transactionUC.Update(mockCtx, trans, user)
+	err := s.uc.Update(mockCtx, trans, user)
 	s.Require().Equal(domain.ErrTypeNotConsistent, err, desc)
 }
 
@@ -445,7 +445,7 @@ func update_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockSubCategRepo.On("GetByID", trans.SubCategID, user.ID).
 		Return(nil, errors.New("error")).Once()
 
-	err := s.transactionUC.Update(mockCtx, trans, user)
+	err := s.uc.Update(mockCtx, trans, user)
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
@@ -469,7 +469,7 @@ func update_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
 	s.mockSubCategRepo.On("GetByID", trans.SubCategID, user.ID).
 		Return(&subCateg, nil).Once()
 
-	err := s.transactionUC.Update(mockCtx, trans, user)
+	err := s.uc.Update(mockCtx, trans, user)
 	s.Require().Equal(domain.ErrMainCategNotConsistent, err, desc)
 }
 
@@ -496,7 +496,7 @@ func update_GetTransFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetByIDAndUserID", mockCtx, trans.ID, user.ID).
 		Return(domain.Transaction{}, errors.New("error")).Once()
 
-	err := s.transactionUC.Update(mockCtx, trans, user)
+	err := s.uc.Update(mockCtx, trans, user)
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
@@ -526,7 +526,7 @@ func update_UpdateFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("Update", mockCtx, trans).
 		Return(errors.New("error")).Once()
 
-	err := s.transactionUC.Update(mockCtx, trans, user)
+	err := s.uc.Update(mockCtx, trans, user)
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
@@ -555,7 +555,7 @@ func delete_NoError_DeleteSuccessfully(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("Delete", mockCtx, int64(1)).
 		Return(nil).Once()
 
-	err := s.transactionUC.Delete(mockCtx, int64(1), user)
+	err := s.uc.Delete(mockCtx, int64(1), user)
 	s.Require().NoError(err, desc)
 }
 
@@ -568,7 +568,7 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 		On("GetByIDAndUserID", mockCtx, int64(1), user.ID).
 		Return(domain.Transaction{}, errors.New("error")).Once()
 
-	err := s.transactionUC.Delete(mockCtx, int64(1), user)
+	err := s.uc.Delete(mockCtx, int64(1), user)
 	s.Require().Equal(errors.New("error"), err, desc)
 }
 
@@ -599,7 +599,7 @@ func getAccInfo_NoError_ReturnAccInfo(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
 		Return(accInfo, nil).Once()
 
-	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
+	result, err := s.uc.GetAccInfo(mockCtx, query, user)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(accInfo, result, desc)
 }
@@ -613,7 +613,7 @@ func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
 		Return(domain.AccInfo{}, errors.New("get acc info fail")).Once()
 
-	result, err := s.transactionUC.GetAccInfo(mockCtx, query, user)
+	result, err := s.uc.GetAccInfo(mockCtx, query, user)
 	s.Require().EqualError(err, "get acc info fail", desc)
 	s.Require().Equal(domain.AccInfo{}, result, desc)
 }
@@ -666,7 +666,7 @@ func getBarChartData_WithOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc 
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -700,7 +700,7 @@ func getBarChartData_WithOneWeek_ReturnDateData(s *TransactionSuite, desc string
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -737,7 +737,7 @@ func getBarChartData_WithTwoWeeks_ReturnDateData(s *TransactionSuite, desc strin
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 700, 0, 0, 0, 0, 800, 900, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeTwoWeeks, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeTwoWeeks, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -774,7 +774,7 @@ func getBarChartData_WithOneMonth_ReturnDateData(s *TransactionSuite, desc strin
 		Datasets: []float64{100, 200, 0, 0, 500, 600, 0, 0, 0, 0, 0, 0, 0, 700, 0, 0, 0, 0, 800, 900, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -825,7 +825,7 @@ func getBarChartData_WithThreeMonths_ReturnDateData(s *TransactionSuite, desc st
 		Datasets: []float64{100, 200, 1100, 0, 0, 700, 800, 900, 0, 0, 0, 2100, 2500, 0, 0, 1400, 0, 3100, 0, 0, 0, 3500, 3900, 0, 0, 2100, 0, 4500, 0, 0, 0},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -860,7 +860,7 @@ func getBarChartData_WithSixMonths_ReturnDateData(s *TransactionSuite, desc stri
 		Datasets: []float64{100, 500, 0, 700, 900, 1100},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -901,7 +901,7 @@ func getBarChartData_WithOneYear_ReturnDateData(s *TransactionSuite, desc string
 		Datasets: []float64{100, 500, 0, 700, 900, 1100, 1300, 1500, 1700, 1900, 2100, 2300},
 	}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -925,7 +925,7 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 	// prepare expected result
 	expResult := domain.ChartData{}
 
-	result, err := s.transactionUC.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
+	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
 	s.Require().Equal(errors.New("error"), err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -962,7 +962,7 @@ func getPieChartData_NoError_ReturnChartData(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 		Return(chartData, nil).Once()
 
-	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.uc.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(chartData, result, desc)
 }
@@ -981,7 +981,7 @@ func getPieChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 	s.mockTransactionRepo.On("GetPieChartData", mockCtx, chartDataRange, domain.TransactionTypeExpense, int64(1)).
 		Return(domain.ChartData{}, errors.New("error")).Once()
 
-	result, err := s.transactionUC.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
+	result, err := s.uc.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
 	s.Require().EqualError(err, "error", desc)
 	s.Require().Equal(domain.ChartData{}, result, desc)
 }
@@ -1032,7 +1032,7 @@ func getLineChartData_WithOneWeekDay_ReturnWeekDayData(s *TransactionSuite, desc
 		Datasets: []float64{100, 200, 200, 200, -500, 600, 600},
 	}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1064,7 +1064,7 @@ func getLineChartData_WithOneWeek_ReturnData(s *TransactionSuite, desc string) {
 		Datasets: []float64{100, -300, -300, -300, -500, 600, 600},
 	}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1099,7 +1099,7 @@ func getLineChartData_WithTwoWeeks_ReturnData(s *TransactionSuite, desc string) 
 		Datasets: []float64{-100, 200, 200, 200, 500, -600, 700, 700, 700, 700, 700, -800, 900, 900},
 	}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeek, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1137,7 +1137,7 @@ func getLineChartData_WithOneMonth_ReturnData(s *TransactionSuite, desc string) 
 		Datasets: []float64{500, -600, -600, -600, -600, -100, -100, -100, -100, 700, 700, -500, -500, -500, -800, 900, 900, 900, 900, 900, 1000, 1000, 1000, 1000, 1000, 1000, -1400, -1400, 100, 100},
 	}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneMonth, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1186,7 +1186,7 @@ func getLineChartData_WithThreeMonths_ReturnData(s *TransactionSuite, desc strin
 		Datasets: []float64{100, 200, -600, -600, -600, -700, 800, 900, 900, 900, 900, -1100, 1300, 1300, 1300, -1400, -1400, 1600, 1600, 1600, 1600, -1800, 2000, 2000, 2000, -2100, -2100, -2300, -2300, -2300, -2300},
 	}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeThreeMonths, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1219,7 +1219,7 @@ func getLineChartData_WithSixMonths_ReturnMonthData(s *TransactionSuite, desc st
 		Datasets: []float64{-100, -500, -500, -700, -900, -1100},
 	}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeSixMonths, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1258,7 +1258,7 @@ func getLineChartData_WithOneYear_ReturnMonthData(s *TransactionSuite, desc stri
 		Datasets: []float64{100, 500, 500, -700, 900, -1100, 1300, -1500, -1700, -1900, 2100, 2300},
 	}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneYear, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1279,7 +1279,7 @@ func getLineChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc str
 
 	expResult := domain.ChartData{}
 
-	result, err := s.transactionUC.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.User{ID: 1})
+	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.User{ID: 1})
 	s.Require().Equal(errors.New("error"), err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1333,7 +1333,7 @@ func getMonthlyData_31DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc s
 	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(monthlyData, nil).Once()
 
-	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	result, err := s.uc.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1371,7 +1371,7 @@ func getMonthlyData_30DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc s
 	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(monthlyData, nil).Once()
 
-	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	result, err := s.uc.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1409,7 +1409,7 @@ func getMonthlyData_29DaysInAMonth_ReturnMonthlyData(s *TransactionSuite, desc s
 	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(monthlyData, nil).Once()
 
-	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	result, err := s.uc.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResult, result, desc)
 }
@@ -1428,7 +1428,7 @@ func getMonthlyData_GetMonthlyDataFail_ReturnError(s *TransactionSuite, desc str
 	s.mockTransactionRepo.On("GetMonthlyData", mockCtx, dateRange, int64(1)).
 		Return(nil, errors.New("error")).Once()
 
-	result, err := s.transactionUC.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
+	result, err := s.uc.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
 	s.Require().Equal(errors.New("error"), err, desc)
 	s.Require().Equal([]domain.TransactionType{}, result, desc)
 }
