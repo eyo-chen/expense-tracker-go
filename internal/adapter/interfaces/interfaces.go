@@ -129,18 +129,6 @@ type RedisService interface {
 	Set(ctx context.Context, key string, value string, ttl time.Duration) error
 }
 
-// S3PreSignerService is the interface that wraps the basic methods for s3 pre-signer service.
-type S3PreSignerService interface {
-	// PutObjectUrl returns a pre-signed URL to upload an object to S3.
-	PutObjectUrl(ctx context.Context, objectKey string, lifetimeSecs int64) (string, error)
-
-	// GetObjectUrl returns a pre-signed URL to get an object from S3.
-	GetObjectUrl(ctx context.Context, objectKey string, lifetimeSecs int64) (string, error)
-
-	// DeleteObject deletes an object from S3.
-	DeleteObject(ctx context.Context, objectKey string) error
-}
-
 // S3Service is the interface that wraps the basic methods for s3 service.
 type S3Service interface {
 	// PutObjectUrl returns a pre-signed URL to upload an object to S3.
