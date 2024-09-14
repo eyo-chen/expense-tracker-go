@@ -21,8 +21,13 @@ type factory struct {
 
 func newFactory(db *sql.DB) *factory {
 	return &factory{
-		subCateg:  gofacto.New(SubCateg{}).WithDB(mysqlf.NewConfig(db)).WithStorageName("sub_categories"),
-		maincateg: gofacto.New(maincateg.MainCateg{}).WithDB(mysqlf.NewConfig(db)).WithStorageName("main_categories"),
+		subCateg: gofacto.New(SubCateg{}).
+			WithDB(mysqlf.NewConfig(db)).
+			WithStorageName("sub_categories"),
+		maincateg: gofacto.New(maincateg.MainCateg{}).
+			WithDB(mysqlf.NewConfig(db)).
+			WithStorageName("main_categories").
+			WithBlueprint(maincateg.Blueprint),
 	}
 }
 
