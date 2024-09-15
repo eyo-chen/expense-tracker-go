@@ -76,6 +76,15 @@ type IconRepo interface {
 	GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error)
 }
 
+// UserIconRepo is the interface that wraps the basic methods for user icon repository.
+type UserIconRepo interface {
+	// Create inserts a new user icon into the database.
+	Create(ctx context.Context, userIcon domain.UserIcon) error
+
+	// GetByUserID returns user icons by user id.
+	GetByUserID(ctx context.Context, userID int64) ([]domain.UserIcon, error)
+}
+
 // TransactionRepo is the interface that wraps the basic methods for transaction repository.
 type TransactionRepo interface {
 	// Create inserts a new transaction into the database.
