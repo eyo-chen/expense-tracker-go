@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/ctxutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
@@ -12,17 +12,17 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/pkg/validator"
 )
 
-type SubCategHandler struct {
+type Hlr struct {
 	SubCateg interfaces.SubCategUC
 }
 
-func NewSubCategHandler(s interfaces.SubCategUC) *SubCategHandler {
-	return &SubCategHandler{
+func New(s interfaces.SubCategUC) *Hlr {
+	return &Hlr{
 		SubCateg: s,
 	}
 }
 
-func (s *SubCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) CreateSubCateg(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name        string `json:"name"`
 		MainCategID int64  `json:"main_category_id"`
@@ -45,19 +45,18 @@ func (s *SubCategHandler) CreateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := s.SubCateg.Create(&categ, user.ID); err != nil {
+	if err := h.SubCateg.Create(&categ, user.ID); err != nil {
 		if err == domain.ErrUniqueNameUserMainCateg {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
 
-		logger.Error("s.SubCateg.Create failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
-func (s *SubCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetByMainCategID(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -66,9 +65,8 @@ func (s *SubCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Reques
 	}
 
 	user := ctxutil.GetUser(r)
-	categs, err := s.SubCateg.GetByMainCategID(user.ID, id)
+	categs, err := h.SubCateg.GetByMainCategID(user.ID, id)
 	if err != nil {
-		logger.Error("s.SubCateg.GetByMainCategID failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
@@ -83,7 +81,7 @@ func (s *SubCategHandler) GetByMainCategID(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (s *SubCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -114,19 +112,18 @@ func (s *SubCategHandler) UpdateSubCateg(w http.ResponseWriter, r *http.Request)
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := s.SubCateg.Update(&categ, user.ID); err != nil {
+	if err := h.SubCateg.Update(&categ, user.ID); err != nil {
 		if err == domain.ErrUniqueNameUserMainCateg {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
 
-		logger.Error("s.SubCateg.Update failed", "package", "handler", "err", err)
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}
 }
 
-func (s *SubCategHandler) DeleteSubCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) DeleteSubCateg(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -134,8 +131,7 @@ func (s *SubCategHandler) DeleteSubCateg(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := s.SubCateg.Delete(id); err != nil {
-		logger.Error("s.SubCateg.Delete failed", "package", "handler", "err", err)
+	if err := h.SubCateg.Delete(id); err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
 	}

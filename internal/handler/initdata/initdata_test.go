@@ -18,7 +18,7 @@ import (
 
 type InitDataSuite struct {
 	suite.Suite
-	hlr            *InitDataHlr
+	hlr            *Hlr
 	mockInitDataUC *mocks.InitDataUC
 }
 

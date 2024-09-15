@@ -3,7 +3,7 @@ package initdata
 import (
 	"net/http"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/ctxutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
@@ -14,17 +14,17 @@ const (
 	packageName = "handler/initdata"
 )
 
-type InitDataHlr struct {
+type Hlr struct {
 	InitData interfaces.InitDataUC
 }
 
-func New(i interfaces.InitDataUC) *InitDataHlr {
-	return &InitDataHlr{
+func New(i interfaces.InitDataUC) *Hlr {
+	return &Hlr{
 		InitData: i,
 	}
 }
 
-func (i *InitDataHlr) List(w http.ResponseWriter, r *http.Request) {
+func (i *Hlr) List(w http.ResponseWriter, r *http.Request) {
 	initData, err := i.InitData.List()
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
@@ -41,7 +41,7 @@ func (i *InitDataHlr) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (i *InitDataHlr) Create(w http.ResponseWriter, r *http.Request) {
+func (i *Hlr) Create(w http.ResponseWriter, r *http.Request) {
 	var input createInitDataInput
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJson failed", "package", packageName, "err", err)

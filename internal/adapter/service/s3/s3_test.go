@@ -7,7 +7,6 @@ import (
 
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
@@ -22,7 +21,7 @@ var (
 
 type s3ServiceSuite struct {
 	suite.Suite
-	s3Service           interfaces.S3Service
+	service             *Service
 	mockS3Client        *mocks.S3Client
 	mockS3PresignClient *mocks.S3PresignClient
 }
@@ -39,7 +38,7 @@ func (s *s3ServiceSuite) SetupTest() {
 	s.mockS3Client = new(mocks.S3Client)
 	s.mockS3PresignClient = new(mocks.S3PresignClient)
 
-	s.s3Service = New(mockBucketName, s.mockS3Client, s.mockS3PresignClient)
+	s.service = New(mockBucketName, s.mockS3Client, s.mockS3PresignClient)
 }
 
 func (s *s3ServiceSuite) TearDownTest() {
@@ -79,7 +78,7 @@ func putObject_NoError_ReturnSuccessfully(s *s3ServiceSuite, desc string) {
 		Return(mockPresignedHTTPRequest, nil).Once()
 
 	// action
-	url, err := s.s3Service.PutObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
+	url, err := s.service.PutObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
 
 	// assertion
 	s.Require().NoError(err, desc)
@@ -102,7 +101,7 @@ func putObject_GetObjectUrlFailed_ReturnError(s *s3ServiceSuite, desc string) {
 		Return(nil, mockErr).Once()
 
 	// action
-	url, err := s.s3Service.PutObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
+	url, err := s.service.PutObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
 
 	// assertion
 	s.Require().Empty(url, desc)
@@ -141,7 +140,7 @@ func getObjectUrl_NoError_ReturnSuccessfully(s *s3ServiceSuite, desc string) {
 		Return(mockPresignedHTTPRequest, nil).Once()
 
 	// action
-	url, err := s.s3Service.GetObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
+	url, err := s.service.GetObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
 
 	// assertion
 	s.Require().NoError(err, desc)
@@ -164,7 +163,7 @@ func getObjectUrl_GetPresignedUrlFailed_ReturnError(s *s3ServiceSuite, desc stri
 		Return(nil, mockErr).Once()
 
 	// action
-	url, err := s.s3Service.GetObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
+	url, err := s.service.GetObjectUrl(mockCTX, mockObjectKey, mockLifetimeSecs)
 
 	// assertion
 	s.Require().Empty(url, desc)
@@ -197,7 +196,7 @@ func deleteObject_NoError_DeleteSuccessfully(s *s3ServiceSuite, desc string) {
 		Return(&s3.DeleteObjectOutput{}, nil).Once()
 
 	// action
-	err := s.s3Service.DeleteObject(mockCTX, mockObjectKey)
+	err := s.service.DeleteObject(mockCTX, mockObjectKey)
 
 	// assertion
 	s.Require().NoError(err, desc)
@@ -217,7 +216,7 @@ func deleteObject_DeleteObjectFailed_ReturnError(s *s3ServiceSuite, desc string)
 		Return(nil, mockErr).Once()
 
 	// action
-	err := s.s3Service.DeleteObject(mockCTX, mockObjectKey)
+	err := s.service.DeleteObject(mockCTX, mockObjectKey)
 
 	// assertion
 	s.Require().ErrorIs(err, mockErr, desc)

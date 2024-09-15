@@ -6,7 +6,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -27,9 +26,9 @@ type MainCategSuite struct {
 	dk            *dockerutil.Container
 	migrate       *migrate.Migrate
 	f             *factory
-	mainCategRepo interfaces.MainCategRepo
-	userRepo      interfaces.UserRepo
-	iconRepo      interfaces.IconRepo
+	mainCategRepo *Repo
+	userRepo      *user.Repo
+	iconRepo      *icon.Repo
 }
 
 func TestMainCategSuite(t *testing.T) {

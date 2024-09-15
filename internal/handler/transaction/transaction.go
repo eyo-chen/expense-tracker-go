@@ -6,7 +6,7 @@ import (
 	"slices"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/ctxutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
@@ -18,17 +18,17 @@ const (
 	packageName = "handler/transaction"
 )
 
-type TransactionHandler struct {
+type Hlr struct {
 	transaction interfaces.TransactionUC
 }
 
-func NewTransactionHandler(t interfaces.TransactionUC) *TransactionHandler {
-	return &TransactionHandler{
+func New(t interfaces.TransactionUC) *Hlr {
+	return &Hlr{
 		transaction: t,
 	}
 }
 
-func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) Create(w http.ResponseWriter, r *http.Request) {
 	var input createTransactionReq
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", packageName, "err", err)
@@ -54,7 +54,7 @@ func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	if err := t.transaction.Create(ctx, trans); err != nil {
+	if err := h.transaction.Create(ctx, trans); err != nil {
 		if errors.Is(err, domain.ErrDataNotFound) {
 			errutil.BadRequestResponse(w, r, err)
 			return
@@ -71,7 +71,7 @@ func (t *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetAll(w http.ResponseWriter, r *http.Request) {
 	opt, err := genGetTransOpt(r)
 	if err != nil {
 		errutil.BadRequestResponse(w, r, err)
@@ -86,7 +86,7 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	transactions, cursor, err := t.transaction.GetAll(ctx, opt, *user)
+	transactions, cursor, err := h.transaction.GetAll(ctx, opt, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -105,7 +105,7 @@ func (t *TransactionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TransactionHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		errutil.BadRequestResponse(w, r, err)
@@ -144,7 +144,7 @@ func (t *TransactionHandler) Update(w http.ResponseWriter, r *http.Request) {
 		domain.ErrTransactionDataNotFound,
 	}
 
-	if err := t.transaction.Update(r.Context(), trans, *user); err != nil {
+	if err := h.transaction.Update(r.Context(), trans, *user); err != nil {
 		if slices.Contains(errs, err) {
 			errutil.BadRequestResponse(w, r, err)
 			return
@@ -161,7 +161,7 @@ func (t *TransactionHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		errutil.BadRequestResponse(w, r, err)
@@ -176,7 +176,7 @@ func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	user := ctxutil.GetUser(r)
-	if err := t.transaction.Delete(ctx, id, *user); err != nil {
+	if err := h.transaction.Delete(ctx, id, *user); err != nil {
 		if errors.Is(err, domain.ErrTransactionDataNotFound) {
 			errutil.BadRequestResponse(w, r, err)
 			return
@@ -193,7 +193,7 @@ func (t *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetAccInfo(w http.ResponseWriter, r *http.Request) {
 	query := genGetAccInfoQuery(r)
 	v := validator.New()
 	if !v.GetAccInfo(query) {
@@ -203,7 +203,7 @@ func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) 
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	info, err := t.transaction.GetAccInfo(ctx, query, *user)
+	info, err := h.transaction.GetAccInfo(ctx, query, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -222,7 +222,7 @@ func (t *TransactionHandler) GetAccInfo(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetBarChartData(w http.ResponseWriter, r *http.Request) {
 	dateRange, err := genChartDateRange(r)
 	if err != nil {
 		logger.Error("genChartDateRange failed", "package", packageName, "err", err)
@@ -251,7 +251,7 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	data, err := t.transaction.GetBarChartData(ctx, dateRange, timeRangeType, transactionType, mainCatagIDs, *user)
+	data, err := h.transaction.GetBarChartData(ctx, dateRange, timeRangeType, transactionType, mainCatagIDs, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -268,7 +268,7 @@ func (t *TransactionHandler) GetBarChartData(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetPieChartData(w http.ResponseWriter, r *http.Request) {
 	dateRange, err := genChartDateRange(r)
 	if err != nil {
 		logger.Error("genChartDateRange failed", "package", packageName, "err", err)
@@ -286,7 +286,7 @@ func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Requ
 	}
 
 	user := ctxutil.GetUser(r)
-	data, err := t.transaction.GetPieChartData(r.Context(), dateRange, transactionType, *user)
+	data, err := h.transaction.GetPieChartData(r.Context(), dateRange, transactionType, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -303,7 +303,7 @@ func (t *TransactionHandler) GetPieChartData(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (t *TransactionHandler) GetLineChartData(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetLineChartData(w http.ResponseWriter, r *http.Request) {
 	dateRange, err := genChartDateRange(r)
 	if err != nil {
 		logger.Error("genChartDateRange failed", "package", packageName, "err", err)
@@ -321,7 +321,7 @@ func (t *TransactionHandler) GetLineChartData(w http.ResponseWriter, r *http.Req
 	}
 
 	user := ctxutil.GetUser(r)
-	data, err := t.transaction.GetLineChartData(r.Context(), dateRange, timeRangeType, *user)
+	data, err := h.transaction.GetLineChartData(r.Context(), dateRange, timeRangeType, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return
@@ -338,7 +338,7 @@ func (t *TransactionHandler) GetLineChartData(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (t *TransactionHandler) GetMonthlyData(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetMonthlyData(w http.ResponseWriter, r *http.Request) {
 	startDate, endDate, err := genGetMonthlyDataRange(r)
 	if err != nil {
 		logger.Error("genGetMonthlyDataRange failed", "package", packageName, "err", err, "start_date", startDate, "end_date", endDate)
@@ -358,7 +358,7 @@ func (t *TransactionHandler) GetMonthlyData(w http.ResponseWriter, r *http.Reque
 	}
 
 	user := ctxutil.GetUser(r)
-	data, err := t.transaction.GetMonthlyData(r.Context(), dateRange, *user)
+	data, err := h.transaction.GetMonthlyData(r.Context(), dateRange, *user)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return

@@ -3,7 +3,7 @@ package icon
 import (
 	"net/http"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/jsonutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -13,18 +13,18 @@ const (
 	PackageName = "handler/icon"
 )
 
-type IconHandler struct {
+type Hlr struct {
 	Icon interfaces.IconUC
 }
 
-func NewIconHandler(i interfaces.IconUC) *IconHandler {
-	return &IconHandler{
+func New(i interfaces.IconUC) *Hlr {
+	return &Hlr{
 		Icon: i,
 	}
 }
 
-func (i *IconHandler) List(w http.ResponseWriter, r *http.Request) {
-	icons, err := i.Icon.List()
+func (h *Hlr) List(w http.ResponseWriter, r *http.Request) {
+	icons, err := h.Icon.List()
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return

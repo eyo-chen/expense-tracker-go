@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/dockerutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -23,7 +22,7 @@ type redisServiceSuite struct {
 	suite.Suite
 	dk           *dockerutil.Container
 	redis        *redis.Client
-	redisService interfaces.RedisService
+	redisService *Service
 }
 
 func TestRedisServiceSuitee(t *testing.T) {

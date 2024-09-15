@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -13,7 +12,7 @@ import (
 
 type SubCategSuite struct {
 	suite.Suite
-	subCategUC        interfaces.SubCategUC
+	uc                *UC
 	mockSubCategRepo  *mocks.SubCategRepo
 	mockMainCategRepo *mocks.MainCategRepo
 }
@@ -25,7 +24,7 @@ func TestSubCategSuite(t *testing.T) {
 func (s *SubCategSuite) SetupTest() {
 	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
-	s.subCategUC = NewSubCategUC(s.mockSubCategRepo, s.mockMainCategRepo)
+	s.uc = New(s.mockSubCategRepo, s.mockMainCategRepo)
 }
 
 func (s *SubCategSuite) TearDownTest() {
@@ -60,7 +59,7 @@ func create_NoError_CreateSuccessfully(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("Create", mockCateg, mockUserID).Return(nil)
 
 	// action, assertion
-	err := s.subCategUC.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCateg, mockUserID)
 	s.Require().NoError(err, desc)
 }
 
@@ -76,7 +75,7 @@ func create_MainCategNotExist_ReturnError(s *SubCategSuite, desc string) {
 	s.mockMainCategRepo.On("GetByID", mockCateg.MainCategID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
 
 	// action, assertion
-	err := s.subCategUC.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCateg, mockUserID)
 	s.Require().EqualError(err, domain.ErrMainCategNotFound.Error(), desc)
 }
 
@@ -106,7 +105,7 @@ func getByMainCategID_NoError_ReturnData(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("GetByMainCategID", mockUserID, mockMainCategID).Return(mockSubCategs, nil)
 
 	// action, assertion
-	subCategs, err := s.subCategUC.GetByMainCategID(mockUserID, mockMainCategID)
+	subCategs, err := s.uc.GetByMainCategID(mockUserID, mockMainCategID)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockSubCategs, subCategs, desc)
 }
@@ -120,7 +119,7 @@ func getByMainCategID_GetByMainCategIDFail_ReturnError(s *SubCategSuite, desc st
 	s.mockSubCategRepo.On("GetByMainCategID", mockUserID, mockMainCategID).Return(nil, errors.New("getByMainCategID error"))
 
 	// action, assertion
-	subCategs, err := s.subCategUC.GetByMainCategID(mockUserID, mockMainCategID)
+	subCategs, err := s.uc.GetByMainCategID(mockUserID, mockMainCategID)
 	s.Require().EqualError(err, "getByMainCategID error", desc)
 	s.Require().Nil(subCategs, desc)
 }
@@ -159,7 +158,7 @@ func update_NoError_UpdateSuccessfully(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("Update", mockInputCateg).Return(nil)
 
 	// action, assertion
-	err := s.subCategUC.Update(mockInputCateg, mockUserID)
+	err := s.uc.Update(mockInputCateg, mockUserID)
 	s.Require().NoError(err, desc)
 }
 
@@ -176,7 +175,7 @@ func update_SubCategNotExist_ReturnError(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("GetByID", mockInputCateg.ID, mockUserID).Return(nil, domain.ErrSubCategNotFound)
 
 	// action, assertion
-	err := s.subCategUC.Update(mockInputCateg, mockUserID)
+	err := s.uc.Update(mockInputCateg, mockUserID)
 	s.Require().EqualError(err, domain.ErrSubCategNotFound.Error(), desc)
 }
 
@@ -198,7 +197,7 @@ func update_MainCategIDNotMatch_ReturnError(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("GetByID", mockInputCateg.ID, mockUserID).Return(mockSubCateg, nil)
 
 	// action, assertion
-	err := s.subCategUC.Update(mockInputCateg, mockUserID)
+	err := s.uc.Update(mockInputCateg, mockUserID)
 	s.Require().EqualError(err, domain.ErrMainCategNotFound.Error(), desc)
 }
 
@@ -221,7 +220,7 @@ func update_UpdateFail_ReturnError(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("Update", mockInputCateg).Return(errors.New("update error"))
 
 	// action, assertion
-	err := s.subCategUC.Update(mockInputCateg, mockUserID)
+	err := s.uc.Update(mockInputCateg, mockUserID)
 	s.Require().EqualError(err, "update error", desc)
 }
 
@@ -246,7 +245,7 @@ func delete_NoError_DeleteSuccessfully(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("Delete", mockID).Return(nil)
 
 	// action, assertion
-	err := s.subCategUC.Delete(mockID)
+	err := s.uc.Delete(mockID)
 	s.Require().NoError(err, desc)
 }
 
@@ -258,6 +257,6 @@ func delete_DeleteFail_ReturnError(s *SubCategSuite, desc string) {
 	s.mockSubCategRepo.On("Delete", mockID).Return(errors.New("delete error"))
 
 	// action, assertion
-	err := s.subCategUC.Delete(mockID)
+	err := s.uc.Delete(mockID)
 	s.Require().EqualError(err, "delete error", desc)
 }

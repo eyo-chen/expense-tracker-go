@@ -20,7 +20,7 @@ import (
 
 type TransactionSuite struct {
 	suite.Suite
-	transactionHlr    *transaction.TransactionHandler
+	transactionHlr    *transaction.Hlr
 	mockTransactionUC *mocks.TransactionUC
 }
 
@@ -34,7 +34,7 @@ func (s *TransactionSuite) SetupSuite() {
 
 func (s *TransactionSuite) SetupTest() {
 	s.mockTransactionUC = mocks.NewTransactionUC(s.T())
-	s.transactionHlr = transaction.NewTransactionHandler(s.mockTransactionUC)
+	s.transactionHlr = transaction.New(s.mockTransactionUC)
 }
 
 func (s *TransactionSuite) TearDownTest() {

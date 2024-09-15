@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/auth"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -22,7 +21,7 @@ var (
 
 type UserSuite struct {
 	suite.Suite
-	userUC       interfaces.UserUC
+	uc           *UC
 	mockUserRepo *mocks.UserRepo
 	mockRedis    *mocks.RedisService
 }
@@ -38,7 +37,7 @@ func (s *UserSuite) SetupSuite() {
 func (s *UserSuite) SetupTest() {
 	s.mockUserRepo = mocks.NewUserRepo(s.T())
 	s.mockRedis = mocks.NewRedisService(s.T())
-	s.userUC = New(s.mockUserRepo, s.mockRedis)
+	s.uc = New(s.mockUserRepo, s.mockRedis)
 }
 
 func (s *UserSuite) TearDownTest() {
@@ -73,7 +72,7 @@ func singup_EmailNotExists_SignupSuccessfully(s *UserSuite, desc string) {
 	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(nil).Once()
 
-	token, err := s.userUC.Signup(mockCTX, mockUser)
+	token, err := s.uc.Signup(mockCTX, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().NotEmpty(token.Access, desc)
 	s.Require().NotEmpty(token.Refresh, desc)
@@ -87,7 +86,7 @@ func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
 	}
 	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 
-	token, err := s.userUC.Signup(mockCTX, mockUser)
+	token, err := s.uc.Signup(mockCTX, mockUser)
 	s.Require().Equal(domain.ErrEmailAlreadyExists, err, desc)
 	s.Require().Empty(token, desc)
 }
@@ -106,7 +105,7 @@ func singup_SetCacheFail_DontReturnError(s *UserSuite, desc string) {
 	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(errors.New("set fail")).Once()
 
-	token, err := s.userUC.Signup(mockCTX, mockUser)
+	token, err := s.uc.Signup(mockCTX, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().NotEmpty(token.Access, desc)
 	s.Require().NotEmpty(token.Refresh, desc)
@@ -141,7 +140,7 @@ func login_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(nil).Once()
 
-	token, err := s.userUC.Login(mockCTX, mockUser)
+	token, err := s.uc.Login(mockCTX, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().NotEmpty(token.Access, desc)
 	s.Require().NotEmpty(token.Refresh, desc)
@@ -154,7 +153,7 @@ func login_EmailNotExists_ReturnError(s *UserSuite, desc string) {
 		Email:    "email.com",
 		Password: "password",
 	}
-	token, err := s.userUC.Login(mockCTX, input)
+	token, err := s.uc.Login(mockCTX, input)
 	s.Require().Equal(domain.ErrAuthentication, err, desc)
 	s.Require().Empty(token, desc)
 }
@@ -176,7 +175,7 @@ func login_PasswordNotMatch_ReturnError(s *UserSuite, desc string) {
 		Email:    "email.com",
 		Password: "password2", // wrong password
 	}
-	token, err := s.userUC.Login(mockCTX, input)
+	token, err := s.uc.Login(mockCTX, input)
 	s.Require().Equal(domain.ErrAuthentication, err, desc)
 	s.Require().Empty(token, desc)
 }
@@ -195,7 +194,7 @@ func login_RedisSetFail_DontReturnError(s *UserSuite, desc string) {
 	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 	s.mockRedis.On("Set", mockCTX, mock.Anything, mockUser.Email, 7*24*time.Hour).Return(errors.New("set fail")).Once()
 
-	token, err := s.userUC.Login(mockCTX, mockUser)
+	token, err := s.uc.Login(mockCTX, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().NotEmpty(token.Access, desc)
 	s.Require().NotEmpty(token.Refresh, desc)
@@ -237,7 +236,7 @@ func token_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 		Refresh: mockNewRefreshToken,
 	}
 
-	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	token, err := s.uc.Token(mockCTX, mockRefreshToken)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, token, desc)
 }
@@ -249,7 +248,7 @@ func token_RedisGetDelFail_ReturnError(s *UserSuite, desc string) {
 	s.mockRedis.On("GetDel", mockCTX, hashToken(mockRefreshToken)).
 		Return("", mockErr).Once()
 
-	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	token, err := s.uc.Token(mockCTX, mockRefreshToken)
 	s.Require().ErrorIs(err, mockErr, desc)
 	s.Require().Empty(token, desc)
 }
@@ -264,7 +263,7 @@ func token_UserNotFound_ReturnError(s *UserSuite, desc string) {
 
 	s.mockUserRepo.On("FindByEmail", mockEmail).Return(domain.User{}, mockErr).Once()
 
-	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	token, err := s.uc.Token(mockCTX, mockRefreshToken)
 	s.Require().ErrorIs(err, mockErr, desc)
 	s.Require().Empty(token, desc)
 }
@@ -291,7 +290,7 @@ func token_SetFail_DontReturnError(s *UserSuite, desc string) {
 		Refresh: mockNewRefreshToken,
 	}
 
-	token, err := s.userUC.Token(mockCTX, mockRefreshToken)
+	token, err := s.uc.Token(mockCTX, mockRefreshToken)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, token, desc)
 }
@@ -317,7 +316,7 @@ func getInfo_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 	}
 	s.mockUserRepo.On("GetInfo", int64(1)).Return(userByID, nil).Once()
 
-	user, err := s.userUC.GetInfo(1)
+	user, err := s.uc.GetInfo(1)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(userByID, user, desc)
 }
@@ -325,7 +324,7 @@ func getInfo_NoError_ReturnSuccessfully(s *UserSuite, desc string) {
 func getInfo_GetFail_ReturnError(s *UserSuite, desc string) {
 	s.mockUserRepo.On("GetInfo", int64(1)).Return(domain.User{}, domain.ErrUserIDNotFound).Once()
 
-	user, err := s.userUC.GetInfo(1)
+	user, err := s.uc.GetInfo(1)
 	s.Require().Equal(domain.ErrUserIDNotFound, err, desc)
 	s.Require().Empty(user, desc)
 }

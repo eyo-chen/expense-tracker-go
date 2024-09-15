@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -18,7 +17,7 @@ var (
 
 type InitDataSuite struct {
 	suite.Suite
-	uc                interfaces.InitDataUC
+	uc                *UC
 	mockIconRepo      *mocks.IconRepo
 	mockMainCategRepo *mocks.MainCategRepo
 	mockSubCategRepo  *mocks.SubCategRepo
@@ -35,7 +34,7 @@ func (s *InitDataSuite) SetupTest() {
 	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
 	s.mockUserRepo = mocks.NewUserRepo(s.T())
 
-	s.uc = NewInitDataUC(s.mockIconRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockUserRepo)
+	s.uc = New(s.mockIconRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockUserRepo)
 }
 
 func (s *InitDataSuite) TearDownTest() {

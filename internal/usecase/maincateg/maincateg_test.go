@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
-	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
 	"github.com/stretchr/testify/suite"
@@ -17,7 +16,7 @@ var (
 
 type MainCategSuite struct {
 	suite.Suite
-	mainCategUC       interfaces.MainCategUC
+	uc                *UC
 	mockIconRepo      *mocks.IconRepo
 	mockMainCategRepo *mocks.MainCategRepo
 }
@@ -29,7 +28,7 @@ func TestMainCategSuite(t *testing.T) {
 func (s *MainCategSuite) SetupTest() {
 	s.mockIconRepo = mocks.NewIconRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
-	s.mainCategUC = NewMainCategUC(s.mockMainCategRepo, s.mockIconRepo)
+	s.uc = New(s.mockMainCategRepo, s.mockIconRepo)
 }
 
 func (s *MainCategSuite) TearDownTest() {
@@ -63,7 +62,7 @@ func create_NoError_CreateSuccessfully(s *MainCategSuite, desc string) {
 	s.mockMainCategRepo.On("Create", &mockCateg, mockUserID).Return(nil)
 
 	// action, assertion
-	err := s.mainCategUC.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCateg, mockUserID)
 	s.Require().NoError(err, desc)
 }
 
@@ -79,7 +78,7 @@ func create_IconNotExist_ReturnError(s *MainCategSuite, desc string) {
 	s.mockIconRepo.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, domain.ErrIconNotFound)
 
 	// action, assertion
-	err := s.mainCategUC.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCateg, mockUserID)
 	s.Require().EqualError(err, domain.ErrIconNotFound.Error(), desc)
 }
 
@@ -107,7 +106,7 @@ func getAll_NoError_ReturnMainCategories(s *MainCategSuite, desc string) {
 	s.mockMainCategRepo.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeExpense).Return(mockMainCategs, nil)
 
 	// action, assertion
-	res, err := s.mainCategUC.GetAll(mockCtx, mockUserID, domain.TransactionTypeExpense)
+	res, err := s.uc.GetAll(mockCtx, mockUserID, domain.TransactionTypeExpense)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockMainCategs, res, desc)
 }
@@ -141,7 +140,7 @@ func update_NoError_UpdateSuccessfully(s *MainCategSuite, desc string) {
 	s.mockMainCategRepo.On("Update", &mockCateg).Return(nil)
 
 	// action, assertion
-	err := s.mainCategUC.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCateg, mockUserID)
 	s.Require().NoError(err, desc)
 }
 
@@ -158,7 +157,7 @@ func update_MainCategNotExist_ReturnError(s *MainCategSuite, desc string) {
 	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
 
 	// action, assertion
-	err := s.mainCategUC.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCateg, mockUserID)
 	s.Require().EqualError(err, domain.ErrMainCategNotFound.Error(), desc)
 }
 
@@ -176,7 +175,7 @@ func update_IconNotExist_ReturnError(s *MainCategSuite, desc string) {
 	s.mockIconRepo.On("GetByID", mockCateg.Icon.ID).Return(domain.Icon{}, domain.ErrIconNotFound)
 
 	// action, assertion
-	err := s.mainCategUC.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCateg, mockUserID)
 	s.Require().EqualError(err, domain.ErrIconNotFound.Error(), desc)
 }
 
@@ -200,6 +199,6 @@ func delete_NoError_DeleteSuccessfully(s *MainCategSuite, desc string) {
 	s.mockMainCategRepo.On("Delete", mockID).Return(nil)
 
 	// action, assertion
-	err := s.mainCategUC.Delete(mockID)
+	err := s.uc.Delete(mockID)
 	s.Require().NoError(err, desc)
 }
