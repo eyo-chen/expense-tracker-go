@@ -46,7 +46,7 @@ func (r *Repo) Create(ctx context.Context, userIcon domain.UserIcon) error {
 
 func (r *Repo) GetByUserID(ctx context.Context, userID int64) ([]domain.UserIcon, error) {
 	stmt := `SELECT id, user_id, object_key FROM user_icons WHERE user_id = ?`
-	rows, err := r.DB.Query(stmt, userID)
+	rows, err := r.DB.QueryContext(ctx, stmt, userID)
 	if err != nil {
 		logger.Error("user_icons SELECT r.DB.Query", "err", err, "package", packageName)
 		return nil, err
