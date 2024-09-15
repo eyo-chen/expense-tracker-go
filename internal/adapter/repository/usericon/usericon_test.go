@@ -57,6 +57,19 @@ func (s *UserIconSuite) TearDownTest() {
 }
 
 func (s *UserIconSuite) TestCreate() {
+	for scenario, fn := range map[string]func(s *UserIconSuite, desc string){
+		"when no error, return successfully": create_NoError_ReturnSuccessfully,
+		"when user not found, return error":  create_UserNotFound_ReturnErr,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func create_NoError_ReturnSuccessfully(s *UserIconSuite, desc string) {
 	// prepare mock data
 	user, err := s.factory.InsertUser(mockCTX)
 	s.Require().NoError(err)
@@ -87,6 +100,20 @@ func (s *UserIconSuite) TestCreate() {
 
 	s.Require().Equal(userIcon.UserID, userID)
 	s.Require().Equal(userIcon.ObjectKey, objectKey)
+}
+
+func create_UserNotFound_ReturnErr(s *UserIconSuite, desc string) {
+	// prepare mock data
+	userIcon := domain.UserIcon{
+		UserID:    111, // user not found
+		ObjectKey: "test",
+	}
+
+	// action
+	err := s.repo.Create(mockCTX, userIcon)
+
+	// assertion
+	s.Require().ErrorIs(err, domain.ErrUserNotFound)
 }
 
 func (s *UserIconSuite) TestGetByUserID() {

@@ -2,6 +2,11 @@ package domain
 
 import "errors"
 
+const (
+	// mysql foreign key constraint violation error
+	ErrMySQLForeignKeyConstraintViolation = 1452
+)
+
 var (
 	// email not found error
 	ErrEmailNotFound = errors.New("email not found")
@@ -62,4 +67,7 @@ var (
 
 	// cache miss error
 	ErrCacheMiss = errors.New("cache miss")
+
+	// user not found error
+	ErrUserNotFound = errors.New("user not found")
 )

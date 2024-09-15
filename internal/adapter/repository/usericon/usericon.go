@@ -3,9 +3,11 @@ package usericon
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
+	"github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -28,9 +30,14 @@ type userIcon struct {
 
 func (r *Repo) Create(ctx context.Context, userIcon domain.UserIcon) error {
 	stmt := `INSERT INTO user_icons (user_id, object_key) VALUES (?, ?)`
-	_, err := r.DB.Exec(stmt, userIcon.UserID, userIcon.ObjectKey)
+	_, err := r.DB.ExecContext(ctx, stmt, userIcon.UserID, userIcon.ObjectKey)
 	if err != nil {
-		logger.Error("user_icons INSERT r.DB.Exec", "err", err, "package", packageName)
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == domain.ErrMySQLForeignKeyConstraintViolation {
+			logger.Error("user_icons INSERT foreign key constraint violation", "err", err, "package", packageName)
+			return domain.ErrUserNotFound
+		}
+		logger.Error("user_icons INSERT r.DB.ExecContext", "err", err, "package", packageName)
 		return err
 	}
 
