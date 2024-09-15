@@ -31,7 +31,7 @@ func New(u interfaces.UserRepo,
 		MainCateg:   maincateg.New(m, i),
 		SubCateg:    subcateg.New(s, m),
 		Transaction: transaction.New(t, m, s),
-		Icon:        icon.New(i, r),
+		Icon:        icon.New(i, nil, r, nil),
 		InitData:    initdata.New(i, m, s, u),
 	}
 }
