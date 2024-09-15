@@ -20,9 +20,10 @@ func genMainCategs(categs []domain.InitDataMainCateg, t domain.TransactionType) 
 	mainCategs := make([]domain.MainCateg, len(categs))
 	for i, c := range categs {
 		mainCategs[i] = domain.MainCateg{
-			Name: c.Name,
-			Icon: c.Icon,
-			Type: t,
+			Name:     c.Name,
+			Type:     t,
+			IconType: domain.IconTypeDefault,
+			IconData: c.Icon.URL,
 		}
 	}
 
