@@ -1,9 +1,9 @@
 package domain
 
-// Icon contains icon information
-type Icon struct {
-	ID  int64  `json:"id"`
-	URL string `json:"url"`
+// DefaultIcon contains default icon information
+type DefaultIcon struct {
+	ID  int64
+	URL string
 }
 
 // UserIcon contains user icon information

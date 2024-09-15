@@ -14,23 +14,23 @@ type IconUC struct {
 }
 
 // List provides a mock function with given fields:
-func (_m *IconUC) List() ([]domain.Icon, error) {
+func (_m *IconUC) List() ([]domain.DefaultIcon, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for List")
 	}
 
-	var r0 []domain.Icon
+	var r0 []domain.DefaultIcon
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]domain.Icon, error)); ok {
+	if rf, ok := ret.Get(0).(func() ([]domain.DefaultIcon, error)); ok {
 		return rf()
 	}
-	if rf, ok := ret.Get(0).(func() []domain.Icon); ok {
+	if rf, ok := ret.Get(0).(func() []domain.DefaultIcon); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.Icon)
+			r0 = ret.Get(0).([]domain.DefaultIcon)
 		}
 	}
 

@@ -21,7 +21,7 @@ func New(i interfaces.IconRepo, r interfaces.RedisService) *UC {
 	}
 }
 
-func (u *UC) List() ([]domain.Icon, error) {
+func (u *UC) List() ([]domain.DefaultIcon, error) {
 	ctx := context.Background()
 
 	res, err := u.redis.GetByFunc(ctx, "icons", 7*24*time.Hour, func() (string, error) {
@@ -36,5 +36,5 @@ func (u *UC) List() ([]domain.Icon, error) {
 		return nil, err
 	}
 
-	return jsonutil.CvtFromJSON[[]domain.Icon](res)
+	return jsonutil.CvtFromJSON[[]domain.DefaultIcon](res)
 }

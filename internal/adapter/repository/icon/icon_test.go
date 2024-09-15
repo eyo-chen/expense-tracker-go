@@ -85,7 +85,7 @@ func list_WithIcons_ReturnAll(s *IconSuite, desc string) {
 	icons, err := s.f.InsertMany(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
-	expRes := []domain.Icon{
+	expRes := []domain.DefaultIcon{
 		{
 			ID:  icons[0].ID,
 			URL: icons[0].URL,
@@ -124,7 +124,7 @@ func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
 	icons, err := s.f.InsertMany(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
-	expRes := domain.Icon{
+	expRes := domain.DefaultIcon{
 		ID:  icons[0].ID,
 		URL: icons[0].URL,
 	}
@@ -138,7 +138,7 @@ func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 	_, err := s.f.InsertMany(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
-	expRes := domain.Icon{}
+	expRes := domain.DefaultIcon{}
 
 	res, err := s.repo.GetByID(999)
 	s.Require().Equal(expRes, res, desc)
@@ -162,7 +162,7 @@ func getByIDs_WithIcon_ReturnIcons(s *IconSuite, desc string) {
 	icons, err := s.f.InsertMany(mockCTX, 5)
 	s.Require().NoError(err, desc)
 
-	expRes := map[int64]domain.Icon{
+	expRes := map[int64]domain.DefaultIcon{
 		icons[0].ID: {
 			ID:  icons[0].ID,
 			URL: icons[0].URL,

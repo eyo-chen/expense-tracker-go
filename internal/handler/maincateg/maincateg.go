@@ -36,7 +36,7 @@ func (h *Hlr) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
 	categ := domain.MainCateg{
 		Name: input.Name,
 		Type: domain.CvtToTransactionType(input.Type),
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID: input.IconID,
 		},
 	}
@@ -116,7 +116,7 @@ func (h *Hlr) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 		ID:   id,
 		Name: input.Name,
 		Type: domain.CvtToTransactionType(input.Type),
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID: input.IconID,
 		},
 	}

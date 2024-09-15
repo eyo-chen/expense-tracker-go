@@ -104,7 +104,7 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 	categ := &domain.MainCateg{
 		Name: "test",
 		Type: domain.TransactionTypeExpense,
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID: icons[0].ID,
 		},
 		IconType: domain.IconTypeDefault,
@@ -137,7 +137,7 @@ func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 	categ := &domain.MainCateg{
 		Name: createdMainCateg.Name,
 		Type: domain.TransactionTypeIncome,
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID: icon.ID,
 		},
 		IconType: domain.IconTypeDefault,
@@ -171,7 +171,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 			ID:   mainCategList[1].ID,
 			Name: mainCategList[1].Name,
 			Type: domain.TransactionTypeIncome,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  icons[1].ID,
 				URL: icons[1].URL,
 			},
@@ -192,7 +192,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 			ID:   mainCategList[0].ID,
 			Name: mainCategList[0].Name,
 			Type: domain.TransactionTypeExpense,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  icons[0].ID,
 				URL: icons[0].URL,
 			},
@@ -213,7 +213,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 			ID:   mainCategList[0].ID,
 			Name: mainCategList[0].Name,
 			Type: domain.TransactionTypeExpense,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  icons[0].ID,
 				URL: icons[0].URL,
 			},
@@ -222,7 +222,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 			ID:   mainCategList[1].ID,
 			Name: mainCategList[1].Name,
 			Type: domain.TransactionTypeIncome,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  icons[1].ID,
 				URL: icons[1].URL,
 			},
@@ -243,7 +243,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 			ID:   mainCategList[1].ID,
 			Name: mainCategList[1].Name,
 			Type: domain.TransactionTypeIncome,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  icons[1].ID,
 				URL: icons[1].URL,
 			},
@@ -252,7 +252,7 @@ func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
 			ID:   mainCategList[2].ID,
 			Name: mainCategList[2].Name,
 			Type: domain.TransactionTypeExpense,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  icons[2].ID,
 				URL: icons[2].URL,
 			},
@@ -286,7 +286,7 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 		ID:   categ.ID,
 		Name: "test2",
 		Type: domain.TransactionTypeIncome,
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID: categ.IconID,
 		},
 	}
@@ -312,7 +312,7 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 		ID:   categs[0].ID,
 		Name: "update name",
 		Type: domain.TransactionTypeIncome,
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID: categs[0].IconID,
 		},
 	}
@@ -346,7 +346,7 @@ func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 		ID:   categs[0].ID,
 		Name: categs[1].Name, // update categ1 with categ2 name
 		Type: domain.CvtToTransactionType(categs[0].Type),
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID: categs[0].IconID,
 		},
 	}
@@ -456,7 +456,7 @@ func createBatch_InsertOneData_InsertSuccessfully(s *MainCategSuite, desc string
 		{
 			Name: "test1",
 			Type: domain.TransactionTypeExpense,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID: icons[0].ID,
 			},
 		},
@@ -485,21 +485,21 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.Icon{ID: icons[0].ID},
+			Icon:     domain.DefaultIcon{ID: icons[0].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
 		{
 			Name:     "test2",
 			Type:     domain.TransactionTypeIncome,
-			Icon:     domain.Icon{ID: icons[1].ID},
+			Icon:     domain.DefaultIcon{ID: icons[1].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
 		{
 			Name:     "test3",
 			Type:     domain.TransactionTypeIncome,
-			Icon:     domain.Icon{ID: icons[2].ID},
+			Icon:     domain.DefaultIcon{ID: icons[2].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
@@ -535,14 +535,14 @@ func createBatch_InsertDuplicateNameData_ReturnError(s *MainCategSuite, desc str
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.Icon{ID: icons[0].ID},
+			Icon:     domain.DefaultIcon{ID: icons[0].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.Icon{ID: icons[1].ID},
+			Icon:     domain.DefaultIcon{ID: icons[1].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
@@ -573,14 +573,14 @@ func createBatch_AlreadyExistData_ReturnError(s *MainCategSuite, desc string) {
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.Icon{ID: icons[0].ID},
+			Icon:     domain.DefaultIcon{ID: icons[0].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
 		{
 			Name:     maincateg.Name,
 			Type:     domain.CvtToTransactionType(maincateg.Type),
-			Icon:     domain.Icon{ID: icons[1].ID},
+			Icon:     domain.DefaultIcon{ID: icons[1].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},

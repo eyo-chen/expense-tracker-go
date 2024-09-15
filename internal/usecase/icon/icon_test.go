@@ -61,7 +61,7 @@ func list_NoError_ReturnIconList(s *IconSuite, desc string) {
 	s.mockRedisService.On("GetByFunc", mockCTX, "icons", mockTTL, mockGetFun).Return(mockIconsStr, nil)
 
 	// prepare expected result
-	expResp := []domain.Icon{
+	expResp := []domain.DefaultIcon{
 		{ID: 1, URL: "http://test.com/1"},
 		{ID: 2, URL: "http://test.com/1"},
 	}

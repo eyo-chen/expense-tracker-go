@@ -67,13 +67,13 @@ type SubCategRepo interface {
 // IconRepo is the interface that wraps the basic methods for icon repository.
 type IconRepo interface {
 	// GetByID returns an icon by id.
-	GetByID(id int64) (domain.Icon, error)
+	GetByID(id int64) (domain.DefaultIcon, error)
 
 	// List returns all icons.
-	List() ([]domain.Icon, error)
+	List() ([]domain.DefaultIcon, error)
 
 	// GetByIDs returns icons by ids.
-	GetByIDs(ids []int64) (map[int64]domain.Icon, error)
+	GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error)
 }
 
 // TransactionRepo is the interface that wraps the basic methods for transaction repository.

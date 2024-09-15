@@ -19,7 +19,7 @@ func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.Sub
 			ID:   m.ID,
 			Name: m.Name,
 			Type: domain.CvtToTransactionType(m.Type),
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  i.ID,
 				URL: i.URL,
 			},

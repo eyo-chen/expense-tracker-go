@@ -15,7 +15,7 @@ func cvtToMainCateg(input []initDataMainCateg) []domain.InitDataMainCateg {
 	for i, v := range input {
 		categ[i] = domain.InitDataMainCateg{
 			Name: v.Name,
-			Icon: domain.Icon{
+			Icon: domain.DefaultIcon{
 				ID:  v.Icon.ID,
 				URL: v.Icon.URL,
 			},
