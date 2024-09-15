@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/eyo-chen/expense-tracker-go/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
@@ -36,6 +38,36 @@ func (_m *IconUC) List() ([]domain.DefaultIcon, error) {
 
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListByUserID provides a mock function with given fields: ctx, userID
+func (_m *IconUC) ListByUserID(ctx context.Context, userID int64) ([]domain.Icon, error) {
+	ret := _m.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListByUserID")
+	}
+
+	var r0 []domain.Icon
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) ([]domain.Icon, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64) []domain.Icon); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Icon)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}

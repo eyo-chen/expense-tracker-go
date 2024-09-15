@@ -26,6 +26,9 @@ func New(handler *hd.Handler) http.Handler {
 
 	auth := alice.New(middleware.Authenticate)
 
+	// icon with auth
+	r.Handle("/v1/user-icon", auth.ThenFunc(handler.Icon.ListByUserID)).Methods(http.MethodGet)
+
 	// user with auth
 	r.Handle("/v1/user", auth.ThenFunc(handler.User.GetInfo)).Methods(http.MethodGet)
 

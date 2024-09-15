@@ -15,7 +15,7 @@ type UserIcon struct {
 
 // Icon contains icon information
 type Icon struct {
-	ID   int64    `json:"id"`
-	Type IconType `json:"type"`
-	URL  string   `json:"url"`
+	ID   int64
+	Type IconType
+	URL  string
 }

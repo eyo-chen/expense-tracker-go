@@ -85,6 +85,9 @@ type TransactionUC interface {
 type IconUC interface {
 	// List returns all icons.
 	List() ([]domain.DefaultIcon, error)
+
+	// ListByUserID returns all icons by user id.
+	ListByUserID(ctx context.Context, userID int64) ([]domain.Icon, error)
 }
 
 // InitDataUC is the interface that wraps the basic methods for init data usecase.
