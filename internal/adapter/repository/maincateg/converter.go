@@ -1,19 +1,16 @@
 package maincateg
 
 import (
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
-func cvtToDomainMainCateg(c MainCateg, i icon.Icon) domain.MainCateg {
+func cvtToDomainMainCateg(c MainCateg) domain.MainCateg {
 	return domain.MainCateg{
-		ID:   c.ID,
-		Name: c.Name,
-		Type: domain.CvtToTransactionType(c.Type),
-		Icon: domain.DefaultIcon{
-			ID:  i.ID,
-			URL: i.URL,
-		},
+		ID:       c.ID,
+		Name:     c.Name,
+		Type:     domain.CvtToTransactionType(c.Type),
+		IconType: domain.CvtToIconType(c.IconType),
+		IconData: c.IconData,
 	}
 }
 
