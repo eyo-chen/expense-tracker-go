@@ -42,7 +42,7 @@ func (r *Repo) List() ([]domain.DefaultIcon, error) {
 			return nil, err
 		}
 
-		icons = append(icons, cvtToDomainIcon(icon))
+		icons = append(icons, cvtToDomainDefaultIcon(icon))
 	}
 	defer rows.Close()
 
@@ -61,7 +61,7 @@ func (r *Repo) GetByID(id int64) (domain.DefaultIcon, error) {
 		return domain.DefaultIcon{}, err
 	}
 
-	return cvtToDomainIcon(icon), nil
+	return cvtToDomainDefaultIcon(icon), nil
 }
 
 func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
@@ -103,5 +103,5 @@ func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
 		return nil, domain.ErrIconNotFound
 	}
 
-	return cvtToIDToDomainIcon(icons), nil
+	return cvtToIDToDomainDefaultIcon(icons), nil
 }
