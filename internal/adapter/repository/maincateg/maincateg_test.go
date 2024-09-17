@@ -277,19 +277,23 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 		Icon: domain.DefaultIcon{
 			ID: categ.IconID,
 		},
+		IconType: domain.IconTypeDefault,
+		IconData: "new-url",
 	}
 	err = s.mainCategRepo.Update(inputCateg)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id
+	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
 							 FROM main_categories
 							 WHERE id = ?
 							 `
 	var result MainCateg
-	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
 	s.Require().Equal(inputCateg.Type.ToModelValue(), result.Type, desc)
+	s.Require().Equal(inputCateg.IconType.ToModelValue(), result.IconType, desc)
+	s.Require().Equal(inputCateg.IconData, result.IconData, desc)
 }
 
 func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) {
@@ -303,24 +307,28 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 		Icon: domain.DefaultIcon{
 			ID: categs[0].IconID,
 		},
+		IconType: domain.IconTypeDefault,
+		IconData: "new-url",
 	}
 	err = s.mainCategRepo.Update(inputCateg)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id
+	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
 							 FROM main_categories
 							 WHERE id = ?
 							 `
 	// check if the data is updated
 	var result MainCateg
-	err = s.db.QueryRow(checkStmt, categs[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	err = s.db.QueryRow(checkStmt, categs[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
 	s.Require().Equal(inputCateg.Type.ToModelValue(), result.Type, desc)
+	s.Require().Equal(inputCateg.IconType.ToModelValue(), result.IconType, desc)
+	s.Require().Equal(inputCateg.IconData, result.IconData, desc)
 
 	// check if the other data is not updated
 	var result2 MainCateg
-	err = s.db.QueryRow(checkStmt, categs[1].ID).Scan(&result2.ID, &result2.Name, &result2.Type, &result2.IconID)
+	err = s.db.QueryRow(checkStmt, categs[1].ID).Scan(&result2.ID, &result2.Name, &result2.Type, &result2.IconID, &result2.IconType, &result2.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categs[1].Name, result2.Name, desc)
 	s.Require().Equal(categs[1].Type, result2.Type, desc)
@@ -337,6 +345,8 @@ func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 		Icon: domain.DefaultIcon{
 			ID: categs[0].IconID,
 		},
+		IconType: domain.IconTypeDefault,
+		IconData: "new-url",
 	}
 	err = s.mainCategRepo.Update(domainMainCateg)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
