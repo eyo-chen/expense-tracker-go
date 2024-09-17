@@ -10,14 +10,12 @@ import (
 )
 
 func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, t Transaction) string {
-	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, sc.id, sc.name, i.id, i.url
+	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, mc.icon_type, mc.icon_data, sc.id, sc.name
 						FROM transactions AS t
 						LEFT JOIN main_categories AS mc 
 						ON t.main_category_id = mc.id
 						LEFT JOIN sub_categories AS sc 
 						ON t.sub_category_id = sc.id
-						LEFT JOIN icons AS i
-						ON mc.icon_id = i.id
 						WHERE t.user_id = ?`
 
 	if opt.Search.Keyword != nil {
@@ -100,7 +98,7 @@ func genDBFieldNames(key string, t Transaction) string {
 			continue
 		}
 
-		t := val.Type().Field(i).Tag.Get("esql")
+		t := val.Type().Field(i).Tag.Get("mysqlf")
 		if t == "" {
 			return camelToSnake(key)
 		}

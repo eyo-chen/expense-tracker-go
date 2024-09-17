@@ -4,13 +4,11 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 	"github.com/eyo-chen/gofacto"
 	"github.com/eyo-chen/gofacto/db/mysqlf"
-	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type TransactionFactory struct {
@@ -34,31 +32,27 @@ func NewTransactionFactory(db *sql.DB) *TransactionFactory {
 	}
 }
 
-func (tf *TransactionFactory) PrepareUserMainAndSubCateg(ctx context.Context) (user.User, maincateg.MainCateg, subcateg.SubCateg, icon.Icon, error) {
+func (tf *TransactionFactory) PrepareUserMainAndSubCateg(ctx context.Context) (user.User, maincateg.MainCateg, subcateg.SubCateg, error) {
 	u := user.User{}
-	i := icon.Icon{}
-	m, err := tf.maincateg.Build(ctx).WithOne(&u).WithOne(&i).Insert()
+	m, err := tf.maincateg.Build(ctx).WithOne(&u).Insert()
 	if err != nil {
-		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, icon.Icon{}, err
+		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, err
 	}
 
 	ow := subcateg.SubCateg{UserID: u.ID, MainCategID: m.ID}
 	s, err := tf.subcateg.Build(ctx).Overwrite(ow).Insert()
 	if err != nil {
-		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, icon.Icon{}, err
+		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, err
 	}
 
-	return u, m, s, i, nil
+	return u, m, s, nil
 }
 
-func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context, i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, []icon.Icon, error) {
+func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context, i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, error) {
 	u := user.User{}
-
-	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](i, nil)
-
-	maincategList, err := tf.maincateg.BuildList(ctx, i).WithOne(&u).WithMany(iconPtrList).Insert()
+	maincategList, err := tf.maincateg.BuildList(ctx, i).WithOne(&u).Insert()
 	if err != nil {
-		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
+		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, err
 	}
 
 	owSub := []subcateg.SubCateg{}
@@ -68,7 +62,7 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context,
 
 	subcategList, err := tf.subcateg.BuildList(ctx, i).Overwrites(owSub...).Insert()
 	if err != nil {
-		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
+		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, err
 	}
 
 	owTrans := []Transaction{}
@@ -82,25 +76,22 @@ func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context,
 
 	transList, err := tf.transaction.BuildList(ctx, i).Overwrites(owTrans...).Overwrites(ow...).Insert()
 	if err != nil {
-		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, []icon.Icon{}, err
+		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, err
 	}
 
-	iconList := typeconv.ToT[icon.Icon](iconPtrList)
-	return transList, u, maincategList, subcategList, iconList, nil
+	return transList, u, maincategList, subcategList, nil
 }
 
 // InsertMainCategList inserts a list of main categories
-func (tf *TransactionFactory) InsertMainCategList(ctx context.Context, i int, ow ...maincateg.MainCateg) ([]maincateg.MainCateg, user.User, []icon.Icon, error) {
+func (tf *TransactionFactory) InsertMainCategList(ctx context.Context, i int, ow ...maincateg.MainCateg) ([]maincateg.MainCateg, user.User, error) {
 	u := user.User{}
 
-	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](i, nil)
-	maincategList, err := tf.maincateg.BuildList(ctx, i).Overwrites(ow...).WithOne(&u).WithMany(iconPtrList).Insert()
+	maincategList, err := tf.maincateg.BuildList(ctx, i).Overwrites(ow...).WithOne(&u).Insert()
 	if err != nil {
-		return nil, user.User{}, []icon.Icon{}, err
+		return nil, user.User{}, err
 	}
 
-	iconList := typeconv.ToT[icon.Icon](iconPtrList)
-	return maincategList, u, iconList, nil
+	return maincategList, u, nil
 }
 
 // InsertTransactionWithGivenUser inserts a transaction with a given user
