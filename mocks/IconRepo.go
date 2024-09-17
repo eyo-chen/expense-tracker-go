@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/eyo-chen/expense-tracker-go/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
@@ -64,6 +66,34 @@ func (_m *IconRepo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) 
 
 	if rf, ok := ret.Get(1).(func([]int64) error); ok {
 		r1 = rf(ids)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetByURL provides a mock function with given fields: ctx, url
+func (_m *IconRepo) GetByURL(ctx context.Context, url string) (domain.DefaultIcon, error) {
+	ret := _m.Called(ctx, url)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByURL")
+	}
+
+	var r0 domain.DefaultIcon
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (domain.DefaultIcon, error)); ok {
+		return rf(ctx, url)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) domain.DefaultIcon); ok {
+		r0 = rf(ctx, url)
+	} else {
+		r0 = ret.Get(0).(domain.DefaultIcon)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, url)
 	} else {
 		r1 = ret.Error(1)
 	}

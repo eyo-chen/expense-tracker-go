@@ -33,6 +33,34 @@ func (_m *UserIconRepo) Create(ctx context.Context, userIcon domain.UserIcon) er
 	return r0
 }
 
+// GetByObjectKeyAndUserID provides a mock function with given fields: ctx, objectKey, userID
+func (_m *UserIconRepo) GetByObjectKeyAndUserID(ctx context.Context, objectKey string, userID int64) (domain.UserIcon, error) {
+	ret := _m.Called(ctx, objectKey, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByObjectKeyAndUserID")
+	}
+
+	var r0 domain.UserIcon
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64) (domain.UserIcon, error)); ok {
+		return rf(ctx, objectKey, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64) domain.UserIcon); ok {
+		r0 = rf(ctx, objectKey, userID)
+	} else {
+		r0 = ret.Get(0).(domain.UserIcon)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64) error); ok {
+		r1 = rf(ctx, objectKey, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetByUserID provides a mock function with given fields: ctx, userID
 func (_m *UserIconRepo) GetByUserID(ctx context.Context, userID int64) ([]domain.UserIcon, error) {
 	ret := _m.Called(ctx, userID)
