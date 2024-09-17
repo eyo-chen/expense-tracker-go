@@ -70,4 +70,7 @@ var (
 
 	// user not found error
 	ErrUserNotFound = errors.New("user not found")
+
+	// user icon not found error
+	ErrUserIconNotFound = errors.New("user icon not found")
 )

@@ -162,3 +162,63 @@ func getByUserID_NoData_ReturnEmpty(s *UserIconSuite, desc string) {
 	s.Require().NoError(err, desc)
 	s.Require().Empty(userIcons, desc)
 }
+
+func (s *UserIconSuite) TestGetByObjectKeyAndUserID() {
+	for scenario, fn := range map[string]func(s *UserIconSuite, desc string){
+		"when no error, return successfully":      getByObjectKeyAndUserID_NoError_ReturnSuccessfully,
+		"when incorrect user id, return error":    getByObjectKeyAndUserID_IncorrectUserID_ReturnErr,
+		"when incorrect object key, return error": getByObjectKeyAndUserID_IncorrectObjectKey_ReturnErr,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByObjectKeyAndUserID_NoError_ReturnSuccessfully(s *UserIconSuite, desc string) {
+	// prepare mock data
+	mockUserIcons, user, err := s.factory.InsertManyWithOneUser(mockCTX, 2)
+	s.Require().NoError(err)
+
+	// prepare expected data
+	expResp := domain.UserIcon{
+		ID:        mockUserIcons[0].ID,
+		UserID:    user.ID,
+		ObjectKey: mockUserIcons[0].ObjectKey,
+	}
+
+	// action
+	userIcon, err := s.repo.GetByObjectKeyAndUserID(mockCTX, mockUserIcons[0].ObjectKey, user.ID)
+
+	// assertion
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expResp, userIcon, desc)
+}
+
+func getByObjectKeyAndUserID_IncorrectUserID_ReturnErr(s *UserIconSuite, desc string) {
+	// prepare mock data
+	mockUserIcons, _, err := s.factory.InsertManyWithOneUser(mockCTX, 2)
+	s.Require().NoError(err)
+
+	// action
+	userIcon, err := s.repo.GetByObjectKeyAndUserID(mockCTX, mockUserIcons[0].ObjectKey, 9999)
+
+	// assertion
+	s.Require().ErrorIs(err, domain.ErrUserIconNotFound, desc)
+	s.Require().Empty(userIcon, desc)
+}
+
+func getByObjectKeyAndUserID_IncorrectObjectKey_ReturnErr(s *UserIconSuite, desc string) {
+	// prepare mock data
+	_, user, err := s.factory.InsertManyWithOneUser(mockCTX, 2)
+	s.Require().NoError(err)
+
+	// action
+	userIcon, err := s.repo.GetByObjectKeyAndUserID(mockCTX, "incorrect", user.ID)
+
+	// assertion
+	s.Require().ErrorIs(err, domain.ErrUserIconNotFound, desc)
+	s.Require().Empty(userIcon, desc)
+}
