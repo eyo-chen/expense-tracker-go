@@ -26,17 +26,16 @@ type MainCateg struct {
 	ID       int64
 	Name     string
 	Type     string
-	IconID   int64 `gofacto:"foreignKey,struct:Icon"`
 	UserID   int64 `gofacto:"foreignKey,struct:User"`
 	IconType string
 	IconData string
 }
 
 func (r *Repo) Create(categ *domain.MainCateg, userID int64) error {
-	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id, icon_type, icon_data) VALUES (?, ?, ?, ?, ?, ?)`
+	stmt := `INSERT INTO main_categories (name, type, user_id, icon_type, icon_data) VALUES (?, ?, ?, ?, ?)`
 
 	c := cvtToMainCateg(categ, userID)
-	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconID, c.IconType, c.IconData); err != nil {
+	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconType, c.IconData); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -80,10 +79,10 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 }
 
 func (r *Repo) Update(categ *domain.MainCateg) error {
-	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ?, icon_type = ?, icon_data = ? WHERE id = ?`
+	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_type = ?, icon_data = ? WHERE id = ?`
 
 	c := cvtToMainCateg(categ, 0)
-	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.IconID, c.IconType, c.IconData, c.ID); err != nil {
+	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.IconType, c.IconData, c.ID); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -107,10 +106,10 @@ func (r *Repo) Delete(id int64) error {
 }
 
 func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
-	stmt := `SELECT id, name, type FROM main_categories WHERE id = ? AND user_id = ?`
+	stmt := `SELECT id, name, type, icon_type, icon_data FROM main_categories WHERE id = ? AND user_id = ?`
 
 	var categ MainCateg
-	if err := r.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.Type); err != nil {
+	if err := r.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.Type, &categ.IconType, &categ.IconData); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrMainCategNotFound
 		}
@@ -124,15 +123,15 @@ func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
 }
 
 func (r *Repo) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
-	stmt := `INSERT INTO main_categories (name, type, user_id, icon_id, icon_type, icon_data) VALUES `
+	stmt := `INSERT INTO main_categories (name, type, user_id, icon_type, icon_data) VALUES `
 	args := make([]interface{}, 0, len(categs)*6)
 	for i, c := range categs {
-		stmt += "(?, ?, ?, ?, ?, ?)"
+		stmt += "(?, ?, ?, ?, ?)"
 		if i < len(categs)-1 {
 			stmt += ", "
 		}
 
-		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.Icon.ID, c.IconType.ToModelValue(), c.IconData)
+		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.IconType.ToModelValue(), c.IconData)
 	}
 
 	if _, err := r.DB.ExecContext(ctx, stmt, args...); err != nil {

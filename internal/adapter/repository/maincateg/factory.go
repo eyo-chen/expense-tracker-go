@@ -48,52 +48,42 @@ func newFactory(db *sql.DB) *factory {
 	}
 }
 
-// InsertUsersAndIcons inserts many users and icons
-func (mf *factory) InsertUsersAndIcons(ctx context.Context, userI int, iconI int) ([]user.User, []icon.Icon, error) {
+// InsertUsers inserts many users
+func (mf *factory) InsertUsers(ctx context.Context, userI int) ([]user.User, error) {
 	users, err := mf.User.BuildList(ctx, userI).Insert()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	icons, err := mf.Icon.BuildList(ctx, iconI).Insert()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return users, icons, nil
+	return users, nil
 }
 
 // InsertMainCateg inserts a main category
-func (mf *factory) InsertMainCategWithAss(ctx context.Context, ow MainCateg) (MainCateg, user.User, icon.Icon, error) {
+func (mf *factory) InsertMainCategWithAss(ctx context.Context, ow MainCateg) (MainCateg, user.User, error) {
 	user := &user.User{}
-	icon := &icon.Icon{}
 
 	maincateg, err := mf.MainCateg.Build(ctx).
 		Overwrite(ow).
 		WithOne(user).
-		WithOne(icon).
 		Insert()
 
-	return maincateg, *user, *icon, err
+	return maincateg, *user, err
 }
 
 // InsertMainCategList inserts many main categories with associations and traits
-func (mf *factory) InsertMainCategListWithAss(ctx context.Context, i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, []icon.Icon, error) {
-	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](iconIdx, nil)
+func (mf *factory) InsertMainCategListWithAss(ctx context.Context, i int, userIdx int, iconIdx int, traitName ...string) ([]MainCateg, []user.User, error) {
 	userPtrList := typeconv.ToAnysWithOW[user.User](userIdx, nil)
 
 	maincategList, err := mf.MainCateg.BuildList(ctx, i).
 		SetTraits(traitName...).
 		WithMany(userPtrList).
-		WithMany(iconPtrList).
 		Insert()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
-	icons := typeconv.ToT[icon.Icon](iconPtrList)
 	users := typeconv.ToT[user.User](userPtrList)
-	return maincategList, users, icons, nil
+	return maincategList, users, nil
 }
 
 // Reset resets the factory

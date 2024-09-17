@@ -98,48 +98,40 @@ func (s *MainCategSuite) TestCreate() {
 }
 
 func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.InsertUsersAndIcons(mockCTX, 1, 1)
+	users, err := s.f.InsertUsers(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
-		Name: "test",
-		Type: domain.TransactionTypeExpense,
-		Icon: domain.DefaultIcon{
-			ID: icons[0].ID,
-		},
+		Name:     "test",
+		Type:     domain.TransactionTypeExpense,
 		IconType: domain.IconTypeDefault,
 		IconData: "url",
 	}
 	err = s.mainCategRepo.Create(categ, users[0].ID)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id
+	checkStmt := `SELECT id, name, type, icon_type, icon_data
 							 FROM main_categories
 							 WHERE user_id = ?
 							 AND name = ?
 							 AND type = ?
 							 `
 	var result MainCateg
-	err = s.db.QueryRow(checkStmt, users[0].ID, "test", domain.TransactionTypeExpense.ToModelValue()).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	err = s.db.QueryRow(checkStmt, users[0].ID, "test", domain.TransactionTypeExpense.ToModelValue()).Scan(&result.ID, &result.Name, &result.Type, &result.IconType, &result.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categ.Name, result.Name, desc)
 	s.Require().Equal(categ.Type.ToModelValue(), result.Type, desc)
-	s.Require().Equal(icons[0].ID, result.IconID, desc)
+	s.Require().Equal(categ.IconType.ToModelValue(), result.IconType, desc)
+	s.Require().Equal(categ.IconData, result.IconData, desc)
 }
 
 func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
-	createdMainCateg, user, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
-	s.Require().NoError(err, desc)
-
-	icon, err := s.f.Icon.Build(mockCTX).Insert()
+	createdMainCateg, user, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	categ := &domain.MainCateg{
-		Name: createdMainCateg.Name,
-		Type: domain.TransactionTypeIncome,
-		Icon: domain.DefaultIcon{
-			ID: icon.ID,
-		},
+		Name:     createdMainCateg.Name,
+		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
 		IconData: "url",
 	}
@@ -163,7 +155,7 @@ func (s *MainCategSuite) TestGetAll() {
 }
 
 func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) {
-	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
+	mainCategList, users, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
@@ -182,7 +174,7 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 }
 
 func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string) {
-	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
+	mainCategList, users, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
@@ -201,7 +193,7 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 }
 
 func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
-	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
+	mainCategList, users, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
@@ -227,7 +219,7 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 }
 
 func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
-	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 3, 2, 3, "expense", "income", "expense")
+	mainCategList, users, err := s.f.InsertMainCategListWithAss(mockCTX, 3, 2, 3, "expense", "income", "expense")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
@@ -267,28 +259,25 @@ func (s *MainCategSuite) TestUpdate() {
 }
 
 func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
-	categ, _, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	categ, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	inputCateg := &domain.MainCateg{
-		ID:   categ.ID,
-		Name: "test2",
-		Type: domain.TransactionTypeIncome,
-		Icon: domain.DefaultIcon{
-			ID: categ.IconID,
-		},
+		ID:       categ.ID,
+		Name:     "test2",
+		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
 		IconData: "new-url",
 	}
 	err = s.mainCategRepo.Update(inputCateg)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
+	checkStmt := `SELECT id, name, type, icon_type, icon_data
 							 FROM main_categories
 							 WHERE id = ?
 							 `
 	var result MainCateg
-	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
+	err = s.db.QueryRow(checkStmt, categ.ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconType, &result.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
 	s.Require().Equal(inputCateg.Type.ToModelValue(), result.Type, desc)
@@ -297,29 +286,26 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 }
 
 func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) {
-	categs, _, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 2, 1)
+	categs, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 2, 1)
 	s.Require().NoError(err, desc)
 
 	inputCateg := &domain.MainCateg{
-		ID:   categs[0].ID,
-		Name: "update name",
-		Type: domain.TransactionTypeIncome,
-		Icon: domain.DefaultIcon{
-			ID: categs[0].IconID,
-		},
+		ID:       categs[0].ID,
+		Name:     "update name",
+		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
 		IconData: "new-url",
 	}
 	err = s.mainCategRepo.Update(inputCateg)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
+	checkStmt := `SELECT id, name, type, icon_type, icon_data
 							 FROM main_categories
 							 WHERE id = ?
 							 `
 	// check if the data is updated
 	var result MainCateg
-	err = s.db.QueryRow(checkStmt, categs[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
+	err = s.db.QueryRow(checkStmt, categs[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconType, &result.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(inputCateg.Name, result.Name, desc)
 	s.Require().Equal(inputCateg.Type.ToModelValue(), result.Type, desc)
@@ -328,23 +314,22 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 
 	// check if the other data is not updated
 	var result2 MainCateg
-	err = s.db.QueryRow(checkStmt, categs[1].ID).Scan(&result2.ID, &result2.Name, &result2.Type, &result2.IconID, &result2.IconType, &result2.IconData)
+	err = s.db.QueryRow(checkStmt, categs[1].ID).Scan(&result2.ID, &result2.Name, &result2.Type, &result2.IconType, &result2.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categs[1].Name, result2.Name, desc)
 	s.Require().Equal(categs[1].Type, result2.Type, desc)
+	s.Require().Equal(categs[1].IconType, result2.IconType, desc)
+	s.Require().Equal(categs[1].IconData, result2.IconData, desc)
 }
 
 func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
-	categs, _, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2)
+	categs, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2)
 	s.Require().NoError(err, desc)
 
 	domainMainCateg := &domain.MainCateg{
-		ID:   categs[0].ID,
-		Name: categs[1].Name, // update categ1 with categ2 name
-		Type: domain.CvtToTransactionType(categs[0].Type),
-		Icon: domain.DefaultIcon{
-			ID: categs[0].IconID,
-		},
+		ID:       categs[0].ID,
+		Name:     categs[1].Name, // update categ1 with categ2 name
+		Type:     domain.CvtToTransactionType(categs[0].Type),
 		IconType: domain.IconTypeDefault,
 		IconData: "new-url",
 	}
@@ -365,7 +350,7 @@ func (s *MainCategSuite) TestDelete() {
 }
 
 func delete_NoError_DeleteSuccessfully(s *MainCategSuite, desc string) {
-	categ, _, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	categ, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	err = s.mainCategRepo.Delete(categ.ID)
@@ -394,20 +379,22 @@ func (s *MainCategSuite) TestGetByID() {
 
 func getByID_NoError_ReturnSuccessfully(s *MainCategSuite, desc string) {
 	// prepare existing data
-	categ, user, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	categ, user, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	// prepare more user data
-	_, _, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	_, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
-	_, _, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	_, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	// prepare expected result
 	expResult := domain.MainCateg{
-		ID:   categ.ID,
-		Name: categ.Name,
-		Type: domain.CvtToTransactionType(categ.Type),
+		ID:       categ.ID,
+		Name:     categ.Name,
+		Type:     domain.CvtToTransactionType(categ.Type),
+		IconType: domain.CvtToIconType(categ.IconType),
+		IconData: categ.IconData,
 	}
 
 	result, err := s.mainCategRepo.GetByID(categ.ID, user.ID)
@@ -417,13 +404,13 @@ func getByID_NoError_ReturnSuccessfully(s *MainCategSuite, desc string) {
 
 func getByID_FindNoData_ReturnSuccessfully(s *MainCategSuite, desc string) {
 	// prepare existing data
-	_, user, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	_, user, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	// prepare more user data
-	_, _, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	_, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
-	_, _, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
+	_, _, err = s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	result, err := s.mainCategRepo.GetByID(0, user.ID)
@@ -447,61 +434,13 @@ func (s *MainCategSuite) TestCreateBatch() {
 }
 
 func createBatch_InsertOneData_InsertSuccessfully(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.InsertUsersAndIcons(mockCTX, 1, 1)
-	s.Require().NoError(err, desc)
-
-	categs := []domain.MainCateg{
-		{
-			Name: "test1",
-			Type: domain.TransactionTypeExpense,
-			Icon: domain.DefaultIcon{
-				ID: icons[0].ID,
-			},
-			IconType: domain.IconTypeDefault,
-			IconData: "url",
-		},
-	}
-
-	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
-	s.Require().NoError(err, desc)
-
-	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
-							 FROM main_categories
-							 WHERE user_id = ?
-							 `
-	var result MainCateg
-	err = s.db.QueryRow(checkStmt, users[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(categs[0].Name, result.Name, desc)
-	s.Require().Equal(categs[0].Type.ToModelValue(), result.Type, desc)
-	s.Require().Equal(icons[0].ID, result.IconID, desc)
-	s.Require().Equal(categs[0].IconType.ToModelValue(), result.IconType, desc)
-	s.Require().Equal(categs[0].IconData, result.IconData, desc)
-}
-
-func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.InsertUsersAndIcons(mockCTX, 1, 3)
+	users, err := s.f.InsertUsers(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	categs := []domain.MainCateg{
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.DefaultIcon{ID: icons[0].ID},
-			IconType: domain.IconTypeDefault,
-			IconData: "url",
-		},
-		{
-			Name:     "test2",
-			Type:     domain.TransactionTypeIncome,
-			Icon:     domain.DefaultIcon{ID: icons[1].ID},
-			IconType: domain.IconTypeDefault,
-			IconData: "url",
-		},
-		{
-			Name:     "test3",
-			Type:     domain.TransactionTypeIncome,
-			Icon:     domain.DefaultIcon{ID: icons[2].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
@@ -510,7 +449,48 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
+	checkStmt := `SELECT id, name, type, icon_type, icon_data
+							 FROM main_categories
+							 WHERE user_id = ?
+							 `
+	var result MainCateg
+	err = s.db.QueryRow(checkStmt, users[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconType, &result.IconData)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(categs[0].Name, result.Name, desc)
+	s.Require().Equal(categs[0].Type.ToModelValue(), result.Type, desc)
+	s.Require().Equal(categs[0].IconType.ToModelValue(), result.IconType, desc)
+	s.Require().Equal(categs[0].IconData, result.IconData, desc)
+}
+
+func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc string) {
+	users, err := s.f.InsertUsers(mockCTX, 1)
+	s.Require().NoError(err, desc)
+
+	categs := []domain.MainCateg{
+		{
+			Name:     "test1",
+			Type:     domain.TransactionTypeExpense,
+			IconType: domain.IconTypeDefault,
+			IconData: "url",
+		},
+		{
+			Name:     "test2",
+			Type:     domain.TransactionTypeIncome,
+			IconType: domain.IconTypeDefault,
+			IconData: "url",
+		},
+		{
+			Name:     "test3",
+			Type:     domain.TransactionTypeIncome,
+			IconType: domain.IconTypeDefault,
+			IconData: "url",
+		},
+	}
+
+	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
+	s.Require().NoError(err, desc)
+
+	checkStmt := `SELECT id, name, type, icon_type, icon_data
 							 FROM main_categories
 							 WHERE user_id = ?
 							 ORDER BY id
@@ -521,32 +501,29 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 
 	var result MainCateg
 	for i := 0; rows.Next(); i++ {
-		err = rows.Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
+		err = rows.Scan(&result.ID, &result.Name, &result.Type, &result.IconType, &result.IconData)
 		s.Require().NoError(err, desc)
 		s.Require().Equal(categs[i].Name, result.Name, desc)
 		s.Require().Equal(categs[i].Type.ToModelValue(), result.Type, desc)
-		s.Require().Equal(icons[i].ID, result.IconID, desc)
 		s.Require().Equal(categs[i].IconType.ToModelValue(), result.IconType, desc)
 		s.Require().Equal(categs[i].IconData, result.IconData, desc)
 	}
 }
 
 func createBatch_InsertDuplicateNameData_ReturnError(s *MainCategSuite, desc string) {
-	users, icons, err := s.f.InsertUsersAndIcons(mockCTX, 1, 2)
+	users, err := s.f.InsertUsers(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	categs := []domain.MainCateg{
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.DefaultIcon{ID: icons[0].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.DefaultIcon{ID: icons[1].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
@@ -567,24 +544,19 @@ func createBatch_InsertDuplicateNameData_ReturnError(s *MainCategSuite, desc str
 }
 
 func createBatch_AlreadyExistData_ReturnError(s *MainCategSuite, desc string) {
-	maincateg, user, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
-	s.Require().NoError(err, desc)
-
-	icons, err := s.f.Icon.BuildList(mockCTX, 2).Insert()
+	maincateg, user, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
 	categs := []domain.MainCateg{
 		{
 			Name:     "test1",
 			Type:     domain.TransactionTypeExpense,
-			Icon:     domain.DefaultIcon{ID: icons[0].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
 		{
 			Name:     maincateg.Name,
 			Type:     domain.CvtToTransactionType(maincateg.Type),
-			Icon:     domain.DefaultIcon{ID: icons[1].ID},
 			IconType: domain.IconTypeDefault,
 			IconData: "url",
 		},
