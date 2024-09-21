@@ -9,6 +9,7 @@ import (
 	"time"
 
 	adapter "github.com/eyo-chen/expense-tracker-go/internal/adapter"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/service/s3"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler"
 	"github.com/eyo-chen/expense-tracker-go/internal/router"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase"
@@ -50,8 +51,13 @@ func main() {
 	}
 	defer redisClient.Close()
 
+	s3Client, presignClient, err := s3.NewS3Clients(os.Getenv("AWS_REGION"))
+	if err != nil {
+		logger.Fatal("Unable to create S3 clients", "error", err)
+	}
+
 	// Setup adapter, usecase, and handler
-	adapter := adapter.New(mysqlDB, redisClient)
+	adapter := adapter.New(mysqlDB, redisClient, s3Client, presignClient, os.Getenv("AWS_BUCKET"))
 	usecase := usecase.New(adapter.User, adapter.MainCateg, adapter.SubCateg, adapter.Icon, adapter.Transaction, adapter.RedisService, adapter.UserIcon)
 	handler := handler.New(usecase.User, usecase.MainCateg, usecase.SubCateg, usecase.Transaction, usecase.Icon, usecase.InitData)
 	if err := initServe(handler); err != nil {
