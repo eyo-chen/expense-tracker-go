@@ -88,8 +88,10 @@ func list_CacheFailed_ReturnError(s *IconSuite, desc string) {
 	// mock service
 	s.mockRedisService.On("GetByFunc", mockCTX, "icons", mockTTL, mockGetFun).Return("", mockErr)
 
-	// test function
+	// action
 	icons, err := s.uc.List()
+
+	// assertion
 	s.Require().ErrorIs(err, mockErr, desc)
 	s.Require().Nil(icons, desc)
 }
@@ -132,8 +134,10 @@ func listByUserID_NoError_ReturnSuccessfully(s *IconSuite, desc string) {
 		{ID: 2, Type: domain.IconTypeDefault, URL: "http://test.com/2"},
 	}
 
-	// test function
+	// action
 	icons, err := s.uc.ListByUserID(mockCTX, mockUserID)
+
+	// assertion
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, icons, desc)
 }
@@ -148,8 +152,10 @@ func listByUserID_ListDefaultIconsFailed_ReturnError(s *IconSuite, desc string) 
 	// prepare mock service
 	s.mockRedisService.On("GetByFunc", mockCTX, "icons", mockTTL, mockGetFun).Return("", mockErr)
 
-	// test function
+	// action
 	icons, err := s.uc.ListByUserID(mockCTX, mockUserID)
+
+	// assertion
 	s.Require().ErrorIs(err, mockErr, desc)
 	s.Require().Nil(icons, desc)
 }
@@ -166,8 +172,10 @@ func listByUserID_GetUserIconsFailed_ReturnError(s *IconSuite, desc string) {
 	s.mockRedisService.On("GetByFunc", mockCTX, "icons", mockTTL, mockGetFun).Return(mockIconsStr, nil)
 	s.mockUserIconRepo.On("GetByUserID", mockCTX, mockUserID).Return(nil, mockErr)
 
-	// test function
+	// action
 	icons, err := s.uc.ListByUserID(mockCTX, mockUserID)
+
+	// assertion
 	s.Require().ErrorIs(err, mockErr, desc)
 	s.Require().Nil(icons, desc)
 }
@@ -187,8 +195,10 @@ func listByUserID_GetObjectUrlFailed_ReturnError(s *IconSuite, desc string) {
 	s.mockUserIconRepo.On("GetByUserID", mockCTX, mockUserID).Return(mockUserIcons, nil)
 	s.mockS3Service.On("GetObjectUrl", mockCTX, mockUserIcons[0].ObjectKey, mockLifetimeSecs).Return("", mockErr)
 
-	// test function
+	// action
 	icons, err := s.uc.ListByUserID(mockCTX, mockUserID)
+
+	// assertion
 	s.Require().ErrorIs(err, mockErr, desc)
 	s.Require().Nil(icons, desc)
 }
