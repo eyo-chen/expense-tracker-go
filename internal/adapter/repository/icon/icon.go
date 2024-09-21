@@ -24,7 +24,7 @@ type Icon struct {
 	URL string `json:"url"`
 }
 
-func (r *Repo) List() ([]domain.Icon, error) {
+func (r *Repo) List() ([]domain.DefaultIcon, error) {
 	stmt := `SELECT id, url FROM icons`
 
 	rows, err := r.DB.Query(stmt)
@@ -34,7 +34,7 @@ func (r *Repo) List() ([]domain.Icon, error) {
 	}
 	defer rows.Close()
 
-	var icons []domain.Icon
+	var icons []domain.DefaultIcon
 	for rows.Next() {
 		var icon Icon
 		if err := rows.Scan(&icon.ID, &icon.URL); err != nil {
@@ -42,29 +42,29 @@ func (r *Repo) List() ([]domain.Icon, error) {
 			return nil, err
 		}
 
-		icons = append(icons, cvtToDomainIcon(icon))
+		icons = append(icons, cvtToDomainDefaultIcon(icon))
 	}
 	defer rows.Close()
 
 	return icons, nil
 }
 
-func (r *Repo) GetByID(id int64) (domain.Icon, error) {
+func (r *Repo) GetByID(id int64) (domain.DefaultIcon, error) {
 	stmt := `SELECT id, url FROM icons WHERE id = ?`
 
 	var icon Icon
 	if err := r.DB.QueryRow(stmt, id).Scan(&icon.ID, &icon.URL); err != nil {
 		if err == sql.ErrNoRows {
-			return domain.Icon{}, domain.ErrIconNotFound
+			return domain.DefaultIcon{}, domain.ErrIconNotFound
 		}
 
-		return domain.Icon{}, err
+		return domain.DefaultIcon{}, err
 	}
 
-	return cvtToDomainIcon(icon), nil
+	return cvtToDomainDefaultIcon(icon), nil
 }
 
-func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
+func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
 	stmt := `SELECT id, url FROM icons WHERE id IN (`
 	for i := range ids {
 		if i == 0 {
@@ -103,5 +103,5 @@ func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
 		return nil, domain.ErrIconNotFound
 	}
 
-	return cvtToIDToDomainIcon(icons), nil
+	return cvtToIDToDomainDefaultIcon(icons), nil
 }

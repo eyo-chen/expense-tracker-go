@@ -14,22 +14,22 @@ type IconRepo struct {
 }
 
 // GetByID provides a mock function with given fields: id
-func (_m *IconRepo) GetByID(id int64) (domain.Icon, error) {
+func (_m *IconRepo) GetByID(id int64) (domain.DefaultIcon, error) {
 	ret := _m.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByID")
 	}
 
-	var r0 domain.Icon
+	var r0 domain.DefaultIcon
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) (domain.Icon, error)); ok {
+	if rf, ok := ret.Get(0).(func(int64) (domain.DefaultIcon, error)); ok {
 		return rf(id)
 	}
-	if rf, ok := ret.Get(0).(func(int64) domain.Icon); ok {
+	if rf, ok := ret.Get(0).(func(int64) domain.DefaultIcon); ok {
 		r0 = rf(id)
 	} else {
-		r0 = ret.Get(0).(domain.Icon)
+		r0 = ret.Get(0).(domain.DefaultIcon)
 	}
 
 	if rf, ok := ret.Get(1).(func(int64) error); ok {
@@ -42,23 +42,23 @@ func (_m *IconRepo) GetByID(id int64) (domain.Icon, error) {
 }
 
 // GetByIDs provides a mock function with given fields: ids
-func (_m *IconRepo) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
+func (_m *IconRepo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
 	ret := _m.Called(ids)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByIDs")
 	}
 
-	var r0 map[int64]domain.Icon
+	var r0 map[int64]domain.DefaultIcon
 	var r1 error
-	if rf, ok := ret.Get(0).(func([]int64) (map[int64]domain.Icon, error)); ok {
+	if rf, ok := ret.Get(0).(func([]int64) (map[int64]domain.DefaultIcon, error)); ok {
 		return rf(ids)
 	}
-	if rf, ok := ret.Get(0).(func([]int64) map[int64]domain.Icon); ok {
+	if rf, ok := ret.Get(0).(func([]int64) map[int64]domain.DefaultIcon); ok {
 		r0 = rf(ids)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(map[int64]domain.Icon)
+			r0 = ret.Get(0).(map[int64]domain.DefaultIcon)
 		}
 	}
 
@@ -72,23 +72,23 @@ func (_m *IconRepo) GetByIDs(ids []int64) (map[int64]domain.Icon, error) {
 }
 
 // List provides a mock function with given fields:
-func (_m *IconRepo) List() ([]domain.Icon, error) {
+func (_m *IconRepo) List() ([]domain.DefaultIcon, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for List")
 	}
 
-	var r0 []domain.Icon
+	var r0 []domain.DefaultIcon
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]domain.Icon, error)); ok {
+	if rf, ok := ret.Get(0).(func() ([]domain.DefaultIcon, error)); ok {
 		return rf()
 	}
-	if rf, ok := ret.Get(0).(func() []domain.Icon); ok {
+	if rf, ok := ret.Get(0).(func() []domain.DefaultIcon); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.Icon)
+			r0 = ret.Get(0).([]domain.DefaultIcon)
 		}
 	}
 

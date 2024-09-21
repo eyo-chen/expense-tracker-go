@@ -67,7 +67,7 @@ func list_NoError_ReturnSuccessfully(s *InitDataSuite, desc string) {
 			Expense: []domain.InitDataMainCateg{
 				{
 					Name: "Food",
-					Icon: domain.Icon{
+					Icon: domain.DefaultIcon{
 						ID:  1,
 						URL: "http://example.com/icon/1",
 					},
@@ -79,7 +79,7 @@ func list_NoError_ReturnSuccessfully(s *InitDataSuite, desc string) {
 			Income: []domain.InitDataMainCateg{
 				{
 					Name: "salary",
-					Icon: domain.Icon{
+					Icon: domain.DefaultIcon{
 						ID:  12,
 						URL: "http://example.com/icon/12",
 					},
@@ -163,14 +163,14 @@ func create_NoError_ReturnSuccessfully(s *InitDataSuite, desc string) {
 		Expense: []domain.InitDataMainCateg{
 			{
 				Name:      "Food",
-				Icon:      domain.Icon{ID: 1, URL: "http://example.com/icon/1"},
+				Icon:      domain.DefaultIcon{ID: 1, URL: "http://example.com/icon/1"},
 				SubCategs: []string{"breakfast", "brunch", "lunch", "dinner", "groceries", "drink", "snak"},
 			},
 		},
 		Income: []domain.InitDataMainCateg{
 			{
 				Name:      "salary",
-				Icon:      domain.Icon{ID: 12, URL: "http://example.com/icon/12"},
+				Icon:      domain.DefaultIcon{ID: 12, URL: "http://example.com/icon/12"},
 				SubCategs: []string{"salary", "bonus", "commission", "tips"},
 			},
 		},
@@ -211,14 +211,14 @@ func create_CreateFail_ReturnError(s *InitDataSuite, desc string) {
 		Expense: []domain.InitDataMainCateg{
 			{
 				Name:      "Food",
-				Icon:      domain.Icon{ID: 1, URL: "http://example.com/icon/1"},
+				Icon:      domain.DefaultIcon{ID: 1, URL: "http://example.com/icon/1"},
 				SubCategs: []string{"breakfast", "brunch", "lunch", "dinner", "groceries", "drink", "snak"},
 			},
 		},
 		Income: []domain.InitDataMainCateg{
 			{
 				Name:      "salary",
-				Icon:      domain.Icon{ID: 12, URL: "http://example.com/icon/12"},
+				Icon:      domain.DefaultIcon{ID: 12, URL: "http://example.com/icon/12"},
 				SubCategs: []string{"salary", "bonus", "commission", "tips"},
 			},
 		},

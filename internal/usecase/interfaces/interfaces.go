@@ -67,13 +67,22 @@ type SubCategRepo interface {
 // IconRepo is the interface that wraps the basic methods for icon repository.
 type IconRepo interface {
 	// GetByID returns an icon by id.
-	GetByID(id int64) (domain.Icon, error)
+	GetByID(id int64) (domain.DefaultIcon, error)
 
 	// List returns all icons.
-	List() ([]domain.Icon, error)
+	List() ([]domain.DefaultIcon, error)
 
 	// GetByIDs returns icons by ids.
-	GetByIDs(ids []int64) (map[int64]domain.Icon, error)
+	GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error)
+}
+
+// UserIconRepo is the interface that wraps the basic methods for user icon repository.
+type UserIconRepo interface {
+	// Create inserts a new user icon into the database.
+	Create(ctx context.Context, userIcon domain.UserIcon) error
+
+	// GetByUserID returns user icons by user id.
+	GetByUserID(ctx context.Context, userID int64) ([]domain.UserIcon, error)
 }
 
 // TransactionRepo is the interface that wraps the basic methods for transaction repository.

@@ -84,7 +84,7 @@ type TransactionUC interface {
 // IconUC is the interface that wraps the basic methods for icon usecase.
 type IconUC interface {
 	// List returns all icons.
-	List() ([]domain.Icon, error)
+	List() ([]domain.DefaultIcon, error)
 }
 
 // InitDataUC is the interface that wraps the basic methods for init data usecase.

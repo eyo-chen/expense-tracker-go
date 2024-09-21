@@ -38,7 +38,7 @@ func GetAll_GenExpResult(ts []Transaction, u user.User, ms []maincateg.MainCateg
 				ID:   ms[i].ID,
 				Name: ms[i].Name,
 				Type: domain.CvtToTransactionType(ms[i].Type),
-				Icon: domain.Icon{
+				Icon: domain.DefaultIcon{
 					ID:  is[i].ID,
 					URL: is[i].URL,
 				},

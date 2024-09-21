@@ -10,7 +10,7 @@ func cvtToDomainMainCateg(c MainCateg, i icon.Icon) domain.MainCateg {
 		ID:   c.ID,
 		Name: c.Name,
 		Type: domain.CvtToTransactionType(c.Type),
-		Icon: domain.Icon{
+		Icon: domain.DefaultIcon{
 			ID:  i.ID,
 			URL: i.URL,
 		},

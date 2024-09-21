@@ -58,7 +58,7 @@ func (s *InitDataSuite) TestList() {
 }
 
 func list_NoError_ReturnInitData(s *InitDataSuite, desc string) {
-	mockIDToIcon := map[int64]domain.Icon{
+	mockIDToIcon := map[int64]domain.DefaultIcon{
 		1:  {ID: 1, URL: "url1"},
 		2:  {ID: 2, URL: "url2"},
 		3:  {ID: 3, URL: "url3"},
@@ -227,84 +227,84 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 		Expense: []domain.InitDataMainCateg{
 			{
 				Name: "food",
-				Icon: domain.Icon{ID: 1, URL: "url1"},
+				Icon: domain.DefaultIcon{ID: 1, URL: "url1"},
 				SubCategs: []string{
 					"breakfast", "brunch", "lunch", "dinner", "groceries", "drink", "snak",
 				},
 			},
 			{
 				Name: "transportation",
-				Icon: domain.Icon{ID: 4, URL: "url4"},
+				Icon: domain.DefaultIcon{ID: 4, URL: "url4"},
 				SubCategs: []string{
 					"bus", "train", "MRT", "taxi", "uber", "gasoline", "parking fees", "repairs", "maintenance",
 				},
 			},
 			{
 				Name: "utilities",
-				Icon: domain.Icon{ID: 9, URL: "url9"},
+				Icon: domain.DefaultIcon{ID: 9, URL: "url9"},
 				SubCategs: []string{
 					"electricity", "water", "internet", "phones", "garbage", "cable",
 				},
 			},
 			{
 				Name: "housing",
-				Icon: domain.Icon{ID: 3, URL: "url3"},
+				Icon: domain.DefaultIcon{ID: 3, URL: "url3"},
 				SubCategs: []string{
 					"rent", "mortgage", "property taxes", "insurance", "repairs", "furnishings",
 				},
 			},
 			{
 				Name: "clothing",
-				Icon: domain.Icon{ID: 2, URL: "url2"},
+				Icon: domain.DefaultIcon{ID: 2, URL: "url2"},
 				SubCategs: []string{
 					"shirts", "pants", "shoes", "accessories", "jewelry", "underwear", "socks",
 				},
 			},
 			{
 				Name: "entertainment",
-				Icon: domain.Icon{ID: 6, URL: "url6"},
+				Icon: domain.DefaultIcon{ID: 6, URL: "url6"},
 				SubCategs: []string{
 					"movies", "concerts", "shows", "games", "toys", "hobbies", "books", "magazines", "music", "apps", "party", "vacations", "membership", "subscriptions",
 				},
 			},
 			{
 				Name: "gifts",
-				Icon: domain.Icon{ID: 7, URL: "url7"},
+				Icon: domain.DefaultIcon{ID: 7, URL: "url7"},
 				SubCategs: []string{
 					"birthday", "wedding", "baby shower", "anniversary", "graduation", "holiday", "charities",
 				},
 			},
 			{
 				Name: "education",
-				Icon: domain.Icon{ID: 5, URL: "url5"},
+				Icon: domain.DefaultIcon{ID: 5, URL: "url5"},
 				SubCategs: []string{
 					"tuition", "books", "course",
 				},
 			},
 			{
 				Name: "insurance",
-				Icon: domain.Icon{ID: 10, URL: "url10"},
+				Icon: domain.DefaultIcon{ID: 10, URL: "url10"},
 				SubCategs: []string{
 					"health", "life", "auto", "home", "disability", "liability",
 				},
 			},
 			{
 				Name: "debt",
-				Icon: domain.Icon{ID: 11, URL: "url11"},
+				Icon: domain.DefaultIcon{ID: 11, URL: "url11"},
 				SubCategs: []string{
 					"credit card", "student loans", "personal loans",
 				},
 			},
 			{
 				Name: "healthcare",
-				Icon: domain.Icon{ID: 8, URL: "url8"},
+				Icon: domain.DefaultIcon{ID: 8, URL: "url8"},
 				SubCategs: []string{
 					"doctor", "dentist", "optometrist", "medication", "pharmacy", "hospital", "medical devices",
 				},
 			},
 			{
 				Name: "others",
-				Icon: domain.Icon{ID: 14, URL: "url14"},
+				Icon: domain.DefaultIcon{ID: 14, URL: "url14"},
 				SubCategs: []string{
 					"others",
 				},
@@ -313,21 +313,21 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 		Income: []domain.InitDataMainCateg{
 			{
 				Name: "salary",
-				Icon: domain.Icon{ID: 12, URL: "url12"},
+				Icon: domain.DefaultIcon{ID: 12, URL: "url12"},
 				SubCategs: []string{
 					"salary", "bonus", "commission", "tips",
 				},
 			},
 			{
 				Name: "investment",
-				Icon: domain.Icon{ID: 15, URL: "url15"},
+				Icon: domain.DefaultIcon{ID: 15, URL: "url15"},
 				SubCategs: []string{
 					"dividends", "capital gains", "interest",
 				},
 			},
 			{
 				Name: "others",
-				Icon: domain.Icon{ID: 14, URL: "url14"},
+				Icon: domain.DefaultIcon{ID: 14, URL: "url14"},
 				SubCategs: []string{
 					"others",
 				},
@@ -335,38 +335,38 @@ func create_NoError_CreateSuccessfully(s *InitDataSuite, desc string) {
 		},
 	}
 	mockMainCategs := []domain.MainCateg{
-		{Name: "food", Icon: domain.Icon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
-		{Name: "transportation", Icon: domain.Icon{ID: 4, URL: "url4"}, Type: domain.TransactionTypeExpense},
-		{Name: "utilities", Icon: domain.Icon{ID: 9, URL: "url9"}, Type: domain.TransactionTypeExpense},
-		{Name: "housing", Icon: domain.Icon{ID: 3, URL: "url3"}, Type: domain.TransactionTypeExpense},
-		{Name: "clothing", Icon: domain.Icon{ID: 2, URL: "url2"}, Type: domain.TransactionTypeExpense},
-		{Name: "entertainment", Icon: domain.Icon{ID: 6, URL: "url6"}, Type: domain.TransactionTypeExpense},
-		{Name: "gifts", Icon: domain.Icon{ID: 7, URL: "url7"}, Type: domain.TransactionTypeExpense},
-		{Name: "education", Icon: domain.Icon{ID: 5, URL: "url5"}, Type: domain.TransactionTypeExpense},
-		{Name: "insurance", Icon: domain.Icon{ID: 10, URL: "url10"}, Type: domain.TransactionTypeExpense},
-		{Name: "debt", Icon: domain.Icon{ID: 11, URL: "url11"}, Type: domain.TransactionTypeExpense},
-		{Name: "healthcare", Icon: domain.Icon{ID: 8, URL: "url8"}, Type: domain.TransactionTypeExpense},
-		{Name: "others", Icon: domain.Icon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeExpense},
-		{Name: "salary", Icon: domain.Icon{ID: 12, URL: "url12"}, Type: domain.TransactionTypeIncome},
-		{Name: "investment", Icon: domain.Icon{ID: 15, URL: "url15"}, Type: domain.TransactionTypeIncome},
-		{Name: "others", Icon: domain.Icon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeIncome},
+		{Name: "food", Icon: domain.DefaultIcon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
+		{Name: "transportation", Icon: domain.DefaultIcon{ID: 4, URL: "url4"}, Type: domain.TransactionTypeExpense},
+		{Name: "utilities", Icon: domain.DefaultIcon{ID: 9, URL: "url9"}, Type: domain.TransactionTypeExpense},
+		{Name: "housing", Icon: domain.DefaultIcon{ID: 3, URL: "url3"}, Type: domain.TransactionTypeExpense},
+		{Name: "clothing", Icon: domain.DefaultIcon{ID: 2, URL: "url2"}, Type: domain.TransactionTypeExpense},
+		{Name: "entertainment", Icon: domain.DefaultIcon{ID: 6, URL: "url6"}, Type: domain.TransactionTypeExpense},
+		{Name: "gifts", Icon: domain.DefaultIcon{ID: 7, URL: "url7"}, Type: domain.TransactionTypeExpense},
+		{Name: "education", Icon: domain.DefaultIcon{ID: 5, URL: "url5"}, Type: domain.TransactionTypeExpense},
+		{Name: "insurance", Icon: domain.DefaultIcon{ID: 10, URL: "url10"}, Type: domain.TransactionTypeExpense},
+		{Name: "debt", Icon: domain.DefaultIcon{ID: 11, URL: "url11"}, Type: domain.TransactionTypeExpense},
+		{Name: "healthcare", Icon: domain.DefaultIcon{ID: 8, URL: "url8"}, Type: domain.TransactionTypeExpense},
+		{Name: "others", Icon: domain.DefaultIcon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeExpense},
+		{Name: "salary", Icon: domain.DefaultIcon{ID: 12, URL: "url12"}, Type: domain.TransactionTypeIncome},
+		{Name: "investment", Icon: domain.DefaultIcon{ID: 15, URL: "url15"}, Type: domain.TransactionTypeIncome},
+		{Name: "others", Icon: domain.DefaultIcon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeIncome},
 	}
 	mockMainCategsWithID := []domain.MainCateg{
-		{ID: 1, Name: "food", Icon: domain.Icon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
-		{ID: 2, Name: "transportation", Icon: domain.Icon{ID: 4, URL: "url4"}, Type: domain.TransactionTypeExpense},
-		{ID: 3, Name: "utilities", Icon: domain.Icon{ID: 9, URL: "url9"}, Type: domain.TransactionTypeExpense},
-		{ID: 4, Name: "housing", Icon: domain.Icon{ID: 3, URL: "url3"}, Type: domain.TransactionTypeExpense},
-		{ID: 5, Name: "clothing", Icon: domain.Icon{ID: 2, URL: "url2"}, Type: domain.TransactionTypeExpense},
-		{ID: 6, Name: "entertainment", Icon: domain.Icon{ID: 6, URL: "url6"}, Type: domain.TransactionTypeExpense},
-		{ID: 7, Name: "gifts", Icon: domain.Icon{ID: 7, URL: "url7"}, Type: domain.TransactionTypeExpense},
-		{ID: 8, Name: "education", Icon: domain.Icon{ID: 5, URL: "url5"}, Type: domain.TransactionTypeExpense},
-		{ID: 9, Name: "insurance", Icon: domain.Icon{ID: 10, URL: "url10"}, Type: domain.TransactionTypeExpense},
-		{ID: 10, Name: "debt", Icon: domain.Icon{ID: 11, URL: "url11"}, Type: domain.TransactionTypeExpense},
-		{ID: 11, Name: "healthcare", Icon: domain.Icon{ID: 8, URL: "url8"}, Type: domain.TransactionTypeExpense},
-		{ID: 12, Name: "others", Icon: domain.Icon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeExpense},
-		{ID: 13, Name: "salary", Icon: domain.Icon{ID: 12, URL: "url12"}, Type: domain.TransactionTypeIncome},
-		{ID: 14, Name: "investment", Icon: domain.Icon{ID: 15, URL: "url15"}, Type: domain.TransactionTypeIncome},
-		{ID: 15, Name: "others", Icon: domain.Icon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeIncome},
+		{ID: 1, Name: "food", Icon: domain.DefaultIcon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
+		{ID: 2, Name: "transportation", Icon: domain.DefaultIcon{ID: 4, URL: "url4"}, Type: domain.TransactionTypeExpense},
+		{ID: 3, Name: "utilities", Icon: domain.DefaultIcon{ID: 9, URL: "url9"}, Type: domain.TransactionTypeExpense},
+		{ID: 4, Name: "housing", Icon: domain.DefaultIcon{ID: 3, URL: "url3"}, Type: domain.TransactionTypeExpense},
+		{ID: 5, Name: "clothing", Icon: domain.DefaultIcon{ID: 2, URL: "url2"}, Type: domain.TransactionTypeExpense},
+		{ID: 6, Name: "entertainment", Icon: domain.DefaultIcon{ID: 6, URL: "url6"}, Type: domain.TransactionTypeExpense},
+		{ID: 7, Name: "gifts", Icon: domain.DefaultIcon{ID: 7, URL: "url7"}, Type: domain.TransactionTypeExpense},
+		{ID: 8, Name: "education", Icon: domain.DefaultIcon{ID: 5, URL: "url5"}, Type: domain.TransactionTypeExpense},
+		{ID: 9, Name: "insurance", Icon: domain.DefaultIcon{ID: 10, URL: "url10"}, Type: domain.TransactionTypeExpense},
+		{ID: 10, Name: "debt", Icon: domain.DefaultIcon{ID: 11, URL: "url11"}, Type: domain.TransactionTypeExpense},
+		{ID: 11, Name: "healthcare", Icon: domain.DefaultIcon{ID: 8, URL: "url8"}, Type: domain.TransactionTypeExpense},
+		{ID: 12, Name: "others", Icon: domain.DefaultIcon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeExpense},
+		{ID: 13, Name: "salary", Icon: domain.DefaultIcon{ID: 12, URL: "url12"}, Type: domain.TransactionTypeIncome},
+		{ID: 14, Name: "investment", Icon: domain.DefaultIcon{ID: 15, URL: "url15"}, Type: domain.TransactionTypeIncome},
+		{ID: 15, Name: "others", Icon: domain.DefaultIcon{ID: 14, URL: "url14"}, Type: domain.TransactionTypeIncome},
 	}
 	mockSubCategs := []domain.SubCateg{
 		{Name: "breakfast", MainCategID: 1},
@@ -484,17 +484,17 @@ func create_NoSubCategory_DoNotCreateSubCategory(s *InitDataSuite, desc string) 
 		Expense: []domain.InitDataMainCateg{
 			{
 				Name:      "food",
-				Icon:      domain.Icon{ID: 1, URL: "url1"},
+				Icon:      domain.DefaultIcon{ID: 1, URL: "url1"},
 				SubCategs: []string{},
 			},
 		},
 		Income: []domain.InitDataMainCateg{},
 	}
 	mockMainCategs := []domain.MainCateg{
-		{Name: "food", Icon: domain.Icon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
+		{Name: "food", Icon: domain.DefaultIcon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
 	}
 	mockMainCategsWithID := []domain.MainCateg{
-		{ID: 1, Name: "food", Icon: domain.Icon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
+		{ID: 1, Name: "food", Icon: domain.DefaultIcon{ID: 1, URL: "url1"}, Type: domain.TransactionTypeExpense},
 	}
 
 	// mock service
