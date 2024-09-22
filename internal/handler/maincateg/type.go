@@ -1,15 +1,11 @@
 package maincateg
 
-type icon struct {
-	ID  int64  `json:"id"`
-	URL string `json:"url"`
-}
-
 type mainCateg struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-	Icon icon   `json:"icon"`
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	IconType string `json:"icon_type"`
+	IconData string `json:"icon_data"`
 }
 
 type getAllMainCategResp struct {
