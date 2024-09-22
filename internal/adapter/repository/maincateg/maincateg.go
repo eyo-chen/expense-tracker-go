@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errorutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -50,10 +49,8 @@ func (r *Repo) Create(categ *domain.MainCateg, userID int64) error {
 }
 
 func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
-	stmt := `SELECT mc.id, mc.name, mc.type, i.id, i.url
-					 FROM main_categories AS mc
-					 LEFT JOIN icons AS i 
-					 ON mc.icon_id = i.id
+	stmt := `SELECT id, name, type, icon_type, icon_data
+					 FROM main_categories
 					 WHERE user_id = ?`
 
 	if transType.IsValid() {
@@ -70,13 +67,12 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 	var categs []domain.MainCateg
 	for rows.Next() {
 		var categ MainCateg
-		var icon icon.Icon
-		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &icon.ID, &icon.URL); err != nil {
+		if err := rows.Scan(&categ.ID, &categ.Name, &categ.Type, &categ.IconType, &categ.IconData); err != nil {
 			logger.Error("rows.Scan failed", "package", packageName, "err", err)
 			return nil, err
 		}
 
-		categs = append(categs, cvtToDomainMainCateg(categ, icon))
+		categs = append(categs, cvtToDomainMainCateg(categ))
 	}
 	defer rows.Close()
 
@@ -123,7 +119,7 @@ func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
 		return nil, err
 	}
 
-	domainCateg := cvtToDomainMainCateg(categ, icon.Icon{})
+	domainCateg := cvtToDomainMainCateg(categ)
 	return &domainCateg, nil
 }
 
