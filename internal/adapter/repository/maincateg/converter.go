@@ -19,7 +19,6 @@ func cvtToMainCateg(c *domain.MainCateg, userID int64) *MainCateg {
 		ID:       c.ID,
 		Name:     c.Name,
 		Type:     c.Type.ToModelValue(),
-		IconID:   c.Icon.ID,
 		UserID:   userID,
 		IconType: c.IconType.ToModelValue(),
 		IconData: c.IconData,
