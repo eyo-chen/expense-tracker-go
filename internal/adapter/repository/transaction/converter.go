@@ -1,13 +1,12 @@
 package transaction
 
 import (
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
-func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.SubCateg, i icon.Icon) domain.Transaction {
+func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.SubCateg) domain.Transaction {
 	return domain.Transaction{
 		ID:     t.ID,
 		Type:   domain.CvtToTransactionType(t.Type),
@@ -16,13 +15,11 @@ func cvtToDomainTransaction(t Transaction, m maincateg.MainCateg, s subcateg.Sub
 		Note:   t.Note,
 		Date:   t.Date,
 		MainCateg: domain.MainCateg{
-			ID:   m.ID,
-			Name: m.Name,
-			Type: domain.CvtToTransactionType(m.Type),
-			Icon: domain.DefaultIcon{
-				ID:  i.ID,
-				URL: i.URL,
-			},
+			ID:       m.ID,
+			Name:     m.Name,
+			Type:     domain.CvtToTransactionType(m.Type),
+			IconType: domain.CvtToIconType(m.IconType),
+			IconData: m.IconData,
 		},
 		SubCateg: domain.SubCateg{
 			ID:          s.ID,
