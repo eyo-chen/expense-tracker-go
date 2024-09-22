@@ -80,10 +80,10 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 }
 
 func (r *Repo) Update(categ *domain.MainCateg) error {
-	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ? WHERE id = ?`
+	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_id = ?, icon_type = ?, icon_data = ? WHERE id = ?`
 
 	c := cvtToMainCateg(categ, 0)
-	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.IconID, c.ID); err != nil {
+	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.IconID, c.IconType, c.IconData, c.ID); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
