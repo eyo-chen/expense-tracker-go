@@ -459,22 +459,26 @@ func createBatch_InsertOneData_InsertSuccessfully(s *MainCategSuite, desc string
 			Icon: domain.DefaultIcon{
 				ID: icons[0].ID,
 			},
+			IconType: domain.IconTypeDefault,
+			IconData: "url",
 		},
 	}
 
 	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id
+	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
 							 FROM main_categories
 							 WHERE user_id = ?
 							 `
 	var result MainCateg
-	err = s.db.QueryRow(checkStmt, users[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+	err = s.db.QueryRow(checkStmt, users[0].ID).Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(categs[0].Name, result.Name, desc)
 	s.Require().Equal(categs[0].Type.ToModelValue(), result.Type, desc)
 	s.Require().Equal(icons[0].ID, result.IconID, desc)
+	s.Require().Equal(categs[0].IconType.ToModelValue(), result.IconType, desc)
+	s.Require().Equal(categs[0].IconData, result.IconData, desc)
 }
 
 func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc string) {
@@ -508,7 +512,7 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 	err = s.mainCategRepo.BatchCreate(mockCTX, categs, users[0].ID)
 	s.Require().NoError(err, desc)
 
-	checkStmt := `SELECT id, name, type, icon_id
+	checkStmt := `SELECT id, name, type, icon_id, icon_type, icon_data
 							 FROM main_categories
 							 WHERE user_id = ?
 							 ORDER BY id
@@ -519,11 +523,13 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 
 	var result MainCateg
 	for i := 0; rows.Next(); i++ {
-		err = rows.Scan(&result.ID, &result.Name, &result.Type, &result.IconID)
+		err = rows.Scan(&result.ID, &result.Name, &result.Type, &result.IconID, &result.IconType, &result.IconData)
 		s.Require().NoError(err, desc)
 		s.Require().Equal(categs[i].Name, result.Name, desc)
 		s.Require().Equal(categs[i].Type.ToModelValue(), result.Type, desc)
 		s.Require().Equal(icons[i].ID, result.IconID, desc)
+		s.Require().Equal(categs[i].IconType.ToModelValue(), result.IconType, desc)
+		s.Require().Equal(categs[i].IconData, result.IconData, desc)
 	}
 }
 
