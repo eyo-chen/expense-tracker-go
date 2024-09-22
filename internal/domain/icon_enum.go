@@ -34,3 +34,18 @@ func (t IconType) ToModelValue() string {
 	}
 	return "0"
 }
+
+// CvtToIconType converts string to IconType
+func CvtToIconType(s string) IconType {
+	switch s {
+	case "1":
+		return IconTypeDefault
+	case "2":
+		return IconTypeCustom
+	case "default":
+		return IconTypeDefault
+	case "custom":
+		return IconTypeCustom
+	}
+	return IconTypeUnspecified
+}
