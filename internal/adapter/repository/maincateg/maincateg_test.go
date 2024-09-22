@@ -163,18 +163,16 @@ func (s *MainCategSuite) TestGetAll() {
 }
 
 func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) {
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
+	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   mainCategList[1].ID,
-			Name: mainCategList[1].Name,
-			Type: domain.TransactionTypeIncome,
-			Icon: domain.DefaultIcon{
-				ID:  icons[1].ID,
-				URL: icons[1].URL,
-			},
+			ID:       mainCategList[1].ID,
+			Name:     mainCategList[1].Name,
+			Type:     domain.TransactionTypeIncome,
+			IconType: domain.CvtToIconType(mainCategList[1].IconType),
+			IconData: mainCategList[1].IconData,
 		},
 	}
 
@@ -184,18 +182,16 @@ func getAll_IncomeType_ReturnOnlyIncomeTypeData(s *MainCategSuite, desc string) 
 }
 
 func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string) {
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
+	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   mainCategList[0].ID,
-			Name: mainCategList[0].Name,
-			Type: domain.TransactionTypeExpense,
-			Icon: domain.DefaultIcon{
-				ID:  icons[0].ID,
-				URL: icons[0].URL,
-			},
+			ID:       mainCategList[0].ID,
+			Name:     mainCategList[0].Name,
+			Type:     domain.TransactionTypeExpense,
+			IconType: domain.CvtToIconType(mainCategList[0].IconType),
+			IconData: mainCategList[0].IconData,
 		},
 	}
 
@@ -205,27 +201,23 @@ func getAll_ExpenseType_ReturnOnlyExpenseTypeData(s *MainCategSuite, desc string
 }
 
 func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
+	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2, "expense", "income")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   mainCategList[0].ID,
-			Name: mainCategList[0].Name,
-			Type: domain.TransactionTypeExpense,
-			Icon: domain.DefaultIcon{
-				ID:  icons[0].ID,
-				URL: icons[0].URL,
-			},
+			ID:       mainCategList[0].ID,
+			Name:     mainCategList[0].Name,
+			Type:     domain.TransactionTypeExpense,
+			IconType: domain.CvtToIconType(mainCategList[0].IconType),
+			IconData: mainCategList[0].IconData,
 		},
 		{
-			ID:   mainCategList[1].ID,
-			Name: mainCategList[1].Name,
-			Type: domain.TransactionTypeIncome,
-			Icon: domain.DefaultIcon{
-				ID:  icons[1].ID,
-				URL: icons[1].URL,
-			},
+			ID:       mainCategList[1].ID,
+			Name:     mainCategList[1].Name,
+			Type:     domain.TransactionTypeIncome,
+			IconType: domain.CvtToIconType(mainCategList[1].IconType),
+			IconData: mainCategList[1].IconData,
 		},
 	}
 
@@ -235,27 +227,23 @@ func getAll_UnSpecifiedType_ReturnAllData(s *MainCategSuite, desc string) {
 }
 
 func getAll_MultipleUsers_ReturnCorrectData(s *MainCategSuite, desc string) {
-	mainCategList, users, icons, err := s.f.InsertMainCategListWithAss(mockCTX, 3, 2, 3, "expense", "income", "expense")
+	mainCategList, users, _, err := s.f.InsertMainCategListWithAss(mockCTX, 3, 2, 3, "expense", "income", "expense")
 	s.Require().NoError(err, desc)
 
 	expResult := []domain.MainCateg{
 		{
-			ID:   mainCategList[1].ID,
-			Name: mainCategList[1].Name,
-			Type: domain.TransactionTypeIncome,
-			Icon: domain.DefaultIcon{
-				ID:  icons[1].ID,
-				URL: icons[1].URL,
-			},
+			ID:       mainCategList[1].ID,
+			Name:     mainCategList[1].Name,
+			Type:     domain.TransactionTypeIncome,
+			IconType: domain.CvtToIconType(mainCategList[1].IconType),
+			IconData: mainCategList[1].IconData,
 		},
 		{
-			ID:   mainCategList[2].ID,
-			Name: mainCategList[2].Name,
-			Type: domain.TransactionTypeExpense,
-			Icon: domain.DefaultIcon{
-				ID:  icons[2].ID,
-				URL: icons[2].URL,
-			},
+			ID:       mainCategList[2].ID,
+			Name:     mainCategList[2].Name,
+			Type:     domain.TransactionTypeExpense,
+			IconType: domain.CvtToIconType(mainCategList[2].IconType),
+			IconData: mainCategList[2].IconData,
 		},
 	}
 
