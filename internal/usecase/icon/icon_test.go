@@ -3,6 +3,7 @@ package icon
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -116,13 +117,14 @@ func listByUserID_NoError_ReturnSuccessfully(s *IconSuite, desc string) {
 	mockGetFun := mock.AnythingOfType("func() (string, error)")
 	mockTTL := 7 * 24 * time.Hour
 	mockUserIcons := []domain.UserIcon{{ID: 1, UserID: 1, ObjectKey: "test/1"}, {ID: 2, UserID: 1, ObjectKey: "test/2"}}
-	mockLifetimeSecs := int64((7 * 24 * time.Hour).Seconds())
+	mockKey1 := fmt.Sprintf("user_icon-%s", mockUserIcons[0].ObjectKey)
+	mockKey2 := fmt.Sprintf("user_icon-%s", mockUserIcons[1].ObjectKey)
 
 	// prepare mock service
 	s.mockRedisService.On("GetByFunc", mockCTX, "icons", mockTTL, mockGetFun).Return(mockIconsStr, nil)
 	s.mockUserIconRepo.On("GetByUserID", mockCTX, mockUserID).Return(mockUserIcons, nil)
-	s.mockS3Service.On("GetObjectUrl", mockCTX, mockUserIcons[0].ObjectKey, mockLifetimeSecs).Return("http://s3.com/1", nil)
-	s.mockS3Service.On("GetObjectUrl", mockCTX, mockUserIcons[1].ObjectKey, mockLifetimeSecs).Return("http://s3.com/2", nil)
+	s.mockRedisService.On("GetByFunc", mockCTX, mockKey1, mockTTL, mockGetFun).Return("http://s3.com/1", nil)
+	s.mockRedisService.On("GetByFunc", mockCTX, mockKey2, mockTTL, mockGetFun).Return("http://s3.com/2", nil)
 
 	// prepare expected result
 	expResp := []domain.Icon{
@@ -179,14 +181,13 @@ func listByUserID_GetObjectUrlFailed_ReturnError(s *IconSuite, desc string) {
 	mockGetFun := mock.AnythingOfType("func() (string, error)")
 	mockTTL := 7 * 24 * time.Hour
 	mockUserIcons := []domain.UserIcon{{ID: 1, UserID: 1, ObjectKey: "test/1"}, {ID: 2, UserID: 1, ObjectKey: "test/2"}}
-	mockLifetimeSecs := int64((7 * 24 * time.Hour).Seconds())
+	mockKey1 := fmt.Sprintf("user_icon-%s", mockUserIcons[0].ObjectKey)
 	mockErr := errors.New("get object url failed")
 
 	// prepare mock service
 	s.mockRedisService.On("GetByFunc", mockCTX, "icons", mockTTL, mockGetFun).Return(mockIconsStr, nil)
 	s.mockUserIconRepo.On("GetByUserID", mockCTX, mockUserID).Return(mockUserIcons, nil)
-	s.mockS3Service.On("GetObjectUrl", mockCTX, mockUserIcons[0].ObjectKey, mockLifetimeSecs).Return("", mockErr)
-
+	s.mockRedisService.On("GetByFunc", mockCTX, mockKey1, mockTTL, mockGetFun).Return("", mockErr)
 	// test function
 	icons, err := s.uc.ListByUserID(mockCTX, mockUserID)
 	s.Require().ErrorIs(err, mockErr, desc)
