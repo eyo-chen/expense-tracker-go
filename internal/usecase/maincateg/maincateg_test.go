@@ -2,11 +2,15 @@ package maincateg
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/mocks"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -20,6 +24,8 @@ type MainCategSuite struct {
 	mockIconRepo      *mocks.IconRepo
 	mockMainCategRepo *mocks.MainCategRepo
 	mockUserIconRepo  *mocks.UserIconRepo
+	mockRedisService  *mocks.RedisService
+	mockS3Service     *mocks.S3Service
 }
 
 func TestMainCategSuite(t *testing.T) {
@@ -30,13 +36,17 @@ func (s *MainCategSuite) SetupTest() {
 	s.mockIconRepo = mocks.NewIconRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
 	s.mockUserIconRepo = mocks.NewUserIconRepo(s.T())
-	s.uc = New(s.mockMainCategRepo, s.mockIconRepo, s.mockUserIconRepo)
+	s.mockRedisService = mocks.NewRedisService(s.T())
+	s.mockS3Service = mocks.NewS3Service(s.T())
+	s.uc = New(s.mockMainCategRepo, s.mockIconRepo, s.mockUserIconRepo, s.mockRedisService, s.mockS3Service)
 }
 
 func (s *MainCategSuite) TearDownTest() {
 	s.mockIconRepo.AssertExpectations(s.T())
 	s.mockMainCategRepo.AssertExpectations(s.T())
 	s.mockUserIconRepo.AssertExpectations(s.T())
+	s.mockRedisService.AssertExpectations(s.T())
+	s.mockS3Service.AssertExpectations(s.T())
 }
 
 func (s *MainCategSuite) TestCreate() {
@@ -122,7 +132,9 @@ func create_UserIconNotFound_ReturnError(s *MainCategSuite, desc string) {
 
 func (s *MainCategSuite) TestGetAll() {
 	for scenario, fn := range map[string]func(s *MainCategSuite, desc string){
-		"when no error, return main categories": getAll_NoError_ReturnMainCategories,
+		"when with only default icon, return main categories": getAll_WithOnlyDefaultIcon_ReturnMainCategories,
+		"when with only user icon, return main categories":    getAll_WithOnlyUserIcon_ReturnMainCategories,
+		"when get object url fail, return error":              getAll_GetObjectURLFail_ReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -132,12 +144,12 @@ func (s *MainCategSuite) TestGetAll() {
 	}
 }
 
-func getAll_NoError_ReturnMainCategories(s *MainCategSuite, desc string) {
+func getAll_WithOnlyDefaultIcon_ReturnMainCategories(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
 	mockMainCategs := []domain.MainCateg{
-		{ID: 1, Name: "Test1"},
-		{ID: 2, Name: "Test2"},
+		{ID: 1, Name: "Test1", IconType: domain.IconTypeDefault, IconData: "https://example.com/icon1.png"},
+		{ID: 2, Name: "Test2", IconType: domain.IconTypeDefault, IconData: "https://example.com/icon2.png"},
 	}
 
 	// prepare mock service
@@ -147,6 +159,51 @@ func getAll_NoError_ReturnMainCategories(s *MainCategSuite, desc string) {
 	res, err := s.uc.GetAll(mockCtx, mockUserID, domain.TransactionTypeExpense)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockMainCategs, res, desc)
+}
+
+func getAll_WithOnlyUserIcon_ReturnMainCategories(s *MainCategSuite, desc string) {
+	// prepare mock data
+	mockUserID := int64(1)
+	mockMainCategs := []domain.MainCateg{
+		{ID: 1, Name: "Test1", IconType: domain.IconTypeCustom, IconData: "https://example.com/icon1.png"},
+		{ID: 2, Name: "Test2", IconType: domain.IconTypeCustom, IconData: "https://example.com/icon2.png"},
+	}
+	mockGetFun := mock.AnythingOfType("func() (string, error)")
+	mockTTL := 7 * 24 * time.Hour
+	mockKey1 := fmt.Sprintf("user_icon-%s", mockMainCategs[0].IconData)
+	mockKey2 := fmt.Sprintf("user_icon-%s", mockMainCategs[1].IconData)
+
+	// prepare mock service
+	s.mockMainCategRepo.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeExpense).Return(mockMainCategs, nil)
+	s.mockRedisService.On("GetByFunc", mockCtx, mockKey1, mockTTL, mockGetFun).Return("https://example.com/icon1.png", nil)
+	s.mockRedisService.On("GetByFunc", mockCtx, mockKey2, mockTTL, mockGetFun).Return("https://example.com/icon2.png", nil)
+
+	// action, assertion
+	res, err := s.uc.GetAll(mockCtx, mockUserID, domain.TransactionTypeExpense)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(mockMainCategs, res, desc)
+}
+
+func getAll_GetObjectURLFail_ReturnError(s *MainCategSuite, desc string) {
+	// prepare mock data
+	mockUserID := int64(1)
+	mockMainCategs := []domain.MainCateg{
+		{ID: 1, Name: "Test1", IconType: domain.IconTypeCustom, IconData: "https://example.com/icon1.png"},
+		{ID: 2, Name: "Test2", IconType: domain.IconTypeCustom, IconData: "https://example.com/icon2.png"},
+	}
+	mockKey := fmt.Sprintf("user_icon-%s", mockMainCategs[0].IconData)
+	mockTTL := 7 * 24 * time.Hour
+	mockGetFun := mock.AnythingOfType("func() (string, error)")
+	mockErr := errors.New("get object url failed")
+
+	// prepare mock service
+	s.mockMainCategRepo.On("GetAll", mockCtx, mockUserID, domain.TransactionTypeExpense).Return(mockMainCategs, nil)
+	s.mockRedisService.On("GetByFunc", mockCtx, mockKey, mockTTL, mockGetFun).Return("", mockErr)
+
+	// action, assertion
+	res, err := s.uc.GetAll(mockCtx, mockUserID, domain.TransactionTypeExpense)
+	s.Require().ErrorIs(err, mockErr, desc)
+	s.Require().Empty(res, desc)
 }
 
 func (s *MainCategSuite) TestUpdate() {

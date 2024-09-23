@@ -26,10 +26,11 @@ func New(u interfaces.UserRepo,
 	t interfaces.TransactionRepo,
 	r interfaces.RedisService,
 	ui interfaces.UserIconRepo,
+	s3 interfaces.S3Service,
 ) *Usecase {
 	return &Usecase{
 		User:        user.New(u, r),
-		MainCateg:   maincateg.New(m, i, ui),
+		MainCateg:   maincateg.New(m, i, ui, r, s3),
 		SubCateg:    subcateg.New(s, m),
 		Transaction: transaction.New(t, m, s),
 		Icon:        icon.New(i, ui, r, nil),
