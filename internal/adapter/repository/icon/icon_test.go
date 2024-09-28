@@ -188,3 +188,39 @@ func getByIDs_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 	s.Require().Nil(res, desc)
 	s.Require().Equal(domain.ErrIconNotFound, err, desc)
 }
+
+func (s *IconSuite) TestGetByURL() {
+	for scenario, fn := range map[string]func(s *IconSuite, desc string){
+		"when has icon, return icon":   getByURL_WithIcon_ReturnIcon,
+		"when has no icon, return err": getByURL_WithoutIcon_ReturnErr,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByURL_WithIcon_ReturnIcon(s *IconSuite, desc string) {
+	icons, err := s.f.InsertMany(mockCTX, 5)
+	s.Require().NoError(err, desc)
+
+	expRes := domain.DefaultIcon{
+		ID:  icons[0].ID,
+		URL: icons[0].URL,
+	}
+
+	res, err := s.repo.GetByURL(mockCTX, icons[0].URL)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, res, desc)
+}
+
+func getByURL_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
+	_, err := s.f.InsertMany(mockCTX, 5)
+	s.Require().NoError(err, desc)
+
+	res, err := s.repo.GetByURL(mockCTX, "incorrect url")
+	s.Require().Empty(res, desc)
+	s.Require().Equal(domain.ErrIconNotFound, err, desc)
+}
