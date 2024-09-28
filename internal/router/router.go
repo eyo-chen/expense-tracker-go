@@ -26,11 +26,12 @@ func New(handler *hd.Handler) http.Handler {
 
 	auth := alice.New(middleware.Authenticate)
 
-	// icon with auth
-	r.Handle("/v1/user-icon", auth.ThenFunc(handler.Icon.ListByUserID)).Methods(http.MethodGet)
-
 	// user with auth
 	r.Handle("/v1/user", auth.ThenFunc(handler.User.GetInfo)).Methods(http.MethodGet)
+
+	// user icon
+	r.Handle("/v1/user-icon", auth.ThenFunc(handler.Icon.ListByUserID)).Methods(http.MethodGet)
+	r.Handle("/v1/user-icon/url", auth.ThenFunc(handler.UserIcon.GetPutObjectURL)).Methods(http.MethodPost)
 
 	// init data with auth
 	r.Handle("/v1/init-data", auth.ThenFunc(handler.InitData.Create)).Methods(http.MethodPost)

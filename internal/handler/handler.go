@@ -8,6 +8,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/transaction"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/user"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/usericon"
 )
 
 type Handler struct {
@@ -16,6 +17,7 @@ type Handler struct {
 	SubCateg    *subcateg.Hlr
 	Transaction *transaction.Hlr
 	Icon        *icon.Hlr
+	UserIcon    *usericon.Hlr
 	InitData    *initdata.Hlr
 }
 
@@ -24,6 +26,7 @@ func New(u interfaces.UserUC,
 	s interfaces.SubCategUC,
 	t interfaces.TransactionUC,
 	i interfaces.IconUC,
+	ui interfaces.UserIconUC,
 	in interfaces.InitDataUC,
 ) *Handler {
 	return &Handler{
@@ -32,6 +35,7 @@ func New(u interfaces.UserUC,
 		SubCateg:    subcateg.New(s),
 		Transaction: transaction.New(t),
 		Icon:        icon.New(i),
+		UserIcon:    usericon.New(ui),
 		InitData:    initdata.New(in),
 	}
 }
