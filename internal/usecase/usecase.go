@@ -36,7 +36,7 @@ func New(u interfaces.UserRepo,
 		SubCateg:    subcateg.New(s, m),
 		Transaction: transaction.New(t, m, s),
 		Icon:        icon.New(i, ui, r, s3),
-		UserIcon:    usericon.New(s3),
+		UserIcon:    usericon.New(s3, ui),
 		InitData:    initdata.New(i, m, s, u),
 	}
 }
