@@ -74,6 +74,9 @@ type IconRepo interface {
 
 	// GetByIDs returns icons by ids.
 	GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error)
+
+	// GetByURL returns an icon by url.
+	GetByURL(ctx context.Context, url string) (domain.DefaultIcon, error)
 }
 
 // UserIconRepo is the interface that wraps the basic methods for user icon repository.
@@ -83,6 +86,9 @@ type UserIconRepo interface {
 
 	// GetByUserID returns user icons by user id.
 	GetByUserID(ctx context.Context, userID int64) ([]domain.UserIcon, error)
+
+	// GetByObjectKeyAndUserID returns a user icon by object key and user id.
+	GetByObjectKeyAndUserID(ctx context.Context, objectKey string, userID int64) (domain.UserIcon, error)
 }
 
 // TransactionRepo is the interface that wraps the basic methods for transaction repository.
