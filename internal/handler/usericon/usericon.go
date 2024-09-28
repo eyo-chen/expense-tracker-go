@@ -54,3 +54,36 @@ func (h *Hlr) GetPutObjectURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+type CreateInput struct {
+	FileName string `json:"file_name"`
+}
+
+func (h *Hlr) Create(w http.ResponseWriter, r *http.Request) {
+	var input CreateInput
+
+	if err := jsonutil.ReadJson(w, r, &input); err != nil {
+		logger.Error("jsonutil.ReadJson failed", "package", "handler", "err", err)
+		errutil.BadRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+	if !v.Create(input.FileName) {
+		errutil.VildateErrorResponse(w, r, v.Error)
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	err := h.UserIcon.Create(r.Context(), input.FileName, user.ID)
+	if err != nil {
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusCreated, nil, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", "handler", "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
