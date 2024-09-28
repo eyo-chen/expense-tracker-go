@@ -10,19 +10,33 @@ import (
 type UC struct {
 	MainCateg interfaces.MainCategRepo
 	Icon      interfaces.IconRepo
+	UserIcon  interfaces.UserIconRepo
 }
 
-func New(m interfaces.MainCategRepo, i interfaces.IconRepo) *UC {
+func New(m interfaces.MainCategRepo, i interfaces.IconRepo, ui interfaces.UserIconRepo) *UC {
 	return &UC{
 		MainCateg: m,
 		Icon:      i,
+		UserIcon:  ui,
 	}
 }
 
 func (u *UC) Create(categ domain.MainCateg, userID int64) error {
-	// check if the icon exists
-	if _, err := u.Icon.GetByID(categ.Icon.ID); err != nil {
-		return err
+	if categ.IconType == domain.IconTypeUnspecified {
+		return domain.ErrIconNotFound
+	}
+
+	ctx := context.Background()
+	if categ.IconType == domain.IconTypeDefault {
+		if _, err := u.Icon.GetByURL(ctx, categ.IconData); err != nil {
+			return err
+		}
+	}
+
+	if categ.IconType == domain.IconTypeCustom {
+		if _, err := u.UserIcon.GetByObjectKeyAndUserID(ctx, categ.IconData, userID); err != nil {
+			return err
+		}
 	}
 
 	return u.MainCateg.Create(&categ, userID)
@@ -38,9 +52,21 @@ func (u *UC) Update(categ domain.MainCateg, userID int64) error {
 		return err
 	}
 
-	// check if the icon exists
-	if _, err := u.Icon.GetByID(categ.Icon.ID); err != nil {
-		return err
+	if categ.IconType == domain.IconTypeUnspecified {
+		return domain.ErrIconNotFound
+	}
+
+	ctx := context.Background()
+	if categ.IconType == domain.IconTypeDefault {
+		if _, err := u.Icon.GetByURL(ctx, categ.IconData); err != nil {
+			return err
+		}
+	}
+
+	if categ.IconType == domain.IconTypeCustom {
+		if _, err := u.UserIcon.GetByObjectKeyAndUserID(ctx, categ.IconData, userID); err != nil {
+			return err
+		}
 	}
 
 	return u.MainCateg.Update(&categ)

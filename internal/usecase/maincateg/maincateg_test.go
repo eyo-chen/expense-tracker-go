@@ -19,6 +19,7 @@ type MainCategSuite struct {
 	uc                *UC
 	mockIconRepo      *mocks.IconRepo
 	mockMainCategRepo *mocks.MainCategRepo
+	mockUserIconRepo  *mocks.UserIconRepo
 }
 
 func TestMainCategSuite(t *testing.T) {
@@ -28,12 +29,14 @@ func TestMainCategSuite(t *testing.T) {
 func (s *MainCategSuite) SetupTest() {
 	s.mockIconRepo = mocks.NewIconRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
-	s.uc = New(s.mockMainCategRepo, s.mockIconRepo)
+	s.mockUserIconRepo = mocks.NewUserIconRepo(s.T())
+	s.uc = New(s.mockMainCategRepo, s.mockIconRepo, s.mockUserIconRepo)
 }
 
 func (s *MainCategSuite) TearDownTest() {
 	s.mockIconRepo.AssertExpectations(s.T())
 	s.mockMainCategRepo.AssertExpectations(s.T())
+	s.mockUserIconRepo.AssertExpectations(s.T())
 }
 
 func (s *MainCategSuite) TestCreate() {
