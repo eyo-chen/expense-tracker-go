@@ -96,7 +96,7 @@ func (s *TransactionSuite) TearDownTest() {
 }
 
 func (s *TransactionSuite) TestCreate() {
-	user, main, sub, _, err := s.f.PrepareUserMainAndSubCateg(mockCTX)
+	user, main, sub, err := s.f.PrepareUserMainAndSubCateg(mockCTX)
 	s.Require().NoError(err)
 
 	t := domain.CreateTransactionInput{
@@ -160,10 +160,10 @@ func (s *TransactionSuite) TestGetAll() {
 }
 
 func getAll_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0)
 
 	opt := domain.GetTransOpt{}
 	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
@@ -173,12 +173,12 @@ func getAll_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 }
 
 func getAll_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0)
 
 	opt := domain.GetTransOpt{}
 	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
@@ -193,16 +193,16 @@ func getAll_WithSearchKeyword_ReturnDataWithKeyword(s *TransactionSuite, desc st
 	ow3 := transaction.Transaction{Note: "mongodb database"}
 	ow4 := transaction.Transaction{Note: "go programming"}
 	ow5 := transaction.Transaction{Note: "javascript programming"}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1, 2)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 1, 2)
 
 	searchKeyword := "database"
 	opt := domain.GetTransOpt{
@@ -217,16 +217,16 @@ func getAll_WithSearchKeyword_ReturnDataWithKeyword(s *TransactionSuite, desc st
 }
 
 func getAll_WithManyTransaction_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1, 2)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 1, 2)
 
 	opt := domain.GetTransOpt{}
 	trans, decodedNextKey, err := s.repo.GetAll(mockCTX, opt, user.ID)
@@ -240,16 +240,16 @@ func getAll_FilterByStartDate_ReturnDataAfterStartDate(s *TransactionSuite, desc
 	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
 	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0)}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2, 3)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 1, 2, 3)
 
 	startDate := mockTimeNow.AddDate(0, 0, -2)
 
@@ -269,16 +269,16 @@ func getAll_FilterByEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc st
 	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
 	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0)}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 1)
 
 	endDate := mockTimeNow.AddDate(0, 0, -2)
 	opt := domain.GetTransOpt{
@@ -297,16 +297,16 @@ func getAll_FilterByMinPrice_ReturnDataGreaterThanMinPrice(s *TransactionSuite, 
 	ow2 := transaction.Transaction{Price: 1500}
 	ow3 := transaction.Transaction{Price: 2000}
 	ow4 := transaction.Transaction{Price: 2500}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2, 3)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 1, 2, 3)
 
 	minPrice := 1500.00
 	opt := domain.GetTransOpt{
@@ -325,16 +325,16 @@ func getAll_FilterByMaxPrice_ReturnDataLessThanMinPrice(s *TransactionSuite, des
 	ow2 := transaction.Transaction{Price: 1500}
 	ow3 := transaction.Transaction{Price: 2000}
 	ow4 := transaction.Transaction{Price: 2500}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 1)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 1)
 
 	maxPrice := 1500.00
 	opt := domain.GetTransOpt{
@@ -353,16 +353,16 @@ func getAll_FilterByStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transact
 	ow2 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
 	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0)}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 1, 2)
 
 	startDate := mockTimeNow.AddDate(0, 0, -2)
 	endDate := mockTimeNow.AddDate(0, 0, -1)
@@ -379,16 +379,16 @@ func getAll_FilterByStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transact
 }
 
 func getAll_FilterByMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, desc string) {
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 2)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 2)
 
 	opt := domain.GetTransOpt{
 		Filter: domain.Filter{
@@ -402,16 +402,16 @@ func getAll_FilterByMainCategID_ReturnDataWithMainCategID(s *TransactionSuite, d
 }
 
 func getAll_FilterBySubCategID_ReturnDataWithSubCategID(s *TransactionSuite, desc string) {
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 3)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 1, 3)
 
 	opt := domain.GetTransOpt{
 		Filter: domain.Filter{
@@ -433,16 +433,16 @@ func getAll_FilterByDateAndPriceAndMainCateg_ReturnCorrectData(s *TransactionSui
 	ow6 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2), Price: 2000}
 	ow7 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1), Price: 3000}
 	ow8 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0), Price: 4000}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 2)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 1, 2)
 
 	startDate := mockTimeNow.AddDate(0, 0, -2)
 	endDate := mockTimeNow.AddDate(0, 0, 0)
@@ -470,16 +470,16 @@ func getAll_SortByDateAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
 	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0)}
 	ow5 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 2, 4, 1, 3)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 2, 4, 1, 3)
 
 	opt := domain.GetTransOpt{
 		Sort: &domain.Sort{
@@ -500,16 +500,16 @@ func getAll_SortByDateDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) 
 	ow4 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, 0)}
 	ow5 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 3, 1, 4, 2, 0)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 3, 1, 4, 2, 0)
 
 	opt := domain.GetTransOpt{
 		Sort: &domain.Sort{
@@ -530,16 +530,16 @@ func getAll_SortByPriceAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) 
 	ow4 := transaction.Transaction{Price: 2000}
 	ow5 := transaction.Transaction{Price: 500}
 
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 2, 4, 1, 3, 0)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 2, 4, 1, 3, 0)
 
 	opt := domain.GetTransOpt{
 		Sort: &domain.Sort{
@@ -560,16 +560,16 @@ func getAll_SortByPriceDesc_ReturnCorrectOrder(s *TransactionSuite, desc string)
 	ow4 := transaction.Transaction{Price: 2000}
 	ow5 := transaction.Transaction{Price: 500}
 
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 3, 1, 4, 2)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 3, 1, 4, 2)
 
 	opt := domain.GetTransOpt{
 		Sort: &domain.Sort{
@@ -590,16 +590,16 @@ func getAll_SortByTypeAsc_ReturnCorrectOrder(s *TransactionSuite, desc string) {
 	ow4 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
 	ow5 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
 
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 0, 2, 3, 1, 4)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 0, 2, 3, 1, 4)
 
 	opt := domain.GetTransOpt{
 		Sort: &domain.Sort{
@@ -620,16 +620,16 @@ func getAll_SortByTypeDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) 
 	ow4 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
 	ow5 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
 
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 5, ow1, ow2, ow3, ow4, ow5)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 4, 1, 3, 2, 0)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 4, 1, 3, 2, 0)
 
 	opt := domain.GetTransOpt{
 		Sort: &domain.Sort{
@@ -644,7 +644,7 @@ func getAll_SortByTypeDesc_ReturnCorrectOrder(s *TransactionSuite, desc string) 
 }
 
 func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc string) {
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8)
 	s.Require().NoError(err, desc)
 
 	// prepare encodedNextKey
@@ -653,12 +653,12 @@ func getAll_WithNextKeyCursor_ReturnDataAfterCursorKey(s *TransactionSuite, desc
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 5, 6, 7)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 5, 6, 7)
 
 	opt := domain.GetTransOpt{
 		Cursor: domain.Cursor{
@@ -682,7 +682,7 @@ func getAll_WithNextKeyCursorAndSortByDate_ReturnCorrectData(s *TransactionSuite
 	ow6 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow7 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
 	ow8 := transaction.Transaction{Date: mockTimeNow.AddDate(0, 0, -1)}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
 	s.Require().NoError(err, desc)
 
 	// prepare encodedNextKey
@@ -690,12 +690,12 @@ func getAll_WithNextKeyCursorAndSortByDate_ReturnCorrectData(s *TransactionSuite
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 2, 1, 0)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 2, 1, 0)
 	expDecodedNextKey := domain.DecodedNextKeys{
 		{Field: "Date", Value: transactionList[3].Date.Format("2006-01-02")},
 		{Field: "ID", Value: fmt.Sprint(transactionList[3].ID)},
@@ -726,7 +726,7 @@ func getAll_WithNextKeyCursorAndSortByPrice_ReturnCorrectData(s *TransactionSuit
 	ow6 := transaction.Transaction{Price: 2000}
 	ow7 := transaction.Transaction{Price: 2500}
 	ow8 := transaction.Transaction{Price: 3000}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
 	s.Require().NoError(err, desc)
 
 	// prepare encodedNextKey
@@ -734,12 +734,12 @@ func getAll_WithNextKeyCursorAndSortByPrice_ReturnCorrectData(s *TransactionSuit
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 3, 2, 1)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 3, 2, 1)
 	expDecodedNextKey := domain.DecodedNextKeys{
 		{Field: "Price", Value: fmt.Sprintf("%f", transactionList[4].Price)},
 		{Field: "ID", Value: fmt.Sprint(transactionList[4].ID)},
@@ -770,7 +770,7 @@ func getAll_WithNextKeyCursorAndSortByTransType_ReturnCorrectData(s *Transaction
 	ow6 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
 	ow7 := transaction.Transaction{Type: domain.TransactionTypeIncome.ToModelValue()}
 	ow8 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue()}
-	transactionList, user, mainList, subList, iconList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
+	transactionList, user, mainList, subList, err := s.f.InsertTransactionsWithOneUser(mockCTX, 8, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8)
 	s.Require().NoError(err, desc)
 
 	// prepare encodedNextKey
@@ -778,12 +778,12 @@ func getAll_WithNextKeyCursorAndSortByTransType_ReturnCorrectData(s *Transaction
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
-	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, iconList, 1, 6, 5)
+	expResult := transaction.GetAll_GenExpResult(transactionList, user, mainList, subList, 1, 6, 5)
 	expDecodedNextKey := domain.DecodedNextKeys{
 		{Field: "Type", Value: transactionList[4].Type},
 		{Field: "ID", Value: fmt.Sprint(transactionList[4].ID)},
@@ -820,7 +820,7 @@ func (s *TransactionSuite) TestUpdate() {
 }
 
 func update_WithOneData_UpdateSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	t := domain.UpdateTransactionInput{
@@ -849,7 +849,7 @@ func update_WithOneData_UpdateSuccessfully(s *TransactionSuite, desc string) {
 }
 
 func update_WithMultipleData_UpdateSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 2)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
 	t := domain.UpdateTransactionInput{
@@ -885,11 +885,11 @@ func update_WithMultipleData_UpdateSuccessfully(s *TransactionSuite, desc string
 }
 
 func update_WithMultipleUsers_UpdateSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	transactions2, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions2, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	t := domain.UpdateTransactionInput{
@@ -939,7 +939,7 @@ func (s *TransactionSuite) TestDelete() {
 }
 
 func delete_WithOneData_DeleteSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	err = s.repo.Delete(mockCTX, transactions[0].ID)
@@ -958,7 +958,7 @@ func delete_WithOneData_DeleteSuccessfully(s *TransactionSuite, desc string) {
 }
 
 func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
 	s.Require().NoError(err, desc)
 
 	err = s.repo.Delete(mockCTX, transactions[0].ID)
@@ -977,11 +977,11 @@ func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string
 }
 
 func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	transactions2, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions2, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	err = s.repo.Delete(mockCTX, transactions[0].ID)
@@ -1025,7 +1025,7 @@ func (s *TransactionSuite) TestGetAccInfo() {
 
 func getAccInfo_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue()}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.AccInfo{
@@ -1042,11 +1042,11 @@ func getAccInfo_NoError_ReturnSuccessfully(s *TransactionSuite, desc string) {
 
 func getAccInfo_WithMultipleUsers_ReturnDataOnlyWithOneUser(s *TransactionSuite, desc string) {
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue()}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
 	s.Require().NoError(err, desc)
 
 	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue()}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow2)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow2)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.AccInfo{
@@ -1065,13 +1065,13 @@ func getAccInfo_WithManyTransaction_ReturnCorrectCalculation(s *TransactionSuite
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue()}
 	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue()}
 	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue()}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3, ow1, ow2, ow3)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3, ow1, ow2, ow3)
 	s.Require().NoError(err, desc)
 
 	// prepare two more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.AccInfo{
@@ -1091,13 +1091,13 @@ func getAccInfo_QueryStartDate_ReturnDataAfterStartDate(s *TransactionSuite, des
 	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
 	ow4 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare two more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.AccInfo{
@@ -1120,13 +1120,13 @@ func getAccInfo_QueryEndDate_ReturnDataBeforeEndDate(s *TransactionSuite, desc s
 	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
 	ow4 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare two more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.AccInfo{
@@ -1149,13 +1149,13 @@ func getAccInfo_QueryStartAndEndDate_ReturnDataBetweenStartAndEndDate(s *Transac
 	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -2)}
 	ow3 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, -1)}
 	ow4 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: mockTimeNow.AddDate(0, 0, 0)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 4, ow1, ow2, ow3, ow4)
 	s.Require().NoError(err, desc)
 
 	// prepare two more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.AccInfo{
@@ -1192,7 +1192,7 @@ func (s *TransactionSuite) TestGetByIDAndUserID() {
 }
 
 func getByIDAndUserID_OnlyOneData_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.Transaction{
@@ -1210,7 +1210,7 @@ func getByIDAndUserID_OnlyOneData_ReturnSuccessfully(s *TransactionSuite, desc s
 }
 
 func getByIDAndUserID_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.Transaction{
@@ -1228,11 +1228,11 @@ func getByIDAndUserID_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, d
 }
 
 func getByIDAndUserID_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 3)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.Transaction{
@@ -1250,7 +1250,7 @@ func getByIDAndUserID_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, 
 }
 
 func getByIDAndUserID_IDNotFound_ReturnError(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	_, err = s.repo.GetByIDAndUserID(mockCTX, transactions[0].ID+1, transactions[0].UserID)
@@ -1258,7 +1258,7 @@ func getByIDAndUserID_IDNotFound_ReturnError(s *TransactionSuite, desc string) {
 }
 
 func getByIDAndUserID_UserIDNotFound_ReturnError(s *TransactionSuite, desc string) {
-	transactions, _, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
+	transactions, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
 	_, err = s.repo.GetByIDAndUserID(mockCTX, transactions[0].ID, transactions[0].UserID+1)
@@ -1291,7 +1291,7 @@ func getDailyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, de
 		Type:  domain.TransactionTypeExpense.ToModelValue(),
 		Date:  start,
 	}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -1318,7 +1318,7 @@ func getDailyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuit
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
@@ -1365,7 +1365,7 @@ func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSui
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
@@ -1386,12 +1386,12 @@ func getDailyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSui
 	// prepare more users
 	ow13 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 1)}
 	ow14 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 2)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
 	ow15 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 3)}
 	ow16 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 4)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -1423,7 +1423,7 @@ func getDailyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs(s *Transactio
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
@@ -1485,7 +1485,7 @@ func getMonthlyBarChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, 
 		Type:  domain.TransactionTypeExpense.ToModelValue(),
 		Date:  start,
 	}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -1512,7 +1512,7 @@ func getMonthlyBarChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSu
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
@@ -1559,7 +1559,7 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
@@ -1587,12 +1587,12 @@ func getMonthlyBarChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionS
 	// prepare more users
 	ow13 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
 	ow14 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
 	ow15 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
 	ow16 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
 	s.Require().NoError(err, desc)
 
 	// only get data with mainCategList[1] and mainCategList[2]
@@ -1617,7 +1617,7 @@ func getMonthlyBarChartData_NoMainCategIDs_DoNotFilterByMainCategIDs(s *Transact
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0), MainCategID: mainCategList[0].ID}
@@ -1678,7 +1678,7 @@ func getPieChartData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc st
 		Type:  domain.TransactionTypeExpense.ToModelValue(),
 		Date:  start.AddDate(0, 0, 1),
 	}
-	_, user, mainCategs, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
+	_, user, mainCategs, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.ChartData{
@@ -1707,7 +1707,7 @@ func getPieChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, de
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: mainCategList[0].Type, MainCategID: mainCategList[0].ID, Date: start}
@@ -1753,7 +1753,7 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 	mainCategOW2 := maincateg.MainCateg{Name: "clothes", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW3 := maincateg.MainCateg{Name: "transportation", Type: domain.TransactionTypeExpense.ToModelValue()}
 	mainCategOW4 := maincateg.MainCateg{Name: "salary", Type: domain.TransactionTypeIncome.ToModelValue()} // income type
-	mainCategList, user, _, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
+	mainCategList, user, err := s.f.InsertMainCategList(mockCTX, 5, mainCategOW1, mainCategOW2, mainCategOW3, mainCategOW4)
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Price: 999, Type: mainCategList[0].Type, MainCategID: mainCategList[0].ID, Date: start}
@@ -1777,12 +1777,12 @@ func getPieChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, d
 	// prepare more user
 	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 1)}
 	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 2)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow11, ow12)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow11, ow12)
 	s.Require().NoError(err, desc)
 
 	ow13 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 3)}
 	ow14 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 4)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.ChartData{
@@ -1822,7 +1822,7 @@ func getDailyLineChartData_WithTwoData_ReturnSuccessFully(s *TransactionSuite, d
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 1)}
 	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 0, 1)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -1857,7 +1857,7 @@ func getDailyLineChartData_WithMultipleData_ReturnSuccessfully(s *TransactionSui
 	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 5)}
 	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 6)}
 	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 6)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -1895,18 +1895,18 @@ func getDailyLineChartData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSu
 	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 5)}
 	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 6)}
 	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 6)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
 	ow13 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
 	ow14 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
 	ow15 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 1)}
 	ow16 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 1)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -1948,7 +1948,7 @@ func getMonthlyLineChartData_WithTwoData_ReturnSuccessFully(s *TransactionSuite,
 
 	ow1 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
 	ow2 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeIncome.ToModelValue(), Date: start.AddDate(0, 1, 0)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow1, ow2)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -1983,7 +1983,7 @@ func getMonthlyLineChartData_WithMultipleData_ReturnSuccessfully(s *TransactionS
 	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 5, 0)}
 	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
 	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -2021,18 +2021,18 @@ func getMonthlyLineChartData_WithMultipleUsers_ReturnSuccessfully(s *Transaction
 	ow10 := transaction.Transaction{Price: 2000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 5, 0)}
 	ow11 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
 	ow12 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 6, 0)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 12, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10, ow11, ow12)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
 	ow13 := transaction.Transaction{Price: 999, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
 	ow14 := transaction.Transaction{Price: 1, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 0, 0)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow13, ow14)
 	s.Require().NoError(err, desc)
 
 	ow15 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
 	ow16 := transaction.Transaction{Price: 1000, Type: domain.TransactionTypeExpense.ToModelValue(), Date: start.AddDate(0, 1, 0)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 2, ow15, ow16)
 	s.Require().NoError(err, desc)
 
 	expResult := domain.DateToChartData{
@@ -2073,7 +2073,7 @@ func getMonthlyData_WithOneData_ReturnSuccessfully(s *TransactionSuite, desc str
 	s.Require().NoError(err, desc)
 
 	ow1 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 3)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow1)
 	s.Require().NoError(err, desc)
 
 	dateRange := domain.GetMonthlyDateRange{
@@ -2106,7 +2106,7 @@ func getMonthlyData_WithMultipleData_ReturnSuccessfully(s *TransactionSuite, des
 	ow8 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 6)}
 	ow9 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
 	ow10 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
 	s.Require().NoError(err, desc)
 
 	dateRange := domain.GetMonthlyDateRange{
@@ -2142,15 +2142,15 @@ func getMonthlyData_WithMultipleUsers_ReturnSuccessfully(s *TransactionSuite, de
 	ow8 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 6)}
 	ow9 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
 	ow10 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 40)}
-	_, user, _, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
+	_, user, _, _, err := s.f.InsertTransactionsWithOneUser(mockCTX, 10, ow1, ow2, ow3, ow4, ow5, ow6, ow7, ow8, ow9, ow10)
 	s.Require().NoError(err, desc)
 
 	// prepare more users
 	ow11 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 1)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow11)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow11)
 	s.Require().NoError(err, desc)
 	ow12 := transaction.Transaction{Type: domain.TransactionTypeExpense.ToModelValue(), Date: startDate.AddDate(0, 0, 2)}
-	_, _, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow12)
+	_, _, _, _, err = s.f.InsertTransactionsWithOneUser(mockCTX, 1, ow12)
 	s.Require().NoError(err, desc)
 
 	dateRange := domain.GetMonthlyDateRange{

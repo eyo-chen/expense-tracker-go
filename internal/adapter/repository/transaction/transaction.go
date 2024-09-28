@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -75,14 +74,13 @@ func (r *Repo) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64)
 		var trans Transaction
 		var mainCateg maincateg.MainCateg
 		var subCateg subcateg.SubCateg
-		var icon icon.Icon
 
-		if err := rows.Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.Price, &trans.Note, &trans.Date, &mainCateg.ID, &mainCateg.Name, &mainCateg.Type, &subCateg.ID, &subCateg.Name, &icon.ID, &icon.URL); err != nil {
+		if err := rows.Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.Price, &trans.Note, &trans.Date, &mainCateg.ID, &mainCateg.Name, &mainCateg.Type, &mainCateg.IconType, &mainCateg.IconData, &subCateg.ID, &subCateg.Name); err != nil {
 			logger.Error("rows.Scan failed", "package", packageName, "err", err)
 			return nil, nil, err
 		}
 
-		transactions = append(transactions, cvtToDomainTransaction(trans, mainCateg, subCateg, icon))
+		transactions = append(transactions, cvtToDomainTransaction(trans, mainCateg, subCateg))
 	}
 	defer rows.Close()
 

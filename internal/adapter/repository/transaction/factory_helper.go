@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
@@ -26,8 +25,7 @@ func blueprint(i int) Transaction {
 }
 
 // GetAll_GenExpResult generates expected transactions
-
-func GetAll_GenExpResult(ts []Transaction, u user.User, ms []maincateg.MainCateg, ss []subcateg.SubCateg, is []icon.Icon, indexList ...int) []domain.Transaction {
+func GetAll_GenExpResult(ts []Transaction, u user.User, ms []maincateg.MainCateg, ss []subcateg.SubCateg, indexList ...int) []domain.Transaction {
 	expResult := make([]domain.Transaction, 0, len(indexList))
 	for _, i := range indexList {
 		expResult = append(expResult, domain.Transaction{
@@ -35,13 +33,11 @@ func GetAll_GenExpResult(ts []Transaction, u user.User, ms []maincateg.MainCateg
 			UserID: u.ID,
 			Type:   domain.CvtToTransactionType(ts[i].Type),
 			MainCateg: domain.MainCateg{
-				ID:   ms[i].ID,
-				Name: ms[i].Name,
-				Type: domain.CvtToTransactionType(ms[i].Type),
-				Icon: domain.DefaultIcon{
-					ID:  is[i].ID,
-					URL: is[i].URL,
-				},
+				ID:       ms[i].ID,
+				Name:     ms[i].Name,
+				Type:     domain.CvtToTransactionType(ms[i].Type),
+				IconType: domain.CvtToIconType(ms[i].IconType),
+				IconData: ms[i].IconData,
 			},
 			SubCateg: domain.SubCateg{
 				ID:          ss[i].ID,

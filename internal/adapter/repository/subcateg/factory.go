@@ -5,13 +5,11 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/gofacto"
 	"github.com/eyo-chen/gofacto/db/mysqlf"
-	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type factory struct {
@@ -36,7 +34,7 @@ func (f *factory) InsertUserAndMaincateg(ctx context.Context) (user.User, mainca
 	u := user.User{}
 	ow := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue()}
 
-	m, err := f.maincateg.Build(ctx).WithOne(&u).WithOne(&icon.Icon{}).Overwrite(ow).Insert()
+	m, err := f.maincateg.Build(ctx).WithOne(&u).Overwrite(ow).Insert()
 	if err != nil {
 		return user.User{}, maincateg.MainCateg{}, err
 	}
@@ -70,10 +68,9 @@ func (f *factory) InsertSubcategsWithOneOrManyMainCateg(ctx context.Context, mai
 
 	// prepare associations data
 	u := user.User{}
-	iconPtrList := typeconv.ToAnysWithOW[icon.Icon](maincategIndex, nil)
 
 	// insert main categories
-	ms, err := f.maincateg.BuildList(ctx, maincategIndex).Overwrites(maincategOWs...).WithOne(&u).WithMany(iconPtrList).Insert()
+	ms, err := f.maincateg.BuildList(ctx, maincategIndex).Overwrites(maincategOWs...).WithOne(&u).Insert()
 	if err != nil {
 		return nil, nil, user.User{}, err
 	}
