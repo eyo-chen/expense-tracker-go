@@ -32,6 +32,7 @@ func New(handler *hd.Handler) http.Handler {
 	// user icon
 	r.Handle("/v1/user-icon", auth.ThenFunc(handler.Icon.ListByUserID)).Methods(http.MethodGet)
 	r.Handle("/v1/user-icon/url", auth.ThenFunc(handler.UserIcon.GetPutObjectURL)).Methods(http.MethodPost)
+	r.Handle("/v1/user-icon", auth.ThenFunc(handler.UserIcon.Create)).Methods(http.MethodPost)
 
 	// init data with auth
 	r.Handle("/v1/init-data", auth.ThenFunc(handler.InitData.Create)).Methods(http.MethodPost)

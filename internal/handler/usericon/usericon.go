@@ -24,8 +24,9 @@ type GetPutObjectURLInput struct {
 }
 
 func (h *Hlr) GetPutObjectURL(w http.ResponseWriter, r *http.Request) {
-	var input GetPutObjectURLInput
-
+	var input struct {
+		FileName string `json:"file_name"`
+	}
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJson failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
