@@ -21,24 +21,26 @@ func New(m interfaces.MainCategUC) *Hlr {
 	return &Hlr{MainCateg: m}
 }
 
+type createInput struct {
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	IconType string `json:"icon_type"`
+	IconID   int64  `json:"icon_id"`
+}
+
 func (h *Hlr) Create(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name     string `json:"name"`
-		Type     string `json:"type"`
-		IconType string `json:"icon_type"`
-		IconData string `json:"icon_data"`
-	}
+	var input createInput
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
 
-	categ := domain.MainCateg{
+	categ := domain.CreateMainCategInput{
 		Name:     input.Name,
 		Type:     domain.CvtToTransactionType(input.Type),
 		IconType: domain.CvtToIconType(input.IconType),
-		IconData: input.IconData,
+		IconID:   input.IconID,
 	}
 
 	v := validator.New()
@@ -48,7 +50,7 @@ func (h *Hlr) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := h.MainCateg.Create(categ, user.ID); err != nil {
+	if err := h.MainCateg.Create(r.Context(), categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrIconNotFound,
 			domain.ErrUserIconNotFound,
@@ -114,12 +116,11 @@ func (h *Hlr) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categ := domain.MainCateg{
+	categ := domain.UpdateMainCategInput{
 		ID:       id,
 		Name:     input.Name,
 		Type:     domain.CvtToTransactionType(input.Type),
 		IconType: domain.CvtToIconType(input.IconType),
-		IconData: input.IconData,
 	}
 
 	v := validator.New()
@@ -129,7 +130,7 @@ func (h *Hlr) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := h.MainCateg.Update(categ, user.ID); err != nil {
+	if err := h.MainCateg.Update(r.Context(), categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrUniqueNameUserType,
 			domain.ErrUniqueIconUser,
