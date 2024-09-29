@@ -49,3 +49,8 @@ func CvtToIconType(s string) IconType {
 	}
 	return IconTypeUnspecified
 }
+
+// IsValid checks if the icon type is valid
+func (t IconType) IsValid() bool {
+	return t == IconTypeDefault || t == IconTypeCustom
+}
