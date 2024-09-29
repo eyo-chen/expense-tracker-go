@@ -2,6 +2,7 @@ package icon
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -59,7 +60,15 @@ func (u *UC) ListByUserID(ctx context.Context, userID int64) ([]domain.Icon, err
 
 	icons := make([]domain.Icon, 0, len(defaultIcons)+len(userIcons))
 	for _, ui := range userIcons {
-		presignedURL, err := u.s3.GetObjectUrl(ctx, ui.ObjectKey, int64((7 * 24 * time.Hour).Seconds()))
+		key := fmt.Sprintf("user_icon-%s", ui.ObjectKey)
+		url, err := u.redis.GetByFunc(ctx, key, 7*24*time.Hour, func() (string, error) {
+			presignedURL, err := u.s3.GetObjectUrl(ctx, ui.ObjectKey, int64((7 * 24 * time.Hour).Seconds()))
+			if err != nil {
+				return "", err
+			}
+
+			return presignedURL, nil
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +76,7 @@ func (u *UC) ListByUserID(ctx context.Context, userID int64) ([]domain.Icon, err
 		icons = append(icons, domain.Icon{
 			ID:   ui.ID,
 			Type: domain.IconTypeCustom,
-			URL:  presignedURL,
+			URL:  url,
 		})
 	}
 
