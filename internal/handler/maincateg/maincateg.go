@@ -21,12 +21,15 @@ func New(m interfaces.MainCategUC) *Hlr {
 	return &Hlr{MainCateg: m}
 }
 
-func (h *Hlr) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name   string `json:"name"`
-		Type   string `json:"type"`
-		IconID int64  `json:"icon_id"`
-	}
+type createInput struct {
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	IconType string `json:"icon_type"`
+	IconData string `json:"icon_data"`
+}
+
+func (h *Hlr) Create(w http.ResponseWriter, r *http.Request) {
+	var input createInput
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
@@ -34,11 +37,10 @@ func (h *Hlr) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
 	}
 
 	categ := domain.MainCateg{
-		Name: input.Name,
-		Type: domain.CvtToTransactionType(input.Type),
-		Icon: domain.DefaultIcon{
-			ID: input.IconID,
-		},
+		Name:     input.Name,
+		Type:     domain.CvtToTransactionType(input.Type),
+		IconType: domain.CvtToIconType(input.IconType),
+		IconData: input.IconData,
 	}
 
 	v := validator.New()
@@ -51,6 +53,7 @@ func (h *Hlr) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
 	if err := h.MainCateg.Create(categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrIconNotFound,
+			domain.ErrUserIconNotFound,
 			domain.ErrUniqueNameUserType,
 			domain.ErrUniqueIconUser,
 		}
@@ -70,7 +73,7 @@ func (h *Hlr) CreateMainCateg(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Hlr) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) GetAll(w http.ResponseWriter, r *http.Request) {
 	qType := r.URL.Query().Get("type")
 	categType := domain.CvtToTransactionType(qType)
 	user := ctxutil.GetUser(r)
@@ -93,7 +96,14 @@ func (h *Hlr) GetAllMainCateg(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Hlr) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
+type updateInput struct {
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	IconType string `json:"icon_type"`
+	IconData string `json:"icon_data"`
+}
+
+func (h *Hlr) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
@@ -101,11 +111,7 @@ func (h *Hlr) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input struct {
-		Name   string `json:"name"`
-		Type   string `json:"type"`
-		IconID int64  `json:"icon_id"`
-	}
+	var input updateInput
 	if err := jsonutil.ReadJson(w, r, &input); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
@@ -113,12 +119,11 @@ func (h *Hlr) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 	}
 
 	categ := domain.MainCateg{
-		ID:   id,
-		Name: input.Name,
-		Type: domain.CvtToTransactionType(input.Type),
-		Icon: domain.DefaultIcon{
-			ID: input.IconID,
-		},
+		ID:       id,
+		Name:     input.Name,
+		Type:     domain.CvtToTransactionType(input.Type),
+		IconType: domain.CvtToIconType(input.IconType),
+		IconData: input.IconData,
 	}
 
 	v := validator.New()
@@ -132,6 +137,7 @@ func (h *Hlr) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 		errors := []error{
 			domain.ErrUniqueNameUserType,
 			domain.ErrUniqueIconUser,
+			domain.ErrUserIconNotFound,
 			domain.ErrMainCategNotFound,
 			domain.ErrIconNotFound,
 		}
@@ -151,7 +157,7 @@ func (h *Hlr) UpdateMainCateg(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Hlr) DeleteMainCateg(w http.ResponseWriter, r *http.Request) {
+func (h *Hlr) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := jsonutil.ReadID(r)
 	if err != nil {
 		logger.Error("jsonutil.ReadID failed", "package", "handler", "err", err)
