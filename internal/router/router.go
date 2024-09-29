@@ -36,10 +36,10 @@ func New(handler *hd.Handler) http.Handler {
 	r.Handle("/v1/init-data", auth.ThenFunc(handler.InitData.Create)).Methods(http.MethodPost)
 
 	// main category
-	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.CreateMainCateg)).Methods(http.MethodPost)
-	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.GetAllMainCateg)).Methods(http.MethodGet)
-	r.Handle("/v1/main-category/{id}", auth.ThenFunc(handler.MainCateg.UpdateMainCateg)).Methods(http.MethodPatch)
-	r.Handle("/v1/main-category/{id}", auth.ThenFunc(handler.MainCateg.DeleteMainCateg)).Methods(http.MethodDelete)
+	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.Create)).Methods(http.MethodPost)
+	r.Handle("/v1/main-category", auth.ThenFunc(handler.MainCateg.GetAll)).Methods(http.MethodGet)
+	r.Handle("/v1/main-category/{id}", auth.ThenFunc(handler.MainCateg.Update)).Methods(http.MethodPatch)
+	r.Handle("/v1/main-category/{id}", auth.ThenFunc(handler.MainCateg.Delete)).Methods(http.MethodDelete)
 
 	// sub category
 	r.Handle("/v1/sub-category", auth.ThenFunc(handler.SubCateg.CreateSubCateg)).Methods(http.MethodPost)
