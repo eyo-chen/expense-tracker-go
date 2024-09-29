@@ -31,11 +31,11 @@ type MainCateg struct {
 	IconData string
 }
 
-func (r *Repo) Create(categ *domain.MainCateg, userID int64) error {
+func (r *Repo) Create(ctx context.Context, categ domain.MainCateg, userID int64) error {
 	stmt := `INSERT INTO main_categories (name, type, user_id, icon_type, icon_data) VALUES (?, ?, ?, ?, ?)`
 
 	c := cvtToMainCateg(categ, userID)
-	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.UserID, c.IconType, c.IconData); err != nil {
+	if _, err := r.DB.ExecContext(ctx, stmt, c.Name, c.Type, c.UserID, c.IconType, c.IconData); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
@@ -78,11 +78,11 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 	return categs, nil
 }
 
-func (r *Repo) Update(categ *domain.MainCateg) error {
+func (r *Repo) Update(ctx context.Context, categ domain.MainCateg) error {
 	stmt := `UPDATE main_categories SET name = ?, type = ?, icon_type = ?, icon_data = ? WHERE id = ?`
 
 	c := cvtToMainCateg(categ, 0)
-	if _, err := r.DB.Exec(stmt, c.Name, c.Type, c.IconType, c.IconData, c.ID); err != nil {
+	if _, err := r.DB.ExecContext(ctx, stmt, c.Name, c.Type, c.IconType, c.IconData, c.ID); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}
