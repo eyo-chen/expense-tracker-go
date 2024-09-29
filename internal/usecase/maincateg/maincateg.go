@@ -27,25 +27,35 @@ func New(m interfaces.MainCategRepo, i interfaces.IconRepo, ui interfaces.UserIc
 	}
 }
 
-func (u *UC) Create(categ domain.MainCateg, userID int64) error {
-	if categ.IconType == domain.IconTypeUnspecified {
+func (u *UC) Create(ctx context.Context, categ domain.CreateMainCategInput, userID int64) error {
+	if !categ.IconType.IsValid() {
 		return domain.ErrIconNotFound
 	}
 
-	ctx := context.Background()
+	var iconData string
 	if categ.IconType == domain.IconTypeDefault {
-		if _, err := u.Icon.GetByURL(ctx, categ.IconData); err != nil {
+		i, err := u.Icon.GetByID(ctx, categ.IconID)
+		if err != nil {
 			return err
 		}
+		iconData = i.URL
 	}
 
 	if categ.IconType == domain.IconTypeCustom {
-		if _, err := u.UserIcon.GetByObjectKeyAndUserID(ctx, categ.IconData, userID); err != nil {
+		ui, err := u.UserIcon.GetByID(ctx, categ.IconID, userID)
+		if err != nil {
 			return err
 		}
+		iconData = ui.ObjectKey
 	}
 
-	return u.MainCateg.Create(&categ, userID)
+	c := domain.MainCateg{
+		Name:     categ.Name,
+		Type:     categ.Type,
+		IconType: categ.IconType,
+		IconData: iconData,
+	}
+	return u.MainCateg.Create(ctx, c, userID)
 }
 
 func (u *UC) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
@@ -55,7 +65,7 @@ func (u *UC) GetAll(ctx context.Context, userID int64, transType domain.Transact
 	}
 
 	// get and cache presigned URL of custom icons
-	for _, categ := range categs {
+	for i, categ := range categs {
 		if categ.IconType != domain.IconTypeCustom {
 			continue
 		}
@@ -73,36 +83,48 @@ func (u *UC) GetAll(ctx context.Context, userID int64, transType domain.Transact
 			return nil, err
 		}
 
-		categ.IconData = url
+		categs[i].IconData = url
+
 	}
 
 	return categs, nil
 }
 
-func (u *UC) Update(categ domain.MainCateg, userID int64) error {
+func (u *UC) Update(ctx context.Context, categ domain.UpdateMainCategInput, userID int64) error {
 	// check if the main category exists
 	if _, err := u.MainCateg.GetByID(categ.ID, userID); err != nil {
 		return err
 	}
 
-	if categ.IconType == domain.IconTypeUnspecified {
+	if !categ.IconType.IsValid() {
 		return domain.ErrIconNotFound
 	}
 
-	ctx := context.Background()
+	var iconData string
 	if categ.IconType == domain.IconTypeDefault {
-		if _, err := u.Icon.GetByURL(ctx, categ.IconData); err != nil {
+		i, err := u.Icon.GetByID(ctx, categ.IconID)
+		if err != nil {
 			return err
 		}
+		iconData = i.URL
 	}
 
 	if categ.IconType == domain.IconTypeCustom {
-		if _, err := u.UserIcon.GetByObjectKeyAndUserID(ctx, categ.IconData, userID); err != nil {
+		ui, err := u.UserIcon.GetByID(ctx, categ.IconID, userID)
+		if err != nil {
 			return err
 		}
+		iconData = ui.ObjectKey
 	}
 
-	return u.MainCateg.Update(&categ)
+	c := domain.MainCateg{
+		ID:       categ.ID,
+		Name:     categ.Name,
+		Type:     categ.Type,
+		IconType: categ.IconType,
+		IconData: iconData,
+	}
+	return u.MainCateg.Update(ctx, c)
 }
 
 func (u *UC) Delete(id int64) error {
