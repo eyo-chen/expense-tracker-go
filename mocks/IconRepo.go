@@ -15,9 +15,9 @@ type IconRepo struct {
 	mock.Mock
 }
 
-// GetByID provides a mock function with given fields: id
-func (_m *IconRepo) GetByID(id int64) (domain.DefaultIcon, error) {
-	ret := _m.Called(id)
+// GetByID provides a mock function with given fields: ctx, id
+func (_m *IconRepo) GetByID(ctx context.Context, id int64) (domain.DefaultIcon, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByID")
@@ -25,17 +25,17 @@ func (_m *IconRepo) GetByID(id int64) (domain.DefaultIcon, error) {
 
 	var r0 domain.DefaultIcon
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) (domain.DefaultIcon, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) (domain.DefaultIcon, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(int64) domain.DefaultIcon); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) domain.DefaultIcon); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(domain.DefaultIcon)
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -66,34 +66,6 @@ func (_m *IconRepo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) 
 
 	if rf, ok := ret.Get(1).(func([]int64) error); ok {
 		r1 = rf(ids)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetByURL provides a mock function with given fields: ctx, url
-func (_m *IconRepo) GetByURL(ctx context.Context, url string) (domain.DefaultIcon, error) {
-	ret := _m.Called(ctx, url)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetByURL")
-	}
-
-	var r0 domain.DefaultIcon
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (domain.DefaultIcon, error)); ok {
-		return rf(ctx, url)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) domain.DefaultIcon); ok {
-		r0 = rf(ctx, url)
-	} else {
-		r0 = ret.Get(0).(domain.DefaultIcon)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, url)
 	} else {
 		r1 = ret.Error(1)
 	}

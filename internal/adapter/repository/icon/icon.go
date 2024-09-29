@@ -3,7 +3,6 @@ package icon
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -24,6 +23,21 @@ func New(db *sql.DB) *Repo {
 type Icon struct {
 	ID  int64  `json:"id"`
 	URL string `json:"url"`
+}
+
+func (r *Repo) GetByID(ctx context.Context, id int64) (domain.DefaultIcon, error) {
+	stmt := `SELECT id, url FROM icons WHERE id = ?`
+
+	var icon Icon
+	if err := r.DB.QueryRowContext(ctx, stmt, id).Scan(&icon.ID, &icon.URL); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.DefaultIcon{}, domain.ErrIconNotFound
+		}
+
+		return domain.DefaultIcon{}, err
+	}
+
+	return cvtToDomainDefaultIcon(icon), nil
 }
 
 func (r *Repo) List() ([]domain.DefaultIcon, error) {
@@ -49,21 +63,6 @@ func (r *Repo) List() ([]domain.DefaultIcon, error) {
 	defer rows.Close()
 
 	return icons, nil
-}
-
-func (r *Repo) GetByID(id int64) (domain.DefaultIcon, error) {
-	stmt := `SELECT id, url FROM icons WHERE id = ?`
-
-	var icon Icon
-	if err := r.DB.QueryRow(stmt, id).Scan(&icon.ID, &icon.URL); err != nil {
-		if err == sql.ErrNoRows {
-			return domain.DefaultIcon{}, domain.ErrIconNotFound
-		}
-
-		return domain.DefaultIcon{}, err
-	}
-
-	return cvtToDomainDefaultIcon(icon), nil
 }
 
 func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
@@ -106,20 +105,4 @@ func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
 	}
 
 	return cvtToIDToDomainDefaultIcon(icons), nil
-}
-
-func (r *Repo) GetByURL(ctx context.Context, url string) (domain.DefaultIcon, error) {
-	stmt := `SELECT id, url FROM icons WHERE url = ?`
-
-	var icon Icon
-	if err := r.DB.QueryRowContext(ctx, stmt, url).Scan(&icon.ID, &icon.URL); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.DefaultIcon{}, domain.ErrIconNotFound
-		}
-
-		logger.Error("get icon by url r.DB.QueryRowContext failed", "package", packageName, "err", err)
-		return domain.DefaultIcon{}, err
-	}
-
-	return cvtToDomainDefaultIcon(icon), nil
 }
