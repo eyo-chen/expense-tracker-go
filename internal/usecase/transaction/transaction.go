@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
@@ -17,13 +18,21 @@ type UC struct {
 	Transaction interfaces.TransactionRepo
 	MainCateg   interfaces.MainCategRepo
 	SubCateg    interfaces.SubCategRepo
+	Redis       interfaces.RedisService
+	S3          interfaces.S3Service
 }
 
-func New(t interfaces.TransactionRepo, m interfaces.MainCategRepo, s interfaces.SubCategRepo) *UC {
+func New(t interfaces.TransactionRepo,
+	m interfaces.MainCategRepo,
+	s interfaces.SubCategRepo,
+	r interfaces.RedisService,
+	s3 interfaces.S3Service) *UC {
 	return &UC{
 		Transaction: t,
 		MainCateg:   m,
 		SubCateg:    s,
+		Redis:       r,
+		S3:          s3,
 	}
 }
 
@@ -59,6 +68,28 @@ func (u *UC) GetAll(ctx context.Context, opt domain.GetTransOpt, user domain.Use
 	trans, decodedNextKeys, err := u.Transaction.GetAll(ctx, opt, user.ID)
 	if err != nil {
 		return nil, domain.Cursor{}, err
+	}
+
+	// get and cache presigned URL of custom icons
+	for i, t := range trans {
+		if t.MainCateg.IconType != domain.IconTypeCustom {
+			continue
+		}
+
+		key := domain.GenUserIconCacheKey(t.MainCateg.IconData)
+		url, err := u.Redis.GetByFunc(ctx, key, 7*24*time.Hour, func() (string, error) {
+			presignedURL, err := u.S3.GetObjectUrl(ctx, t.MainCateg.IconData, int64((7 * 24 * time.Hour).Seconds()))
+			if err != nil {
+				return "", err
+			}
+
+			return presignedURL, nil
+		})
+		if err != nil {
+			return nil, domain.Cursor{}, err
+		}
+
+		trans[i].MainCateg.IconData = url
 	}
 
 	var cursor domain.Cursor

@@ -30,10 +30,12 @@ type icon struct {
 }
 
 type mainCateg struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-	Icon icon   `json:"icon"`
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	IconType string `json:"icon_type"`
+	IconData string `json:"icon_data"`
+	Icon     icon   `json:"icon"`
 }
 
 type subCateg struct {

@@ -2,7 +2,6 @@ package maincateg
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -70,7 +69,7 @@ func (u *UC) GetAll(ctx context.Context, userID int64, transType domain.Transact
 			continue
 		}
 
-		key := fmt.Sprintf("user_icon-%s", categ.IconData)
+		key := domain.GenUserIconCacheKey(categ.IconData)
 		url, err := u.Redis.GetByFunc(ctx, key, 7*24*time.Hour, func() (string, error) {
 			presignedURL, err := u.S3.GetObjectUrl(ctx, categ.IconData, int64((7 * 24 * time.Hour).Seconds()))
 			if err != nil {

@@ -11,6 +11,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/pkg/codeutil"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	"github.com/eyo-chen/expense-tracker-go/pkg/testutil"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -26,6 +27,8 @@ type TransactionSuite struct {
 	mockTransactionRepo *mocks.TransactionRepo
 	mockMainCategRepo   *mocks.MainCategRepo
 	mockSubCategRepo    *mocks.SubCategRepo
+	mockRedis           *mocks.RedisService
+	mockS3              *mocks.S3Service
 }
 
 func TestTransactionSuite(t *testing.T) {
@@ -40,13 +43,17 @@ func (s *TransactionSuite) SetupTest() {
 	s.mockTransactionRepo = mocks.NewTransactionRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
 	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
-	s.uc = New(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo)
+	s.mockRedis = mocks.NewRedisService(s.T())
+	s.mockS3 = mocks.NewS3Service(s.T())
+	s.uc = New(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockRedis, s.mockS3)
 }
 
 func (s *TransactionSuite) TearDownTest() {
 	s.mockTransactionRepo.AssertExpectations(s.T())
 	s.mockMainCategRepo.AssertExpectations(s.T())
 	s.mockSubCategRepo.AssertExpectations(s.T())
+	s.mockRedis.AssertExpectations(s.T())
+	s.mockS3.AssertExpectations(s.T())
 }
 
 func (s *TransactionSuite) TestCreate() {
@@ -218,6 +225,8 @@ func (s *TransactionSuite) TestGetAll() {
 		"when it's the first page with size and sort, return correct cursor":        getAll_InitPageWithSizeAndSort_ReturnCorrectCursor,
 		"when it's not the first page with decoded next key, return correct cursor": getAll_WithDecodedNextKey_ReturnCorrectCursor,
 		"when size is empty value, return no cursor":                                getAll_SizeIsEmptyValue_ReturnNoCursor,
+		"when with custom icon, return transactions":                                getAll_WithCustomIcon_ReturnTransactions,
+		"when get presigned URL of custom icon fail, return error":                  getAll_GetByFuncFail_ReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -337,6 +346,50 @@ func getAll_SizeIsEmptyValue_ReturnNoCursor(s *TransactionSuite, desc string) {
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
 	s.Require().Equal(domain.Cursor{}, cursor, desc)
+}
+
+func getAll_WithCustomIcon_ReturnTransactions(s *TransactionSuite, desc string) {
+	mockDecodedNextKeys := domain.DecodedNextKeys{}
+	mockOpt := domain.GetTransOpt{Cursor: domain.Cursor{Size: 3}}
+	mockUser := domain.User{ID: 1}
+	mockTrans := []domain.Transaction{
+		{ID: 1, UserID: 1, MainCateg: domain.MainCateg{IconType: domain.IconTypeCustom, IconData: "test"}},
+		{ID: 2, UserID: 1, MainCateg: domain.MainCateg{IconType: domain.IconTypeDefault, IconData: "test2"}},
+	}
+	mockKey := "user_icon-test"
+	mockTTL := 7 * 24 * time.Hour
+	mockGetFun := mock.AnythingOfType("func() (string, error)")
+
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
+		Return(mockTrans, mockDecodedNextKeys, nil).Once()
+	s.mockRedis.On("GetByFunc", mockCtx, mockKey, mockTTL, mockGetFun).
+		Return("https://example.com/icon1.png", nil).Once()
+
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(mockTrans, result, desc)
+	s.Require().Equal(domain.Cursor{}, cursor, desc)
+}
+
+func getAll_GetByFuncFail_ReturnError(s *TransactionSuite, desc string) {
+	mockDecodedNextKeys := domain.DecodedNextKeys{}
+	mockOpt := domain.GetTransOpt{Cursor: domain.Cursor{Size: 3}}
+	mockUser := domain.User{ID: 1}
+	mockTrans := []domain.Transaction{{ID: 1, UserID: 1, MainCateg: domain.MainCateg{IconType: domain.IconTypeCustom, IconData: "test"}}}
+	mockKey := "user_icon-test"
+	mockTTL := 7 * 24 * time.Hour
+	mockGetFun := mock.AnythingOfType("func() (string, error)")
+	mockErr := errors.New("get by func error")
+
+	s.mockTransactionRepo.On("GetAll", mockCtx, mockOpt, int64(1)).
+		Return(mockTrans, mockDecodedNextKeys, nil).Once()
+	s.mockRedis.On("GetByFunc", mockCtx, mockKey, mockTTL, mockGetFun).
+		Return("", mockErr).Once()
+
+	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
+	s.Require().ErrorIs(err, mockErr, desc)
+	s.Require().Nil(result, desc)
+	s.Require().Empty(cursor, desc)
 }
 
 func (s *TransactionSuite) TestUpdate() {
