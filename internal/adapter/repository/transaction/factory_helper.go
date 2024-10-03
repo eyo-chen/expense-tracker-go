@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	mockLoc, _  = time.LoadLocation("")
-	mockTimeNow = time.Unix(1629446406, 0).Truncate(24 * time.Hour).In(mockLoc)
+	mockLocF, _  = time.LoadLocation("")
+	mockTimeNowF = time.Unix(1629446406, 0).Truncate(24 * time.Hour).In(mockLocF)
 )
 
 func blueprint(i int) Transaction {
@@ -20,7 +20,7 @@ func blueprint(i int) Transaction {
 		Type:  domain.TransactionTypeIncome.ToModelValue(),
 		Price: float64(i*10.0 + 1.0),
 		Note:  "test" + fmt.Sprint(i),
-		Date:  mockTimeNow,
+		Date:  mockTimeNowF,
 	}
 }
 

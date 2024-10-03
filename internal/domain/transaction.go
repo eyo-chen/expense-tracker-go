@@ -103,3 +103,10 @@ type GetMonthlyDateRange struct {
 
 // MonthDayToTransactionType contains mapping from month day to transaction type
 type MonthDayToTransactionType map[int]TransactionType
+
+// MonthlyAggregatedData contains aggregated data for a month
+type MonthlyAggregatedData struct {
+	UserID       int64
+	TotalIncome  float64
+	TotalExpense float64
+}
