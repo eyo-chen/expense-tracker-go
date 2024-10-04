@@ -125,6 +125,15 @@ type TransactionRepo interface {
 
 	// GetMonthlyData returns monthly data.
 	GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDateRange, userID int64) (domain.MonthDayToTransactionType, error)
+
+	// GetMonthlyAggregatedData returns monthly aggregated data.
+	GetMonthlyAggregatedData(ctx context.Context, date time.Time) ([]domain.MonthlyAggregatedData, error)
+}
+
+// MonthlyTransRepo is the interface that wraps the basic methods for monthly transaction repository.
+type MonthlyTransRepo interface {
+	// Create inserts new monthly transactions into the database.
+	Create(ctx context.Context, date time.Time, trans []domain.MonthlyAggregatedData) error
 }
 
 // RedisService is the interface that wraps the basic methods for redis service.
