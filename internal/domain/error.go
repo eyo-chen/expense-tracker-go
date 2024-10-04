@@ -73,4 +73,7 @@ var (
 
 	// user icon not found error
 	ErrUserIconNotFound = errors.New("user icon not found")
+
+	// unique user date error
+	ErrUniqueUserDate = errors.New("unique user date")
 )

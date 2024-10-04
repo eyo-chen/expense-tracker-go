@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS `monthly_transactions` (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   INDEX idx_user_id (user_id),
   INDEX idx_month_date (month_date),
-  UNIQUE INDEX idx_user_month_date (user_id, month_date)
+  UNIQUE INDEX unique_user_month_date (user_id, month_date)
 );
