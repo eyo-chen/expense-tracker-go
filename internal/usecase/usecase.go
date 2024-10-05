@@ -8,6 +8,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/transaction"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/user"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/usericon"
 )
 
 type Usecase struct {
@@ -16,6 +17,7 @@ type Usecase struct {
 	SubCateg    *subcateg.UC
 	Transaction *transaction.UC
 	Icon        *icon.UC
+	UserIcon    *usericon.UC
 	InitData    *initdata.UC
 }
 
@@ -34,6 +36,7 @@ func New(u interfaces.UserRepo,
 		SubCateg:    subcateg.New(s, m),
 		Transaction: transaction.New(t, m, s),
 		Icon:        icon.New(i, ui, r, s3),
+		UserIcon:    usericon.New(s3),
 		InitData:    initdata.New(i, m, s, u),
 	}
 }
