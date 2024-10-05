@@ -90,6 +90,12 @@ type IconUC interface {
 	ListByUserID(ctx context.Context, userID int64) ([]domain.Icon, error)
 }
 
+// UserIconUC is the interface that wraps the basic methods for user icon usecase.
+type UserIconUC interface {
+	// GetPutObjectURL returns the put object url.
+	GetPutObjectURL(ctx context.Context, fileName string, userID int64) (string, error)
+}
+
 // InitDataUC is the interface that wraps the basic methods for init data usecase.
 type InitDataUC interface {
 	// List returns the initial data.
