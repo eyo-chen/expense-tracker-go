@@ -173,3 +173,134 @@ func getPutObjectURL_GetFail_ReturnServerError(s *UserIconSuite, desc string) {
 	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)
 	s.Require().Equal(expResp, responseBody, desc)
 }
+
+func (s *UserIconSuite) TestCreate() {
+	for scenario, fn := range map[string]func(s *UserIconSuite, desc string){
+		"when no error, return successfully":       create_NoError_ReturnSuccessfully,
+		"when empty file name, return bad request": create_EmptyFileName_ReturnBadRequest,
+		"when create fail, return server error":    create_CreateFail_ReturnServerError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func create_NoError_ReturnSuccessfully(s *UserIconSuite, desc string) {
+	// prepare mock data
+	mockFileName := "test.png"
+	mockInput := map[string]interface{}{
+		"file_name": mockFileName,
+	}
+	mockBody, err := json.Marshal(mockInput)
+	s.Require().NoError(err, desc)
+
+	mockUser := domain.User{ID: 1}
+
+	// prepare mock request
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Create))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user-icon", bytes.NewBuffer(mockBody))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &mockUser)
+
+	// mock service
+	s.mockUserIconUC.On("Create", req.Context(), mockFileName, mockUser.ID).Return(nil)
+
+	// action
+	s.hlr.Create(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(http.StatusCreated, res.Code, desc)
+	s.Require().Empty(responseBody, desc)
+}
+
+func create_EmptyFileName_ReturnBadRequest(s *UserIconSuite, desc string) {
+	// prepare mock data
+	mockFileName := ""
+	mockInput := map[string]interface{}{
+		"file_name": mockFileName,
+	}
+	mockBody, err := json.Marshal(mockInput)
+	s.Require().NoError(err, desc)
+
+	mockUser := domain.User{ID: 1}
+
+	// prepare mock request
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Create))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user-icon", bytes.NewBuffer(mockBody))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &mockUser)
+
+	// prepare expResp
+	expResp := map[string]interface{}{
+		"file_name": "File name can't be empty",
+	}
+
+	// action
+	s.hlr.Create(res, req)
+
+	// assertion
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(http.StatusBadRequest, res.Code, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+}
+
+func create_CreateFail_ReturnServerError(s *UserIconSuite, desc string) {
+	// prepare mock data
+	mockFileName := "test.png"
+	mockInput := map[string]interface{}{
+		"file_name": mockFileName,
+	}
+	mockBody, err := json.Marshal(mockInput)
+	s.Require().NoError(err, desc)
+
+	mockUser := domain.User{ID: 1}
+	mockErr := errors.New("create fail")
+
+	// prepare mock request
+	srv := httptest.NewServer(http.HandlerFunc(s.hlr.Create))
+	req := httptest.NewRequest(http.MethodPost, srv.URL+"/v1/user-icon", bytes.NewBuffer(mockBody))
+	res := httptest.NewRecorder()
+	defer srv.Close()
+	defer req.Body.Close()
+	defer res.Result().Body.Close()
+
+	// set context value on request
+	req = ctxutil.SetUser(req, &mockUser)
+
+	// prepare expResp
+	expResp := map[string]interface{}{
+		"error": mockErr.Error(),
+	}
+
+	// mock service
+	s.mockUserIconUC.On("Create", req.Context(), mockFileName, mockUser.ID).Return(mockErr)
+
+	// action
+	s.hlr.Create(res, req)
+
+	// assertion
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(res.Body.Bytes(), &responseBody)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(http.StatusInternalServerError, res.Code, desc)
+	s.Require().Equal(expResp, responseBody, desc)
+}
