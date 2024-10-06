@@ -94,6 +94,9 @@ type IconUC interface {
 type UserIconUC interface {
 	// GetPutObjectURL returns the put object url.
 	GetPutObjectURL(ctx context.Context, fileName string, userID int64) (string, error)
+
+	// Create creates a user icon.
+	Create(ctx context.Context, fileName string, userID int64) error
 }
 
 // InitDataUC is the interface that wraps the basic methods for init data usecase.
