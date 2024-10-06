@@ -3,7 +3,7 @@ package model
 import (
 	"database/sql"
 
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/subcateg"
@@ -28,8 +28,8 @@ type Adapter struct {
 
 func New(mysqlDB *sql.DB,
 	redisClient *redis.Client,
-	s3Client *s3.Client,
-	presignClient *s3.PresignClient,
+	s3Client interfaces.S3Client,
+	presignClient interfaces.S3PresignClient,
 	bucket string,
 ) *Adapter {
 	return &Adapter{

@@ -51,10 +51,8 @@ func main() {
 	}
 	defer redisClient.Close()
 
-	s3Client, presignClient, err := s3.NewS3Clients(os.Getenv("AWS_REGION"))
-	if err != nil {
-		logger.Fatal("Unable to create S3 clients", "error", err)
-	}
+	logger.Info("Connecting to S3...")
+	s3Client, presignClient := s3.NewS3Clients(os.Getenv("AWS_REGION"), os.Getenv("AWS_KEY"), os.Getenv("AWS_SECRET"))
 
 	// Setup adapter, usecase, and handler
 	adapter := adapter.New(mysqlDB, redisClient, s3Client, presignClient, os.Getenv("AWS_BUCKET"))
