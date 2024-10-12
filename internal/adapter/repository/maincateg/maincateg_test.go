@@ -101,13 +101,13 @@ func create_NoDuplicate_CreateSuccessfully(s *MainCategSuite, desc string) {
 	users, err := s.f.InsertUsers(mockCTX, 1)
 	s.Require().NoError(err, desc)
 
-	categ := &domain.MainCateg{
+	categ := domain.MainCateg{
 		Name:     "test",
 		Type:     domain.TransactionTypeExpense,
 		IconType: domain.IconTypeDefault,
 		IconData: "url",
 	}
-	err = s.mainCategRepo.Create(categ, users[0].ID)
+	err = s.mainCategRepo.Create(mockCTX, categ, users[0].ID)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_type, icon_data
@@ -129,13 +129,13 @@ func create_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 	createdMainCateg, user, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
-	categ := &domain.MainCateg{
+	categ := domain.MainCateg{
 		Name:     createdMainCateg.Name,
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
 		IconData: "url",
 	}
-	err = s.mainCategRepo.Create(categ, user.ID)
+	err = s.mainCategRepo.Create(mockCTX, categ, user.ID)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 }
 
@@ -262,14 +262,14 @@ func update_NoDuplicate_UpdateSuccessfully(s *MainCategSuite, desc string) {
 	categ, _, err := s.f.InsertMainCategWithAss(mockCTX, MainCateg{})
 	s.Require().NoError(err, desc)
 
-	inputCateg := &domain.MainCateg{
+	inputCateg := domain.MainCateg{
 		ID:       categ.ID,
 		Name:     "test2",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
 		IconData: "new-url",
 	}
-	err = s.mainCategRepo.Update(inputCateg)
+	err = s.mainCategRepo.Update(mockCTX, inputCateg)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_type, icon_data
@@ -289,14 +289,14 @@ func update_WithMultipleUser_UpdateSuccessfully(s *MainCategSuite, desc string) 
 	categs, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 2, 1)
 	s.Require().NoError(err, desc)
 
-	inputCateg := &domain.MainCateg{
+	inputCateg := domain.MainCateg{
 		ID:       categs[0].ID,
 		Name:     "update name",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
 		IconData: "new-url",
 	}
-	err = s.mainCategRepo.Update(inputCateg)
+	err = s.mainCategRepo.Update(mockCTX, inputCateg)
 	s.Require().NoError(err, desc)
 
 	checkStmt := `SELECT id, name, type, icon_type, icon_data
@@ -326,14 +326,14 @@ func update_DuplicateName_ReturnError(s *MainCategSuite, desc string) {
 	categs, _, err := s.f.InsertMainCategListWithAss(mockCTX, 2, 1, 2)
 	s.Require().NoError(err, desc)
 
-	domainMainCateg := &domain.MainCateg{
+	domainMainCateg := domain.MainCateg{
 		ID:       categs[0].ID,
 		Name:     categs[1].Name, // update categ1 with categ2 name
 		Type:     domain.CvtToTransactionType(categs[0].Type),
 		IconType: domain.IconTypeDefault,
 		IconData: "new-url",
 	}
-	err = s.mainCategRepo.Update(domainMainCateg)
+	err = s.mainCategRepo.Update(mockCTX, domainMainCateg)
 	s.Require().EqualError(err, domain.ErrUniqueNameUserType.Error(), desc)
 }
 
