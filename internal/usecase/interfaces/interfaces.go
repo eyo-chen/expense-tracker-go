@@ -25,13 +25,13 @@ type UserRepo interface {
 // MainCategRepo is the interface that wraps the basic methods for main category repository.
 type MainCategRepo interface {
 	// Create inserts a new main category into the database.
-	Create(categ *domain.MainCateg, userID int64) error
+	Create(ctx context.Context, categ domain.MainCateg, userID int64) error
 
 	// GetAll returns all main categories by user id.
 	GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error)
 
 	// Update updates a main category.
-	Update(categ *domain.MainCateg) error
+	Update(ctx context.Context, categ domain.MainCateg) error
 
 	// Delete deletes a main category.
 	Delete(id int64) error
@@ -67,16 +67,13 @@ type SubCategRepo interface {
 // IconRepo is the interface that wraps the basic methods for icon repository.
 type IconRepo interface {
 	// GetByID returns an icon by id.
-	GetByID(id int64) (domain.DefaultIcon, error)
+	GetByID(ctx context.Context, id int64) (domain.DefaultIcon, error)
 
 	// List returns all icons.
 	List() ([]domain.DefaultIcon, error)
 
 	// GetByIDs returns icons by ids.
 	GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error)
-
-	// GetByURL returns an icon by url.
-	GetByURL(ctx context.Context, url string) (domain.DefaultIcon, error)
 }
 
 // UserIconRepo is the interface that wraps the basic methods for user icon repository.
@@ -87,8 +84,8 @@ type UserIconRepo interface {
 	// GetByUserID returns user icons by user id.
 	GetByUserID(ctx context.Context, userID int64) ([]domain.UserIcon, error)
 
-	// GetByObjectKeyAndUserID returns a user icon by object key and user id.
-	GetByObjectKeyAndUserID(ctx context.Context, objectKey string, userID int64) (domain.UserIcon, error)
+	// GetByID returns a user icon by id and user id.
+	GetByID(ctx context.Context, id, userID int64) (domain.UserIcon, error)
 }
 
 // TransactionRepo is the interface that wraps the basic methods for transaction repository.

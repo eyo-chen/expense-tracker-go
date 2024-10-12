@@ -33,17 +33,17 @@ func (_m *MainCategRepo) BatchCreate(ctx context.Context, categs []domain.MainCa
 	return r0
 }
 
-// Create provides a mock function with given fields: categ, userID
-func (_m *MainCategRepo) Create(categ *domain.MainCateg, userID int64) error {
-	ret := _m.Called(categ, userID)
+// Create provides a mock function with given fields: ctx, categ, userID
+func (_m *MainCategRepo) Create(ctx context.Context, categ domain.MainCateg, userID int64) error {
+	ret := _m.Called(ctx, categ, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*domain.MainCateg, int64) error); ok {
-		r0 = rf(categ, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.MainCateg, int64) error); ok {
+		r0 = rf(ctx, categ, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -129,17 +129,17 @@ func (_m *MainCategRepo) GetByID(id int64, userID int64) (*domain.MainCateg, err
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: categ
-func (_m *MainCategRepo) Update(categ *domain.MainCateg) error {
-	ret := _m.Called(categ)
+// Update provides a mock function with given fields: ctx, categ
+func (_m *MainCategRepo) Update(ctx context.Context, categ domain.MainCateg) error {
+	ret := _m.Called(ctx, categ)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*domain.MainCateg) error); ok {
-		r0 = rf(categ)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.MainCateg) error); ok {
+		r0 = rf(ctx, categ)
 	} else {
 		r0 = ret.Error(0)
 	}
