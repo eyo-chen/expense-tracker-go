@@ -14,6 +14,7 @@ func (v *Validator) UpdateMainCateg(categ domain.UpdateMainCategInput) bool {
 	v.Check(len(categ.Name) > 0, "name", "Name can't be empty")
 	v.Check(categ.Type.IsValid(), "type", "Type must be income or expense")
 	v.Check(categ.IconType.IsValid(), "icon_type", "Icon type must be default or custom")
+	v.Check(categ.IconID > 0, "icon_id", "Icon ID must be greater than 0")
 	return v.Valid()
 }
 
