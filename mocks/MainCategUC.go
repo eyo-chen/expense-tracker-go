@@ -15,17 +15,17 @@ type MainCategUC struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: categ, userID
-func (_m *MainCategUC) Create(categ domain.MainCateg, userID int64) error {
-	ret := _m.Called(categ, userID)
+// Create provides a mock function with given fields: ctx, categ, userID
+func (_m *MainCategUC) Create(ctx context.Context, categ domain.CreateMainCategInput, userID int64) error {
+	ret := _m.Called(ctx, categ, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(domain.MainCateg, int64) error); ok {
-		r0 = rf(categ, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.CreateMainCategInput, int64) error); ok {
+		r0 = rf(ctx, categ, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -81,17 +81,17 @@ func (_m *MainCategUC) GetAll(ctx context.Context, userID int64, transType domai
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: categ, userID
-func (_m *MainCategUC) Update(categ domain.MainCateg, userID int64) error {
-	ret := _m.Called(categ, userID)
+// Update provides a mock function with given fields: ctx, categ, userID
+func (_m *MainCategUC) Update(ctx context.Context, categ domain.UpdateMainCategInput, userID int64) error {
+	ret := _m.Called(ctx, categ, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(domain.MainCateg, int64) error); ok {
-		r0 = rf(categ, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.UpdateMainCategInput, int64) error); ok {
+		r0 = rf(ctx, categ, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
