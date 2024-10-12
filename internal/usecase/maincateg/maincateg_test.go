@@ -67,66 +67,73 @@ func (s *MainCategSuite) TestCreate() {
 func create_NoError_CreateSuccessfully(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
-		IconType: domain.IconTypeDefault,
-		IconData: "https://example.com/icon.png",
+	mockIconData := "https://example.com/icon.png"
+	mockInput := domain.CreateMainCategInput{
 		Name:     "Test",
+		Type:     domain.TransactionTypeExpense,
+		IconType: domain.IconTypeDefault,
+		IconID:   1,
 	}
-	mockDefaultIcon := domain.DefaultIcon{ID: 1}
+	mockCateg := domain.MainCateg{
+		Name:     "Test",
+		Type:     domain.TransactionTypeExpense,
+		IconType: domain.IconTypeDefault,
+		IconData: mockIconData,
+	}
+	mockDefaultIcon := domain.DefaultIcon{ID: 1, URL: mockIconData}
 
 	// prepare mock service
-	s.mockIconRepo.On("GetByURL", mockCtx, mockCateg.IconData).Return(mockDefaultIcon, nil)
-	s.mockMainCategRepo.On("Create", &mockCateg, mockUserID).Return(nil)
+	s.mockIconRepo.On("GetByID", mockCtx, mockInput.IconID).Return(mockDefaultIcon, nil)
+	s.mockMainCategRepo.On("Create", mockCtx, mockCateg, mockUserID).Return(nil)
 
 	// action, assertion
-	err := s.uc.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCtx, mockInput, mockUserID)
 	s.Require().NoError(err, desc)
 }
 
 func create_IconTypeUnspecified_ReturnError(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
+	mockCateg := domain.CreateMainCategInput{
 		IconType: domain.IconTypeUnspecified,
-		Name:     "Test",
 	}
 
 	// action, assertion
-	err := s.uc.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCtx, mockCateg, mockUserID)
 	s.Require().ErrorIs(err, domain.ErrIconNotFound, desc)
 }
 
 func create_DefaultIconNotFound_ReturnError(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
+	mockInput := domain.CreateMainCategInput{
 		IconType: domain.IconTypeDefault,
-		IconData: "https://example.com/icon.png",
+		IconID:   1,
 		Name:     "Test",
 	}
 
 	// prepare mock service
-	s.mockIconRepo.On("GetByURL", mockCtx, mockCateg.IconData).Return(domain.DefaultIcon{}, domain.ErrIconNotFound)
+	s.mockIconRepo.On("GetByID", mockCtx, mockInput.IconID).Return(domain.DefaultIcon{}, domain.ErrIconNotFound)
 
 	// action, assertion
-	err := s.uc.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCtx, mockInput, mockUserID)
 	s.Require().ErrorIs(err, domain.ErrIconNotFound, desc)
 }
 
 func create_UserIconNotFound_ReturnError(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
+	mockInput := domain.CreateMainCategInput{
 		IconType: domain.IconTypeCustom,
-		IconData: "https://example.com/icon.png",
+		IconID:   1,
 		Name:     "Test",
 	}
 
 	// prepare mock service
-	s.mockUserIconRepo.On("GetByObjectKeyAndUserID", mockCtx, mockCateg.IconData, mockUserID).Return(domain.UserIcon{}, domain.ErrUserIconNotFound)
+	s.mockUserIconRepo.On("GetByID", mockCtx, mockInput.IconID, mockUserID).Return(domain.UserIcon{}, domain.ErrUserIconNotFound)
 
 	// action, assertion
-	err := s.uc.Create(mockCateg, mockUserID)
+	err := s.uc.Create(mockCtx, mockInput, mockUserID)
 	s.Require().ErrorIs(err, domain.ErrUserIconNotFound, desc)
 }
 
@@ -165,8 +172,8 @@ func getAll_WithOnlyUserIcon_ReturnMainCategories(s *MainCategSuite, desc string
 	// prepare mock data
 	mockUserID := int64(1)
 	mockMainCategs := []domain.MainCateg{
-		{ID: 1, Name: "Test1", IconType: domain.IconTypeCustom, IconData: "https://example.com/icon1.png"},
-		{ID: 2, Name: "Test2", IconType: domain.IconTypeCustom, IconData: "https://example.com/icon2.png"},
+		{ID: 1, Name: "Test1", IconType: domain.IconTypeCustom, IconData: "example.com/icon1.png"},
+		{ID: 2, Name: "Test2", IconType: domain.IconTypeCustom, IconData: "example.com/icon2.png"},
 	}
 	mockGetFun := mock.AnythingOfType("func() (string, error)")
 	mockTTL := 7 * 24 * time.Hour
@@ -225,93 +232,99 @@ func (s *MainCategSuite) TestUpdate() {
 func update_NoError_UpdateSuccessfully(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
+	mockIconData := "https://example.com/icon.png"
+	mockInput := domain.UpdateMainCategInput{
+		ID:       1,
+		Name:     "Test",
+		IconType: domain.IconTypeDefault,
+		IconID:   1,
+	}
 	mockCateg := domain.MainCateg{
 		ID:       1,
 		Name:     "Test",
 		IconType: domain.IconTypeDefault,
-		IconData: "https://example.com/icon.png",
+		IconData: mockIconData,
 	}
+	mockDefaultIcon := domain.DefaultIcon{ID: 1, URL: mockIconData}
 
 	// prepare mock service
-	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
-	s.mockIconRepo.On("GetByURL", mockCtx, mockCateg.IconData).Return(domain.DefaultIcon{}, nil)
-	s.mockMainCategRepo.On("Update", &mockCateg).Return(nil)
+	s.mockMainCategRepo.On("GetByID", mockInput.ID, mockUserID).Return(&domain.MainCateg{}, nil)
+	s.mockIconRepo.On("GetByID", mockCtx, mockInput.IconID).Return(mockDefaultIcon, nil)
+	s.mockMainCategRepo.On("Update", mockCtx, mockCateg).Return(nil)
 
 	// action, assertion
-	err := s.uc.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCtx, mockInput, mockUserID)
 	s.Require().NoError(err, desc)
 }
 
 func update_MainCategNotExist_ReturnError(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
+	mockInput := domain.UpdateMainCategInput{
 		ID:       1,
 		Name:     "Test",
 		IconType: domain.IconTypeDefault,
-		IconData: "https://example.com/icon.png",
+		IconID:   1,
 	}
 
 	// prepare mock service
-	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
+	s.mockMainCategRepo.On("GetByID", mockInput.ID, mockUserID).Return(nil, domain.ErrMainCategNotFound)
 
 	// action, assertion
-	err := s.uc.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCtx, mockInput, mockUserID)
 	s.Require().EqualError(err, domain.ErrMainCategNotFound.Error(), desc)
 }
 
 func update_IconTypeUnspecified_ReturnError(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
-		ID:       1,
-		Name:     "Test",
+	mockInput := domain.UpdateMainCategInput{
 		IconType: domain.IconTypeUnspecified,
 	}
 
 	// prepare mock service
-	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
+	s.mockMainCategRepo.On("GetByID", mockInput.ID, mockUserID).Return(&domain.MainCateg{}, nil)
 
 	// action, assertion
-	err := s.uc.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCtx, mockInput, mockUserID)
 	s.Require().ErrorIs(err, domain.ErrIconNotFound, desc)
 }
 
 func update_DefaultIconNotFound_ReturnError(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
+	mockInput := domain.UpdateMainCategInput{
 		ID:       1,
 		Name:     "Test",
 		IconType: domain.IconTypeDefault,
-		IconData: "https://example.com/icon.png",
+		IconID:   1,
 	}
 
 	// prepare mock service
-	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
-	s.mockIconRepo.On("GetByURL", mockCtx, mockCateg.IconData).Return(domain.DefaultIcon{}, domain.ErrIconNotFound)
+	s.mockMainCategRepo.On("GetByID", mockInput.ID, mockUserID).Return(&domain.MainCateg{}, nil)
+	s.mockIconRepo.On("GetByID", mockCtx, mockInput.IconID).Return(domain.DefaultIcon{}, domain.ErrIconNotFound)
 
 	// action, assertion
-	err := s.uc.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCtx, mockInput, mockUserID)
 	s.Require().ErrorIs(err, domain.ErrIconNotFound, desc)
 }
 
 func update_UserIconNotFound_ReturnError(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockUserID := int64(1)
-	mockCateg := domain.MainCateg{
+	mockInput := domain.UpdateMainCategInput{
 		ID:       1,
 		Name:     "Test",
 		IconType: domain.IconTypeCustom,
-		IconData: "https://example.com/icon.png",
+		IconID:   1,
 	}
 
 	// prepare mock service
-	s.mockMainCategRepo.On("GetByID", mockCateg.ID, mockUserID).Return(&domain.MainCateg{}, nil)
-	s.mockUserIconRepo.On("GetByObjectKeyAndUserID", mockCtx, mockCateg.IconData, mockUserID).Return(domain.UserIcon{}, domain.ErrUserIconNotFound)
+	s.mockMainCategRepo.On("GetByID", mockInput.ID, mockUserID).Return(&domain.MainCateg{}, nil)
+	s.mockUserIconRepo.On("GetByID", mockCtx, mockInput.IconID, mockUserID).Return(domain.UserIcon{}, domain.ErrUserIconNotFound)
 
 	// action, assertion
-	err := s.uc.Update(mockCateg, mockUserID)
+	err := s.uc.Update(mockCtx, mockInput, mockUserID)
 	s.Require().ErrorIs(err, domain.ErrUserIconNotFound, desc)
 }
 
