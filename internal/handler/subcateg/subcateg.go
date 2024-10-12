@@ -39,7 +39,7 @@ func (h *Hlr) CreateSubCateg(w http.ResponseWriter, r *http.Request) {
 	}
 
 	v := validator.New()
-	if !v.CreateSubCateg(&categ) {
+	if !v.CreateSubCateg(categ) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
@@ -106,7 +106,7 @@ func (h *Hlr) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
 	}
 
 	v := validator.New()
-	if !v.UpdateSubCateg(&categ) {
+	if !v.UpdateSubCateg(categ) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}

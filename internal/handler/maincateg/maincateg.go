@@ -25,7 +25,7 @@ type createInput struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	IconType string `json:"icon_type"`
-	IconData string `json:"icon_data"`
+	IconID   int64  `json:"icon_id"`
 }
 
 func (h *Hlr) Create(w http.ResponseWriter, r *http.Request) {
@@ -36,21 +36,21 @@ func (h *Hlr) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categ := domain.MainCateg{
+	categ := domain.CreateMainCategInput{
 		Name:     input.Name,
 		Type:     domain.CvtToTransactionType(input.Type),
 		IconType: domain.CvtToIconType(input.IconType),
-		IconData: input.IconData,
+		IconID:   input.IconID,
 	}
 
 	v := validator.New()
-	if !v.CreateMainCateg(&categ) {
+	if !v.CreateMainCateg(categ) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := h.MainCateg.Create(categ, user.ID); err != nil {
+	if err := h.MainCateg.Create(r.Context(), categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrIconNotFound,
 			domain.ErrUserIconNotFound,
@@ -96,11 +96,11 @@ func (h *Hlr) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type updateInput struct {
+var updateInput struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	IconType string `json:"icon_type"`
-	IconData string `json:"icon_data"`
+	IconID   int64  `json:"icon_id"`
 }
 
 func (h *Hlr) Update(w http.ResponseWriter, r *http.Request) {
@@ -111,29 +111,28 @@ func (h *Hlr) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input updateInput
-	if err := jsonutil.ReadJson(w, r, &input); err != nil {
+	if err := jsonutil.ReadJson(w, r, &updateInput); err != nil {
 		logger.Error("jsonutil.ReadJSON failed", "package", "handler", "err", err)
 		errutil.BadRequestResponse(w, r, err)
 		return
 	}
 
-	categ := domain.MainCateg{
+	categ := domain.UpdateMainCategInput{
 		ID:       id,
-		Name:     input.Name,
-		Type:     domain.CvtToTransactionType(input.Type),
-		IconType: domain.CvtToIconType(input.IconType),
-		IconData: input.IconData,
+		Name:     updateInput.Name,
+		Type:     domain.CvtToTransactionType(updateInput.Type),
+		IconType: domain.CvtToIconType(updateInput.IconType),
+		IconID:   updateInput.IconID,
 	}
 
 	v := validator.New()
-	if !v.UpdateMainCateg(&categ) {
+	if !v.UpdateMainCateg(categ) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
-	if err := h.MainCateg.Update(categ, user.ID); err != nil {
+	if err := h.MainCateg.Update(r.Context(), categ, user.ID); err != nil {
 		errors := []error{
 			domain.ErrUniqueNameUserType,
 			domain.ErrUniqueIconUser,
