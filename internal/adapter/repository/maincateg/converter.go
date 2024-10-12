@@ -14,8 +14,8 @@ func cvtToDomainMainCateg(c MainCateg) domain.MainCateg {
 	}
 }
 
-func cvtToMainCateg(c *domain.MainCateg, userID int64) *MainCateg {
-	return &MainCateg{
+func cvtToMainCateg(c domain.MainCateg, userID int64) MainCateg {
+	return MainCateg{
 		ID:       c.ID,
 		Name:     c.Name,
 		Type:     c.Type.ToModelValue(),
