@@ -45,7 +45,7 @@ func (s *MainCategSuite) TestCreate() {
 		"when no error, return successfully":         create_NoError_CreateSuccessfully,
 		"when invalid type, return bad request":      create_InvalidType_ReturnBadRequest,
 		"when invalid icon type, return bad request": create_InvalidIconType_ReturnBadRequest,
-		"when invalid icon data, return bad request": create_InvalidIconData_ReturnBadRequest,
+		"when invalid icon id, return bad request":   create_InvalidIconID_ReturnBadRequest,
 		"when invalid name, return bad request":      create_InvalidName_ReturnBadRequest,
 		"when bad request error, return bad request": create_BadRequestError_ReturnBadRequest,
 		"when server error, return server error":     create_ServerError_ReturnServerError,
@@ -64,15 +64,15 @@ func create_NoError_CreateSuccessfully(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
-	mockCateg := domain.MainCateg{
+	mockCateg := domain.CreateMainCategInput{
 		Name:     "Food",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
-		IconData: "url",
+		IconID:   1,
 	}
 	mockUser := domain.User{ID: 1}
 
@@ -88,7 +88,7 @@ func create_NoError_CreateSuccessfully(s *MainCategSuite, desc string) {
 	req = ctxutil.SetUser(req, &mockUser)
 
 	// mock service
-	s.mockMainCategUC.On("Create", mockCateg, mockUser.ID).Return(nil)
+	s.mockMainCategUC.On("Create", req.Context(), mockCateg, mockUser.ID).Return(nil)
 
 	// action
 	s.hlr.Create(res, req)
@@ -107,7 +107,7 @@ func create_InvalidType_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "invalid",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -146,7 +146,7 @@ func create_InvalidIconType_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "invalid",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -179,13 +179,13 @@ func create_InvalidIconType_ReturnBadRequest(s *MainCategSuite, desc string) {
 	s.Require().Equal(expResp, responseBody, desc)
 }
 
-func create_InvalidIconData_ReturnBadRequest(s *MainCategSuite, desc string) {
+func create_InvalidIconID_ReturnBadRequest(s *MainCategSuite, desc string) {
 	// prepare mock data
 	mockInput := map[string]interface{}{
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "",
+		"icon_id":   0,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -204,7 +204,7 @@ func create_InvalidIconData_ReturnBadRequest(s *MainCategSuite, desc string) {
 
 	// prepare expResp
 	expResp := map[string]interface{}{
-		"icon_data": "Icon data can't be empty",
+		"icon_id": "Icon ID must be greater than 0",
 	}
 
 	// action
@@ -224,7 +224,7 @@ func create_InvalidName_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -263,15 +263,15 @@ func create_BadRequestError_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
-	mockCateg := domain.MainCateg{
+	mockCateg := domain.CreateMainCategInput{
 		Name:     "Food",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
-		IconData: "url",
+		IconID:   1,
 	}
 	mockUser := domain.User{ID: 1}
 
@@ -292,7 +292,7 @@ func create_BadRequestError_ReturnBadRequest(s *MainCategSuite, desc string) {
 	}
 
 	// mock service
-	s.mockMainCategUC.On("Create", mockCateg, mockUser.ID).Return(domain.ErrIconNotFound)
+	s.mockMainCategUC.On("Create", req.Context(), mockCateg, mockUser.ID).Return(domain.ErrIconNotFound)
 
 	// action
 	s.hlr.Create(res, req)
@@ -311,15 +311,15 @@ func create_ServerError_ReturnServerError(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
-	mockCateg := domain.MainCateg{
+	mockCateg := domain.CreateMainCategInput{
 		Name:     "Food",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
-		IconData: "url",
+		IconID:   1,
 	}
 	mockUser := domain.User{ID: 1}
 	mockErr := errors.New("server error")
@@ -341,7 +341,7 @@ func create_ServerError_ReturnServerError(s *MainCategSuite, desc string) {
 	}
 
 	// mock service
-	s.mockMainCategUC.On("Create", mockCateg, mockUser.ID).Return(mockErr)
+	s.mockMainCategUC.On("Create", req.Context(), mockCateg, mockUser.ID).Return(mockErr)
 
 	// action
 	s.hlr.Create(res, req)
@@ -494,16 +494,16 @@ func update_NoError_CreateSuccessfully(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
-	mockCateg := domain.MainCateg{
+	mockCateg := domain.UpdateMainCategInput{
 		ID:       1,
 		Name:     "Food",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
-		IconData: "url",
+		IconID:   1,
 	}
 	mockUser := domain.User{ID: 1}
 
@@ -520,7 +520,7 @@ func update_NoError_CreateSuccessfully(s *MainCategSuite, desc string) {
 	req = ctxutil.SetUser(req, &mockUser)
 
 	// mock service
-	s.mockMainCategUC.On("Update", mockCateg, mockUser.ID).Return(nil)
+	s.mockMainCategUC.On("Update", req.Context(), mockCateg, mockUser.ID).Return(nil)
 
 	// action
 	s.hlr.Update(res, req)
@@ -560,7 +560,7 @@ func update_InvalidType_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "invalid",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -600,7 +600,7 @@ func update_InvalidIconType_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "invalid",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -640,7 +640,7 @@ func update_InvalidIconData_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "",
+		"icon_id":   0,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -660,7 +660,7 @@ func update_InvalidIconData_ReturnBadRequest(s *MainCategSuite, desc string) {
 
 	// prepare expResp
 	expResp := map[string]interface{}{
-		"icon_data": "Icon data can't be empty",
+		"icon_id": "Icon ID must be greater than 0",
 	}
 
 	// action
@@ -680,7 +680,7 @@ func update_InvalidName_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
@@ -720,16 +720,16 @@ func update_BadRequestError_ReturnBadRequest(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
-	mockCateg := domain.MainCateg{
+	mockCateg := domain.UpdateMainCategInput{
 		ID:       1,
 		Name:     "Food",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
-		IconData: "url",
+		IconID:   1,
 	}
 	mockUser := domain.User{ID: 1}
 
@@ -751,7 +751,7 @@ func update_BadRequestError_ReturnBadRequest(s *MainCategSuite, desc string) {
 	}
 
 	// mock service
-	s.mockMainCategUC.On("Update", mockCateg, mockUser.ID).Return(domain.ErrIconNotFound)
+	s.mockMainCategUC.On("Update", req.Context(), mockCateg, mockUser.ID).Return(domain.ErrIconNotFound)
 
 	// action
 	s.hlr.Update(res, req)
@@ -770,16 +770,16 @@ func update_ServerError_ReturnServerError(s *MainCategSuite, desc string) {
 		"name":      "Food",
 		"type":      "income",
 		"icon_type": "default",
-		"icon_data": "url",
+		"icon_id":   1,
 	}
 	mockBody, err := json.Marshal(mockInput)
 	s.Require().NoError(err, desc)
-	mockCateg := domain.MainCateg{
+	mockCateg := domain.UpdateMainCategInput{
 		ID:       1,
 		Name:     "Food",
 		Type:     domain.TransactionTypeIncome,
 		IconType: domain.IconTypeDefault,
-		IconData: "url",
+		IconID:   1,
 	}
 	mockUser := domain.User{ID: 1}
 	mockErr := errors.New("server error")
@@ -802,7 +802,7 @@ func update_ServerError_ReturnServerError(s *MainCategSuite, desc string) {
 	}
 
 	// mock service
-	s.mockMainCategUC.On("Update", mockCateg, mockUser.ID).Return(mockErr)
+	s.mockMainCategUC.On("Update", req.Context(), mockCateg, mockUser.ID).Return(mockErr)
 
 	// action
 	s.hlr.Update(res, req)
