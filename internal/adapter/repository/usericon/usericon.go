@@ -65,16 +65,16 @@ func (r *Repo) GetByUserID(ctx context.Context, userID int64) ([]domain.UserIcon
 	return userIcons, nil
 }
 
-func (r *Repo) GetByObjectKeyAndUserID(ctx context.Context, objectKey string, userID int64) (domain.UserIcon, error) {
-	stmt := `SELECT id, user_id, object_key FROM user_icons WHERE user_id = ? AND object_key = ?`
+func (r *Repo) GetByID(ctx context.Context, id, userID int64) (domain.UserIcon, error) {
+	stmt := `SELECT id, user_id, object_key FROM user_icons WHERE id = ? AND user_id = ?`
 
 	var userIcon userIcon
-	if err := r.DB.QueryRowContext(ctx, stmt, userID, objectKey).Scan(&userIcon.ID, &userIcon.UserID, &userIcon.ObjectKey); err != nil {
+	if err := r.DB.QueryRowContext(ctx, stmt, id, userID).Scan(&userIcon.ID, &userIcon.UserID, &userIcon.ObjectKey); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.UserIcon{}, domain.ErrUserIconNotFound
 		}
 
-		logger.Error("get user icon by object key and user id r.DB.QueryRowContext", "err", err, "package", packageName)
+		logger.Error("get user icon by id and user id r.DB.QueryRowContext", "err", err, "package", packageName)
 		return domain.UserIcon{}, err
 	}
 
