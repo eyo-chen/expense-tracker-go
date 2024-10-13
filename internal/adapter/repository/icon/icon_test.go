@@ -68,6 +68,44 @@ func (s *IconSuite) TearDownTest() {
 	s.f.Reset()
 }
 
+func (s *IconSuite) TestGetByID() {
+	for scenario, fn := range map[string]func(s *IconSuite, desc string){
+		"when has icon, return icon":   getByID_WithIcon_ReturnIcon,
+		"when has no icon, return err": getByID_WithoutIcon_ReturnErr,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
+	icons, err := s.f.InsertMany(mockCTX, 2)
+	s.Require().NoError(err, desc)
+
+	expRes := domain.DefaultIcon{
+		ID:  icons[0].ID,
+		URL: icons[0].URL,
+	}
+
+	res, err := s.repo.GetByID(mockCTX, icons[0].ID)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, res, desc)
+}
+
+func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
+	_, err := s.f.InsertMany(mockCTX, 2)
+	s.Require().NoError(err, desc)
+
+	expRes := domain.DefaultIcon{}
+
+	res, err := s.repo.GetByID(mockCTX, 999)
+	s.Require().Equal(expRes, res, desc)
+	s.Require().Equal(domain.ErrIconNotFound, err, desc)
+}
+
 func (s *IconSuite) TestList() {
 	for scenario, fn := range map[string]func(s *IconSuite, desc string){
 		"when has icons, return all":    list_WithIcons_ReturnAll,
@@ -105,44 +143,6 @@ func list_WithoutIcons_ReturnNil(s *IconSuite, desc string) {
 	res, err := s.repo.List()
 	s.Require().NoError(err, desc)
 	s.Require().Nil(res, desc)
-}
-
-func (s *IconSuite) TestGetByID() {
-	for scenario, fn := range map[string]func(s *IconSuite, desc string){
-		"when has icon, return icon":   getByID_WithIcon_ReturnIcon,
-		"when has no icon, return err": getByID_WithoutIcon_ReturnErr,
-	} {
-		s.Run(testutil.GetFunName(fn), func() {
-			s.SetupTest()
-			fn(s, scenario)
-			s.TearDownTest()
-		})
-	}
-}
-
-func getByID_WithIcon_ReturnIcon(s *IconSuite, desc string) {
-	icons, err := s.f.InsertMany(mockCTX, 2)
-	s.Require().NoError(err, desc)
-
-	expRes := domain.DefaultIcon{
-		ID:  icons[0].ID,
-		URL: icons[0].URL,
-	}
-
-	res, err := s.repo.GetByID(icons[0].ID)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(expRes, res, desc)
-}
-
-func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
-	_, err := s.f.InsertMany(mockCTX, 2)
-	s.Require().NoError(err, desc)
-
-	expRes := domain.DefaultIcon{}
-
-	res, err := s.repo.GetByID(999)
-	s.Require().Equal(expRes, res, desc)
-	s.Require().Equal(domain.ErrIconNotFound, err, desc)
 }
 
 func (s *IconSuite) TestGetByIDs() {
@@ -186,41 +186,5 @@ func getByIDs_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 	ids := []int64{999}
 	res, err := s.repo.GetByIDs(ids)
 	s.Require().Nil(res, desc)
-	s.Require().Equal(domain.ErrIconNotFound, err, desc)
-}
-
-func (s *IconSuite) TestGetByURL() {
-	for scenario, fn := range map[string]func(s *IconSuite, desc string){
-		"when has icon, return icon":   getByURL_WithIcon_ReturnIcon,
-		"when has no icon, return err": getByURL_WithoutIcon_ReturnErr,
-	} {
-		s.Run(testutil.GetFunName(fn), func() {
-			s.SetupTest()
-			fn(s, scenario)
-			s.TearDownTest()
-		})
-	}
-}
-
-func getByURL_WithIcon_ReturnIcon(s *IconSuite, desc string) {
-	icons, err := s.f.InsertMany(mockCTX, 5)
-	s.Require().NoError(err, desc)
-
-	expRes := domain.DefaultIcon{
-		ID:  icons[0].ID,
-		URL: icons[0].URL,
-	}
-
-	res, err := s.repo.GetByURL(mockCTX, icons[0].URL)
-	s.Require().NoError(err, desc)
-	s.Require().Equal(expRes, res, desc)
-}
-
-func getByURL_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
-	_, err := s.f.InsertMany(mockCTX, 5)
-	s.Require().NoError(err, desc)
-
-	res, err := s.repo.GetByURL(mockCTX, "incorrect url")
-	s.Require().Empty(res, desc)
 	s.Require().Equal(domain.ErrIconNotFound, err, desc)
 }
