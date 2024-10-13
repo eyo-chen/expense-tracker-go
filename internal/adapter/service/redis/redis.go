@@ -2,6 +2,7 @@ package redisservice
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -41,7 +42,7 @@ func (s *Service) GetByFunc(ctx context.Context, key string, ttl time.Duration, 
 
 func (s *Service) GetDel(ctx context.Context, key string) (string, error) {
 	v, err := s.redis.GetDel(ctx, key).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return "", domain.ErrCacheMiss
 	}
 	if err != nil {

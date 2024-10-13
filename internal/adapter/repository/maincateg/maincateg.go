@@ -3,6 +3,7 @@ package maincateg
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errorutil"
@@ -110,7 +111,7 @@ func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
 
 	var categ MainCateg
 	if err := r.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.Type, &categ.IconType, &categ.IconData); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrMainCategNotFound
 		}
 

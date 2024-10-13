@@ -3,6 +3,7 @@ package subcateg
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errorutil"
@@ -102,7 +103,7 @@ func (r *Repo) GetByID(id, userID int64) (*domain.SubCateg, error) {
 
 	var categ SubCateg
 	if err := r.DB.QueryRow(stmt, id, userID).Scan(&categ.ID, &categ.Name, &categ.MainCategID); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubCategNotFound
 		}
 

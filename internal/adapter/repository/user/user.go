@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -40,7 +41,7 @@ func (r *Repo) FindByEmail(email string) (domain.User, error) {
 
 	var user User
 	if err := r.DB.QueryRow(stmt, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password_hash); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.User{}, domain.ErrEmailNotFound
 		}
 
@@ -56,7 +57,7 @@ func (r *Repo) GetInfo(userID int64) (domain.User, error) {
 
 	var user User
 	if err := r.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email, &user.IsSetInitCategory); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.User{}, domain.ErrUserIDNotFound
 		}
 

@@ -163,11 +163,11 @@ func getByUserID_NoData_ReturnEmpty(s *UserIconSuite, desc string) {
 	s.Require().Empty(userIcons, desc)
 }
 
-func (s *UserIconSuite) TestGetByObjectKeyAndUserID() {
+func (s *UserIconSuite) TestGetByID() {
 	for scenario, fn := range map[string]func(s *UserIconSuite, desc string){
-		"when no error, return successfully":      getByObjectKeyAndUserID_NoError_ReturnSuccessfully,
-		"when incorrect user id, return error":    getByObjectKeyAndUserID_IncorrectUserID_ReturnErr,
-		"when incorrect object key, return error": getByObjectKeyAndUserID_IncorrectObjectKey_ReturnErr,
+		"when no error, return successfully":   getByID_NoError_ReturnSuccessfully,
+		"when incorrect user id, return error": getByID_IncorrectUserID_ReturnErr,
+		"when incorrect id, return error":      getByID_IncorrectID_ReturnErr,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -177,7 +177,7 @@ func (s *UserIconSuite) TestGetByObjectKeyAndUserID() {
 	}
 }
 
-func getByObjectKeyAndUserID_NoError_ReturnSuccessfully(s *UserIconSuite, desc string) {
+func getByID_NoError_ReturnSuccessfully(s *UserIconSuite, desc string) {
 	// prepare mock data
 	mockUserIcons, user, err := s.factory.InsertManyWithOneUser(mockCTX, 2)
 	s.Require().NoError(err)
@@ -190,33 +190,33 @@ func getByObjectKeyAndUserID_NoError_ReturnSuccessfully(s *UserIconSuite, desc s
 	}
 
 	// action
-	userIcon, err := s.repo.GetByObjectKeyAndUserID(mockCTX, mockUserIcons[0].ObjectKey, user.ID)
+	userIcon, err := s.repo.GetByID(mockCTX, mockUserIcons[0].ID, user.ID)
 
 	// assertion
 	s.Require().NoError(err, desc)
 	s.Require().Equal(expResp, userIcon, desc)
 }
 
-func getByObjectKeyAndUserID_IncorrectUserID_ReturnErr(s *UserIconSuite, desc string) {
+func getByID_IncorrectUserID_ReturnErr(s *UserIconSuite, desc string) {
 	// prepare mock data
 	mockUserIcons, _, err := s.factory.InsertManyWithOneUser(mockCTX, 2)
 	s.Require().NoError(err)
 
 	// action
-	userIcon, err := s.repo.GetByObjectKeyAndUserID(mockCTX, mockUserIcons[0].ObjectKey, 9999)
+	userIcon, err := s.repo.GetByID(mockCTX, mockUserIcons[0].ID, 9999)
 
 	// assertion
 	s.Require().ErrorIs(err, domain.ErrUserIconNotFound, desc)
 	s.Require().Empty(userIcon, desc)
 }
 
-func getByObjectKeyAndUserID_IncorrectObjectKey_ReturnErr(s *UserIconSuite, desc string) {
+func getByID_IncorrectID_ReturnErr(s *UserIconSuite, desc string) {
 	// prepare mock data
 	_, user, err := s.factory.InsertManyWithOneUser(mockCTX, 2)
 	s.Require().NoError(err)
 
 	// action
-	userIcon, err := s.repo.GetByObjectKeyAndUserID(mockCTX, "incorrect", user.ID)
+	userIcon, err := s.repo.GetByID(mockCTX, 9999, user.ID)
 
 	// assertion
 	s.Require().ErrorIs(err, domain.ErrUserIconNotFound, desc)
