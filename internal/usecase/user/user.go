@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -68,7 +69,7 @@ func (u *UC) Signup(ctx context.Context, user domain.User) (domain.Token, error)
 func (u *UC) Login(ctx context.Context, user domain.User) (domain.Token, error) {
 	userByEmail, err := u.user.FindByEmail(user.Email)
 	if err != nil {
-		if err == domain.ErrEmailNotFound {
+		if errors.Is(err, domain.ErrEmailNotFound) {
 			return domain.Token{}, domain.ErrAuthentication
 		}
 

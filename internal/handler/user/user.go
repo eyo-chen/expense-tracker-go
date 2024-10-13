@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -45,7 +46,7 @@ func (h *Hlr) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	token, err := h.User.Signup(r.Context(), user)
 	if err != nil {
-		if err == domain.ErrEmailAlreadyExists {
+		if errors.Is(err, domain.ErrEmailAlreadyExists) {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
@@ -89,7 +90,7 @@ func (h *Hlr) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.User.Login(r.Context(), user)
 	if err != nil {
-		if err == domain.ErrAuthentication {
+		if errors.Is(err, domain.ErrAuthentication) {
 			errutil.AuthenticationErrorResponse(w, r, err)
 			return
 		}
@@ -138,7 +139,7 @@ func (h *Hlr) GetInfo(w http.ResponseWriter, r *http.Request) {
 	userCtx := ctxutil.GetUser(r)
 	user, err := h.User.GetInfo(userCtx.ID)
 	if err != nil {
-		if err == domain.ErrUserIDNotFound {
+		if errors.Is(err, domain.ErrUserIDNotFound) {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}

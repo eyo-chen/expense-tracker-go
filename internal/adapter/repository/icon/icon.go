@@ -3,6 +3,7 @@ package icon
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -30,7 +31,7 @@ func (r *Repo) GetByID(ctx context.Context, id int64) (domain.DefaultIcon, error
 
 	var icon Icon
 	if err := r.DB.QueryRowContext(ctx, stmt, id).Scan(&icon.ID, &icon.URL); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.DefaultIcon{}, domain.ErrIconNotFound
 		}
 

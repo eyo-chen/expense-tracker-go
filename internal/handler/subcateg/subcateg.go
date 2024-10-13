@@ -1,6 +1,7 @@
 package subcateg
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
@@ -46,7 +47,7 @@ func (h *Hlr) CreateSubCateg(w http.ResponseWriter, r *http.Request) {
 
 	user := ctxutil.GetUser(r)
 	if err := h.SubCateg.Create(&categ, user.ID); err != nil {
-		if err == domain.ErrUniqueNameUserMainCateg {
+		if errors.Is(err, domain.ErrUniqueNameUserMainCateg) {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
@@ -113,7 +114,7 @@ func (h *Hlr) UpdateSubCateg(w http.ResponseWriter, r *http.Request) {
 
 	user := ctxutil.GetUser(r)
 	if err := h.SubCateg.Update(&categ, user.ID); err != nil {
-		if err == domain.ErrUniqueNameUserMainCateg {
+		if errors.Is(err, domain.ErrUniqueNameUserMainCateg) {
 			errutil.BadRequestResponse(w, r, err)
 			return
 		}
