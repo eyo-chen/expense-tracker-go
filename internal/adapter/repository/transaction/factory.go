@@ -7,8 +7,10 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
+	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/gofacto"
 	"github.com/eyo-chen/gofacto/db/mysqlf"
+	"github.com/eyo-chen/gofacto/typeconv"
 )
 
 type TransactionFactory struct {
@@ -34,13 +36,9 @@ func NewTransactionFactory(db *sql.DB) *TransactionFactory {
 
 func (tf *TransactionFactory) PrepareUserMainAndSubCateg(ctx context.Context) (user.User, maincateg.MainCateg, subcateg.SubCateg, error) {
 	u := user.User{}
-	m, err := tf.maincateg.Build(ctx).WithOne(&u).Insert()
-	if err != nil {
-		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, err
-	}
+	m := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue(), IconType: domain.IconTypeDefault.ToModelValue()}
 
-	ow := subcateg.SubCateg{UserID: u.ID, MainCategID: m.ID}
-	s, err := tf.subcateg.Build(ctx).Overwrite(ow).Insert()
+	s, err := tf.subcateg.Build(ctx).WithOne(&u, &m).Insert()
 	if err != nil {
 		return user.User{}, maincateg.MainCateg{}, subcateg.SubCateg{}, err
 	}
@@ -50,34 +48,23 @@ func (tf *TransactionFactory) PrepareUserMainAndSubCateg(ctx context.Context) (u
 
 func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context, i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, error) {
 	u := user.User{}
-	maincategList, err := tf.maincateg.BuildList(ctx, i).WithOne(&u).Insert()
+	maincategOW := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue(), IconType: domain.IconTypeDefault.ToModelValue()}
+	maincategAnyList := typeconv.ToAnysWithOW[maincateg.MainCateg](i, &maincategOW)
+	subcategAnyList := typeconv.ToAnysWithOW[subcateg.SubCateg](i, nil)
+
+	transList, err := tf.transaction.
+		BuildList(ctx, i).
+		WithOne(&u).
+		WithMany(maincategAnyList).
+		WithMany(subcategAnyList).
+		Overwrites(ow...).
+		Insert()
 	if err != nil {
 		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, err
 	}
 
-	owSub := []subcateg.SubCateg{}
-	for _, m := range maincategList {
-		owSub = append(owSub, subcateg.SubCateg{UserID: m.UserID, MainCategID: m.ID})
-	}
-
-	subcategList, err := tf.subcateg.BuildList(ctx, i).Overwrites(owSub...).Insert()
-	if err != nil {
-		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, err
-	}
-
-	owTrans := []Transaction{}
-	for k, m := range maincategList {
-		owTrans = append(owTrans, Transaction{
-			UserID:      m.UserID,
-			MainCategID: m.ID,
-			SubCategID:  subcategList[k].ID,
-		})
-	}
-
-	transList, err := tf.transaction.BuildList(ctx, i).Overwrites(owTrans...).Overwrites(ow...).Insert()
-	if err != nil {
-		return nil, user.User{}, []maincateg.MainCateg{}, []subcateg.SubCateg{}, err
-	}
+	maincategList := typeconv.ToT[maincateg.MainCateg](maincategAnyList)
+	subcategList := typeconv.ToT[subcateg.SubCateg](subcategAnyList)
 
 	return transList, u, maincategList, subcategList, nil
 }
