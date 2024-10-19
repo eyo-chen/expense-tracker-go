@@ -56,8 +56,8 @@ func main() {
 
 	// Setup adapter, usecase, and handler
 	adapter := adapter.New(mysqlDB, redisClient, s3Client, presignClient, os.Getenv("AWS_BUCKET"))
-	usecase := usecase.New(adapter.User, nil, adapter.SubCateg, nil, adapter.Transaction, adapter.RedisService, nil, adapter.S3Service)
-	handler := handler.New(usecase.User, nil, usecase.SubCateg, usecase.Transaction, nil, nil, usecase.InitData)
+	usecase := usecase.New(adapter.User, adapter.MainCateg, adapter.SubCateg, adapter.Icon, adapter.Transaction, adapter.RedisService, adapter.UserIcon, adapter.S3Service)
+	handler := handler.New(usecase.User, usecase.MainCateg, usecase.SubCateg, usecase.Transaction, usecase.Icon, usecase.UserIcon, usecase.InitData)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}

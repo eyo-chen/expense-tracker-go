@@ -10,13 +10,11 @@ func cvtToGetTransactionResp(trans []domain.Transaction) getTransactionResp {
 			ID:   t.ID,
 			Type: t.Type.ToString(),
 			MainCateg: mainCateg{
-				ID:   t.MainCateg.ID,
-				Name: t.MainCateg.Name,
-				Type: t.MainCateg.Type.ToString(),
-				Icon: icon{
-					ID:  t.MainCateg.Icon.ID,
-					URL: t.MainCateg.Icon.URL,
-				},
+				ID:       t.MainCateg.ID,
+				Name:     t.MainCateg.Name,
+				Type:     t.MainCateg.Type.ToString(),
+				IconType: t.MainCateg.IconType.ToString(),
+				IconData: t.MainCateg.IconData,
 			},
 			SubCateg: subCateg{
 				ID:   t.SubCateg.ID,

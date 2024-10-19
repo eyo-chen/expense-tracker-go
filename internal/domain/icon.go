@@ -1,5 +1,7 @@
 package domain
 
+import "fmt"
+
 // DefaultIcon contains default icon information
 type DefaultIcon struct {
 	ID  int64  `json:"id"`
@@ -15,7 +17,12 @@ type UserIcon struct {
 
 // Icon contains icon information
 type Icon struct {
-	ID   int64    `json:"id"`
-	Type IconType `json:"type"`
-	URL  string   `json:"url"`
+	ID   int64
+	Type IconType
+	URL  string
+}
+
+// GenUserIconCacheKey generates a cache key for user icon
+func GenUserIconCacheKey(objectKey string) string {
+	return fmt.Sprintf("user_icon-%s", objectKey)
 }
