@@ -3,7 +3,7 @@ module github.com/eyo-chen/expense-tracker-go
 go 1.21.4
 
 require (
-	github.com/eyo-chen/gofacto v1.0.0
+	github.com/eyo-chen/gofacto v1.1.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/golang-migrate/migrate v3.5.4+incompatible
