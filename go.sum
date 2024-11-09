@@ -91,6 +91,8 @@ github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4
 github.com/docker/go-units v0.5.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/eyo-chen/gofacto v1.0.0 h1:+tNUAKP8FJhbKLwYY9YsOFXpDD+GlIpziIJE+hpdGeE=
 github.com/eyo-chen/gofacto v1.0.0/go.mod h1:GKhKGQ6nxDgZ5QYfqi2BiWYLmtvrNFVH1fFwtysmPBs=
+github.com/eyo-chen/gofacto v1.1.0 h1:xpY5Cohp0nUDP75Lpt0InKniRrzmNHbeg5Yw4xV7T1Q=
+github.com/eyo-chen/gofacto v1.1.0/go.mod h1:GKhKGQ6nxDgZ5QYfqi2BiWYLmtvrNFVH1fFwtysmPBs=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
