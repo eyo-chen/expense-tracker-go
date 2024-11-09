@@ -165,15 +165,12 @@ func applyDataMigrations(db *sql.DB) error {
 }
 
 func newRedisClient() (*redis.Client, error) {
-	config := map[string]string{
-		"host": os.Getenv("REDIS_HOST"),
-		"port": os.Getenv("REDIS_PORT"),
+	opt, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+	if err != nil {
+		return nil, err
 	}
 
-	client := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", config["host"], config["port"]),
-	})
-
+	client := redis.NewClient(opt)
 	if _, err := client.Ping(context.Background()).Result(); err != nil {
 		return nil, err
 	}
