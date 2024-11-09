@@ -9,7 +9,8 @@ RUN go mod tidy
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o expense-tracker-go ./cmd/main.go
+# Build for ARM64 architecture
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o expense-tracker-go ./cmd/main.go
 
 FROM gcr.io/distroless/base-debian11 AS build-release-stage
 
