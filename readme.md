@@ -31,8 +31,17 @@ A production-grade expense tracking backend API built with Go, following [Clean 
 
 This project follows [Clean Architecture principles](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), ensuring:
 
-- Independence of layers
-- Testability
+- Independence of layers: Changes in one layer don't affect others, ensuring modular development.
+
+- Testability: Business logic can be tested in isolation without external dependencies.
+
+- Maintainability through separation of concerns: Each component has a single responsibility, simplifying maintenance.
+
+- Database independence: Business logic is decoupled from storage implementation, allowing flexible database choices.
+
+- Easier feature implementation: Clear boundaries enable safe addition of new features without side effects.
+
+- Long-term scalability: Architecture supports growing complexity while maintaining code quality.
 
 
 ## How To Run Locally
@@ -97,7 +106,9 @@ Follow these steps:
    cp .env.example .env
    ```
 
-4. Run both services:
+4. Update the `.env` file with your configurations
+
+5. Run both services:
    ```bash
    # inside expense-tracker-go directory
    make run-with-frontend
