@@ -14,6 +14,7 @@ services:
       - .env
     depends_on:
       - mysql
+      - redis
     networks:
       - expense-tracker-network
     restart: always
@@ -28,6 +29,14 @@ services:
       MYSQL_DATABASE: expense-tracker
     volumes:
       - expense-tracker-volumes:/var/lib/mysql
+    networks:
+      - expense-tracker-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
     networks:
       - expense-tracker-network
   
