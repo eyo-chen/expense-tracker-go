@@ -31,9 +31,7 @@ A production-grade expense tracking backend API built with Go, following [Clean 
 
 This project follows [Clean Architecture principles](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), ensuring:
 
-- Independence of frameworks
-- Independence of Database
-- Independence of any external services
+- Independence of layers
 - Testability
 
 
@@ -44,7 +42,7 @@ There are two ways to run this project locally:
 ### Prerequisites
 You need to install docker to run this project locally.
 
-### Option 1: Without Cloning Frontend Repository
+### Option 1: Only Backend
 
 If you only want to run the backend API without cloning the frontend repository:
 
@@ -59,38 +57,49 @@ If you only want to run the backend API without cloning the frontend repository:
    cp .env.example .env
    ```
 
-3. Update the `.env` file with your configurations
-
-4. Run the application:
+3. Run the application:
    ```bash
    make run
    ```
 
 The API will be available at `http://localhost:8000` and the frontend will be available at `http://localhost:3000`
 
-### Option 2: Full Stack Development (Cloning Frontend Repository)
+### Option 2: Full Stack Development (Frontend + Backend)
 
-To run both frontend and backend together:
+To run both frontend and backend together, you'll need to set up the following directory structure:
 
-1. Clone both repositories:
+```bash
+expense-tracker-app/
+├── expense-tracker-go/     # Backend
+└── expense-tracker/        # Frontend
+```
+
+Follow these steps:
+
+1. Create and enter the main project directory:
+   ```bash
+   mkdir expense-tracker-app
+   cd expense-tracker-app
+   ```
+
+2. Clone both repositories:
    ```bash
    # Clone backend
    git clone git@github.com:eyo-chen/expense-tracker-go.git
-   cd expense-tracker-go
-
+   
    # Clone frontend
-   git clone git@github.com:eyo-chen/expense-tracker.git ../expense-tracker
+   git clone git@github.com:eyo-chen/expense-tracker.git
    ```
 
-2. Copy the environment file:
+3. Enter the backend directory and set up environment:
    ```bash
+   cd expense-tracker-go
    cp .env.example .env
    ```
 
-3. Update the `.env` file with your configurations
-
 4. Run both services:
    ```bash
+   # inside expense-tracker-go directory
    make run-with-frontend
    ```
 
