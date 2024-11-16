@@ -49,7 +49,7 @@ func (tf *TransactionFactory) PrepareUserMainAndSubCateg(ctx context.Context) (u
 func (tf *TransactionFactory) InsertTransactionsWithOneUser(ctx context.Context, i int, ow ...Transaction) ([]Transaction, user.User, []maincateg.MainCateg, []subcateg.SubCateg, error) {
 	u := user.User{}
 	maincategOW := maincateg.MainCateg{Type: domain.TransactionTypeExpense.ToModelValue(), IconType: domain.IconTypeDefault.ToModelValue()}
-	maincategAnyList := typeconv.ToAnysWithOW[maincateg.MainCateg](i, &maincategOW)
+	maincategAnyList := typeconv.ToAnysWithOW(i, &maincategOW)
 	subcategAnyList := typeconv.ToAnysWithOW[subcateg.SubCateg](i, nil)
 
 	transList, err := tf.transaction.

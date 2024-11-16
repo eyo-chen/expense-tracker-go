@@ -368,3 +368,38 @@ func (r *Repo) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDa
 
 	return data, nil
 }
+
+func (r *Repo) GetMonthlyAggregatedData(ctx context.Context, date time.Time) ([]domain.MonthlyAggregatedData, error) {
+	// Calculate start and end of the month
+	startOfMonth := date.AddDate(0, 0, -date.Day()+1).Format(time.DateOnly)
+	endOfMonth := date.AddDate(0, 1, -date.Day()).Format(time.DateOnly)
+
+	qStmt := `
+		SELECT user_id,
+			   SUM(CASE WHEN type = '1' THEN price ELSE 0 END) AS total_income,
+			   SUM(CASE WHEN type = '2' THEN price ELSE 0 END) AS total_expense
+		FROM transactions
+		WHERE date BETWEEN ? AND ?
+		GROUP BY user_id
+	`
+
+	rows, err := r.DB.QueryContext(ctx, qStmt, startOfMonth, endOfMonth)
+	if err != nil {
+		logger.Error("r.DB.QueryContext failed", "package", packageName, "err", err)
+		return []domain.MonthlyAggregatedData{}, err
+	}
+	defer rows.Close()
+
+	var monthlyDataList []domain.MonthlyAggregatedData
+	for rows.Next() {
+		var monthlyData domain.MonthlyAggregatedData
+		if err := rows.Scan(&monthlyData.UserID, &monthlyData.TotalIncome, &monthlyData.TotalExpense); err != nil {
+			logger.Error("rows.Scan failed", "package", packageName, "err", err)
+			return []domain.MonthlyAggregatedData{}, err
+		}
+
+		monthlyDataList = append(monthlyDataList, monthlyData)
+	}
+
+	return monthlyDataList, nil
+}
