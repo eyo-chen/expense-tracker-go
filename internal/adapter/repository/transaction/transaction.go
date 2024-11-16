@@ -3,7 +3,6 @@ package transaction
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -131,7 +130,7 @@ func (r *Repo) GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.T
 	var trans Transaction
 	if err := r.DB.QueryRowContext(ctx, qStmt, id, userID).
 		Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.MainCategID, &trans.SubCategID, &trans.Price, &trans.Note, &trans.Date); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if err == sql.ErrNoRows {
 			return domain.Transaction{}, domain.ErrTransactionDataNotFound
 		}
 
@@ -367,4 +366,39 @@ func (r *Repo) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDa
 	}
 
 	return data, nil
+}
+
+func (r *Repo) GetMonthlyAggregatedData(ctx context.Context, date time.Time) ([]domain.MonthlyAggregatedData, error) {
+	// Calculate start and end of the month
+	startOfMonth := date.AddDate(0, 0, -date.Day()+1).Format(time.DateOnly)
+	endOfMonth := date.AddDate(0, 1, -date.Day()).Format(time.DateOnly)
+
+	qStmt := `
+		SELECT user_id,
+			   SUM(CASE WHEN type = '1' THEN price ELSE 0 END) AS total_income,
+			   SUM(CASE WHEN type = '2' THEN price ELSE 0 END) AS total_expense
+		FROM transactions
+		WHERE date BETWEEN ? AND ?
+		GROUP BY user_id
+	`
+
+	rows, err := r.DB.QueryContext(ctx, qStmt, startOfMonth, endOfMonth)
+	if err != nil {
+		logger.Error("r.DB.QueryContext failed", "package", packageName, "err", err)
+		return []domain.MonthlyAggregatedData{}, err
+	}
+	defer rows.Close()
+
+	var monthlyDataList []domain.MonthlyAggregatedData
+	for rows.Next() {
+		var monthlyData domain.MonthlyAggregatedData
+		if err := rows.Scan(&monthlyData.UserID, &monthlyData.TotalIncome, &monthlyData.TotalExpense); err != nil {
+			logger.Error("rows.Scan failed", "package", packageName, "err", err)
+			return []domain.MonthlyAggregatedData{}, err
+		}
+
+		monthlyDataList = append(monthlyDataList, monthlyData)
+	}
+
+	return monthlyDataList, nil
 }
