@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errorutil"
@@ -49,15 +50,17 @@ func (r *Repo) Create(ctx context.Context, categ domain.MainCateg, userID int64)
 }
 
 func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.TransactionType) ([]domain.MainCateg, error) {
-	stmt := `SELECT id, name, type, icon_type, icon_data
-					 FROM main_categories
-					 WHERE user_id = ?`
+	var sb strings.Builder
+	sb.WriteString(`SELECT id, name, type, icon_type, icon_data
+					 				FROM main_categories
+					 				WHERE user_id = ?
+									`)
 
 	if transType.IsValid() {
-		stmt += ` AND type = ` + transType.ToModelValue()
+		sb.WriteString(` AND type = ` + transType.ToModelValue())
 	}
 
-	rows, err := r.DB.QueryContext(ctx, stmt, userID)
+	rows, err := r.DB.QueryContext(ctx, sb.String(), userID)
 	if err != nil {
 		logger.Error("r.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
@@ -124,18 +127,19 @@ func (r *Repo) GetByID(id, userID int64) (*domain.MainCateg, error) {
 }
 
 func (r *Repo) BatchCreate(ctx context.Context, categs []domain.MainCateg, userID int64) error {
-	stmt := `INSERT INTO main_categories (name, type, user_id, icon_type, icon_data) VALUES `
+	var sb strings.Builder
+	sb.WriteString(`INSERT INTO main_categories (name, type, user_id, icon_type, icon_data) VALUES `)
 	args := make([]interface{}, 0, len(categs)*6)
 	for i, c := range categs {
-		stmt += "(?, ?, ?, ?, ?)"
+		sb.WriteString("(?, ?, ?, ?, ?)")
 		if i < len(categs)-1 {
-			stmt += ", "
+			sb.WriteString(", ")
 		}
 
 		args = append(args, c.Name, c.Type.ToModelValue(), userID, c.IconType.ToModelValue(), c.IconData)
 	}
 
-	if _, err := r.DB.ExecContext(ctx, stmt, args...); err != nil {
+	if _, err := r.DB.ExecContext(ctx, sb.String(), args...); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserType) {
 			return domain.ErrUniqueNameUserType
 		}

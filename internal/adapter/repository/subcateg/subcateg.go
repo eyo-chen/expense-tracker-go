@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/errorutil"
@@ -115,18 +116,19 @@ func (r *Repo) GetByID(id, userID int64) (*domain.SubCateg, error) {
 }
 
 func (r *Repo) BatchCreate(ctx context.Context, categs []domain.SubCateg, userID int64) error {
-	stmt := `INSERT INTO sub_categories (name, user_id, main_category_id) VALUES `
+	var sb strings.Builder
+	sb.WriteString(`INSERT INTO sub_categories (name, user_id, main_category_id) VALUES `)
 	args := make([]interface{}, 0, len(categs)*3)
 	for i, c := range categs {
-		stmt += "(?, ?, ?)"
+		sb.WriteString("(?, ?, ?)")
 		if i < len(categs)-1 {
-			stmt += ", "
+			sb.WriteString(", ")
 		}
 
 		args = append(args, c.Name, userID, c.MainCategID)
 	}
 
-	if _, err := r.DB.ExecContext(ctx, stmt, args...); err != nil {
+	if _, err := r.DB.ExecContext(ctx, sb.String(), args...); err != nil {
 		if errorutil.ParseError(err, uniqueNameUserMainCategory) {
 			return domain.ErrUniqueNameUserMainCateg
 		}

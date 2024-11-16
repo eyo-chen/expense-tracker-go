@@ -1,23 +1,23 @@
 package user
 
 import (
+	"strings"
+
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
 func genUpdateStmtAndVal(opt domain.UpdateUserOpt, userID int64) (string, []interface{}) {
-	var (
-		stmt string
-		val  []interface{}
-	)
+	val := []interface{}{}
 
-	stmt += `UPDATE users SET `
+	var sb strings.Builder
+	sb.WriteString(`UPDATE users SET `)
 
 	if opt.IsSetInitCategory != nil {
-		stmt += `is_set_init_category = ? `
+		sb.WriteString(`is_set_init_category = ? `)
 		val = append(val, *opt.IsSetInitCategory)
 	}
 
-	stmt += `WHERE id = ?`
+	sb.WriteString(`WHERE id = ?`)
 	val = append(val, userID)
-	return stmt, val
+	return sb.String(), val
 }

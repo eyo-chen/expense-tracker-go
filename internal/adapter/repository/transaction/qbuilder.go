@@ -4,58 +4,62 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"strings"
 	"unicode"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
 
 func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, t Transaction) string {
-	qStmt := `SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, mc.icon_type, mc.icon_data, sc.id, sc.name
-						FROM transactions AS t
-						LEFT JOIN main_categories AS mc 
-						ON t.main_category_id = mc.id
-						LEFT JOIN sub_categories AS sc 
-						ON t.sub_category_id = sc.id
-						WHERE t.user_id = ?`
+	var sb strings.Builder
+
+	sb.WriteString(`SELECT t.id, t.user_id, t.type, t.price, t.note, t.date, mc.id, mc.name, mc.type, mc.icon_type, mc.icon_data, sc.id, sc.name
+									FROM transactions AS t
+									LEFT JOIN main_categories AS mc 
+									ON t.main_category_id = mc.id
+									LEFT JOIN sub_categories AS sc 
+									ON t.sub_category_id = sc.id
+									WHERE t.user_id = ?
+									`)
 
 	if opt.Search.Keyword != nil {
-		qStmt += " AND MATCH (note) AGAINST (? IN NATURAL LANGUAGE MODE)"
+		sb.WriteString(" AND MATCH (note) AGAINST (? IN NATURAL LANGUAGE MODE)")
 	}
 
 	if opt.Filter.StartDate != nil && opt.Filter.EndDate != nil {
-		qStmt += " AND date BETWEEN ? AND ?"
+		sb.WriteString(" AND date BETWEEN ? AND ?")
 	}
 
 	if opt.Filter.StartDate != nil {
-		qStmt += " AND date >= ?"
+		sb.WriteString(" AND date >= ?")
 	}
 
 	if opt.Filter.EndDate != nil {
-		qStmt += " AND date <= ?"
+		sb.WriteString(" AND date <= ?")
 	}
 
 	if opt.Filter.MinPrice != nil {
-		qStmt += " AND price >= ?"
+		sb.WriteString(" AND price >= ?")
 	}
 
 	if opt.Filter.MaxPrice != nil {
-		qStmt += " AND price <= ?"
+		sb.WriteString(" AND price <= ?")
 	}
 
 	if opt.Filter.MainCategIDs != nil {
-		qStmt += " AND mc.id IN (?"
+		sb.WriteString(" AND mc.id IN (?")
 		for i := 1; i < len(opt.Filter.MainCategIDs); i++ {
-			qStmt += ", ?"
+			sb.WriteString(", ?")
 		}
-		qStmt += ")"
+		sb.WriteString(")")
 	}
 
 	if opt.Filter.SubCategIDs != nil {
-		qStmt += " AND sc.id IN (?"
+		sb.WriteString(" AND sc.id IN (?")
 		for i := 1; i < len(opt.Filter.SubCategIDs); i++ {
-			qStmt += ", ?"
+			sb.WriteString(", ?")
 		}
-		qStmt += ")"
+		sb.WriteString(")")
 	}
 
 	// construct the next key query statement
@@ -64,27 +68,27 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys,
 	// when it's 2, it means there's sorting(sort by id and other field)
 	if len(decodedNextKeys) != 0 {
 		if len(decodedNextKeys) == 1 {
-			qStmt += fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), domain.GetOperandFromSort(opt.Sort))
+			sb.WriteString(fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), domain.GetOperandFromSort(opt.Sort)))
 		}
 
 		if len(decodedNextKeys) == 2 {
 			// AND col_1 < or > val_1
 			// OR (col_1 = val_1 AND col_2 < or > val_2)
 			// the shorted version is: AND (col_1, col_2) < or > (val_1, val_2)
-			qStmt += fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), domain.GetOperandFromSort(opt.Sort))
-			qStmt += fmt.Sprintf(" OR (t.%s = ? AND t.%s %s ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t), domain.GetOperandFromSort(opt.Sort))
+			sb.WriteString(fmt.Sprintf(" AND t.%s %s ?", genDBFieldNames(decodedNextKeys[0].Field, t), domain.GetOperandFromSort(opt.Sort)))
+			sb.WriteString(fmt.Sprintf(" OR (t.%s = ? AND t.%s %s ?)", genDBFieldNames(decodedNextKeys[0].Field, t), genDBFieldNames(decodedNextKeys[1].Field, t), domain.GetOperandFromSort(opt.Sort)))
 		}
 	}
 
 	if opt.Sort != nil {
-		qStmt += fmt.Sprintf(" ORDER BY t.%s %s, t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String(), opt.Sort.Dir.String())
+		sb.WriteString(fmt.Sprintf(" ORDER BY t.%s %s, t.id %s", opt.Sort.By.String(), opt.Sort.Dir.String(), opt.Sort.Dir.String()))
 	}
 
 	if opt.Cursor.Size != 0 {
-		qStmt += " LIMIT ?"
+		sb.WriteString(" LIMIT ?")
 	}
 
-	return qStmt
+	return sb.String()
 }
 
 // genDBFieldNames generates db field names from struct field names
@@ -184,29 +188,31 @@ func getAllArgs(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys, 
 }
 
 func getAccInfoQStmt(query domain.GetAccInfoQuery) string {
-	qStmt := `SELECT
-						SUM(CASE WHEN type = '1' THEN price ELSE 0 END) AS total_income,
-						SUM(CASE WHEN type = '2' THEN price ELSE 0 END) AS total_expense,
-						SUM(CASE WHEN type = '1' THEN price ELSE -price END) AS total_balance
-	          FROM transactions
-						WHERE user_id = ?
-						`
+	var sb strings.Builder
+
+	sb.WriteString(`SELECT
+									SUM(CASE WHEN type = '1' THEN price ELSE 0 END) AS total_income,
+									SUM(CASE WHEN type = '2' THEN price ELSE 0 END) AS total_expense,
+									SUM(CASE WHEN type = '1' THEN price ELSE -price END) AS total_balance
+									FROM transactions
+									WHERE user_id = ?
+									`)
 
 	if query.StartDate != nil && query.EndDate != nil {
-		qStmt += " AND date BETWEEN ? AND ?"
+		sb.WriteString(" AND date BETWEEN ? AND ?")
 	}
 
 	if query.StartDate != nil {
-		qStmt += " AND date >= ?"
+		sb.WriteString(" AND date >= ?")
 	}
 
 	if query.EndDate != nil {
-		qStmt += " AND date <= ?"
+		sb.WriteString(" AND date <= ?")
 	}
 
-	qStmt += " GROUP BY user_id"
+	sb.WriteString(" GROUP BY user_id")
 
-	return qStmt
+	return sb.String()
 }
 
 func getAccInfoArgs(query domain.GetAccInfoQuery, userID int64) []interface{} {
@@ -229,27 +235,29 @@ func getAccInfoArgs(query domain.GetAccInfoQuery, userID int64) []interface{} {
 }
 
 func getGetDailyBarChartDataQuery(mainCategIDs []int64) string {
-	qStmt := `
-	  SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
-		       SUM(price)
-		FROM transactions
-		WHERE user_id = ?
-		AND type = ?
-		AND date BETWEEN ? AND ?
-	`
+	var sb strings.Builder
+
+	sb.WriteString(`SELECT 
+									DATE_FORMAT(date, '%Y-%m-%d') AS date,
+									SUM(price)
+									FROM transactions
+									WHERE user_id = ?
+									AND type = ?
+									AND date BETWEEN ? AND ?
+									`)
 
 	if mainCategIDs != nil {
-		qStmt += "AND main_category_id IN (?"
+		sb.WriteString("AND main_category_id IN (?")
 		for i := 1; i < len(mainCategIDs); i++ {
-			qStmt += ", ?"
+			sb.WriteString(", ?")
 		}
-		qStmt += ")"
+		sb.WriteString(")")
 	}
 
-	qStmt += `GROUP BY date
-						ORDER BY date`
+	sb.WriteString(`GROUP BY date
+						      ORDER BY date`)
 
-	return qStmt
+	return sb.String()
 }
 
 func genGetDailyBarChartDataArgs(userID int64, transactionType domain.TransactionType, dateRange domain.ChartDateRange, mainCategIDs []int64) []interface{} {
@@ -269,28 +277,30 @@ func genGetDailyBarChartDataArgs(userID int64, transactionType domain.Transactio
 }
 
 func getGetMonthlyBarChartDataQuery(mainCategIDs []int64) string {
-	qStmt := `
-		SELECT YEAR(date),
-					 LPAD(MONTH(date), 2, '0') AS month,
-					 SUM(price)
-		FROM transactions
-		WHERE user_id = ?
-		AND type = ?
-		AND date BETWEEN ? AND ?
-		`
+	var sb strings.Builder
+
+	sb.WriteString(`SELECT
+									YEAR(date),
+									LPAD(MONTH(date), 2, '0') AS month,
+									SUM(price)
+									FROM transactions
+									WHERE user_id = ?
+									AND type = ?
+									AND date BETWEEN ? AND ?
+									`)
 
 	if mainCategIDs != nil {
-		qStmt += "AND main_category_id IN (?"
+		sb.WriteString("AND main_category_id IN (?")
 		for i := 1; i < len(mainCategIDs); i++ {
-			qStmt += ", ?"
+			sb.WriteString(", ?")
 		}
-		qStmt += ")"
+		sb.WriteString(")")
 	}
 
-	qStmt += `GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
-						ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')`
+	sb.WriteString(`GROUP BY YEAR(date), LPAD(MONTH(date), 2, '0')
+						      ORDER BY YEAR(date), LPAD(MONTH(date), 2, '0')`)
 
-	return qStmt
+	return sb.String()
 }
 
 func getGetMonthlyBarChartDataArgs(userID int64, transactionType domain.TransactionType, dateRange domain.ChartDateRange, mainCategIDs []int64) []interface{} {
