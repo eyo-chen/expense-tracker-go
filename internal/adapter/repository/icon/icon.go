@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -68,16 +69,18 @@ func (r *Repo) List() ([]domain.DefaultIcon, error) {
 }
 
 func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
-	stmt := `SELECT id, url FROM icons WHERE id IN (`
+	var sb strings.Builder
+	sb.WriteString(`SELECT id, url FROM icons WHERE id IN (`)
+
 	for i := range ids {
 		if i == 0 {
-			stmt += "?"
+			sb.WriteString("?")
 		} else {
-			stmt += ", ?"
+			sb.WriteString(", ?")
 		}
 
 		if i == len(ids)-1 {
-			stmt += ")"
+			sb.WriteString(")")
 		}
 	}
 
@@ -87,7 +90,7 @@ func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
 	}
 
 	var icons []Icon
-	rows, err := r.DB.Query(stmt, idsInterface...)
+	rows, err := r.DB.Query(sb.String(), idsInterface...)
 	if err != nil {
 		logger.Error("r.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
