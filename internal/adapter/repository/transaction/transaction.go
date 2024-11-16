@@ -3,6 +3,7 @@ package transaction
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -130,7 +131,7 @@ func (r *Repo) GetByIDAndUserID(ctx context.Context, id, userID int64) (domain.T
 	var trans Transaction
 	if err := r.DB.QueryRowContext(ctx, qStmt, id, userID).
 		Scan(&trans.ID, &trans.UserID, &trans.Type, &trans.MainCategID, &trans.SubCategID, &trans.Price, &trans.Note, &trans.Date); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Transaction{}, domain.ErrTransactionDataNotFound
 		}
 
