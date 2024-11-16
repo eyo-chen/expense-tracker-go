@@ -53,7 +53,8 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 	var sb strings.Builder
 	sb.WriteString(`SELECT id, name, type, icon_type, icon_data
 					 				FROM main_categories
-					 				WHERE user_id = ?`)
+					 				WHERE user_id = ?
+									`)
 
 	if transType.IsValid() {
 		sb.WriteString(` AND type = ` + transType.ToModelValue())

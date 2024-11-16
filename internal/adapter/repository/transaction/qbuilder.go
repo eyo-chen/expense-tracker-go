@@ -19,7 +19,8 @@ func getAllQStmt(opt domain.GetTransOpt, decodedNextKeys domain.DecodedNextKeys,
 									ON t.main_category_id = mc.id
 									LEFT JOIN sub_categories AS sc 
 									ON t.sub_category_id = sc.id
-									WHERE t.user_id = ?`)
+									WHERE t.user_id = ?
+									`)
 
 	if opt.Search.Keyword != nil {
 		sb.WriteString(" AND MATCH (note) AGAINST (? IN NATURAL LANGUAGE MODE)")
@@ -194,7 +195,8 @@ func getAccInfoQStmt(query domain.GetAccInfoQuery) string {
 									SUM(CASE WHEN type = '2' THEN price ELSE 0 END) AS total_expense,
 									SUM(CASE WHEN type = '1' THEN price ELSE -price END) AS total_balance
 									FROM transactions
-									WHERE user_id = ?`)
+									WHERE user_id = ?
+									`)
 
 	if query.StartDate != nil && query.EndDate != nil {
 		sb.WriteString(" AND date BETWEEN ? AND ?")
@@ -241,7 +243,8 @@ func getGetDailyBarChartDataQuery(mainCategIDs []int64) string {
 									FROM transactions
 									WHERE user_id = ?
 									AND type = ?
-									AND date BETWEEN ? AND ?`)
+									AND date BETWEEN ? AND ?
+									`)
 
 	if mainCategIDs != nil {
 		sb.WriteString("AND main_category_id IN (?")
@@ -283,7 +286,8 @@ func getGetMonthlyBarChartDataQuery(mainCategIDs []int64) string {
 									FROM transactions
 									WHERE user_id = ?
 									AND type = ?
-									AND date BETWEEN ? AND ?`)
+									AND date BETWEEN ? AND ?
+									`)
 
 	if mainCategIDs != nil {
 		sb.WriteString("AND main_category_id IN (?")
