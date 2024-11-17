@@ -1,0 +1,117 @@
+name: Let's Check PR
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  go-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Clean up previous builds
+        run: |
+          rm -rf ./bin || true
+          mkdir -p ./bin
+
+      - name: Install Dependencies
+        run: go mod download
+      
+      - name: Build API
+        run: go build -v -o ./bin/api ./cmd/api
+      
+      - name: Build Cron
+        run: go build -v -o ./bin/cron ./cmd/cron
+
+      - name: Clean up build files
+        if: always()
+        run: |
+          rm -rf ./bin/*
+          rmdir ./bin
+
+  go-lint:
+    needs: go-build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Run Linter
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59
+  
+  go-test:
+    needs: go-lint
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Run Tests with Coverage
+        run: |
+          go test -race -coverprofile=profile.out ./internal/...
+          cat profile.out | grep -v "_enum.go" > coverage.out
+
+      - name: Calculate Coverage
+        id: coverage
+        run: |
+          total_coverage=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "total_coverage=$total_coverage" >> $GITHUB_ENV
+
+      - name: Post Coverage Comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment => comment.user.type === 'Bot' && comment.body.includes('**Total Test Coverage:**'));
+            const totalCoverage = process.env.total_coverage;
+            const commentBody = `**Total Test Coverage:** ${totalCoverage}%`;
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+              });
+            }
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody,
+            });

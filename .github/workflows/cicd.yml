@@ -1,0 +1,94 @@
+name: Let's CI/CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  go-ci:
+    name: CI Pipeline
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+      
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Build API
+        run: go build -v -o ./bin/api ./cmd/api
+      
+      - name: Build Cron
+        run: go build -v -o ./bin/cron ./cmd/cron
+      
+      - name: Clean up build files
+        if: always()
+        run: |
+          rm -rf ./bin/*
+          rmdir ./bin
+      
+      - name: Run Linter
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59
+      
+      - name: Run Tests
+        run: go test -race ./internal/...
+
+  go-cd-lambda:
+    name: Deploy Lambda
+    needs: go-ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v42
+
+      - name: Check if relevant files changed
+        id: check-changes
+        run: |
+          RELEVANT=false
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ $file == cmd/cron/* ]]; then
+              RELEVANT=true
+              break
+            fi
+          done
+          if [ "$RELEVANT" = "false" ]; then
+            echo "No relevant files changed, skipping deployment"
+            exit 78  # Special exit code that GitHub Actions recognizes as neutral
+          fi
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Build Lambda Function
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bootstrap cmd/cron/main.go
+          zip go-lambda.zip bootstrap
+
+      - name: Deploy to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://go-lambda.zip
