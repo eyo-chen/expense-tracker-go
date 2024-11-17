@@ -65,17 +65,16 @@ jobs:
               break
             fi
           done
-          if [ "$RELEVANT" = "false" ]; then
-            echo "No relevant files changed, skipping deployment"
-            exit 78  # Special exit code that GitHub Actions recognizes as neutral
-          fi
+          echo "relevant=$RELEVANT" >> $GITHUB_OUTPUT
 
       - name: Setup Go
+        if: steps.check-changes.outputs.relevant == 'true'
         uses: actions/setup-go@v5
         with:
           go-version: '1.21.x'
 
       - name: Configure AWS Credentials
+        if: steps.check-changes.outputs.relevant == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
@@ -83,11 +82,13 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Build Lambda Function
+        if: steps.check-changes.outputs.relevant == 'true'
         run: |
           GOOS=linux GOARCH=amd64 go build -o bootstrap cmd/cron/main.go
           zip go-lambda.zip bootstrap
 
       - name: Deploy to Lambda
+        if: steps.check-changes.outputs.relevant == 'true'
         run: |
           aws lambda update-function-code \
             --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} \
