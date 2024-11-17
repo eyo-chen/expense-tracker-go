@@ -9,6 +9,7 @@ A production-grade expense tracking backend API built with Go, following [Clean 
 - **Redis** - Caching layer
 - **Docker** - Containerization
 - **Amazon ECS** - Container orchestration
+- **Amazon Lambda** - Cron job
 - **Amazon S3** - File storage
 - **API Gateway** - API management
 - **GitHub Actions** - CI/CD pipeline
