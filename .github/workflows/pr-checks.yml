@@ -1,8 +1,6 @@
-name: Let's Go CI
+name: Let's Check PR
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -21,21 +19,44 @@ jobs:
 
       - name: Clean up previous builds
         run: |
-          if [ -d "./bin" ]; then
-            rm -rf ./bin
-          fi
+          rm -rf ./bin || true
+          mkdir -p ./bin
 
       - name: Install Dependencies
         run: go mod download
       
       - name: Build API
         run: go build -v -o ./bin/api ./cmd/api
+      
+      - name: Build Cron
+        run: go build -v -o ./bin/cron ./cmd/cron
 
       - name: Clean up build files
         if: always()
-        run: rm -rf ./bin
+        run: |
+          rm -rf ./bin/*
+          rmdir ./bin
 
+  go-lint:
+    needs: go-build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Run Linter
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59
+  
   go-test:
+    needs: go-lint
     runs-on: ubuntu-latest
 
     permissions:
@@ -66,7 +87,6 @@ jobs:
           echo "total_coverage=$total_coverage" >> $GITHUB_ENV
 
       - name: Post Coverage Comment
-        if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -95,20 +115,3 @@ jobs:
               repo: context.repo.repo,
               body: commentBody,
             });
-
-  go-lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21.x'
-
-      - name: Run Linter
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.59
