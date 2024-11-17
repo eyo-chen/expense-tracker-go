@@ -4,6 +4,7 @@ services:
   expense-tracker-backend:
     build:
       context: .
+      dockerfile: ./cmd/api/Dockerfile
     image: expense-tracker-backend-image
     container_name: expense-tracker-backend
     ports:
