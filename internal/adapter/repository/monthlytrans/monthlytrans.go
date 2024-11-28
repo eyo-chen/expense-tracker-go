@@ -3,6 +3,7 @@ package monthlytrans
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strings"
 	"time"
 
@@ -59,4 +60,25 @@ func (r *Repo) Create(ctx context.Context, date time.Time, trans []domain.Monthl
 	}
 
 	return nil
+}
+
+func (r *Repo) GetByUserIDAndMonthDate(ctx context.Context, userID int64, monthDate time.Time) (domain.AccInfo, error) {
+	query := `SELECT * FROM monthly_transactions WHERE user_id = ? AND month_date = ?`
+
+	var mt MonthlyTrans
+	row := r.DB.QueryRowContext(ctx, query, userID, monthDate)
+	if err := row.Scan(&mt.ID, &mt.UserID, &mt.MonthDate, &mt.TotalExpense, &mt.TotalIncome, &mt.CreatedAt, &mt.UpdatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.AccInfo{}, domain.ErrDataNotFound
+		}
+
+		logger.Error("r.DB.QueryRowContext failed", "package", packageName, "err", err)
+		return domain.AccInfo{}, err
+	}
+
+	return domain.AccInfo{
+		TotalExpense: mt.TotalExpense,
+		TotalIncome:  mt.TotalIncome,
+		TotalBalance: mt.TotalIncome - mt.TotalExpense,
+	}, nil
 }
