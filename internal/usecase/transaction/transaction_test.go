@@ -23,12 +23,13 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
-	uc                  *UC
-	mockTransactionRepo *mocks.TransactionRepo
-	mockMainCategRepo   *mocks.MainCategRepo
-	mockSubCategRepo    *mocks.SubCategRepo
-	mockRedis           *mocks.RedisService
-	mockS3              *mocks.S3Service
+	uc                   *UC
+	mockTransactionRepo  *mocks.TransactionRepo
+	mockMonthlyTransRepo *mocks.MonthlyTransRepo
+	mockMainCategRepo    *mocks.MainCategRepo
+	mockSubCategRepo     *mocks.SubCategRepo
+	mockRedis            *mocks.RedisService
+	mockS3               *mocks.S3Service
 }
 
 func TestTransactionSuite(t *testing.T) {
@@ -39,13 +40,26 @@ func (s *TransactionSuite) SetupSuite() {
 	logger.Register()
 }
 
+func setNow(t time.Time) {
+	now = func() time.Time {
+		return t
+	}
+}
+
+func resetNow() {
+	now = func() time.Time {
+		return time.Now()
+	}
+}
+
 func (s *TransactionSuite) SetupTest() {
 	s.mockTransactionRepo = mocks.NewTransactionRepo(s.T())
+	s.mockMonthlyTransRepo = mocks.NewMonthlyTransRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
 	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
 	s.mockRedis = mocks.NewRedisService(s.T())
 	s.mockS3 = mocks.NewS3Service(s.T())
-	s.uc = New(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockRedis, s.mockS3)
+	s.uc = New(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockMonthlyTransRepo, s.mockRedis, s.mockS3)
 }
 
 func (s *TransactionSuite) TearDownTest() {
@@ -627,8 +641,10 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 
 func (s *TransactionSuite) TestGetAccInfo() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when no error, return acc info":       getAccInfo_NoError_ReturnAccInfo,
-		"when get acc info fail, return error": getAccInfo_GetAccInfoFail_ReturnError,
+		"when no error, return acc info":               getAccInfo_NoError_ReturnAccInfo,
+		"when unspecified time range, return acc info": getAccInfo_UnspecifiedTimeRange_ReturnAccInfo,
+		"when get monthly trans, return acc info":      getAccInfo_GetMonthlyTrans_ReturnAccInfo,
+		"when get acc info fail, return error":         getAccInfo_GetAccInfoFail_ReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -652,23 +668,80 @@ func getAccInfo_NoError_ReturnAccInfo(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
 		Return(accInfo, nil).Once()
 
-	result, err := s.uc.GetAccInfo(mockCtx, query, user)
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeOneMonth)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(accInfo, result, desc)
 }
 
-func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
+func getAccInfo_UnspecifiedTimeRange_ReturnAccInfo(s *TransactionSuite, desc string) {
 	startDate := "2024-03-01"
 	endDate := "2024-03-31"
 	user := domain.User{ID: 1}
 	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	accInfo := domain.AccInfo{
+		TotalIncome:  100,
+		TotalExpense: 200,
+		TotalBalance: -100,
+	}
 
 	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
-		Return(domain.AccInfo{}, errors.New("get acc info fail")).Once()
+		Return(accInfo, nil).Once()
 
-	result, err := s.uc.GetAccInfo(mockCtx, query, user)
-	s.Require().EqualError(err, "get acc info fail", desc)
-	s.Require().Equal(domain.AccInfo{}, result, desc)
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeUnSpecified)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(accInfo, result, desc)
+}
+
+func getAccInfo_GetMonthlyTrans_ReturnAccInfo(s *TransactionSuite, desc string) {
+	startDate := "2024-10-01"
+	endDate := "2024-10-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	accInfo := domain.AccInfo{
+		TotalIncome:  100,
+		TotalExpense: 200,
+		TotalBalance: -100,
+	}
+
+	startTime, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err)
+
+	// set now to target month
+	setNow(startTime)
+
+	s.mockMonthlyTransRepo.On("GetByUserIDAndMonthDate", mockCtx, user.ID, startTime).
+		Return(accInfo, nil).Once()
+
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeOneMonth)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(accInfo, result, desc)
+
+	// reset now
+	resetNow()
+}
+
+func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
+	startDate := "2024-10-01"
+	endDate := "2024-10-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	mockErr := errors.New("get monthly trans fail")
+
+	startTime, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err)
+
+	// set now to target month
+	setNow(startTime)
+
+	s.mockMonthlyTransRepo.On("GetByUserIDAndMonthDate", mockCtx, user.ID, startTime).
+		Return(domain.AccInfo{}, mockErr).Once()
+
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeOneMonth)
+	s.Require().ErrorIs(err, mockErr, desc)
+	s.Require().Empty(result, desc)
+
+	// reset now
+	resetNow()
 }
 
 func (s *TransactionSuite) TestGetBarChartData() {

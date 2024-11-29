@@ -51,9 +51,9 @@ func (_m *TransactionUC) Delete(ctx context.Context, id int64, user domain.User)
 	return r0
 }
 
-// GetAccInfo provides a mock function with given fields: ctx, query, user
-func (_m *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
-	ret := _m.Called(ctx, query, user)
+// GetAccInfo provides a mock function with given fields: ctx, user, query, timeRange
+func (_m *TransactionUC) GetAccInfo(ctx context.Context, user domain.User, query domain.GetAccInfoQuery, timeRange domain.TimeRangeType) (domain.AccInfo, error) {
+	ret := _m.Called(ctx, user, query, timeRange)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAccInfo")
@@ -61,17 +61,17 @@ func (_m *TransactionUC) GetAccInfo(ctx context.Context, query domain.GetAccInfo
 
 	var r0 domain.AccInfo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetAccInfoQuery, domain.User) (domain.AccInfo, error)); ok {
-		return rf(ctx, query, user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.User, domain.GetAccInfoQuery, domain.TimeRangeType) (domain.AccInfo, error)); ok {
+		return rf(ctx, user, query, timeRange)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.GetAccInfoQuery, domain.User) domain.AccInfo); ok {
-		r0 = rf(ctx, query, user)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.User, domain.GetAccInfoQuery, domain.TimeRangeType) domain.AccInfo); ok {
+		r0 = rf(ctx, user, query, timeRange)
 	} else {
 		r0 = ret.Get(0).(domain.AccInfo)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, domain.GetAccInfoQuery, domain.User) error); ok {
-		r1 = rf(ctx, query, user)
+	if rf, ok := ret.Get(1).(func(context.Context, domain.User, domain.GetAccInfoQuery, domain.TimeRangeType) error); ok {
+		r1 = rf(ctx, user, query, timeRange)
 	} else {
 		r1 = ret.Error(1)
 	}
