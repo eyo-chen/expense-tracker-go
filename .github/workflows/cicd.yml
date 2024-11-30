@@ -41,7 +41,7 @@ jobs:
           version: v1.59
       
       - name: Run Tests
-        run: go test -race ./internal/...
+        run: go test -race ./internal/... ./pkg/testutil ./pkg/codeutil
 
   go-cd-lambda:
     name: Deploy Lambda

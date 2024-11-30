@@ -99,11 +99,9 @@ func getByID_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 	_, err := s.f.InsertMany(mockCTX, 2)
 	s.Require().NoError(err, desc)
 
-	expRes := domain.DefaultIcon{}
-
 	res, err := s.repo.GetByID(mockCTX, 999)
-	s.Require().Equal(expRes, res, desc)
-	s.Require().Equal(domain.ErrIconNotFound, err, desc)
+	s.Require().Empty(res, desc)
+	s.Require().ErrorIs(err, domain.ErrIconNotFound, desc)
 }
 
 func (s *IconSuite) TestList() {
@@ -186,5 +184,5 @@ func getByIDs_WithoutIcon_ReturnErr(s *IconSuite, desc string) {
 	ids := []int64{999}
 	res, err := s.repo.GetByIDs(ids)
 	s.Require().Nil(res, desc)
-	s.Require().Equal(domain.ErrIconNotFound, err, desc)
+	s.Require().ErrorIs(err, domain.ErrIconNotFound, desc)
 }

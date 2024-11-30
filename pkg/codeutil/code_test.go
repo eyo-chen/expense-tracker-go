@@ -45,7 +45,7 @@ func decodeNextKeys_EncodedEmptyString_ReturnErr(s *CodeUtilSuite, desc string) 
 	// action
 	result, err := codeutil.DecodeNextKeys(encodedString, nil)
 	s.Require().Nil(result, desc)
-	s.Require().Equal(codeutil.ErrEmptyEncodedString, err, desc)
+	s.Require().ErrorIs(err, codeutil.ErrEmptyEncodedString, desc)
 }
 
 func decodeNextKeys_DecodedEmptyString_ReturnErr(s *CodeUtilSuite, desc string) {
@@ -56,7 +56,7 @@ func decodeNextKeys_DecodedEmptyString_ReturnErr(s *CodeUtilSuite, desc string) 
 	// action
 	result, err := codeutil.DecodeNextKeys(encodedString, nil)
 	s.Require().Nil(result, desc)
-	s.Require().Equal(codeutil.ErrEmptyEncodedString, err, desc)
+	s.Require().ErrorIs(err, codeutil.ErrEmptyEncodedString, desc)
 }
 
 func decodeNextKeys_InvalidFormatCursor_ReturnErr(s *CodeUtilSuite, desc string) {
@@ -67,7 +67,7 @@ func decodeNextKeys_InvalidFormatCursor_ReturnErr(s *CodeUtilSuite, desc string)
 	// action
 	result, err := codeutil.DecodeNextKeys(encodedString, nil)
 	s.Require().Nil(result, desc)
-	s.Require().Equal(codeutil.ErrInvalidFormatCursor, err, desc)
+	s.Require().ErrorIs(err, codeutil.ErrInvalidFormatCursor, desc)
 }
 
 func decodeNextKeys_SourceFieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
@@ -83,7 +83,7 @@ func decodeNextKeys_SourceFieldNotFound_ReturnErr(s *CodeUtilSuite, desc string)
 	// action
 	result, err := codeutil.DecodeNextKeys(encodedString, fieldSource)
 	s.Require().Nil(result, desc)
-	s.Require().Equal(codeutil.ErrFieldNotFound, err, desc)
+	s.Require().ErrorIs(err, codeutil.ErrFieldNotFound, desc)
 }
 
 func decodeNextKeys_ValidEncodedString_ReturnCursorMap(s *CodeUtilSuite, desc string) {
@@ -154,7 +154,7 @@ func encodeNextKeys_FieldNotFound_ReturnErr(s *CodeUtilSuite, desc string) {
 	// action
 	result, err := codeutil.EncodeNextKeys(nextKeys, fieldSource)
 	s.Require().Empty(result, desc)
-	s.Require().Equal(codeutil.ErrFieldNotFound, err, desc)
+	s.Require().ErrorIs(err, codeutil.ErrFieldNotFound, desc)
 }
 
 func encodeNextKeys_ValidCursorMap_ReturnEncodedString(s *CodeUtilSuite, desc string) {

@@ -87,7 +87,7 @@ func singup_EmailExists_ReturnError(s *UserSuite, desc string) {
 	s.mockUserRepo.On("FindByEmail", "email.com").Return(mockUser, nil).Once()
 
 	token, err := s.uc.Signup(mockCTX, mockUser)
-	s.Require().Equal(domain.ErrEmailAlreadyExists, err, desc)
+	s.Require().ErrorIs(err, domain.ErrEmailAlreadyExists, desc)
 	s.Require().Empty(token, desc)
 }
 
@@ -154,7 +154,7 @@ func login_EmailNotExists_ReturnError(s *UserSuite, desc string) {
 		Password: "password",
 	}
 	token, err := s.uc.Login(mockCTX, input)
-	s.Require().Equal(domain.ErrAuthentication, err, desc)
+	s.Require().ErrorIs(err, domain.ErrAuthentication, desc)
 	s.Require().Empty(token, desc)
 }
 
@@ -176,7 +176,7 @@ func login_PasswordNotMatch_ReturnError(s *UserSuite, desc string) {
 		Password: "password2", // wrong password
 	}
 	token, err := s.uc.Login(mockCTX, input)
-	s.Require().Equal(domain.ErrAuthentication, err, desc)
+	s.Require().ErrorIs(err, domain.ErrAuthentication, desc)
 	s.Require().Empty(token, desc)
 }
 
@@ -325,6 +325,6 @@ func getInfo_GetFail_ReturnError(s *UserSuite, desc string) {
 	s.mockUserRepo.On("GetInfo", int64(1)).Return(domain.User{}, domain.ErrUserIDNotFound).Once()
 
 	user, err := s.uc.GetInfo(1)
-	s.Require().Equal(domain.ErrUserIDNotFound, err, desc)
+	s.Require().ErrorIs(err, domain.ErrUserIDNotFound, desc)
 	s.Require().Empty(user, desc)
 }
