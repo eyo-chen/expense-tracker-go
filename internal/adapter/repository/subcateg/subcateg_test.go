@@ -134,7 +134,7 @@ func create_DuplicateNameUserMainCateg_ReturnError(s *SubCategSuite, desc string
 
 	// action and check
 	err = s.subCategRepo.Create(inputSubCateg, user.ID)
-	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+	s.Require().ErrorIs(err, domain.ErrUniqueNameUserMainCateg, desc)
 }
 
 func (s *SubCategSuite) TestGetByMainCategID() {
@@ -334,7 +334,7 @@ func update_DuplicateName_ReturnError(s *SubCategSuite, desc string) {
 
 	// action and check
 	err = s.subCategRepo.Update(inputSubCateg)
-	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+	s.Require().ErrorIs(err, domain.ErrUniqueNameUserMainCateg, desc)
 }
 
 func (s *SubCategSuite) TestDelete() {
@@ -357,7 +357,7 @@ func (s *SubCategSuite) TestDelete() {
 	var result SubCateg
 	checkStmt := `SELECT id, name, main_category_id FROM sub_categories WHERE id = ?`
 	err = s.db.QueryRow(checkStmt, mainCategIDToSubCategs[mainCateg.ID][0].ID).Scan(&result.ID, &result.Name, &result.MainCategID)
-	s.Require().Equal(sql.ErrNoRows, err, "test delete")
+	s.Require().ErrorIs(err, sql.ErrNoRows, "test delete")
 
 	// check to see if the first main category still has the other sub categories
 	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
@@ -426,7 +426,7 @@ func getByID_FindNoData_ReturnError(s *SubCategSuite, desc string) {
 
 	// action
 	result, err := s.subCategRepo.GetByID(mainCateg.ID+999, user.ID)
-	s.Require().Equal(domain.ErrSubCategNotFound, err, desc)
+	s.Require().ErrorIs(err, domain.ErrSubCategNotFound, desc)
 	s.Require().Nil(result, desc)
 }
 
@@ -606,7 +606,7 @@ func createBatch_AlreadyExistData_ReturnError(s *SubCategSuite, desc string) {
 
 	// action
 	err = s.subCategRepo.BatchCreate(mockCTX, subCategs, user.ID)
-	s.Require().Equal(domain.ErrUniqueNameUserMainCateg, err, desc)
+	s.Require().ErrorIs(err, domain.ErrUniqueNameUserMainCateg, desc)
 
 	// check
 	checkStmt := `SELECT COUNT(*)

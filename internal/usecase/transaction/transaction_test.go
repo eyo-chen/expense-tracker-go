@@ -248,7 +248,7 @@ func getAll_NoError_ReturnTransactions(s *TransactionSuite, desc string) {
 	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
-	s.Require().Equal(domain.Cursor{}, cursor, desc)
+	s.Require().Empty(cursor, desc)
 }
 
 func getAll_GetTransFail_ReturnError(s *TransactionSuite, desc string) {
@@ -262,7 +262,7 @@ func getAll_GetTransFail_ReturnError(s *TransactionSuite, desc string) {
 	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().Equal(errors.New("error"), err, desc)
 	s.Require().Nil(result, desc)
-	s.Require().Equal(domain.Cursor{}, cursor, desc)
+	s.Require().Empty(cursor, desc)
 }
 
 func getAll_InitPageWithSize_ReturnCorrectCursor(s *TransactionSuite, desc string) {

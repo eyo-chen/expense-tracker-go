@@ -953,7 +953,7 @@ func delete_WithOneData_DeleteSuccessfully(s *TransactionSuite, desc string) {
 	var checkT Transaction
 	stmt := "SELECT id FROM transactions WHERE id = ?"
 	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
-	s.Require().Equal(sql.ErrNoRows, err, desc)
+	s.Require().ErrorIs(err, sql.ErrNoRows, desc)
 }
 
 func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string) {
@@ -972,7 +972,7 @@ func delete_WithMultipleData_DeleteSuccessfully(s *TransactionSuite, desc string
 	var checkT Transaction
 	stmt := "SELECT id FROM transactions WHERE id = ?"
 	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
-	s.Require().Equal(sql.ErrNoRows, err, desc)
+	s.Require().ErrorIs(err, sql.ErrNoRows, desc)
 }
 
 func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc string) {
@@ -995,7 +995,7 @@ func delete_WithMultipleUsers_DeleteSuccessfully(s *TransactionSuite, desc strin
 	var checkT Transaction
 	stmt := "SELECT id FROM transactions WHERE id = ?"
 	err = s.db.QueryRow(stmt, transactions[0].ID).Scan(&checkT.ID)
-	s.Require().Equal(sql.ErrNoRows, err, desc)
+	s.Require().ErrorIs(err, sql.ErrNoRows, desc)
 
 	// check if other user's data still exists
 	var countUser2 int

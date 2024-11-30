@@ -414,7 +414,7 @@ func getByID_FindNoData_ReturnSuccessfully(s *MainCategSuite, desc string) {
 	s.Require().NoError(err, desc)
 
 	result, err := s.mainCategRepo.GetByID(0, user.ID)
-	s.Require().Equal(domain.ErrMainCategNotFound, err, desc)
+	s.Require().ErrorIs(err, domain.ErrMainCategNotFound, desc)
 	s.Require().Nil(result, desc)
 }
 

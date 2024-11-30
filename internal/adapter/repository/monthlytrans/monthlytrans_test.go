@@ -347,5 +347,5 @@ func getByUserIDAndMonthDate_DataNotFound_ReturnError(s *MonthlyTransSuite, desc
 
 	// assertion
 	s.Require().ErrorIs(err, domain.ErrDataNotFound, desc)
-	s.Require().Equal(domain.AccInfo{}, accInfo, desc)
+	s.Require().Empty(accInfo, desc)
 }
