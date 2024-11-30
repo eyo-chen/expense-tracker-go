@@ -40,6 +40,18 @@ func (s *TransactionSuite) SetupSuite() {
 	logger.Register()
 }
 
+func setNow(t time.Time) {
+	now = func() time.Time {
+		return t
+	}
+}
+
+func resetNow() {
+	now = func() time.Time {
+		return time.Now()
+	}
+}
+
 func (s *TransactionSuite) SetupTest() {
 	s.mockTransactionRepo = mocks.NewTransactionRepo(s.T())
 	s.mockMonthlyTransRepo = mocks.NewMonthlyTransRepo(s.T())
@@ -118,7 +130,7 @@ func create_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
 
 	// action, assertion
 	err := s.uc.Create(mockCtx, transInput)
-	s.Require().Equal(errors.New("get main category fail"), err, desc)
+	s.Require().ErrorIs(err, errors.New("get main category fail"), desc)
 }
 
 func create_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
@@ -141,7 +153,7 @@ func create_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
 
 	// action, assertion
 	err := s.uc.Create(mockCtx, transInput)
-	s.Require().EqualError(err, domain.ErrTypeNotConsistent.Error(), desc)
+	s.Require().ErrorIs(err, domain.ErrTypeNotConsistent, desc)
 }
 
 func create_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
@@ -165,7 +177,7 @@ func create_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
 
 	// action, assertion
 	err := s.uc.Create(mockCtx, transInput)
-	s.Require().EqualError(err, "get subcategory fail", desc)
+	s.Require().ErrorIs(err, errors.New("get subcategory fail"), desc)
 }
 
 func create_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
@@ -216,7 +228,7 @@ func create_CreateFail_ReturnError(s *TransactionSuite, desc string) {
 
 	// action, assertion
 	err := s.uc.Create(mockCtx, transInput)
-	s.Require().EqualError(err, "create fail", desc)
+	s.Require().ErrorIs(err, errors.New("create fail"), desc)
 }
 
 func (s *TransactionSuite) TestGetAll() {
@@ -262,7 +274,7 @@ func getAll_GetTransFail_ReturnError(s *TransactionSuite, desc string) {
 		Return(nil, mockDecodedNextKeys, errors.New("error")).Once()
 
 	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
-	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
 	s.Require().Nil(result, desc)
 	s.Require().Empty(cursor, desc)
 }
@@ -370,7 +382,7 @@ func getAll_WithCustomIcon_ReturnTransactions(s *TransactionSuite, desc string) 
 	result, cursor, err := s.uc.GetAll(mockCtx, mockOpt, mockUser)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(mockTrans, result, desc)
-	s.Require().Equal(domain.Cursor{}, cursor, desc)
+	s.Require().Empty(cursor, desc)
 }
 
 func getAll_GetByFuncFail_ReturnError(s *TransactionSuite, desc string) {
@@ -458,7 +470,7 @@ func update_GetMainCategFail_ReturnError(s *TransactionSuite, desc string) {
 		Return(nil, errors.New("error")).Once()
 
 	err := s.uc.Update(mockCtx, trans, user)
-	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
 }
 
 func update_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
@@ -478,7 +490,7 @@ func update_TypeNotMatch_ReturnError(s *TransactionSuite, desc string) {
 		Return(&mainCateg, nil).Once()
 
 	err := s.uc.Update(mockCtx, trans, user)
-	s.Require().Equal(domain.ErrTypeNotConsistent, err, desc)
+	s.Require().ErrorIs(err, domain.ErrTypeNotConsistent, desc)
 }
 
 func update_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
@@ -501,7 +513,7 @@ func update_GetSubCategFail_ReturnError(s *TransactionSuite, desc string) {
 		Return(nil, errors.New("error")).Once()
 
 	err := s.uc.Update(mockCtx, trans, user)
-	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
 }
 
 func update_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
@@ -525,7 +537,7 @@ func update_MainCategNotMatch_ReturnError(s *TransactionSuite, desc string) {
 		Return(&subCateg, nil).Once()
 
 	err := s.uc.Update(mockCtx, trans, user)
-	s.Require().Equal(domain.ErrMainCategNotConsistent, err, desc)
+	s.Require().ErrorIs(err, domain.ErrMainCategNotConsistent, desc)
 }
 
 func update_GetTransFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
@@ -552,7 +564,7 @@ func update_GetTransFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
 		Return(domain.Transaction{}, errors.New("error")).Once()
 
 	err := s.uc.Update(mockCtx, trans, user)
-	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
 }
 
 func update_UpdateFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
@@ -582,7 +594,7 @@ func update_UpdateFail_UpdateSuccessfully(s *TransactionSuite, desc string) {
 		Return(errors.New("error")).Once()
 
 	err := s.uc.Update(mockCtx, trans, user)
-	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
 }
 
 func (s *TransactionSuite) TestDelete() {
@@ -624,13 +636,15 @@ func delete_CheckPermessionFail_ReturnError(s *TransactionSuite, desc string) {
 		Return(domain.Transaction{}, errors.New("error")).Once()
 
 	err := s.uc.Delete(mockCtx, int64(1), user)
-	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
 }
 
 func (s *TransactionSuite) TestGetAccInfo() {
 	for scenario, fn := range map[string]func(s *TransactionSuite, desc string){
-		"when no error, return acc info":       getAccInfo_NoError_ReturnAccInfo,
-		"when get acc info fail, return error": getAccInfo_GetAccInfoFail_ReturnError,
+		"when no error, return acc info":               getAccInfo_NoError_ReturnAccInfo,
+		"when unspecified time range, return acc info": getAccInfo_UnspecifiedTimeRange_ReturnAccInfo,
+		"when get monthly trans, return acc info":      getAccInfo_GetMonthlyTrans_ReturnAccInfo,
+		"when get acc info fail, return error":         getAccInfo_GetAccInfoFail_ReturnError,
 	} {
 		s.Run(testutil.GetFunName(fn), func() {
 			s.SetupTest()
@@ -659,18 +673,75 @@ func getAccInfo_NoError_ReturnAccInfo(s *TransactionSuite, desc string) {
 	s.Require().Equal(accInfo, result, desc)
 }
 
-func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
+func getAccInfo_UnspecifiedTimeRange_ReturnAccInfo(s *TransactionSuite, desc string) {
 	startDate := "2024-03-01"
 	endDate := "2024-03-31"
 	user := domain.User{ID: 1}
 	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	accInfo := domain.AccInfo{
+		TotalIncome:  100,
+		TotalExpense: 200,
+		TotalBalance: -100,
+	}
 
 	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
-		Return(domain.AccInfo{}, errors.New("get acc info fail")).Once()
+		Return(accInfo, nil).Once()
+
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeUnSpecified)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(accInfo, result, desc)
+}
+
+func getAccInfo_GetMonthlyTrans_ReturnAccInfo(s *TransactionSuite, desc string) {
+	startDate := "2024-10-01"
+	endDate := "2024-10-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	accInfo := domain.AccInfo{
+		TotalIncome:  100,
+		TotalExpense: 200,
+		TotalBalance: -100,
+	}
+
+	startTime, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err)
+
+	// set now to target month
+	setNow(startTime)
+
+	s.mockMonthlyTransRepo.On("GetByUserIDAndMonthDate", mockCtx, user.ID, startTime).
+		Return(accInfo, nil).Once()
 
 	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeOneMonth)
-	s.Require().EqualError(err, "get acc info fail", desc)
-	s.Require().Equal(domain.AccInfo{}, result, desc)
+	s.Require().NoError(err, desc)
+	s.Require().Equal(accInfo, result, desc)
+
+	// reset now
+	resetNow()
+}
+
+func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
+	startDate := "2024-10-01"
+	endDate := "2024-10-31"
+	user := domain.User{ID: 1}
+	query := domain.GetAccInfoQuery{StartDate: &startDate, EndDate: &endDate}
+	mockErr := errors.New("get monthly trans fail")
+
+	startTime, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err)
+
+	// set now to target month
+	setNow(startTime)
+
+	s.mockMonthlyTransRepo.On("GetByUserIDAndMonthDate", mockCtx, user.ID, startTime).
+		Return(domain.AccInfo{}, mockErr).Once()
+
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeOneMonth)
+	s.Require().ErrorIs(err, mockErr, desc)
+	s.Require().Empty(result, desc)
+
+	// reset now
+	resetNow()
 }
 
 func (s *TransactionSuite) TestGetBarChartData() {
@@ -981,7 +1052,7 @@ func getBarChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 	expResult := domain.ChartData{}
 
 	result, err := s.uc.GetBarChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.TransactionTypeExpense, mainCategIDs, domain.User{ID: 1})
-	s.Require().Equal(errors.New("error"), err, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
 	s.Require().Equal(expResult, result, desc)
 }
 
@@ -1037,8 +1108,8 @@ func getPieChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc stri
 		Return(domain.ChartData{}, errors.New("error")).Once()
 
 	result, err := s.uc.GetPieChartData(mockCtx, chartDataRange, domain.TransactionTypeExpense, domain.User{ID: 1})
-	s.Require().EqualError(err, "error", desc)
-	s.Require().Equal(domain.ChartData{}, result, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
+	s.Require().Empty(result, desc)
 }
 
 func (s *TransactionSuite) TestGetLineChartData() {
@@ -1332,11 +1403,9 @@ func getLineChartData_GetChartDataFail_ReturnError(s *TransactionSuite, desc str
 	s.mockTransactionRepo.On("GetDailyLineChartData", mockCtx, chartDataRange, int64(1)).
 		Return(domain.DateToChartData{}, errors.New("error")).Once()
 
-	expResult := domain.ChartData{}
-
 	result, err := s.uc.GetLineChartData(mockCtx, chartDataRange, domain.TimeRangeTypeOneWeekDay, domain.User{ID: 1})
-	s.Require().Equal(errors.New("error"), err, desc)
-	s.Require().Equal(expResult, result, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
+	s.Require().Empty(result, desc)
 }
 
 func (s *TransactionSuite) TestGetMonthlyData() {
@@ -1484,6 +1553,6 @@ func getMonthlyData_GetMonthlyDataFail_ReturnError(s *TransactionSuite, desc str
 		Return(nil, errors.New("error")).Once()
 
 	result, err := s.uc.GetMonthlyData(mockCtx, dateRange, domain.User{ID: 1})
-	s.Require().Equal(errors.New("error"), err, desc)
-	s.Require().Equal([]domain.TransactionType{}, result, desc)
+	s.Require().ErrorIs(err, errors.New("error"), desc)
+	s.Require().Empty(result, desc)
 }
