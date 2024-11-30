@@ -199,7 +199,7 @@ func (h *Hlr) GetAccInfo(w http.ResponseWriter, r *http.Request) {
 	timeRangeType := domain.CvtToTimeRangeType(rawTimeRangeType)
 
 	v := validator.New()
-	if !v.GetAccInfo(query, timeRangeType) {
+	if !v.GetAccInfo(query) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
