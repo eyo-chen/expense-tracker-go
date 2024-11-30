@@ -23,12 +23,13 @@ var (
 
 type TransactionSuite struct {
 	suite.Suite
-	uc                  *UC
-	mockTransactionRepo *mocks.TransactionRepo
-	mockMainCategRepo   *mocks.MainCategRepo
-	mockSubCategRepo    *mocks.SubCategRepo
-	mockRedis           *mocks.RedisService
-	mockS3              *mocks.S3Service
+	uc                   *UC
+	mockTransactionRepo  *mocks.TransactionRepo
+	mockMonthlyTransRepo *mocks.MonthlyTransRepo
+	mockMainCategRepo    *mocks.MainCategRepo
+	mockSubCategRepo     *mocks.SubCategRepo
+	mockRedis            *mocks.RedisService
+	mockS3               *mocks.S3Service
 }
 
 func TestTransactionSuite(t *testing.T) {
@@ -41,11 +42,12 @@ func (s *TransactionSuite) SetupSuite() {
 
 func (s *TransactionSuite) SetupTest() {
 	s.mockTransactionRepo = mocks.NewTransactionRepo(s.T())
+	s.mockMonthlyTransRepo = mocks.NewMonthlyTransRepo(s.T())
 	s.mockMainCategRepo = mocks.NewMainCategRepo(s.T())
 	s.mockSubCategRepo = mocks.NewSubCategRepo(s.T())
 	s.mockRedis = mocks.NewRedisService(s.T())
 	s.mockS3 = mocks.NewS3Service(s.T())
-	s.uc = New(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockRedis, s.mockS3)
+	s.uc = New(s.mockTransactionRepo, s.mockMainCategRepo, s.mockSubCategRepo, s.mockMonthlyTransRepo, s.mockRedis, s.mockS3)
 }
 
 func (s *TransactionSuite) TearDownTest() {
@@ -652,7 +654,7 @@ func getAccInfo_NoError_ReturnAccInfo(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
 		Return(accInfo, nil).Once()
 
-	result, err := s.uc.GetAccInfo(mockCtx, query, user)
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeOneMonth)
 	s.Require().NoError(err, desc)
 	s.Require().Equal(accInfo, result, desc)
 }
@@ -666,7 +668,7 @@ func getAccInfo_GetAccInfoFail_ReturnError(s *TransactionSuite, desc string) {
 	s.mockTransactionRepo.On("GetAccInfo", mockCtx, query, user.ID).
 		Return(domain.AccInfo{}, errors.New("get acc info fail")).Once()
 
-	result, err := s.uc.GetAccInfo(mockCtx, query, user)
+	result, err := s.uc.GetAccInfo(mockCtx, user, query, domain.TimeRangeTypeOneMonth)
 	s.Require().EqualError(err, "get acc info fail", desc)
 	s.Require().Equal(domain.AccInfo{}, result, desc)
 }

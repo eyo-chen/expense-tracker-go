@@ -66,7 +66,7 @@ type TransactionUC interface {
 	Delete(ctx context.Context, id int64, user domain.User) error
 
 	// GetAccInfo returns the accunulated information by user id.
-	GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error)
+	GetAccInfo(ctx context.Context, user domain.User, query domain.GetAccInfoQuery, timeRange domain.TimeRangeType) (domain.AccInfo, error)
 
 	// GetBarChartData returns bar chart data.
 	GetBarChartData(ctx context.Context, chartDateRange domain.ChartDateRange, timeRangeType domain.TimeRangeType, transactionType domain.TransactionType, mainCategIDs []int64, user domain.User) (domain.ChartData, error)

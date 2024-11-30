@@ -43,11 +43,11 @@ func (v *Validator) Delete(id int64) bool {
 }
 
 // GetAccInfo validates the input for getting account info.
-func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery) bool {
+func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery, timeRangeType domain.TimeRangeType) bool {
 	v.Check(isValidDateFormat(q.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
 	v.Check(isValidDateFormat(q.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
 	v.Check(checkStartDateBeforeEndDate(q.StartDate, q.EndDate), "startDate", "Start date must be before end date")
-
+	v.Check(timeRangeType.IsValid(), "time_range", "time range is invalid")
 	return v.Valid()
 }
 

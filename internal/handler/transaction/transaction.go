@@ -195,15 +195,18 @@ func (h *Hlr) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (h *Hlr) GetAccInfo(w http.ResponseWriter, r *http.Request) {
 	query := genGetAccInfoQuery(r)
+	rawTimeRangeType := r.URL.Query().Get("time_range")
+	timeRangeType := domain.CvtToTimeRangeType(rawTimeRangeType)
+
 	v := validator.New()
-	if !v.GetAccInfo(query) {
+	if !v.GetAccInfo(query, timeRangeType) {
 		errutil.VildateErrorResponse(w, r, v.Error)
 		return
 	}
 
 	user := ctxutil.GetUser(r)
 	ctx := r.Context()
-	info, err := h.transaction.GetAccInfo(ctx, query, *user)
+	info, err := h.transaction.GetAccInfo(ctx, *user, query, timeRangeType)
 	if err != nil {
 		errutil.ServerErrorResponse(w, r, err)
 		return

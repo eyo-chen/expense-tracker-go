@@ -14,25 +14,34 @@ const (
 	PackageName = "usecase/transaction"
 )
 
+var (
+	now = func() time.Time {
+		return time.Now()
+	}
+)
+
 type UC struct {
-	Transaction interfaces.TransactionRepo
-	MainCateg   interfaces.MainCategRepo
-	SubCateg    interfaces.SubCategRepo
-	Redis       interfaces.RedisService
-	S3          interfaces.S3Service
+	Transaction  interfaces.TransactionRepo
+	MainCateg    interfaces.MainCategRepo
+	SubCateg     interfaces.SubCategRepo
+	MonthlyTrans interfaces.MonthlyTransRepo
+	Redis        interfaces.RedisService
+	S3           interfaces.S3Service
 }
 
 func New(t interfaces.TransactionRepo,
 	m interfaces.MainCategRepo,
 	s interfaces.SubCategRepo,
+	mt interfaces.MonthlyTransRepo,
 	r interfaces.RedisService,
 	s3 interfaces.S3Service) *UC {
 	return &UC{
-		Transaction: t,
-		MainCateg:   m,
-		SubCateg:    s,
-		Redis:       r,
-		S3:          s3,
+		Transaction:  t,
+		MainCateg:    m,
+		SubCateg:     s,
+		MonthlyTrans: mt,
+		Redis:        r,
+		S3:           s3,
 	}
 }
 
@@ -174,7 +183,23 @@ func (u *UC) Delete(ctx context.Context, id int64, user domain.User) error {
 	return u.Transaction.Delete(ctx, id)
 }
 
-func (u *UC) GetAccInfo(ctx context.Context, query domain.GetAccInfoQuery, user domain.User) (domain.AccInfo, error) {
+func (u *UC) GetAccInfo(ctx context.Context, user domain.User, query domain.GetAccInfoQuery, timeRange domain.TimeRangeType) (domain.AccInfo, error) {
+	if timeRange == domain.TimeRangeTypeOneMonth &&
+		query.StartDate != nil && domain.IsSameMonth(now().Format(time.DateOnly), *query.StartDate) {
+		t, err := time.Parse(time.DateOnly, *query.StartDate)
+		if err != nil {
+			logger.Error("time.Parse failed", "package", PackageName, "err", err)
+			return domain.AccInfo{}, err
+		}
+
+		accInfo, err := u.MonthlyTrans.GetByUserIDAndMonthDate(ctx, user.ID, t)
+		if err != nil {
+			return domain.AccInfo{}, err
+		}
+
+		return accInfo, nil
+	}
+
 	return u.Transaction.GetAccInfo(ctx, query, user.ID)
 }
 
