@@ -134,6 +134,9 @@ type TransactionRepo interface {
 type MonthlyTransRepo interface {
 	// Create inserts new monthly transactions into the database.
 	Create(ctx context.Context, date time.Time, trans []domain.MonthlyAggregatedData) error
+
+	// GetByUserIDAndMonthDate returns monthly aggregated data by user id and month date.
+	GetByUserIDAndMonthDate(ctx context.Context, userID int64, monthDate time.Time) (domain.AccInfo, error)
 }
 
 // RedisService is the interface that wraps the basic methods for redis service.
