@@ -75,7 +75,7 @@ jobs:
 
       - name: Run Tests with Coverage
         run: |
-          go test -race -coverprofile=profile.out ./internal/...
+          go test -race -coverprofile=profile.out ./internal/... ./pkg/testutil ./pkg/codeutil
           cat profile.out | grep -v "_enum.go" > coverage.out
 
       - name: Calculate Coverage
