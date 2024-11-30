@@ -10,12 +10,16 @@ import (
 )
 
 type factory struct {
-	user *gofacto.Factory[user.User]
+	user         *gofacto.Factory[user.User]
+	monthlyTrans *gofacto.Factory[MonthlyTrans]
 }
 
 func newFactory(db *sql.DB) *factory {
 	return &factory{
 		user: gofacto.New(user.User{}).WithDB(mysqlf.NewConfig(db)),
+		monthlyTrans: gofacto.New(MonthlyTrans{}).
+			WithDB(mysqlf.NewConfig(db)).
+			WithStorageName("monthly_transactions"),
 	}
 }
 
@@ -26,6 +30,19 @@ func (f *factory) InsertUsers(ctx context.Context, userI int) ([]user.User, erro
 	}
 
 	return users, nil
+}
+
+func (f *factory) InsertManyMonthlyTransWithOneUser(ctx context.Context, i int, ows []MonthlyTrans) (user.User, []MonthlyTrans, error) {
+	user := user.User{}
+	mt, err := f.monthlyTrans.BuildList(ctx, i).
+		Overwrites(ows...).
+		WithOne(&user).
+		Insert()
+	if err != nil {
+		return user, nil, err
+	}
+
+	return user, mt, nil
 }
 
 func (f *factory) Reset() {

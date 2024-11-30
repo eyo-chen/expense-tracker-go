@@ -204,3 +204,148 @@ func getMonthlyTrans(s *MonthlyTransSuite, date time.Time) []domain.MonthlyAggre
 
 	return createdTrans
 }
+
+func (s *MonthlyTransSuite) TestGetByUserIDAndMonthDate() {
+	for scenario, fn := range map[string]func(s *MonthlyTransSuite, desc string){
+		"when one data, return successfully":  getByUserIDAndMonthDate_OneData_ReturnSuccessfully,
+		"when many data, return successfully": getByUserIDAndMonthDate_ManyData_ReturnSuccessfully,
+		"when many user, return successfully": getByUserIDAndMonthDate_ManyUser_ReturnSuccessfully,
+		"when data not found, return error":   getByUserIDAndMonthDate_DataNotFound_ReturnError,
+	} {
+		s.Run(testutil.GetFunName(fn), func() {
+			s.SetupTest()
+			fn(s, scenario)
+			s.TearDownTest()
+		})
+	}
+}
+
+func getByUserIDAndMonthDate_OneData_ReturnSuccessfully(s *MonthlyTransSuite, desc string) {
+	// prepare mock data
+	startDate := "2024-10-01"
+	monthDate, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err, desc)
+
+	ows := []MonthlyTrans{{MonthDate: monthDate, TotalExpense: 100, TotalIncome: 200}}
+	user, monthlyTrans, err := s.f.InsertManyMonthlyTransWithOneUser(mockCTX, 1, ows)
+	s.Require().NoError(err, desc)
+
+	// prepare expected result
+	expRes := domain.AccInfo{
+		TotalExpense: monthlyTrans[0].TotalExpense,
+		TotalIncome:  monthlyTrans[0].TotalIncome,
+		TotalBalance: monthlyTrans[0].TotalIncome - monthlyTrans[0].TotalExpense,
+	}
+
+	// action
+	accInfo, err := s.repo.GetByUserIDAndMonthDate(mockCTX, user.ID, monthDate)
+
+	// assertion
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, accInfo, desc)
+}
+
+func getByUserIDAndMonthDate_ManyData_ReturnSuccessfully(s *MonthlyTransSuite, desc string) {
+	// prepare mock data
+	startDate := "2024-10-01"
+	monthDate, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err, desc)
+	startDate1 := "2024-11-01"
+	monthDate1, err := time.Parse(time.DateOnly, startDate1)
+	s.Require().NoError(err, desc)
+
+	ows := []MonthlyTrans{
+		{MonthDate: monthDate, TotalExpense: 100, TotalIncome: 200},
+		{MonthDate: monthDate1, TotalExpense: 300, TotalIncome: 400},
+	}
+	user, monthlyTrans, err := s.f.InsertManyMonthlyTransWithOneUser(mockCTX, 2, ows)
+	s.Require().NoError(err, desc)
+
+	// prepare expected result
+	expRes := domain.AccInfo{
+		TotalExpense: monthlyTrans[0].TotalExpense,
+		TotalIncome:  monthlyTrans[0].TotalIncome,
+		TotalBalance: monthlyTrans[0].TotalIncome - monthlyTrans[0].TotalExpense,
+	}
+
+	// action
+	accInfo, err := s.repo.GetByUserIDAndMonthDate(mockCTX, user.ID, monthDate)
+
+	// assertion
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, accInfo, desc)
+}
+
+func getByUserIDAndMonthDate_ManyUser_ReturnSuccessfully(s *MonthlyTransSuite, desc string) {
+	// prepare mock data
+	startDate := "2024-10-01"
+	monthDate, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err, desc)
+	startDate1 := "2024-11-01"
+	monthDate1, err := time.Parse(time.DateOnly, startDate1)
+	s.Require().NoError(err, desc)
+
+	ows := []MonthlyTrans{
+		{MonthDate: monthDate, TotalExpense: 100, TotalIncome: 200},
+		{MonthDate: monthDate1, TotalExpense: 300, TotalIncome: 400},
+	}
+	user, monthlyTrans, err := s.f.InsertManyMonthlyTransWithOneUser(mockCTX, 2, ows)
+	s.Require().NoError(err, desc)
+
+	// prepare another user
+	ows1 := []MonthlyTrans{
+		{MonthDate: monthDate, TotalExpense: 500, TotalIncome: 600},
+		{MonthDate: monthDate1, TotalExpense: 700, TotalIncome: 800},
+	}
+	_, _, err = s.f.InsertManyMonthlyTransWithOneUser(mockCTX, 2, ows1)
+	s.Require().NoError(err, desc)
+
+	// prepare expected result
+	expRes := domain.AccInfo{
+		TotalExpense: monthlyTrans[0].TotalExpense,
+		TotalIncome:  monthlyTrans[0].TotalIncome,
+		TotalBalance: monthlyTrans[0].TotalIncome - monthlyTrans[0].TotalExpense,
+	}
+
+	// action
+	accInfo, err := s.repo.GetByUserIDAndMonthDate(mockCTX, user.ID, monthDate)
+
+	// assertion
+	s.Require().NoError(err, desc)
+	s.Require().Equal(expRes, accInfo, desc)
+}
+
+func getByUserIDAndMonthDate_DataNotFound_ReturnError(s *MonthlyTransSuite, desc string) {
+	// prepare mock data
+	startDate := "2024-10-01"
+	monthDate, err := time.Parse(time.DateOnly, startDate)
+	s.Require().NoError(err, desc)
+	startDate1 := "2024-11-01"
+	monthDate1, err := time.Parse(time.DateOnly, startDate1)
+	s.Require().NoError(err, desc)
+	startDate2 := "2024-12-01"
+	monthDate2, err := time.Parse(time.DateOnly, startDate2)
+	s.Require().NoError(err, desc)
+
+	ows := []MonthlyTrans{
+		{MonthDate: monthDate, TotalExpense: 100, TotalIncome: 200},
+		{MonthDate: monthDate1, TotalExpense: 300, TotalIncome: 400},
+	}
+	user, _, err := s.f.InsertManyMonthlyTransWithOneUser(mockCTX, 2, ows)
+	s.Require().NoError(err, desc)
+
+	// prepare another user
+	ows1 := []MonthlyTrans{
+		{MonthDate: monthDate, TotalExpense: 500, TotalIncome: 600},
+		{MonthDate: monthDate1, TotalExpense: 700, TotalIncome: 800},
+	}
+	_, _, err = s.f.InsertManyMonthlyTransWithOneUser(mockCTX, 2, ows1)
+	s.Require().NoError(err, desc)
+
+	// action
+	accInfo, err := s.repo.GetByUserIDAndMonthDate(mockCTX, user.ID, monthDate2)
+
+	// assertion
+	s.Require().ErrorIs(err, domain.ErrDataNotFound, desc)
+	s.Require().Equal(domain.AccInfo{}, accInfo, desc)
+}
