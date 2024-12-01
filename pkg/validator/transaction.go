@@ -47,7 +47,6 @@ func (v *Validator) GetAccInfo(q domain.GetAccInfoQuery) bool {
 	v.Check(isValidDateFormat(q.StartDate), "startDate", "Start date must be in YYYY-MM-DD format")
 	v.Check(isValidDateFormat(q.EndDate), "endDate", "End date must be in YYYY-MM-DD format")
 	v.Check(checkStartDateBeforeEndDate(q.StartDate, q.EndDate), "startDate", "Start date must be before end date")
-
 	return v.Valid()
 }
 

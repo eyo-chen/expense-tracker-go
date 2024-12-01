@@ -35,6 +35,34 @@ func (_m *MonthlyTransRepo) Create(ctx context.Context, date time.Time, trans []
 	return r0
 }
 
+// GetByUserIDAndMonthDate provides a mock function with given fields: ctx, userID, monthDate
+func (_m *MonthlyTransRepo) GetByUserIDAndMonthDate(ctx context.Context, userID int64, monthDate time.Time) (domain.AccInfo, error) {
+	ret := _m.Called(ctx, userID, monthDate)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByUserIDAndMonthDate")
+	}
+
+	var r0 domain.AccInfo
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, time.Time) (domain.AccInfo, error)); ok {
+		return rf(ctx, userID, monthDate)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64, time.Time) domain.AccInfo); ok {
+		r0 = rf(ctx, userID, monthDate)
+	} else {
+		r0 = ret.Get(0).(domain.AccInfo)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64, time.Time) error); ok {
+		r1 = rf(ctx, userID, monthDate)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewMonthlyTransRepo creates a new instance of MonthlyTransRepo. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMonthlyTransRepo(t interface {
