@@ -9,6 +9,7 @@ import (
 	"time"
 
 	adapter "github.com/eyo-chen/expense-tracker-go/internal/adapter"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/service/mq"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/service/s3"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler"
 	"github.com/eyo-chen/expense-tracker-go/internal/router"
@@ -54,8 +55,15 @@ func main() {
 	logger.Info("Connecting to S3...")
 	s3Client, presignClient := s3.NewS3Clients(os.Getenv("AWS_REGION"), os.Getenv("AWS_KEY"), os.Getenv("AWS_SECRET"))
 
+	logger.Info("Connecting to RabbitMQ...")
+	mqClient, err := mq.NewMQClient(os.Getenv("MESSAGE_QUEUE_URL"))
+	if err != nil {
+		logger.Fatal("Unable to connect to rabbitmq", "error", err)
+	}
+	defer mqClient.Close()
+
 	// Setup adapter, usecase, and handler
-	adapter := adapter.New(mysqlDB, redisClient, s3Client, presignClient, os.Getenv("AWS_BUCKET"))
+	adapter := adapter.New(mysqlDB, redisClient, s3Client, presignClient, mqClient, os.Getenv("AWS_BUCKET"), os.Getenv("MESSAGE_QUEUE_NAME"))
 	usecase := usecase.New(adapter.User, adapter.MainCateg, adapter.SubCateg, adapter.Icon, adapter.Transaction, adapter.MonthlyTrans, adapter.RedisService, adapter.UserIcon, adapter.S3Service)
 	handler := handler.New(usecase.User, usecase.MainCateg, usecase.SubCateg, usecase.Transaction, usecase.Icon, usecase.UserIcon, usecase.InitData)
 	if err := initServe(handler); err != nil {
