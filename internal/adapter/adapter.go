@@ -11,6 +11,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/transaction"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/usericon"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/service/mq"
 	redisservice "github.com/eyo-chen/expense-tracker-go/internal/adapter/service/redis"
 	s3service "github.com/eyo-chen/expense-tracker-go/internal/adapter/service/s3"
 	"github.com/redis/go-redis/v9"
@@ -26,13 +27,16 @@ type Adapter struct {
 	UserIcon     *usericon.Repo
 	S3Service    *s3service.Service
 	MonthlyTrans *monthlytrans.Repo
+	MQService    *mq.Service
 }
 
 func New(mysqlDB *sql.DB,
 	redisClient *redis.Client,
 	s3Client interfaces.S3Client,
 	presignClient interfaces.S3PresignClient,
+	mqClient interfaces.MQClient,
 	bucket string,
+	queueName string,
 ) *Adapter {
 	return &Adapter{
 		User:         user.New(mysqlDB),
@@ -44,5 +48,6 @@ func New(mysqlDB *sql.DB,
 		UserIcon:     usericon.New(mysqlDB),
 		S3Service:    s3service.New(bucket, s3Client, presignClient),
 		MonthlyTrans: monthlytrans.New(mysqlDB),
+		MQService:    mq.New(queueName, mqClient),
 	}
 }
