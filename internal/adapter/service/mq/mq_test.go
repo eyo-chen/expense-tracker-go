@@ -35,6 +35,8 @@ func (s *mqServiceSuite) SetupSuite() {
 func (s *mqServiceSuite) SetupTest() {
 	s.mockMQClient = new(mocks.MQClient)
 
+	var args amqp.Table
+	s.mockMQClient.On("QueueDeclare", mockQueueName, true, false, false, false, args).Return(amqp.Queue{Name: mockQueueName}, nil)
 	s.service = New(mockQueueName, s.mockMQClient)
 }
 
@@ -87,17 +89,6 @@ func publish_Error_ReturnError(s *mqServiceSuite, desc string) {
 	err = s.service.Publish(mockCTX, mockMessage)
 
 	s.Require().ErrorIs(err, mockError, desc)
-}
-
-func (s *mqServiceSuite) TestQueueDeclare() {
-	// mock service
-	var args amqp.Table
-	s.mockMQClient.On("QueueDeclare", mockQueueName, true, false, false, false, args).Return(amqp.Queue{}, nil)
-
-	// action
-	_, err := s.service.QueueDeclare(mockQueueName, true, false, false, false, args)
-
-	s.Require().NoError(err, "QueueDeclare should not return error")
 }
 
 func (s *mqServiceSuite) TestClose() {

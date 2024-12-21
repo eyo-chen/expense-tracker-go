@@ -49,17 +49,6 @@ func (s *Service) Publish(ctx context.Context, msg interface{}) error {
 	)
 }
 
-func (s *Service) QueueDeclare(name string, durable bool, autoDelete bool, exclusive bool, noWait bool, args amqp.Table) (amqp.Queue, error) {
-	return s.MQClient.QueueDeclare(
-		name,
-		durable,
-		autoDelete,
-		exclusive,
-		noWait,
-		args,
-	)
-}
-
 func (s *Service) Close() {
 	s.MQClient.Close()
 }
