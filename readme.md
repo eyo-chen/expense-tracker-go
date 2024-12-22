@@ -7,6 +7,7 @@ A production-grade expense tracking backend API built with Go, following [Clean 
 - **Go** - Core backend language
 - **MySQL** - Primary database
 - **Redis** - Caching layer
+- **RabbitMQ** - Message queue
 - **Docker** - Containerization
 - **Amazon ECS** - Container orchestration
 - **Amazon Lambda** - Cron job
