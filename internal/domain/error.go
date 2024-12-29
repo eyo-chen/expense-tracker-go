@@ -76,4 +76,7 @@ var (
 
 	// unique user date error
 	ErrUniqueUserDate = errors.New("unique user date")
+
+	// invalid transaction type error
+	ErrInvalidTransType = errors.New("invalid transaction type")
 )
