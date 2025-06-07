@@ -23,7 +23,7 @@ func New(queueName string, mqClient interfaces.MQClient) *Service {
 	queue, err := mqClient.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		logger.Fatal("Failed to declare queue", "error", err, "package", packageName)
-		return nil
+		return &Service{QueueName: queue.Name, MQClient: NewEmptyMQClient()}
 	}
 
 	return &Service{QueueName: queue.Name, MQClient: mqClient}

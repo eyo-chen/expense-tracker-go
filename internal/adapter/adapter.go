@@ -34,9 +34,7 @@ func New(mysqlDB *sql.DB,
 	redisClient *redis.Client,
 	s3Client interfaces.S3Client,
 	presignClient interfaces.S3PresignClient,
-	mqClient interfaces.MQClient,
 	bucket string,
-	queueName string,
 ) *Adapter {
 	return &Adapter{
 		User:         user.New(mysqlDB),
@@ -48,6 +46,5 @@ func New(mysqlDB *sql.DB,
 		UserIcon:     usericon.New(mysqlDB),
 		S3Service:    s3service.New(bucket, s3Client, presignClient),
 		MonthlyTrans: monthlytrans.New(mysqlDB),
-		MQService:    mq.New(queueName, mqClient),
 	}
 }

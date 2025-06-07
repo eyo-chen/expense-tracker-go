@@ -30,7 +30,7 @@ func handleRequest(ctx context.Context) error {
 	defer mysqlDB.Close()
 
 	// Setup adapter and usecase
-	adapter := adapter.New(mysqlDB, nil, nil, nil, nil, "", "")
+	adapter := adapter.New(mysqlDB, nil, nil, nil, "")
 	monthlyTransUC := monthlytrans.New(adapter.MonthlyTrans, adapter.Transaction)
 
 	// Execute monthly transaction aggregation for previous month
