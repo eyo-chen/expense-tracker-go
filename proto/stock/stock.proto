@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package stock;
+
+option go_package = "proto/stock";
+
+message Action {
+  enum Type {
+    UNSPECIFIED = 0;
+    BUY = 1;
+    SELL = 2;
+    TRANSFER = 3;
+  }
+}
+
+message StockType {
+  enum Type {
+    UNSPECIFIED = 0;
+    STOCKS = 1;
+    ETF = 2;
+  }
+}
+
+message Stock {
+  string id = 1 [json_name = "id"];
+  int32 user_id = 2 [json_name = "user_id"];
+  string symbol = 3 [json_name = "symbol"];
+  double price = 4 [json_name = "price"];
+  int32 quantity = 5 [json_name = "quantity"];
+  string action = 6 [json_name = "action"];
+  string stock_type = 7 [json_name = "stock_type"];
+  google.protobuf.Timestamp created_at = 8 [json_name = "created_at"];
+  google.protobuf.Timestamp updated_at = 9 [json_name = "updated_at"];
+}
+
+message StockInfo {
+  string symbol = 1 [json_name = "symbol"];
+  int32 quantity = 2 [json_name = "quantity"];
+  double price = 3 [json_name = "price"];
+  double avg_cost = 4 [json_name = "avg_cost"];
+  double percentage = 5 [json_name = "percentage"];
+}
+
+message CreateReq {
+  int32 user_id = 1 [json_name = "user_id"];
+  string symbol = 2 [json_name = "symbol"];
+  double price = 3 [json_name = "price"];
+  int32 quantity = 4 [json_name = "quantity"];
+  Action.Type action = 5 [json_name = "action"];
+  StockType.Type stock_type = 6 [json_name = "stock_type"];
+  google.protobuf.Timestamp created_at = 7 [json_name = "created_at"];
+  google.protobuf.Timestamp updated_at = 8 [json_name = "updated_at"];
+}
+
+message CreateResp {
+  string id = 1 [json_name = "id"];
+}
+
+message ListReq {
+  int32 user_id = 1 [json_name = "user_id"];
+}
+
+message ListResp {
+  repeated Stock stock_list = 1 [json_name = "stock_list"];
+}
+
+message GetPortfolioInfoReq {
+  int32 user_id = 1 [json_name = "user_id"];
+}
+
+message GetPortfolioInfoResp {
+  int32 user_id = 1 [json_name = "user_id"];
+  double total_portfolio_value = 2 [json_name = "total_portfolio_value"];
+  double total_gain = 3 [json_name = "total_gain"];
+  double roi = 4 [json_name = "roi"];
+}
+
+message GetStockInfoReq {
+  int32 user_id = 1 [json_name = "user_id"];
+}
+
+message GetStockInfoResp {
+  repeated StockInfo stocks = 1 [json_name = "STOCKS"];
+  repeated StockInfo etf = 2 [json_name = "ETF"];
+  repeated StockInfo cash = 3 [json_name = "CASH"];
+}
+
+service StockService {
+  rpc Create (CreateReq) returns (CreateResp) {}
+  rpc List (ListReq) returns (ListResp) {}
+  rpc GetPortfolioInfo (GetPortfolioInfoReq) returns (GetPortfolioInfoResp) {}
+  rpc GetStockInfo (GetStockInfoReq) returns (GetStockInfoResp) {}
+}
