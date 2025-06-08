@@ -15,7 +15,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.x'
+          go-version: '1.23.x'
 
       - name: Clean up previous builds
         run: |
@@ -47,7 +47,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.x'
+          go-version: '1.23.x'
 
       - name: Run Linter
         uses: golangci/golangci-lint-action@v6
@@ -68,7 +68,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.x'
+          go-version: '1.23.x'
 
       - name: Install Dependencies
         run: go mod download

@@ -18,7 +18,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.x'
+          go-version: '1.23.x'
       
       - name: Install Dependencies
         run: go mod download
@@ -71,7 +71,7 @@ jobs:
         if: steps.check-changes.outputs.relevant == 'true'
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.x'
+          go-version: '1.23.x'
 
       - name: Configure AWS Credentials
         if: steps.check-changes.outputs.relevant == 'true'
