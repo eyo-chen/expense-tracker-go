@@ -65,7 +65,11 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 		logger.Error("r.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	var categs []domain.MainCateg
 	for rows.Next() {
@@ -77,7 +81,11 @@ func (r *Repo) GetAll(ctx context.Context, userID int64, transType domain.Transa
 
 		categs = append(categs, cvtToDomainMainCateg(categ))
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return categs, nil
 }

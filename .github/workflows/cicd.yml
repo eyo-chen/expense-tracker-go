@@ -36,9 +36,9 @@ jobs:
           rmdir ./bin
       
       - name: Run Linter
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.59
+          version: v2.1.6
       
       - name: Run Tests
         run: go test -race ./internal/... ./pkg/testutil ./pkg/codeutil

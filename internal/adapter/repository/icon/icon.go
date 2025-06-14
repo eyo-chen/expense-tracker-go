@@ -51,7 +51,11 @@ func (r *Repo) List() ([]domain.DefaultIcon, error) {
 		logger.Error("r.DB.Query failed", "package", packageName, "err", err)
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	var icons []domain.DefaultIcon
 	for rows.Next() {
@@ -63,7 +67,11 @@ func (r *Repo) List() ([]domain.DefaultIcon, error) {
 
 		icons = append(icons, cvtToDomainDefaultIcon(icon))
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return icons, nil
 }
@@ -105,7 +113,11 @@ func (r *Repo) GetByIDs(ids []int64) (map[int64]domain.DefaultIcon, error) {
 
 		icons = append(icons, icon)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	if len(icons) == 0 {
 		return nil, domain.ErrIconNotFound

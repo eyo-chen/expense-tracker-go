@@ -50,5 +50,7 @@ func (s *Service) Publish(ctx context.Context, msg interface{}) error {
 }
 
 func (s *Service) Close() {
-	s.MQClient.Close()
+	if err := s.MQClient.Close(); err != nil {
+		logger.Error("Unable to close mq client", "error", err)
+	}
 }

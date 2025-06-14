@@ -27,7 +27,11 @@ func handleRequest(ctx context.Context) error {
 		logger.Error("Unable to connect to mysql database", "error", err)
 		return err
 	}
-	defer mysqlDB.Close()
+	defer func() {
+		if err := mysqlDB.Close(); err != nil {
+			logger.Error("Unable to close mysql database", "error", err)
+		}
+	}()
 
 	// Setup adapter and usecase
 	adapter := adapter.New(mysqlDB, nil, nil, nil, "")

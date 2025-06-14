@@ -43,7 +43,9 @@ func (s *UserSuite) SetupSuite() {
 }
 
 func (s *UserSuite) TearDownSuite() {
-	s.db.Close()
+	if err := s.db.Close(); err != nil {
+		logger.Error("Unable to close mysql database", "error", err)
+	}
 	s.migrate.Close()
 	s.dk.PurgeDocker()
 }
