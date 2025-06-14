@@ -16,7 +16,7 @@ type Service struct {
 
 // NewService creates a new Service instance with a gRPC client connection.
 func NewService(addr string) *Service {
-	conn, err := grpc.NewClient(addr)
+	conn, err := grpc.NewClient(addr, grpc.WithInsecure())
 	if err != nil {
 		logger.Error("Failed to connect gRPC server", "error", err)
 	}
