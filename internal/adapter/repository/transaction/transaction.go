@@ -68,7 +68,11 @@ func (r *Repo) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64)
 		logger.Error("r.DB.QueryContext failed", "package", packageName, "err", err)
 		return nil, nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	var transactions []domain.Transaction
 	for rows.Next() {
@@ -83,7 +87,11 @@ func (r *Repo) GetAll(ctx context.Context, opt domain.GetTransOpt, userID int64)
 
 		transactions = append(transactions, cvtToDomainTransaction(trans, mainCateg, subCateg))
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return transactions, decodedNextKeys, nil
 }
@@ -163,7 +171,11 @@ func (r *Repo) GetDailyBarChartData(ctx context.Context, dateRange domain.ChartD
 
 		dateToData[date] = price
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return dateToData, nil
 }
@@ -191,7 +203,11 @@ func (r *Repo) GetMonthlyBarChartData(ctx context.Context, dateRange domain.Char
 		date := fmt.Sprintf("%s-%s", year, month)
 		dateToData[date] = price
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return dateToData, nil
 }
@@ -228,7 +244,11 @@ func (r *Repo) GetPieChartData(ctx context.Context, dateRange domain.ChartDateRa
 		labels = append(labels, name)
 		datasets = append(datasets, price)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return domain.ChartData{Labels: labels, Datasets: datasets}, nil
 }
@@ -275,7 +295,11 @@ func (r *Repo) GetDailyLineChartData(ctx context.Context, dateRange domain.Chart
 
 		dataToDate[date] = price
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return dataToDate, nil
 }
@@ -327,7 +351,11 @@ func (r *Repo) GetMonthlyLineChartData(ctx context.Context, dateRange domain.Cha
 		date := fmt.Sprintf("%s-%s", year, month)
 		dateToData[date] = price
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	return dateToData, nil
 }
@@ -352,7 +380,11 @@ func (r *Repo) GetMonthlyData(ctx context.Context, dateRange domain.GetMonthlyDa
 		logger.Error("r.DB.QueryContext failed", "package", packageName, "err", err)
 		return domain.MonthDayToTransactionType{}, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	data := domain.MonthDayToTransactionType{}
 	for rows.Next() {
@@ -388,7 +420,11 @@ func (r *Repo) GetMonthlyAggregatedData(ctx context.Context, date time.Time) ([]
 		logger.Error("r.DB.QueryContext failed", "package", packageName, "err", err)
 		return []domain.MonthlyAggregatedData{}, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	var monthlyDataList []domain.MonthlyAggregatedData
 	for rows.Next() {

@@ -44,7 +44,9 @@ func (s *MonthlyTransSuite) SetupSuite() {
 }
 
 func (s *MonthlyTransSuite) TearDownSuite() {
-	s.db.Close()
+	if err := s.db.Close(); err != nil {
+		logger.Error("Unable to close mysql database", "error", err)
+	}
 	s.migrate.Close()
 	s.dk.PurgeDocker()
 }
@@ -191,7 +193,11 @@ func getMonthlyTrans(s *MonthlyTransSuite, date time.Time) []domain.MonthlyAggre
 	`
 	rows, err := s.db.QueryContext(mockCTX, stmt, date)
 	s.Require().NoError(err)
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	createdTrans := []domain.MonthlyAggregatedData{}
 	for rows.Next() {

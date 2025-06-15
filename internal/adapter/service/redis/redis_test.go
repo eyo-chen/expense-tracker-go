@@ -44,7 +44,9 @@ func (s *redisServiceSuite) SetupSuite() {
 }
 
 func (s *redisServiceSuite) TearDownSuite() {
-	s.redis.Close()
+	if err := s.redis.Close(); err != nil {
+		logger.Error("Unable to close redis client", "error", err)
+	}
 	s.dk.PurgeDocker()
 }
 

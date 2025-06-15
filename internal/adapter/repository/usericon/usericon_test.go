@@ -41,7 +41,9 @@ func (s *UserIconSuite) SetupSuite() {
 }
 
 func (s *UserIconSuite) TearDownSuite() {
-	s.db.Close()
+	if err := s.db.Close(); err != nil {
+		logger.Error("Unable to close mysql database", "error", err)
+	}
 	s.migrate.Close()
 	s.dk.PurgeDocker()
 }
@@ -88,7 +90,11 @@ func create_NoError_ReturnSuccessfully(s *UserIconSuite, desc string) {
 	checkStmt := `SELECT user_id, object_key FROM user_icons WHERE user_id = ?`
 	rows, err := s.db.Query(checkStmt, user.ID)
 	s.Require().NoError(err)
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "error", err)
+		}
+	}()
 
 	var userID int64
 	var objectKey string

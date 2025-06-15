@@ -49,7 +49,9 @@ func (s *MainCategSuite) SetupSuite() {
 }
 
 func (s *MainCategSuite) TearDownSuite() {
-	s.db.Close()
+	if err := s.db.Close(); err != nil {
+		logger.Error("Unable to close mysql database", "error", err)
+	}
 	s.migrate.Close()
 	s.dk.PurgeDocker()
 }
@@ -497,7 +499,11 @@ func createBatch_InsertManyData_InsertSuccessfully(s *MainCategSuite, desc strin
 							 `
 	rows, err := s.db.Query(checkStmt, users[0].ID)
 	s.Require().NoError(err, desc)
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	var result MainCateg
 	for i := 0; rows.Next(); i++ {

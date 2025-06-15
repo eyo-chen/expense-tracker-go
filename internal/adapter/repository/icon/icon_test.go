@@ -42,7 +42,9 @@ func (s *IconSuite) SetupSuite() {
 }
 
 func (s *IconSuite) TearDownSuite() {
-	s.db.Close()
+	if err := s.db.Close(); err != nil {
+		logger.Error("Unable to close mysql database", "error", err)
+	}
 	s.migrate.Close()
 	s.dk.PurgeDocker()
 }

@@ -42,7 +42,9 @@ func (s *SubCategSuite) SetupSuite() {
 }
 
 func (s *SubCategSuite) TearDownSuite() {
-	s.db.Close()
+	if err := s.db.Close(); err != nil {
+		logger.Error("Unable to close mysql database", "error", err)
+	}
 	s.migrate.Close()
 	s.dk.PurgeDocker()
 }
@@ -363,7 +365,11 @@ func (s *SubCategSuite) TestDelete() {
 	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
 	rows, err := s.db.Query(checkStmt, mainCateg.ID)
 	s.Require().NoError(err, "test delete")
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 	var subCategs []SubCateg
 	for rows.Next() {
 		var subCateg SubCateg
@@ -377,7 +383,11 @@ func (s *SubCategSuite) TestDelete() {
 	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
 	rows, err = s.db.Query(checkStmt, mainCategs[1].ID)
 	s.Require().NoError(err, "test delete")
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 	var subCategs2 []SubCateg
 	for rows.Next() {
 		var subCateg SubCateg
@@ -391,7 +401,11 @@ func (s *SubCategSuite) TestDelete() {
 	checkStmt = `SELECT id, name, main_category_id FROM sub_categories WHERE main_category_id = ?`
 	rows, err = s.db.Query(checkStmt, mainCategs[2].ID)
 	s.Require().NoError(err, "test delete")
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 	var subCategs3 []SubCateg
 	for rows.Next() {
 		var subCateg SubCateg
@@ -558,7 +572,11 @@ func createBatch_InsertManyData_InsertSuccessfully(s *SubCategSuite, desc string
 	WHERE user_id = ? AND main_category_id = ?`
 	rows, err := s.db.Query(checkStmt, user.ID, maincateg.ID)
 	s.Require().NoError(err, desc)
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logger.Error("Unable to close rows", "package", packageName, "err", err)
+		}
+	}()
 
 	var result SubCateg
 	for i := 0; rows.Next(); i++ {

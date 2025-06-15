@@ -32,7 +32,11 @@ func main() {
 	if err != nil {
 		logger.Fatal("Unable to connect to mysql database", "error", err)
 	}
-	defer mysqlDB.Close()
+	defer func() {
+		if err := mysqlDB.Close(); err != nil {
+			logger.Error("Unable to close mysql database", "error", err)
+		}
+	}()
 
 	logger.Info("Applying schema migrations...")
 	if err := applySchemaMigrations(mysqlDB); err != nil {
@@ -49,7 +53,11 @@ func main() {
 	if err != nil {
 		logger.Fatal("Unable to connect to redis", "error", err)
 	}
-	defer redisClient.Close()
+	defer func() {
+		if err := redisClient.Close(); err != nil {
+			logger.Error("Unable to close redis client", "error", err)
+		}
+	}()
 
 	logger.Info("Connecting to S3...")
 	s3Client, presignClient := s3.NewS3Clients(os.Getenv("AWS_REGION"), os.Getenv("AWS_KEY"), os.Getenv("AWS_SECRET"))
