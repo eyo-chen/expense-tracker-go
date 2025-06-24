@@ -82,3 +82,24 @@ func (r *Repo) GetByUserIDAndMonthDate(ctx context.Context, userID int64, monthD
 		TotalBalance: mt.TotalIncome - mt.TotalExpense,
 	}, nil
 }
+
+func (r *Repo) Update(ctx context.Context, userID int64, monthDate time.Time, transType domain.TransactionType, amount float64) error {
+	if !transType.IsValid() {
+		logger.Error("invalid transaction type", "package", packageName, "err", domain.ErrInvalidTransType)
+		return domain.ErrInvalidTransType
+	}
+
+	var query string
+	if transType == domain.TransactionTypeIncome {
+		query = `UPDATE monthly_transactions SET total_income = total_income + ? WHERE user_id = ? AND month_date = ?`
+	} else {
+		query = `UPDATE monthly_transactions SET total_expense = total_expense + ? WHERE user_id = ? AND month_date = ?`
+	}
+
+	if _, err := r.DB.ExecContext(ctx, query, amount, userID, monthDate); err != nil {
+		logger.Error("r.DB.ExecContext failed", "package", packageName, "err", err)
+		return err
+	}
+
+	return nil
+}
