@@ -162,3 +162,15 @@ type S3Service interface {
 	// DeleteObject deletes an object from S3.
 	DeleteObject(ctx context.Context, objectKey string) error
 }
+
+// StockService is the interface that wraps the basic methods for stock service.
+type StockService interface {
+	// Create creates a new stock.
+	Create(ctx context.Context, stock domain.CreateStock) (string, error)
+
+	// GetPortfolioInfo returns the portfolio info.
+	GetPortfolioInfo(ctx context.Context, userID int32) (domain.Portfolio, error)
+
+	// GetStockInfo returns the stock info.
+	GetStockInfo(ctx context.Context, userID int32) (domain.AllStockInfo, error)
+}
