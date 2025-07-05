@@ -5,6 +5,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/initdata"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/maincateg"
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/stock"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/transaction"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/user"
@@ -19,6 +20,7 @@ type Handler struct {
 	Icon        *icon.Hlr
 	UserIcon    *usericon.Hlr
 	InitData    *initdata.Hlr
+	Stock       *stock.Hlr
 }
 
 func New(u interfaces.UserUC,
@@ -28,6 +30,7 @@ func New(u interfaces.UserUC,
 	i interfaces.IconUC,
 	ui interfaces.UserIconUC,
 	in interfaces.InitDataUC,
+	st interfaces.StockUC,
 ) *Handler {
 	return &Handler{
 		User:        user.New(u),
@@ -37,5 +40,6 @@ func New(u interfaces.UserUC,
 		Icon:        icon.New(i),
 		UserIcon:    usericon.New(ui),
 		InitData:    initdata.New(in),
+		Stock:       stock.New(st),
 	}
 }

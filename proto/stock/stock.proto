@@ -31,8 +31,9 @@ message Stock {
   int32 quantity = 5 [json_name = "quantity"];
   string action = 6 [json_name = "action"];
   string stock_type = 7 [json_name = "stock_type"];
-  google.protobuf.Timestamp created_at = 8 [json_name = "created_at"];
-  google.protobuf.Timestamp updated_at = 9 [json_name = "updated_at"];
+  google.protobuf.Timestamp date = 8 [json_name = "date"];
+  google.protobuf.Timestamp created_at = 9 [json_name = "created_at"];
+  google.protobuf.Timestamp updated_at = 10 [json_name = "updated_at"];
 }
 
 message StockInfo {
@@ -50,8 +51,9 @@ message CreateReq {
   int32 quantity = 4 [json_name = "quantity"];
   Action.Type action = 5 [json_name = "action"];
   StockType.Type stock_type = 6 [json_name = "stock_type"];
-  google.protobuf.Timestamp created_at = 7 [json_name = "created_at"];
-  google.protobuf.Timestamp updated_at = 8 [json_name = "updated_at"];
+  google.protobuf.Timestamp date = 7 [json_name = "date"];
+  google.protobuf.Timestamp created_at = 8 [json_name = "created_at"];
+  google.protobuf.Timestamp updated_at = 9 [json_name = "updated_at"];
 }
 
 message CreateResp {

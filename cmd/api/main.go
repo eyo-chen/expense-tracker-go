@@ -63,9 +63,9 @@ func main() {
 	s3Client, presignClient := s3.NewS3Clients(os.Getenv("AWS_REGION"), os.Getenv("AWS_KEY"), os.Getenv("AWS_SECRET"))
 
 	// Setup adapter, usecase, and handler
-	adapter := adapter.New(mysqlDB, redisClient, s3Client, presignClient, os.Getenv("AWS_BUCKET"))
-	usecase := usecase.New(adapter.User, adapter.MainCateg, adapter.SubCateg, adapter.Icon, adapter.Transaction, adapter.MonthlyTrans, adapter.RedisService, adapter.UserIcon, adapter.S3Service)
-	handler := handler.New(usecase.User, usecase.MainCateg, usecase.SubCateg, usecase.Transaction, usecase.Icon, usecase.UserIcon, usecase.InitData)
+	adapter := adapter.New(mysqlDB, redisClient, s3Client, presignClient, os.Getenv("AWS_BUCKET"), os.Getenv("STOCK_SERVICE_URL"))
+	usecase := usecase.New(adapter.User, adapter.MainCateg, adapter.SubCateg, adapter.Icon, adapter.Transaction, adapter.MonthlyTrans, adapter.RedisService, adapter.UserIcon, adapter.S3Service, adapter.StockService)
+	handler := handler.New(usecase.User, usecase.MainCateg, usecase.SubCateg, usecase.Transaction, usecase.Icon, usecase.UserIcon, usecase.InitData, usecase.Stock)
 	if err := initServe(handler); err != nil {
 		logger.Fatal("Unable to start server", "error", err)
 	}
