@@ -107,3 +107,15 @@ type InitDataUC interface {
 	// Create creates the initial data.
 	Create(ctx context.Context, data domain.InitData, userID int64) error
 }
+
+// StockUC is the interface that wraps the basic methods for stock usecase.
+type StockUC interface {
+	// Create creates a new stock.
+	Create(ctx context.Context, stock domain.CreateStock) (string, error)
+
+	// GetPortfolioInfo returns the portfolio info.
+	GetPortfolioInfo(ctx context.Context, userID int32) (domain.Portfolio, error)
+
+	// GetStockInfo returns the stock info.
+	GetStockInfo(ctx context.Context, userID int32) (domain.AllStockInfo, error)
+}

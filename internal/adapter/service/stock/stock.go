@@ -7,6 +7,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
 	pb "github.com/eyo-chen/expense-tracker-go/proto/stock"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Service is a struct that encapsulates the gRPC client.
@@ -16,7 +17,7 @@ type Service struct {
 
 // NewService creates a new Service instance with a gRPC client connection.
 func NewService(addr string) *Service {
-	conn, err := grpc.NewClient(addr)
+	conn, err := grpc.NewClient(addr, grpc.WithInsecure()) //nolint:all
 	if err != nil {
 		logger.Error("Failed to connect gRPC server", "error", err)
 	}
@@ -34,6 +35,7 @@ func (s *Service) Create(ctx context.Context, stock domain.CreateStock) (string,
 		Quantity:  stock.Quantity,
 		Action:    pb.Action_Type(pb.Action_Type_value[string(stock.ActionType)]),
 		StockType: pb.StockType_Type(pb.StockType_Type_value[string(stock.StockType)]),
+		Date:      timestamppb.New(stock.Date),
 	}
 
 	resp, err := s.client.Create(ctx, req)

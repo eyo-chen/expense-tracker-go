@@ -6,6 +6,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/interfaces"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/maincateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/monthlytrans"
+	"github.com/eyo-chen/expense-tracker-go/internal/usecase/stock"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/subcateg"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/transaction"
 	"github.com/eyo-chen/expense-tracker-go/internal/usecase/user"
@@ -21,6 +22,7 @@ type Usecase struct {
 	Icon         *icon.UC
 	UserIcon     *usericon.UC
 	InitData     *initdata.UC
+	Stock        *stock.UC
 }
 
 func New(u interfaces.UserRepo,
@@ -32,6 +34,7 @@ func New(u interfaces.UserRepo,
 	r interfaces.RedisService,
 	ui interfaces.UserIconRepo,
 	s3 interfaces.S3Service,
+	st interfaces.StockService,
 ) *Usecase {
 	return &Usecase{
 		User:        user.New(u, r),
@@ -41,5 +44,6 @@ func New(u interfaces.UserRepo,
 		Icon:        icon.New(i, ui, r, s3),
 		UserIcon:    usericon.New(s3, ui),
 		InitData:    initdata.New(i, m, s, u),
+		Stock:       stock.New(st),
 	}
 }

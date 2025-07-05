@@ -9,6 +9,7 @@ type CreateStock struct {
 	Quantity   int32
 	ActionType string
 	StockType  string
+	Date       time.Time
 	CreatedAt  time.Time
 }
 
@@ -20,15 +21,15 @@ type Portfolio struct {
 }
 
 type StockInfo struct {
-	Symbol     string
-	Quantity   int32
-	Price      float64
-	AvgCost    float64
-	Percentage float64
+	Symbol     string  `json:"symbol"`
+	Quantity   int32   `json:"quantity"`
+	Price      float64 `json:"price"`
+	AvgCost    float64 `json:"avg_cost"`
+	Percentage float64 `json:"percentage"`
 }
 
 type AllStockInfo struct {
-	Stocks []StockInfo
-	ETF    []StockInfo
-	Cash   []StockInfo
+	Stocks []StockInfo `json:"stocks"`
+	ETF    []StockInfo `json:"etf"`
+	Cash   []StockInfo `json:"cash"`
 }
