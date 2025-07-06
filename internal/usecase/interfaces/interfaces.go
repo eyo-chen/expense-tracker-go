@@ -174,3 +174,9 @@ type StockService interface {
 	// GetStockInfo returns the stock info.
 	GetStockInfo(ctx context.Context, userID int32) (domain.AllStockInfo, error)
 }
+
+// HistoricalPortfolioService is the interface that wraps the basic methods for stock service.
+type HistoricalPortfolioService interface {
+	// Create creates a new stock.
+	Create(ctx context.Context, userID int32, date time.Time) error
+}
