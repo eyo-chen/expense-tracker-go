@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+package historical_portfolio;
+
+option go_package = "proto/historical_portfolio";
+
+message CreateReq {
+  int32 user_id = 1 [json_name = "user_id"];
+  google.protobuf.Timestamp date = 2 [json_name = "date"];
+}
+
+service HistoricalPortfolioService {
+  rpc Create (CreateReq) returns (google.protobuf.Empty) {}
+}
