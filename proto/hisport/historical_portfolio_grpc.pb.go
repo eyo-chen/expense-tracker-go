@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.21.12
-// source: proto/historical_portfolio/historical_portfolio.proto
+// source: proto/hisport/historical_portfolio.proto
 
-package historical_portfolio
+package hisport
 
 import (
 	context "context"
@@ -20,7 +20,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	HistoricalPortfolioService_Create_FullMethodName = "/historical_portfolio.HistoricalPortfolioService/Create"
+	HistoricalPortfolioService_Create_FullMethodName            = "/historical_portfolio.HistoricalPortfolioService/Create"
+	HistoricalPortfolioService_GetPortfolioValue_FullMethodName = "/historical_portfolio.HistoricalPortfolioService/GetPortfolioValue"
 )
 
 // HistoricalPortfolioServiceClient is the client API for HistoricalPortfolioService service.
@@ -28,6 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HistoricalPortfolioServiceClient interface {
 	Create(ctx context.Context, in *CreateReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetPortfolioValue(ctx context.Context, in *GetPortfolioValueReq, opts ...grpc.CallOption) (*GetPortfolioValueRes, error)
 }
 
 type historicalPortfolioServiceClient struct {
@@ -48,11 +50,22 @@ func (c *historicalPortfolioServiceClient) Create(ctx context.Context, in *Creat
 	return out, nil
 }
 
+func (c *historicalPortfolioServiceClient) GetPortfolioValue(ctx context.Context, in *GetPortfolioValueReq, opts ...grpc.CallOption) (*GetPortfolioValueRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPortfolioValueRes)
+	err := c.cc.Invoke(ctx, HistoricalPortfolioService_GetPortfolioValue_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // HistoricalPortfolioServiceServer is the server API for HistoricalPortfolioService service.
 // All implementations must embed UnimplementedHistoricalPortfolioServiceServer
 // for forward compatibility.
 type HistoricalPortfolioServiceServer interface {
 	Create(context.Context, *CreateReq) (*emptypb.Empty, error)
+	GetPortfolioValue(context.Context, *GetPortfolioValueReq) (*GetPortfolioValueRes, error)
 	mustEmbedUnimplementedHistoricalPortfolioServiceServer()
 }
 
@@ -65,6 +78,9 @@ type UnimplementedHistoricalPortfolioServiceServer struct{}
 
 func (UnimplementedHistoricalPortfolioServiceServer) Create(context.Context, *CreateReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedHistoricalPortfolioServiceServer) GetPortfolioValue(context.Context, *GetPortfolioValueReq) (*GetPortfolioValueRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPortfolioValue not implemented")
 }
 func (UnimplementedHistoricalPortfolioServiceServer) mustEmbedUnimplementedHistoricalPortfolioServiceServer() {
 }
@@ -106,6 +122,24 @@ func _HistoricalPortfolioService_Create_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HistoricalPortfolioService_GetPortfolioValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPortfolioValueReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoricalPortfolioServiceServer).GetPortfolioValue(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: HistoricalPortfolioService_GetPortfolioValue_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoricalPortfolioServiceServer).GetPortfolioValue(ctx, req.(*GetPortfolioValueReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // HistoricalPortfolioService_ServiceDesc is the grpc.ServiceDesc for HistoricalPortfolioService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -117,7 +151,11 @@ var HistoricalPortfolioService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Create",
 			Handler:    _HistoricalPortfolioService_Create_Handler,
 		},
+		{
+			MethodName: "GetPortfolioValue",
+			Handler:    _HistoricalPortfolioService_GetPortfolioValue_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/historical_portfolio/historical_portfolio.proto",
+	Metadata: "proto/hisport/historical_portfolio.proto",
 }

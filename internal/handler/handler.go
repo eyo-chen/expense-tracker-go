@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/eyo-chen/expense-tracker-go/internal/handler/hisport"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/icon"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/initdata"
 	"github.com/eyo-chen/expense-tracker-go/internal/handler/interfaces"
@@ -13,14 +14,15 @@ import (
 )
 
 type Handler struct {
-	User        *user.Hlr
-	MainCateg   *maincateg.Hlr
-	SubCateg    *subcateg.Hlr
-	Transaction *transaction.Hlr
-	Icon        *icon.Hlr
-	UserIcon    *usericon.Hlr
-	InitData    *initdata.Hlr
-	Stock       *stock.Hlr
+	User                *user.Hlr
+	MainCateg           *maincateg.Hlr
+	SubCateg            *subcateg.Hlr
+	Transaction         *transaction.Hlr
+	Icon                *icon.Hlr
+	UserIcon            *usericon.Hlr
+	InitData            *initdata.Hlr
+	Stock               *stock.Hlr
+	HistoricalPortfolio *hisport.Hlr
 }
 
 func New(u interfaces.UserUC,
@@ -31,15 +33,17 @@ func New(u interfaces.UserUC,
 	ui interfaces.UserIconUC,
 	in interfaces.InitDataUC,
 	st interfaces.StockUC,
+	hp interfaces.HistoricalPortfolioUC,
 ) *Handler {
 	return &Handler{
-		User:        user.New(u),
-		MainCateg:   maincateg.New(m),
-		SubCateg:    subcateg.New(s),
-		Transaction: transaction.New(t),
-		Icon:        icon.New(i),
-		UserIcon:    usericon.New(ui),
-		InitData:    initdata.New(in),
-		Stock:       stock.New(st),
+		User:                user.New(u),
+		MainCateg:           maincateg.New(m),
+		SubCateg:            subcateg.New(s),
+		Transaction:         transaction.New(t),
+		Icon:                icon.New(i),
+		UserIcon:            usericon.New(ui),
+		InitData:            initdata.New(in),
+		Stock:               stock.New(st),
+		HistoricalPortfolio: hisport.New(hp),
 	}
 }

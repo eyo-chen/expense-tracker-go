@@ -5,13 +5,24 @@ import "google/protobuf/empty.proto";
 
 package historical_portfolio;
 
-option go_package = "proto/historical_portfolio";
+option go_package = "proto/hisport";
 
 message CreateReq {
   int32 user_id = 1 [json_name = "user_id"];
   google.protobuf.Timestamp date = 2 [json_name = "date"];
 }
 
+message GetPortfolioValueReq {
+  int32 user_id = 1 [json_name = "user_id"];
+  string date_option = 2 [json_name = "date_option"];
+}
+
+message GetPortfolioValueRes {
+  repeated string date = 1 [json_name = "date"];
+  repeated double values = 2 [json_name = "values"];
+}
+
 service HistoricalPortfolioService {
   rpc Create (CreateReq) returns (google.protobuf.Empty) {}
+  rpc GetPortfolioValue (GetPortfolioValueReq) returns (GetPortfolioValueRes) {}
 }

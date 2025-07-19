@@ -65,6 +65,10 @@ func New(handler *hd.Handler) http.Handler {
 	r.Handle("/v1/stock/portfolio", auth.ThenFunc(handler.Stock.GetPortfolioInfo)).Methods(http.MethodGet)
 	r.Handle("/v1/stock/info", auth.ThenFunc(handler.Stock.GetStockInfo)).Methods(http.MethodGet)
 
+	// historical portfolio
+	r.Handle("/v1/historical/portfolio", auth.ThenFunc(handler.HistoricalPortfolio.Create)).Methods(http.MethodPost)
+	r.Handle("/v1/historical/portfolio", auth.ThenFunc(handler.HistoricalPortfolio.GetPortfolioValue)).Methods(http.MethodGet)
+
 	regular := alice.New(middleware.LogRequest, middleware.EnableCORS)
 
 	return regular.Then(r)
