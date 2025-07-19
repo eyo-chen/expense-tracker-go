@@ -11,6 +11,7 @@ import (
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/transaction"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/user"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/repository/usericon"
+	"github.com/eyo-chen/expense-tracker-go/internal/adapter/service/hisport"
 	"github.com/eyo-chen/expense-tracker-go/internal/adapter/service/mq"
 	redisservice "github.com/eyo-chen/expense-tracker-go/internal/adapter/service/redis"
 	s3service "github.com/eyo-chen/expense-tracker-go/internal/adapter/service/s3"
@@ -19,17 +20,18 @@ import (
 )
 
 type Adapter struct {
-	User         *user.Repo
-	MainCateg    *maincateg.Repo
-	SubCateg     *subcateg.Repo
-	Icon         *icon.Repo
-	Transaction  *transaction.Repo
-	RedisService *redisservice.Service
-	UserIcon     *usericon.Repo
-	S3Service    *s3service.Service
-	MonthlyTrans *monthlytrans.Repo
-	MQService    *mq.Service
-	StockService *stock.Service
+	User                       *user.Repo
+	MainCateg                  *maincateg.Repo
+	SubCateg                   *subcateg.Repo
+	Icon                       *icon.Repo
+	Transaction                *transaction.Repo
+	RedisService               *redisservice.Service
+	UserIcon                   *usericon.Repo
+	S3Service                  *s3service.Service
+	MonthlyTrans               *monthlytrans.Repo
+	MQService                  *mq.Service
+	StockService               *stock.Service
+	HistoricalPortfolioService *hisport.Service
 }
 
 func New(mysqlDB *sql.DB,
@@ -37,18 +39,19 @@ func New(mysqlDB *sql.DB,
 	s3Client interfaces.S3Client,
 	presignClient interfaces.S3PresignClient,
 	bucket string,
-	stockServiceURL string,
+	gRPCAddr string,
 ) *Adapter {
 	return &Adapter{
-		User:         user.New(mysqlDB),
-		MainCateg:    maincateg.New(mysqlDB),
-		SubCateg:     subcateg.New(mysqlDB),
-		Icon:         icon.New(mysqlDB),
-		Transaction:  transaction.New(mysqlDB),
-		RedisService: redisservice.New(redisClient),
-		UserIcon:     usericon.New(mysqlDB),
-		S3Service:    s3service.New(bucket, s3Client, presignClient),
-		MonthlyTrans: monthlytrans.New(mysqlDB),
-		StockService: stock.NewService(stockServiceURL),
+		User:                       user.New(mysqlDB),
+		MainCateg:                  maincateg.New(mysqlDB),
+		SubCateg:                   subcateg.New(mysqlDB),
+		Icon:                       icon.New(mysqlDB),
+		Transaction:                transaction.New(mysqlDB),
+		RedisService:               redisservice.New(redisClient),
+		UserIcon:                   usericon.New(mysqlDB),
+		S3Service:                  s3service.New(bucket, s3Client, presignClient),
+		MonthlyTrans:               monthlytrans.New(mysqlDB),
+		StockService:               stock.NewService(gRPCAddr),
+		HistoricalPortfolioService: hisport.NewService(gRPCAddr),
 	}
 }
