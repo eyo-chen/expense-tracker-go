@@ -182,4 +182,7 @@ type HistoricalPortfolioService interface {
 
 	// GetPortfolioValue returns portfolio values over time.
 	GetPortfolioValue(ctx context.Context, userID int32, dateOption string) ([]string, []float64, error)
+
+	// GetGain returns portfolio gains over time.
+	GetGain(ctx context.Context, userID int32, dateOption string) ([]string, []float64, error)
 }

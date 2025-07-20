@@ -86,3 +86,32 @@ func (h *Hlr) GetPortfolioValue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (h *Hlr) GetGain(w http.ResponseWriter, r *http.Request) {
+	dateOption := r.URL.Query().Get("date_option")
+	if dateOption == "" {
+		logger.Error("date_option query parameter is required", "package", packageName)
+		errutil.BadRequestResponse(w, r, fmt.Errorf("date_option query parameter is required"))
+		return
+	}
+
+	user := ctxutil.GetUser(r)
+	ctx := r.Context()
+	dates, values, err := h.historicalPortfolioUC.GetGain(ctx, int32(user.ID), dateOption)
+	if err != nil {
+		logger.Error("GetGain failed", "package", packageName, "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	respData := map[string]interface{}{
+		"dates":  dates,
+		"values": values,
+	}
+
+	if err := jsonutil.WriteJSON(w, http.StatusOK, respData, nil); err != nil {
+		logger.Error("jsonutil.WriteJSON failed", "package", packageName, "err", err)
+		errutil.ServerErrorResponse(w, r, err)
+		return
+	}
+}
