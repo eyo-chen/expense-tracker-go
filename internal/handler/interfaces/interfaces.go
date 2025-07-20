@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"context"
+	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/internal/domain"
 )
@@ -118,4 +119,13 @@ type StockUC interface {
 
 	// GetStockInfo returns the stock info.
 	GetStockInfo(ctx context.Context, userID int32) (domain.AllStockInfo, error)
+}
+
+// HistoricalPortfolioUC is the interface that wraps the basic methods for historical portfolio usecase.
+type HistoricalPortfolioUC interface {
+	// Create creates a new historical portfolio record.
+	Create(ctx context.Context, userID int32, date time.Time) error
+
+	// GetPortfolioValue returns portfolio values over time.
+	GetPortfolioValue(ctx context.Context, userID int32, dateOption string) ([]string, []float64, error)
 }

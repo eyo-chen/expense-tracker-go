@@ -2,6 +2,7 @@ package hisport
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/eyo-chen/expense-tracker-go/pkg/logger"
@@ -34,9 +35,27 @@ func (s *Service) Create(ctx context.Context, userID int32, date time.Time) erro
 	}
 
 	if _, err := s.client.Create(ctx, req); err != nil {
-		logger.Error("Failed to create stock via gRPC", "error", err)
+		logger.Error("Failed to create historical portfolio via gRPC", "error", err)
 		return err
 	}
 
 	return nil
+}
+
+func (s *Service) GetPortfolioValue(ctx context.Context, userID int32, dateOption string) ([]string, []float64, error) {
+	req := &pb.GetPortfolioValueReq{
+		UserId:     userID,
+		DateOption: dateOption,
+	}
+
+	resp, err := s.client.GetPortfolioValue(ctx, req)
+	if err != nil {
+		logger.Error("Failed to get portfolio value via gRPC", "error", err)
+		return nil, nil, err
+	}
+
+	fmt.Println("resp.Date", resp.Date)
+	fmt.Println("resp.Values", resp.Values)
+
+	return resp.Date, resp.Values, nil
 }

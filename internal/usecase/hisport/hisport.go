@@ -22,3 +22,12 @@ func (u *UC) Create(ctx context.Context, userID int32, date time.Time) error {
 
 	return nil
 }
+
+func (u *UC) GetPortfolioValue(ctx context.Context, userID int32, dateOption string) ([]string, []float64, error) {
+	dates, values, err := u.historicalPortfolioService.GetPortfolioValue(ctx, userID, dateOption)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return dates, values, nil
+}

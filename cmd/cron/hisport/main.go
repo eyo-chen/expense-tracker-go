@@ -22,7 +22,7 @@ func main() {
 	adapter := adapter.New(nil, nil, nil, nil, "", os.Getenv("STOCK_SERVICE_URL"))
 	usecase := usecase.New(adapter.User, adapter.MainCateg, adapter.SubCateg, adapter.Icon, adapter.Transaction, adapter.MonthlyTrans, adapter.RedisService, adapter.UserIcon, adapter.S3Service, adapter.StockService, adapter.HistoricalPortfolioService)
 
-	userID := 1
+	userID := 11100
 
 	if err := usecase.HistoricalPortfolio.Create(context.Background(), int32(userID), time.Now()); err != nil {
 		print("error", err)
