@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	HistoricalPortfolioService_Create_FullMethodName            = "/historical_portfolio.HistoricalPortfolioService/Create"
 	HistoricalPortfolioService_GetPortfolioValue_FullMethodName = "/historical_portfolio.HistoricalPortfolioService/GetPortfolioValue"
+	HistoricalPortfolioService_GetGain_FullMethodName           = "/historical_portfolio.HistoricalPortfolioService/GetGain"
 )
 
 // HistoricalPortfolioServiceClient is the client API for HistoricalPortfolioService service.
@@ -30,6 +31,7 @@ const (
 type HistoricalPortfolioServiceClient interface {
 	Create(ctx context.Context, in *CreateReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetPortfolioValue(ctx context.Context, in *GetPortfolioValueReq, opts ...grpc.CallOption) (*GetPortfolioValueRes, error)
+	GetGain(ctx context.Context, in *GetGainReq, opts ...grpc.CallOption) (*GetGainRes, error)
 }
 
 type historicalPortfolioServiceClient struct {
@@ -60,12 +62,23 @@ func (c *historicalPortfolioServiceClient) GetPortfolioValue(ctx context.Context
 	return out, nil
 }
 
+func (c *historicalPortfolioServiceClient) GetGain(ctx context.Context, in *GetGainReq, opts ...grpc.CallOption) (*GetGainRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetGainRes)
+	err := c.cc.Invoke(ctx, HistoricalPortfolioService_GetGain_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // HistoricalPortfolioServiceServer is the server API for HistoricalPortfolioService service.
 // All implementations must embed UnimplementedHistoricalPortfolioServiceServer
 // for forward compatibility.
 type HistoricalPortfolioServiceServer interface {
 	Create(context.Context, *CreateReq) (*emptypb.Empty, error)
 	GetPortfolioValue(context.Context, *GetPortfolioValueReq) (*GetPortfolioValueRes, error)
+	GetGain(context.Context, *GetGainReq) (*GetGainRes, error)
 	mustEmbedUnimplementedHistoricalPortfolioServiceServer()
 }
 
@@ -81,6 +94,9 @@ func (UnimplementedHistoricalPortfolioServiceServer) Create(context.Context, *Cr
 }
 func (UnimplementedHistoricalPortfolioServiceServer) GetPortfolioValue(context.Context, *GetPortfolioValueReq) (*GetPortfolioValueRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPortfolioValue not implemented")
+}
+func (UnimplementedHistoricalPortfolioServiceServer) GetGain(context.Context, *GetGainReq) (*GetGainRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGain not implemented")
 }
 func (UnimplementedHistoricalPortfolioServiceServer) mustEmbedUnimplementedHistoricalPortfolioServiceServer() {
 }
@@ -140,6 +156,24 @@ func _HistoricalPortfolioService_GetPortfolioValue_Handler(srv interface{}, ctx 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HistoricalPortfolioService_GetGain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGainReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoricalPortfolioServiceServer).GetGain(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: HistoricalPortfolioService_GetGain_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoricalPortfolioServiceServer).GetGain(ctx, req.(*GetGainReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // HistoricalPortfolioService_ServiceDesc is the grpc.ServiceDesc for HistoricalPortfolioService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -154,6 +188,10 @@ var HistoricalPortfolioService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPortfolioValue",
 			Handler:    _HistoricalPortfolioService_GetPortfolioValue_Handler,
+		},
+		{
+			MethodName: "GetGain",
+			Handler:    _HistoricalPortfolioService_GetGain_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
