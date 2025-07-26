@@ -22,7 +22,18 @@ message GetPortfolioValueRes {
   repeated double values = 2 [json_name = "values"];
 }
 
+message GetGainReq {
+  int32 user_id = 1 [json_name = "user_id"];
+  string date_option = 2 [json_name = "date_option"];
+}
+
+message GetGainRes {
+  repeated string date = 1 [json_name = "date"];
+  repeated double values = 2 [json_name = "values"];
+}
+
 service HistoricalPortfolioService {
   rpc Create (CreateReq) returns (google.protobuf.Empty) {}
   rpc GetPortfolioValue (GetPortfolioValueReq) returns (GetPortfolioValueRes) {}
+  rpc GetGain (GetGainReq) returns (GetGainRes) {}
 }

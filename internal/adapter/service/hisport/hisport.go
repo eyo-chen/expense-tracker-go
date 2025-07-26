@@ -59,3 +59,18 @@ func (s *Service) GetPortfolioValue(ctx context.Context, userID int32, dateOptio
 
 	return resp.Date, resp.Values, nil
 }
+
+func (s *Service) GetGain(ctx context.Context, userID int32, dateOption string) ([]string, []float64, error) {
+	req := &pb.GetGainReq{
+		UserId:     userID,
+		DateOption: dateOption,
+	}
+
+	resp, err := s.client.GetGain(ctx, req)
+	if err != nil {
+		logger.Error("Failed to get portfolio gain via gRPC", "error", err)
+		return nil, nil, err
+	}
+
+	return resp.Date, resp.Values, nil
+}
